@@ -1,1 +1,1 @@
-web: python init_db_prod.py && gunicorn run:app --bind 0.0.0.0:$PORT --timeout 120 --workers 2
+web: gunicorn "run:create_app()" --bind 0.0.0.0:$PORT --timeout 120 --workers 2

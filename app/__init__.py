@@ -107,4 +107,42 @@ def create_app(config_class=Config):
         upload_dir = app.config.get('UPLOADS_DIR')
         return send_from_directory(upload_dir, filename)
 
+    
+    # Inicializar Base de Datos en Producción (Railway)
+    with app.app_context():
+        try:
+            db.create_all()
+            # Crear usuario admin si no existe
+            from .models.usuario import Usuario
+            from werkzeug.security import generate_password_hash
+            
+            admin = Usuario.query.filter_by(username='admin').first()
+            if not admin:
+                print("⚠️ [RAILWAY LOG] Creando usuario admin por defecto...")
+                admin = Usuario(
+                    username='admin',
+                    password_hash=generate_password_hash('admin123'),
+                    nombre='Administrador',
+                    apellidos='Sistema',
+                    role='admin',
+                    email='admin@supata.gov.co'
+                )
+                db.session.add(admin)
+                
+                # Crear usuarios demo
+                demos = [
+                    ('planeacion', 'planeacion123', 'Planeación', 'Municipal', 'planeacion'),
+                    ('gobierno', 'gobierno123', 'Gobierno', 'Municipal', 'gobierno')
+                ]
+                for u, p, n, a, r in demos:
+                    if not Usuario.query.filter_by(username=u).first():
+                        nuevo = Usuario(username=u, password_hash=generate_password_hash(p), nombre=n, apellidos=a, role=r, email=f'{u}@supata.gov.co')
+                        db.session.add(nuevo)
+                
+                db.session.commit()
+                print("✅ [RAILWAY LOG] Usuarios creados correctamente")
+        except Exception as e:
+            print(f"❌ [RAILWAY ERROR] Error inicializando DB: {e}")
+
     return app
+
