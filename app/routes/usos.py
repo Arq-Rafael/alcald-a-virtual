@@ -1,10 +1,8 @@
-
 import os
 import re
 import io
 import json
 import base64
-import glob
 import datetime
 import unicodedata
 import pandas as pd
@@ -28,8 +26,6 @@ try:
 except ImportError:
     pisa = None
 from flask import Blueprint, render_template, request, flash, redirect, url_for, send_file, current_app, jsonify, abort
-from app import db
-from app.models.usos import Parcela, UsoSuelo, InformeUso
 try:
     from shapely.geometry import mapping
 except ImportError:
@@ -43,6 +39,16 @@ _df_normas = None
 _df_normatividad_excel = None
 uso_lookup_cc = {}
 uso_lookup_mat = {}
+
+# --- Column mapping ---
+COLMAP = {
+    'cc': ['cedula_catastral', 'cc', 'cod_pred', 'codigo', 'codigo_predio', 'codigo_catastral'],
+    'matricula': ['matricula', 'matricula_inmobiliaria', 'num_mat', 'num_matricula'],
+    'uso': ['uso', 'uso_predio', 'uso_suelo', 'uso_actual', 'uso_destinado'],
+    'direccion': ['direccion', 'dir', 'direccion_predio', 'ubicacion'],
+    'barrio': ['barrio', 'sector', 'zona', 'localidad'],
+    'norma': ['norma', 'normatividad', 'articulo', 'descripcion_norma']
+}
 
 # --- Helpers ---
 
@@ -496,7 +502,7 @@ def generar_pdf_croquis():
                             </div>
                             <div class="field">
                                 <div class="field-label">Avalúo</div>
-                                <div class="field-value">${predio_props.get('EVALÚO', 'N/A')}</div>
+                                <div class="field-value>${predio_props.get('EVALÚO', 'N/A')}</div>
                             </div>
                             <div class="field">
                                 <div class="field-label">Categoría</div>
@@ -752,6 +758,7 @@ def generar_certificado_completo():
             y -= 14
             c.drawString(inch*0.5, y, f'Propietario: {predio_props.get("PROPIETARIO","N/A")}')
             y -= 14
+            uso = uso_actual or predio_props.get('Uso') or predio_props.get('Subcategor') or predio_props.get('Categoria') or None
             c.drawString(inch*0.5, y, f'Uso: {predio_props.get("Uso") or uso or "N/A"}')
             y -= 18
             try:

@@ -1,6 +1,11 @@
+
+import logging
+import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from .config import Config
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -118,10 +123,14 @@ def create_app(config_class=Config):
             
             admin = Usuario.query.filter_by(usuario='admin').first()
             if not admin:
-                print("⚠️ [RAILWAY LOG] Creando usuario admin por defecto...")
+                logging.warning("[RAILWAY LOG] Creando usuario admin por defecto...")
+                admin_password = os.environ.get('ADMIN_PASSWORD', None)
+                if not admin_password:
+                    logging.warning('ADMIN_PASSWORD no está definida en variables de entorno. Usando valor inseguro por defecto.')
+                    admin_password = 'admin123'
                 admin = Usuario(
                     usuario='admin',
-                    clave='admin123',
+                    clave=admin_password,
                     nombre='Administrador',
                     apellidos='Sistema',
                     role='admin',
@@ -130,24 +139,26 @@ def create_app(config_class=Config):
                 db.session.add(admin)
                 
                 # Crear usuarios demo
-                demos = [
-                    ('planeacion', 'planeacion123', 'Planeación', 'Municipal', 'planeacion'),
-                    ('gobierno', 'gobierno123', 'Gobierno', 'Municipal', 'gobierno')
+                demo_users = [
+                    ('planeacion', os.environ.get('PLANEACION_PASSWORD', 'planeacion123'), 'Planeación', 'Municipal', 'planeacion'),
+                    ('gobierno', os.environ.get('GOBIERNO_PASSWORD', 'gobierno123'), 'Gobierno', 'Municipal', 'gobierno')
                 ]
-                for u, p, n, a, r in demos:
+                for u, p, n, a, r in demo_users:
                     if not Usuario.query.filter_by(usuario=u).first():
+                        if p in ['planeacion123', 'gobierno123']:
+                            logging.warning(f'Contraseña demo para {u} no definida en variables de entorno. Usando valor inseguro por defecto.')
                         nuevo = Usuario(usuario=u, clave=p, nombre=n, apellidos=a, role=r, email=f'{u}@supata.gov.co')
                         db.session.add(nuevo)
                 
                 db.session.commit()
-                print("✅ [RAILWAY LOG] Usuarios creados correctamente")
+                logging.info("[RAILWAY LOG] Usuarios creados correctamente")
                 
             # Sembrar metas
             from .utils.seeds import seed_metas
             seed_metas()
             
         except Exception as e:
-            print(f"❌ [RAILWAY ERROR] Error inicializando DB: {e}")
+            logging.error(f"[RAILWAY ERROR] Error inicializando DB: {e}")
 
     return app
 

@@ -1,6 +1,7 @@
 """
 Analizar estructura específica de tablas en SECOP I
 """
+ # OBSOLETO: mover a _archivos_obsoletos para limpieza
 from bs4 import BeautifulSoup
 
 with open('secop_sample.html', 'r', encoding='utf-8') as f:
