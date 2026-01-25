@@ -483,10 +483,11 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
                     p_body = Paragraph(stripped, style_body)
                 w_body, h_body = p_body.wrap(w - 2*margin, 500)
                 
-                # Verificar si cabe en la página actual
-                if y_position - h_body < 150:
+                # Verificar sí cabe en la página actual
+                # AUMENTADO margen inferior a 180 para evitar tocar el footer branding
+                if y_position - h_body < 180:
                     c.showPage()
-                    y_position = h - 120
+                    y_position = h - 140 # Reiniciar arriba
                 
                 p_body.drawOn(c, margin, y_position - h_body)
                 y_position -= (h_body + 8)
@@ -512,9 +513,9 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
                 img_height = 200
                 
                 # Verificar espacio
-                if y_position - img_height < 150:
+                if y_position - img_height < 180:
                     c.showPage()
-                    y_position = h - 120
+                    y_position = h - 140
                 
                 # Centrar imagen
                 x_offset = (w - img_width) / 2
@@ -531,9 +532,9 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
     # FIRMA
     # ============================================
     # Asegurar espacio para firma
-    if y_position < 200:
+    if y_position < 220: # Más espacio para la firma
         c.showPage()
-        y_position = h - 120
+        y_position = h - 140
     
     y_position -= 40
     
@@ -587,10 +588,10 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
                 p_anexo = Paragraph(anexo_text, style_value)
                 w_anexo, h_anexo = p_anexo.wrap(w - 2*margin - 25, 200)
                 
-                # Verificar espacio antes de dibujar
-                if y_position - h_anexo < 120:  # Margen inferior seguridad
+                # Verificar espacio antes de dibujar - AUMENTADO
+                if y_position - h_anexo < 160:  # Margen inferior seguridad aumentado
                     c.showPage()
-                    y_position = h - 120
+                    y_position = h - 140
                     # Repetir encabezado ANEXOS si salto de página (opcional, pero util)
                     c.setFont('Helvetica-Bold', 12)
                     c.drawString(margin, y_position, 'ANEXOS (Continuación):')
