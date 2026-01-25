@@ -334,7 +334,7 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
     c = canvas.Canvas(overlay_buffer, pagesize=letter)
     w, h = letter
     margin = 85  # Márgenes mejorados para mejor distribución
-    y_position = h - 140  # Comenzar más arriba para reducir espacio en blanco
+    y_position = h - 115  # Ajuste final: Menos espacio blanco superior
     
     # ============================================
     # ESTILOS PROFESIONALES MEJORADOS
@@ -349,7 +349,7 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
         fontSize=12,
         leading=16,
         textColor=colors.black,
-        alignment=0,
+        alignment=4,  # Justified (Ajuste solicitado)
         spaceAfter=6,
         spaceBefore=4
     )
