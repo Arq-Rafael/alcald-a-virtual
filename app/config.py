@@ -15,7 +15,14 @@ class Config:
     DOCUMENTOS_DIR = BASE_DIR / "documentos_generados"
     
     # Database
-    SQLALCHEMY_DATABASE_URI = f'sqlite:///{os.path.join(BASE_DIR, "data.db")}'
+    # Database - Usar /tmp en Railway para garantizar escritura
+    DB_NAME = "data.db"
+    if os.environ.get('RAILWAY_ENVIRONMENT'):
+        DB_PATH = os.path.join('/tmp', DB_NAME)
+    else:
+        DB_PATH = os.path.join(BASE_DIR, DB_NAME)
+        
+    SQLALCHEMY_DATABASE_URI = f'sqlite:///{DB_PATH}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # External/Shared Paths - Migrated to local per user request
