@@ -333,9 +333,9 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
     overlay_buffer = io.BytesIO()
     c = canvas.Canvas(overlay_buffer, pagesize=letter)
     w, h = letter
-    margin = 85  # Márgenes mejorados para mejor distribución
-    header_margin = 180  # Margen superior seguro para encabezado
-    footer_margin = 180  # Margen inferior seguro para pie de página
+    margin = 75  # Márgenes optimizados
+    header_margin = 200  # Espacio para encabezado oficial (escudo + membrete)
+    footer_margin = 90   # Espacio para pie de página
     y_position = h - header_margin
     
     # ============================================
@@ -440,9 +440,9 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
             w_dest, h_dest = p_dest.wrap(w - 2*margin, 100)
             
             p_dest.drawOn(c, margin, y_position - h_dest)
-            y_position -= (h_dest + 2) # Reducido de 4
+            y_position -= (h_dest + 3)
     
-    y_position -= 10 # Reducido de 15
+    y_position -= 15
     
     # ============================================
     # ASUNTO Y REFERENCIA
@@ -526,15 +526,15 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
     # FIRMA
     # ============================================
     # Asegurar espacio para firma
-    if y_position < footer_margin + 40: # Más espacio para la firma
+    if y_position < footer_margin + 100: # Espacio adecuado para firma
         c.showPage()
         y_position = h - header_margin
     
-    y_position -= 40
+    y_position -= 30
     
     c.setFont('Helvetica', 12)
     c.drawString(margin, y_position, 'Atentamente,')
-    y_position -= 60
+    y_position -= 55
     
     # Línea de firma
     c.setLineWidth(1.5)
