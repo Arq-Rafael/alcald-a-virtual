@@ -433,8 +433,12 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
     
     for line in dest_lines:
         if line.strip():
-            c.drawString(margin, y_position, line)
-            y_position -= 16
+            # Usar Paragraph para permitir wrapping si es muy largo
+            p_dest = Paragraph(line, style_value)
+            w_dest, h_dest = p_dest.wrap(w - 2*margin, 100)
+            
+            p_dest.drawOn(c, margin, y_position - h_dest)
+            y_position -= (h_dest + 4)
     
     y_position -= 15
     
@@ -577,8 +581,23 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
         anexos_lines = data.get('anexos', '').split('\n')
         for anexo in anexos_lines:
             if anexo.strip():
-                c.drawString(margin + 25, y_position, f"• {anexo.strip()}")
-                y_position -= 14
+                # Usar Paragraph para wrapping de anexos largos
+                # Estilo con sangría para viñeta
+                anexo_text = f"• {anexo.strip()}"
+                p_anexo = Paragraph(anexo_text, style_value)
+                w_anexo, h_anexo = p_anexo.wrap(w - 2*margin - 25, 200)
+                
+                # Verificar espacio antes de dibujar
+                if y_position - h_anexo < 120:  # Margen inferior seguridad
+                    c.showPage()
+                    y_position = h - 120
+                    # Repetir encabezado ANEXOS si salto de página (opcional, pero util)
+                    c.setFont('Helvetica-Bold', 12)
+                    c.drawString(margin, y_position, 'ANEXOS (Continuación):')
+                    y_position -= 20
+                
+                p_anexo.drawOn(c, margin + 25, y_position - h_anexo)
+                y_position -= (h_anexo + 6)
     
     c.showPage()
     c.save()
