@@ -130,12 +130,12 @@ def create_app(config_class=Config):
                     admin_password = 'admin123'
                 admin = Usuario(
                     usuario='admin',
-                    clave=admin_password,
                     nombre='Administrador',
                     apellidos='Sistema',
                     role='admin',
                     email='admin@supata.gov.co'
                 )
+                admin.set_password(admin_password)
                 db.session.add(admin)
                 
                 # Crear usuarios demo
@@ -147,7 +147,8 @@ def create_app(config_class=Config):
                     if not Usuario.query.filter_by(usuario=u).first():
                         if p in ['planeacion123', 'gobierno123']:
                             logging.warning(f'Contraseña demo para {u} no definida en variables de entorno. Usando valor inseguro por defecto.')
-                        nuevo = Usuario(usuario=u, clave=p, nombre=n, apellidos=a, role=r, email=f'{u}@supata.gov.co')
+                        nuevo = Usuario(usuario=u, nombre=n, apellidos=a, role=r, email=f'{u}@supata.gov.co')
+                        nuevo.set_password(p)
                         db.session.add(nuevo)
                 
                 db.session.commit()
