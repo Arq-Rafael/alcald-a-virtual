@@ -224,12 +224,13 @@ class PDFPlanContingenciaOficial:
                 formato_path = os.path.join(self.current_app.config['DATA_DIR'], 'FORMATO.pdf')
                 if os.path.exists(formato_path):
                     template_pdf = PdfReader(formato_path)
+                    base_template_page = template_pdf.pages[0]
                     overlay_pdf = PdfReader(buffer)
                     output = PdfWriter()
 
-                    # Aplicar formato oficial a cada página
+                    # Aplicar formato oficial a cada página sin reabrir
                     for page_num in range(len(overlay_pdf.pages)):
-                        template_page = PdfReader(formato_path).pages[0]
+                        template_page = __import__('copy').deepcopy(base_template_page)
                         overlay_page = overlay_pdf.pages[page_num]
                         template_page.merge_page(overlay_page)
                         output.add_page(template_page)

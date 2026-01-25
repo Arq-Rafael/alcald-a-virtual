@@ -8,12 +8,15 @@ import json
 import os
 import math
 import io
+import logging
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.platypus import Paragraph, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from PyPDF2 import PdfReader, PdfWriter
+
+logger = logging.getLogger(__name__)
 
 # ✅ LAZY IMPORTS - Se cargan cuando se necesitan dentro de las funciones
 def get_db():
@@ -64,7 +67,7 @@ def buscar_especies():
         
         return jsonify(resultado)
     except Exception as e:
-        print(f'Error buscar_especies: {e}')
+        logger.error(f"Error buscar_especies: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -204,7 +207,7 @@ def crear_radicado():
         
     except Exception as e:
         db.session.rollback()
-        print(f'Error crear_radicado: {e}')
+        logger.error(f"Error crear_radicado: {e}", exc_info=True)
         return jsonify({
             'success': False,
             'error': str(e),
@@ -378,7 +381,7 @@ def _render_pdf(template_name, context, filename="documento.pdf"):
             overlay_buffer.seek(0)
             return send_file(overlay_buffer, mimetype='application/pdf', as_attachment=True, download_name=filename)
     except Exception as e:
-        print(f'Error renderizando PDF {template_name}: {e}')
+        logger.error(f"Error renderizando PDF {template_name}: {e}", exc_info=True)
         import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
@@ -866,7 +869,7 @@ def pdf_informe(radicado_id):
         filename = f"Informe_{radicado.numero_radicado}.pdf"
         return _render_pdf('pdf_informe_arborea.html', context, filename)
     except Exception as e:
-        print(f'Error pdf_informe: {e}')
+        logger.error(f"Error pdf_informe: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -883,7 +886,7 @@ def pdf_dictamen(radicado_id):
         filename = f"Dictamen_{radicado.numero_radicado}.pdf"
         return _render_pdf('pdf_dictamen_arborea.html', context, filename)
     except Exception as e:
-        print(f'Error pdf_dictamen: {e}')
+        logger.error(f"Error pdf_dictamen: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -954,7 +957,7 @@ def actualizar_radicado(radicado_id):
         
     except Exception as e:
         db.session.rollback()
-        print(f'Error actualizar_radicado: {e}')
+        logger.error(f"Error actualizar_radicado: {e}", exc_info=True)
         return jsonify({
             'success': False,
             'error': str(e),
@@ -989,7 +992,7 @@ def eliminar_radicado(radicado_id):
         
     except Exception as e:
         db.session.rollback()
-        print(f'Error eliminar_radicado: {e}')
+        logger.error(f"Error eliminar_radicado: {e}", exc_info=True)
         return jsonify({
             'success': False,
             'error': str(e),
@@ -1079,5 +1082,5 @@ def generar_numero():
             'consecutivo': contador
         }), 200
     except Exception as e:
-        print(f'Error generar_numero: {e}')
+        logger.error(f"Error generar_numero: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500

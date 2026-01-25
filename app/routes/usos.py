@@ -5,22 +5,21 @@ import json
 import base64
 import datetime
 import unicodedata
+import logging
 import pandas as pd
 try:
     import geopandas as gpd
 except ImportError:
     gpd = None
 
+logger = logging.getLogger(__name__)
+
 try:
     import qrcode
 except ImportError:
     qrcode = None
 
-try:
-    import pdfkit
-except ImportError:
-    pdfkit = None
-
+# Usar ReportLab exclusivamente para PDF (consistencia con otros módulos)
 try:
     from xhtml2pdf import pisa
 except ImportError:
@@ -39,6 +38,7 @@ _df_normas = None
 _df_normatividad_excel = None
 uso_lookup_cc = {}
 uso_lookup_mat = {}
+_geojson_cache = None  # Cache para GeoJSON estático
 
 # --- Column mapping ---
 COLMAP = {
@@ -67,7 +67,7 @@ def cargar_df_predios():
     if _df_predios is None:
         path = os.path.join(current_app.config['DATA_DIR'], 'tabla_predios.xlsx')
         if not os.path.exists(path):
-            print(f"Advertencia: No se encuentra tabla_predios.xlsx en {path}")
+            logger.warning(f"No se encuentra tabla_predios.xlsx en {path}")
             return pd.DataFrame()
             
         try:
@@ -90,7 +90,7 @@ def cargar_df_predios():
                 
             _df_predios = df
         except Exception as e:
-            print(f"Error cargando predios: {e}")
+            logger.error(f"Error cargando predios: {e}", exc_info=True)
             return pd.DataFrame()
             
     return _df_predios
@@ -117,7 +117,7 @@ def cargar_excel_normatividad():
         excel_path = os.path.join(project_root, 'documentos_generados', 'normatividad', 'plantilla_normatividad_usos.xlsx')
         
         if not os.path.exists(excel_path):
-            print(f"Excel de normatividad no encontrado en: {excel_path}")
+            logger.warning(f"Excel de normatividad no encontrado en: {excel_path}")
             return pd.DataFrame()
         
         try:
@@ -125,9 +125,9 @@ def cargar_excel_normatividad():
             # Normalizar nombres de columnas
             df.columns = [str(c).strip() for c in df.columns]
             _df_normatividad_excel = df
-            print(f"✅ Excel de normatividad cargado: {len(df)} registros")
+            logger.info(f"Excel de normatividad cargado: {len(df)} registros")
         except Exception as e:
-            print(f"Error cargando Excel de normatividad: {e}")
+            logger.error(f"Error cargando Excel de normatividad: {e}", exc_info=True)
             return pd.DataFrame()
     
     return _df_normatividad_excel
@@ -257,6 +257,7 @@ def usos_suelo():
 
 @usos_bp.route("/usos_suelo/generar/<cc>/<matri>")
 def generar_pdf(cc, matri):
+    """Genera certificado de uso del suelo en PDF usando xhtml2pdf (sin dependencias externas)"""
     # 1) Busco el predio
     fila_predio = buscar_predio(cc=cc, matricula=matri)
     if not fila_predio:
@@ -326,10 +327,13 @@ def generar_pdf(cc, matri):
 
     # 8) Genero el QR en memoria
     qr_data = "https://www.supata-cundinamarca.gov.co"
-    qr_img  = qrcode.make(qr_data)
-    buf     = io.BytesIO()
-    qr_img.save(buf, format="PNG")
-    qr_src  = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
+    if qrcode:
+        qr_img  = qrcode.make(qr_data)
+        buf     = io.BytesIO()
+        qr_img.save(buf, format="PNG")
+        qr_src  = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
+    else:
+        qr_src = ""  # Sin QR si no está disponible
 
     # 9) Ruta al escudo
     logo_path = "file:///" + os.path.join(
@@ -344,25 +348,24 @@ def generar_pdf(cc, matri):
         **datos
     )
 
-    # 11) Genero el PDF
-    # Use tempfile or uploads dir
-    out_dir = current_app.config['UPLOADS_DIR']
-    filename = f"UsoSuelo_{datos['cc']}_{datos['matricula']}.pdf"
-    out_path = os.path.join(out_dir, filename)
-    
-    # PDFKit config (optional, assuming wkhtmltopdf in path or env)
-    # We will try nice defaults
-    try:
-        pdfkit.from_string(
-            html,
-            out_path,
-            options={"enable-local-file-access": ""}
-        )
-    except OSError as e:
-        # Sometimes wkhtmltopdf is not found
-        return f"Error generando PDF (wkhtmltopdf missing?): {e}", 500
-
-    return send_file(out_path, as_attachment=True, download_name=filename)
+    # 11) Genero el PDF con xhtml2pdf (sin dependencias externas como wkhtmltopdf)
+    if pisa:
+        try:
+            pdf_buffer = io.BytesIO()
+            pdf_status = pisa.CreatePDF(io.BytesIO(html.encode('utf-8')), dest=pdf_buffer)
+            if not pdf_status.err:
+                pdf_buffer.seek(0)
+                filename = f"UsoSuelo_{datos['cc']}_{datos['matricula']}.pdf"
+                return send_file(pdf_buffer, mimetype='application/pdf', 
+                               as_attachment=True, download_name=filename)
+            else:
+                logger.error(f"Error generando PDF con xhtml2pdf: {pdf_status.err}")
+                abort(500, "Error generando PDF")
+        except Exception as e:
+            logger.error(f"Excepción generando PDF: {e}", exc_info=True)
+            abort(500, f"Error generando PDF: {str(e)}")
+    else:
+        abort(500, "xhtml2pdf no disponible. Instalar con: pip install xhtml2pdf")
 
 @usos_bp.route('/usos_suelo/certificado/<cod_pred>')
 def generar_certificado_cod_pred(cod_pred):
@@ -373,7 +376,13 @@ def generar_certificado_cod_pred(cod_pred):
 
 @usos_bp.route('/usos_suelo/geojson')
 def usos_suelo_geojson():
-    """Entrega el GeoJSON directamente sin depender de geopandas para evitar fallos de importación."""
+    """Entrega el GeoJSON directamente con caché en memoria (optimizado para velocidad)."""
+    global _geojson_cache
+    
+    # Retornar desde caché si ya está cargado
+    if _geojson_cache is not None:
+        return jsonify(_geojson_cache)
+    
     # Intentar múltiples rutas posibles
     rutas_posibles = [
         os.path.join(current_app.root_path, 'static', 'geojson', 'usos_predial.geojson'),
@@ -386,20 +395,21 @@ def usos_suelo_geojson():
     for ruta in rutas_posibles:
         if os.path.exists(ruta):
             static_path = ruta
-            print(f"✓ GeoJSON encontrado en: {ruta}")
+            logger.info(f"GeoJSON encontrado en: {ruta}")
             break
     
     if not static_path:
-        print(f"✗ No se encontró GeoJSON en: {rutas_posibles}")
+        logger.warning(f"No se encontró GeoJSON en: {rutas_posibles}")
         return jsonify({'type': 'FeatureCollection', 'features': [], 'error': 'Archivo no encontrado'})
 
     try:
         with open(static_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        print(f"✓ GeoJSON cargado: {len(data.get('features', []))} features")
+        _geojson_cache = data  # Guardar en caché
+        logger.info(f"GeoJSON cargado y cacheado: {len(data.get('features', []))} features")
         return jsonify(data)
     except Exception as e:
-        print(f"✗ Error cargando GeoJSON: {e}")
+        logger.error(f"Error cargando GeoJSON: {e}", exc_info=True)
         return jsonify({'error': str(e), 'path': static_path}), 500
 
 @usos_bp.route('/catastro_3d')
@@ -452,9 +462,8 @@ def generar_pdf_croquis():
         except:
             img_data = base64.b64decode(map_screenshot)
         
-        # Si pdfkit está disponible, usar para HTML -> PDF
-        if pdfkit:
-            html_content = f"""
+        # Generar PDF con xhtml2pdf (preferido) o reportlab (fallback)
+        html_content = f"""
             <!DOCTYPE html>
             <html>
             <head>
@@ -539,21 +548,26 @@ def generar_pdf_croquis():
             </body>
             </html>
             """
-            
-            try:
-                pdf_bytes = pdfkit.from_string(html_content, False)
-                return send_file(
-                    io.BytesIO(pdf_bytes),
-                    mimetype='application/pdf',
-                    as_attachment=True,
-                    download_name=f'Croquis_{cod_pred}.pdf'
-                )
-            except Exception as e:
-                print(f"Error con pdfkit: {e}")
-                # Fallback sin pdfkit
-                pass
         
-        # Fallback: Crear PDF simple sin pdfkit
+        # Intentar con xhtml2pdf primero
+        if pisa:
+            try:
+                pdf_buffer = io.BytesIO()
+                pdf_status = pisa.CreatePDF(io.BytesIO(html_content.encode('utf-8')), dest=pdf_buffer)
+                if not pdf_status.err:
+                    pdf_buffer.seek(0)
+                    return send_file(
+                        pdf_buffer,
+                        mimetype='application/pdf',
+                        as_attachment=True,
+                        download_name=f'Croquis_{cod_pred}.pdf'
+                    )
+                else:
+                    logger.warning(f"xhtml2pdf reportó error: {pdf_status.err}")
+            except Exception as e:
+                logger.debug(f"xhtml2pdf no disponible: {e}")
+        
+        # Fallback: Crear PDF simple con reportlab
         try:
             from reportlab.lib.pagesizes import letter, A4
             from reportlab.lib.units import inch
@@ -606,11 +620,11 @@ def generar_pdf_croquis():
                 download_name=f'Croquis_{cod_pred}.pdf'
             )
         except Exception as e2:
-            print(f"Error con reportlab: {e2}")
+            logger.error(f"Error con reportlab: {e2}", exc_info=True)
             return jsonify({'error': f'No se pudo generar PDF: {str(e2)}'}), 500
             
     except Exception as e:
-        print(f"Error generando PDF croquis: {e}")
+        logger.error(f"Error generando PDF croquis: {e}", exc_info=True)
         import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
@@ -631,11 +645,11 @@ def generar_certificado_completo():
         uso_buscado = uso_actual or predio_props.get('Uso') or predio_props.get('Subcategor') or predio_props.get('Categoria') or ''
         normatividad = buscar_normatividad_completa(uso_buscado)
         
-        print(f"🔍 Buscando normatividad para: {uso_buscado}")
+        logger.debug(f"Buscando normatividad para: {uso_buscado}")
         if normatividad:
-            print(f"✅ Encontrada normatividad: {normatividad.get('uso', 'N/A')}")
+            logger.info(f"Encontrada normatividad: {normatividad.get('uso', 'N/A')}")
         else:
-            print(f"⚠️ No se encontró normatividad para: {uso_buscado}")
+            logger.warning(f"No se encontró normatividad para: {uso_buscado}")
         
         # Cargar texto de normatividad desde archivos (fallback)
         def slug(s):
@@ -735,11 +749,11 @@ def generar_certificado_completo():
                 pdf_status = pisa.CreatePDF(io.BytesIO(html_cert.encode('utf-8')), dest=result_buffer)
                 if not pdf_status.err:
                     pdf_main_bytes = result_buffer.getvalue()
-                    print('✅ PDF generado con xhtml2pdf correctamente')
+                    logger.info("PDF generado con xhtml2pdf correctamente")
                 else:
-                    print(f'❌ Error generando PDF con xhtml2pdf: {pdf_status.err}')
+                    logger.error(f"Error generando PDF con xhtml2pdf: {pdf_status.err}")
             except Exception as e:
-                print(f'❌ Excepción en xhtml2pdf: {e}')
+                logger.error(f"Excepción en xhtml2pdf: {e}", exc_info=True)
         
         if pdf_main_bytes is None:
             # Fallback simple con reportlab
@@ -791,7 +805,7 @@ def generar_certificado_completo():
                 out_buf.seek(0)
                 combined_bytes = out_buf.getvalue()
         except Exception as e:
-            print('Combinar con FORMATO.pdf falló:', e)
+            logger.warning(f"Combinar con FORMATO.pdf falló: {e}")
 
         return send_file(io.BytesIO(combined_bytes), mimetype='application/pdf', as_attachment=True,
                          download_name=f'Certificado_{cod_pred}.pdf')

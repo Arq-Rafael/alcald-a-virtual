@@ -3,11 +3,12 @@ import datetime
 import csv
 import io
 import base64
+import copy
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session, current_app, jsonify, send_file
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
-from reportlab.platypus import Table, TableStyle, Paragraph, Image
+from reportlab.platypus import Paragraph
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.utils import ImageReader
 from PyPDF2 import PdfReader, PdfWriter
@@ -597,12 +598,13 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
     try:
         if os.path.exists(formato_path):
             template_pdf = PdfReader(formato_path)
+            base_template_page = template_pdf.pages[0]
             overlay_pdf = PdfReader(overlay_buffer)
             output = PdfWriter()
             
-            # Aplicar formato oficial a cada página del contenido
+            # Aplicar formato oficial a cada página del contenido sin reabrir archivo
             for page_num in range(len(overlay_pdf.pages)):
-                template_page = PdfReader(formato_path).pages[0]
+                template_page = copy.deepcopy(base_template_page)
                 overlay_page = overlay_pdf.pages[page_num]
                 template_page.merge_page(overlay_page)
                 output.add_page(template_page)
@@ -612,7 +614,6 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
             final_buffer.seek(0)
             return final_buffer
         else:
-            # Si no existe formato, devolver overlay
             overlay_buffer.seek(0)
             return overlay_buffer
     except Exception as e:
@@ -631,24 +632,6 @@ def generar_pdf_oficio():
 
         role_session = (session.get('role') or session.get('user_role') or '').lower()
         secretaria_session = session.get('secretaria', '').strip()
-        mapa_secretarias = {
-            'secretaría de gobierno': 'Secretaría General y de Gobierno',
-            'secretaria de gobierno': 'Secretaría General y de Gobierno',
-            'secretaría de planeación': 'Secretaría de Planeación y Obras Públicas',
-            'secretaria de planeación': 'Secretaría de Planeación y Obras Públicas',
-            'secretaría de planeacion': 'Secretaría de Planeación y Obras Públicas',
-            'secretaria de planeacion': 'Secretaría de Planeación y Obras Públicas',
-            'secretaría desarrollo rural': 'Secretaría de Desarrollo Rural Medio Ambiente y Competitividad',
-            'secretaria desarrollo rural': 'Secretaría de Desarrollo Rural Medio Ambiente y Competitividad',
-            'secretaría de hacienda': 'Secretaría de Hacienda y Gestión Financiera',
-            'secretaria de hacienda': 'Secretaría de Hacienda y Gestión Financiera',
-            'secretaría desarrollo social': 'Secretaría de Desarrollo Social y Comunitario',
-            'secretaria desarrollo social': 'Secretaría de Desarrollo Social y Comunitario',
-            'administrador': 'Despacho de la Alcaldía',
-        }
-        secretaria_larga = mapa_secretarias.get(secretaria_session.lower(), secretaria_session)
-
-        # Mapeo a nombres largos para consistencia con el selector
         mapa_secretarias = {
             'secretaría de gobierno': 'Secretaría General y de Gobierno',
             'secretaria de gobierno': 'Secretaría General y de Gobierno',

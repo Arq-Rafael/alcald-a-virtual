@@ -454,6 +454,8 @@ def listar_contratos():
         search = request.args.get('search')
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 20, type=int)
+        # Evita paginaciones enormes
+        per_page = max(1, min(per_page, 100))
         
         query = Contrato.query
         
@@ -481,8 +483,7 @@ def listar_contratos():
         for c in pagination.items:
             try:
                 contratos_lista.append(c.to_dict())
-            except Exception as ex:
-                # Si un contrato está corrompido, lo omite pero sigue
+            except Exception:
                 continue
         
         return jsonify({
@@ -562,29 +563,22 @@ def obtener_estadisticas():
         db = get_db()
         
         total_contratos = Contrato.query.count()
-        
-        # Por plataforma
-        secop_i = Contrato.query.filter_by(plataforma='SECOP_I').count()
-        secop_ii = Contrato.query.filter_by(plataforma='SECOP_II').count()
-        
-        # Por estado
-        try:
-            estados_raw = db.session.query(
-                Contrato.estado, db.func.count(Contrato.id)
-            ).group_by(Contrato.estado).all()
-            estados = {e[0] or 'Sin estado': e[1] for e in estados_raw if e}
-        except:
-            estados = {}
-        
-        # Cuantía total
-        cuantia_total = db.session.query(db.func.sum(Contrato.cuantia)).scalar() or 0
+
+        plataformas_raw = db.session.query(
+            Contrato.plataforma, db.func.count(Contrato.id)
+        ).group_by(Contrato.plataforma).all()
+        por_plataforma = {p or 'Desconocida': c for p, c in plataformas_raw}
+
+        estados_raw = db.session.query(
+            Contrato.estado, db.func.count(Contrato.id)
+        ).group_by(Contrato.estado).all()
+        estados = {e or 'Sin estado': c for e, c in estados_raw}
+
+        cuantia_total = db.session.query(db.func.coalesce(db.func.sum(Contrato.cuantia), 0)).scalar() or 0
         
         return jsonify({
             'total_contratos': total_contratos,
-            'por_plataforma': {
-                'SECOP_I': secop_i,
-                'SECOP_II': secop_ii
-            },
+            'por_plataforma': por_plataforma,
             'por_estado': estados,
             'cuantia_total': cuantia_total
         })

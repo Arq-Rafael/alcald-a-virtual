@@ -1,6 +1,13 @@
 """
 Funciones auxiliares para el API de Contingencia
+Incluye caché ligera in-memory para plantillas y datos estáticos.
 """
+
+# Cache simple en memoria para datos estáticos
+_CACHE = {
+    'datos_supata': None,
+    'plantillas': {}
+}
 
 def obtener_descripcion_base(tipo_evento):
     """Retorna descripción base según tipo de evento"""
@@ -30,7 +37,10 @@ def obtener_antecedentes(tipo_evento):
 
 def get_datos_supata():
     """Datos básicos del municipio de Supatá para auto-completar formularios oficiales."""
-    return {
+    if _CACHE['datos_supata']:
+        return _CACHE['datos_supata']
+
+    _CACHE['datos_supata'] = {
         "municipio": "Supatá",
         "departamento": "Cundinamarca",
         "provincia": "Gualivá",
@@ -59,12 +69,17 @@ def get_datos_supata():
             "cmgrd": "Comité Municipal de Gestión del Riesgo de Desastres",
         },
     }
+    return _CACHE['datos_supata']
 
 
 def get_plantilla_por_tipo(tipo_evento: str, seccion: str):
     """Plantillas preconfiguradas por tipo de evento y sección."""
     tipo_evento = (tipo_evento or "").lower()
     seccion = (seccion or "").lower()
+
+    cache_key = f"{tipo_evento}:{seccion}"
+    if cache_key in _CACHE['plantillas']:
+        return _CACHE['plantillas'][cache_key]
 
     plantillas_default = {
         "lluvias": {
@@ -107,7 +122,9 @@ def get_plantilla_por_tipo(tipo_evento: str, seccion: str):
         },
     }
 
-    return plantillas_default.get(tipo_evento, {}).get(seccion, {})
+    plantilla = plantillas_default.get(tipo_evento, {}).get(seccion, {})
+    _CACHE['plantillas'][cache_key] = plantilla
+    return plantilla
 
 
 TIPOS_EVENTOS_EXPANDED = {

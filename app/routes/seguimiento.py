@@ -4,6 +4,7 @@ import io
 import csv
 import json
 import uuid
+import logging
 import pandas as pd
 import datetime as dt
 from datetime import datetime
@@ -24,6 +25,7 @@ from reportlab.lib.pagesizes import letter, landscape
 from reportlab.lib import colors
 from reportlab.platypus import Table, TableStyle
 
+logger = logging.getLogger(__name__)
 seguimiento_bp = Blueprint('seguimiento', __name__)
 
 # --- Cache para plan de desarrollo ---
@@ -58,7 +60,7 @@ def _load_plan_excel():
     base_dir = os.path.join(str(current_app.config['BASE_DIR']), 'documentos_generados', 'plan de desarollo')
     file_path = os.path.join(base_dir, 'BASE_RENDICION_PLAN_DESARROLLO_SUPATA.xlsx')
     if not os.path.exists(file_path):
-        print('⚠️ Excel de plan de desarrollo no encontrado:', file_path)
+        logger.warning(f"Excel de plan de desarrollo no encontrado: {file_path}")
         return None
 
     try:
@@ -88,7 +90,7 @@ def _load_plan_excel():
         
         # Asegurarse de que ID_META existe
         if 'ID_META' not in avances_df.columns:
-            print('⚠️ Columna ID_META no encontrada. Columnas disponibles:', avances_df.columns.tolist())
+            logger.warning(f"Columna ID_META no encontrada. Columnas disponibles: {avances_df.columns.tolist()}")
             return None
             
         avances_df = avances_df[avances_df['ID_META'].notna()]
@@ -342,10 +344,10 @@ def _load_plan_excel():
             'metas_payload': metas_payload,
             'metas_consolidado': metas_consolidado
         }
-        print(f'OK: Cargadas {len(metas_payload)} metas de REGISTRO_AVANCES (anual) y {len(metas_consolidado)} consolidadas')
+        logger.info(f"Cargadas {len(metas_payload)} metas de REGISTRO_AVANCES (anual) y {len(metas_consolidado)} consolidadas")
         return _plan_cache
     except Exception as e:
-        print('ERROR cargando REGISTRO_AVANCES:', e)
+        logger.error(f"Error cargando REGISTRO_AVANCES: {e}", exc_info=True)
         import traceback
         traceback.print_exc()
         _plan_cache = None

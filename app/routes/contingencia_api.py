@@ -7,6 +7,7 @@ from datetime import datetime
 import json
 import os
 import io
+import logging
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
@@ -15,6 +16,8 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from PyPDF2 import PdfReader, PdfWriter
 from app.utils.pdf_plans_generator import PDFPlanContingenciaOficial
 from app.utils.contingencia_helpers import get_datos_supata, get_plantilla_por_tipo
+
+logger = logging.getLogger(__name__)
 
 # ✅ LAZY IMPORTS
 def get_db():
@@ -196,7 +199,7 @@ def crear_plan():
         }), 201
     except Exception as e:
         db.session.rollback()
-        print(f'Error crear_plan: {e}')
+        logger.error(f"Error crear_plan: {e}", exc_info=True)
         return jsonify({
             'success': False,
             'error': str(e),
@@ -252,6 +255,7 @@ def listar_planes():
         estado = request.args.get('estado')
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 10, type=int)
+        per_page = max(1, min(per_page, 100))
         
         query = PlanContingencia.query
         
@@ -323,7 +327,7 @@ def actualizar_plan(plan_id):
         }), 200
     except Exception as e:
         db.session.rollback()
-        print(f'Error actualizar_plan: {e}')
+        logger.error(f"Error actualizar_plan: {e}", exc_info=True)
         return jsonify({
             'success': False,
             'error': str(e),
@@ -447,166 +451,6 @@ def plantilla_por_tipo(tipo_evento, seccion):
 # ============================================================================
 
 def _render_plan_pdf(plan, filename="plan_contingencia.pdf"):
-    """Genera PDF del plan con portada, TOC y contenido del plan"""
-    try:
-        # Crear canvas
-        pdf_buffer = io.BytesIO()
-        c = canvas.Canvas(pdf_buffer, pagesize=letter)
-        w, h = letter
-        
-        # ESTILOS
-        styles = getSampleStyleSheet()
-        COLOR_PRIMARY = '#2d5016'  # Verde institucional oscuro
-        COLOR_HEADER_BG = '#5a8a3a'  # Verde medio
-        COLOR_ACCENT = '#7cb342'  # Verde claro
-        COLOR_TEXT = '#3d3d3d'
-        
-        # ======== PORTADA ========
-        c.setFont('Helvetica-Bold', 28)
-        c.setFillColor(colors.HexColor(COLOR_PRIMARY))
-        c.drawCentredString(w/2, h - 120, 'PLAN DE CONTINGENCIA')
-        
-        c.setFont('Helvetica-Bold', 16)
-        c.setFillColor(colors.HexColor(COLOR_ACCENT))
-        evento_display = plan.tipo_evento.replace('_', ' ')
-        c.drawCentredString(w/2, h - 160, evento_display.upper())
-        
-        # Línea divisoria
-        c.setStrokeColor(colors.HexColor(COLOR_ACCENT))
-        c.setLineWidth(2)
-        c.line(60, h - 180, w - 60, h - 180)
-        
-        # Metadatos en portada
-        c.setFont('Helvetica', 11)
-        c.setFillColor(colors.HexColor(COLOR_TEXT))
-        
-        y_pos = h - 220
-        portada_lines = [
-            f"Nombre del Plan: {plan.nombre_plan}",
-            f"Número: {plan.numero_plan}",
-            f"Versión: {plan.version}",
-            f"Ámbito: {plan.ambito or 'No especificado'}",
-            f"Fecha de emisión: {plan.fecha_emision.date().strftime('%Y-%m-%d') if plan.fecha_emision else 'N/A'}",
-            f"Vigencia: {plan.vigencia_desde.strftime('%Y-%m-%d') if plan.vigencia_desde else 'N/A'} a {plan.vigencia_hasta.strftime('%Y-%m-%d') if plan.vigencia_hasta else 'N/A'}",
-            f"Responsable: {plan.responsable_principal or 'No especificado'}",
-            f"Entidad: {plan.entidad_responsable}",
-            f"Estado: {plan.estado.replace('_', ' ').title()}",
-        ]
-        
-        for line in portada_lines:
-            c.drawString(80, y_pos, line)
-            y_pos -= 25
-        
-        # Pie de portada
-        c.setFont('Helvetica-Oblique', 9)
-        c.setFillColor(colors.gray)
-        c.drawString(60, 40, f'Generado automáticamente por el Sistema de Gestión de Riesgo - Alcaldía Municipal')
-        
-        c.showPage()
-        
-        # ======== TABLA DE CONTENIDOS ========
-        c.setFont('Helvetica-Bold', 20)
-        c.setFillColor(colors.HexColor(COLOR_PRIMARY))
-        c.drawString(60, h - 60, 'TABLA DE CONTENIDOS')
-        
-        c.setFont('Helvetica', 11)
-        c.setFillColor(colors.HexColor(COLOR_TEXT))
-        
-        toc_items = [
-            ('1. Identificación del Plan', 3),
-            ('2. Escenario y Análisis de Riesgo', 4),
-            ('3. Alertas y Niveles de Activación', 5),
-            ('4. Organización y Estructura de Mando', 6),
-            ('5. Fases de Respuesta', 7),
-            ('6. Logística y Recursos', 8),
-            ('7. Albergues y Refugios', 9),
-            ('8. Comunicaciones', 10),
-            ('9. Salud y Asistencia Humanitaria', 11),
-            ('10. Presupuesto y Financiamiento', 12),
-            ('11. Anexos', 13),
-        ]
-        
-        y_pos = h - 100
-        for item, page_num in toc_items:
-            c.drawString(80, y_pos, f'{item}' + '.' * (70 - len(item)) + f'{page_num}')
-            y_pos -= 20
-        
-        c.showPage()
-        
-        # ======== SECCIONES DE CONTENIDO ========
-        
-        # Sección 1: Identificación
-        _add_section_title(c, "1. IDENTIFICACIÓN DEL PLAN", COLOR_PRIMARY, COLOR_ACCENT)
-        
-        data = [
-            ['Nombre del Plan', plan.nombre_plan or '-'],
-            ['Número', plan.numero_plan],
-            ['Tipo de Evento', plan.tipo_evento.replace('_', ' ')],
-            ['Versión', plan.version],
-            ['Ámbito de cobertura', plan.ambito or '-'],
-            ['Municipio', plan.municipio or '-'],
-            ['Población objetivo', str(plan.poblacion_objetivo or '-')],
-            ['Responsable', plan.responsable_principal or '-'],
-            ['Fecha de emisión', plan.fecha_emision.strftime('%Y-%m-%d')],
-            ['Estado', plan.estado.replace('_', ' ').title()],
-        ]
-        
-        table = Table(data, colWidths=[(w-120)*0.35, (w-120)*0.65])
-        _apply_table_style(table, COLOR_HEADER_BG)
-        
-        table.wrapOn(c, w-120, h-200)
-        table.drawOn(c, 60, h - 300)
-        
-        c.showPage()
-        
-        # Sección 2: Escenario y Riesgo
-        _add_section_title(c, "2. ESCENARIO Y ANÁLISIS DE RIESGO", COLOR_PRIMARY, COLOR_ACCENT)
-        _add_text_section(c, "Descripción del Peligro", plan.descripcion_peligro, h - 120, COLOR_TEXT)
-        _add_text_section(c, "Antecedentes Históricos", plan.antecedentes_historicos, h - 280, COLOR_TEXT)
-        
-        c.showPage()
-        
-        # Sección 3: Alertas
-        _add_section_title(c, "3. ALERTAS Y NIVELES DE ACTIVACIÓN", COLOR_PRIMARY, COLOR_ACCENT)
-        
-        umbrales = json.loads(plan.umbrales_alertas) if plan.umbrales_alertas else {}
-        alert_data = [
-            ['Nivel', 'Descripción']
-        ]
-        for nivel, descripcion in umbrales.items():
-            alert_data.append([nivel.title(), str(descripcion)])
-        
-        if len(alert_data) > 1:
-            alert_table = Table(alert_data, colWidths=[(w-120)*0.2, (w-120)*0.8])
-            _apply_table_style(alert_table, COLOR_HEADER_BG)
-            alert_table.wrapOn(c, w-120, 200)
-            alert_table.drawOn(c, 60, h - 300)
-        
-        c.showPage()
-        
-        # Secciones adicionales con placeholder
-        for section_num in range(4, 12):
-            c.setFont('Helvetica-Bold', 14)
-            c.setFillColor(colors.HexColor(COLOR_PRIMARY))
-            c.drawString(60, h - 80, f'{section_num}. SECCIÓN EN DESARROLLO')
-            
-            c.setFont('Helvetica', 11)
-            c.setFillColor(colors.gray)
-            c.drawString(60, h - 120, 'Esta sección se completa en el asistente de configuración del plan.')
-            
-            c.showPage()
-        
-        c.save()
-        pdf_buffer.seek(0)
-        return pdf_buffer
-    
-    except Exception as e:
-        print(f'Error generando PDF: {e}')
-        import traceback
-        traceback.print_exc()
-        return None
-    
-def _render_plan_pdf(plan, filename="plan_contingencia.pdf"):
     """Genera PDF profesional del plan usando formato oficial de Alcaldía"""
     try:
         # Convertir modelo ORM a diccionario para el generador
@@ -640,13 +484,13 @@ def _render_plan_pdf(plan, filename="plan_contingencia.pdf"):
         pdf_buffer = generador.generar()
         
         if not pdf_buffer:
-            print('El generador retornó None')
+            logger.warning("El generador retornó None")
             return None
         
         return pdf_buffer
     
     except Exception as e:
-        print(f'Error generando PDF: {e}')
+        logger.error(f"Error generando PDF: {e}", exc_info=True)
         import traceback
         traceback.print_exc()
         return None
@@ -734,7 +578,7 @@ def descargar_pdf(plan_id):
         else:
             return jsonify({'error': 'No se pudo generar el PDF'}), 500
     except Exception as e:
-        print(f'Error descargando PDF: {e}')
+        logger.error(f"Error descargando PDF: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -777,7 +621,7 @@ def cargar_usuarios():
             'total': len(usuarios_data)
         }), 200
     except Exception as e:
-        print(f"Error cargando usuarios: {e}")
+        logger.error(f"Error cargando usuarios: {e}", exc_info=True)
         return jsonify({
             'success': False,
             'error': str(e),
@@ -809,7 +653,7 @@ def obtener_datos_sugeridos(tipo_evento):
         
         return jsonify(datos_sugeridos), 200
     except Exception as e:
-        print(f"Error obteniendo datos sugeridos: {e}")
+        logger.error(f"Error obteniendo datos sugeridos: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 

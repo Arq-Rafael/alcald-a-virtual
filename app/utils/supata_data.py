@@ -146,10 +146,19 @@ SUPATA_DATA = {
     }
 }
 
+# Cache liviano en memoria
+_CACHE = {
+    'resumen': None,
+    'directorio': None
+}
+
 
 def get_supata_resumen():
     """Retorna un resumen general de Supatá en formato texto"""
-    return f"""
+    if _CACHE['resumen']:
+        return _CACHE['resumen']
+
+    _CACHE['resumen'] = f"""
     INFORMACIÓN GENERAL - MUNICIPIO DE SUPATÁ, CUNDINAMARCA
     
     Ubicación: {SUPATA_DATA['municipio']}, provincia de {SUPATA_DATA['provincia']}, {SUPATA_DATA['departamento']}
@@ -176,6 +185,7 @@ def get_supata_resumen():
     Alcalde: {SUPATA_DATA['alcalde']}
     Período: {SUPATA_DATA['periodo_alcalde']}
     """
+    return _CACHE['resumen']
 
 
 def get_organismos_emergencia():
@@ -185,6 +195,9 @@ def get_organismos_emergencia():
 
 def get_directorio_emergencias():
     """Retorna directorio completo de emergencias para el plan"""
+    if _CACHE['directorio']:
+        return _CACHE['directorio']
+
     directorio = []
     for org in SUPATA_DATA['organismos_emergencia']:
         directorio.append({
@@ -193,4 +206,5 @@ def get_directorio_emergencias():
             'ubicacion': org.get('ubicacion', 'Cundinamarca'),
             'disponibilidad': '24/7'
         })
+    _CACHE['directorio'] = directorio
     return directorio

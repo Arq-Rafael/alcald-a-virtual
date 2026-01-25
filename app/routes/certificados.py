@@ -1,6 +1,8 @@
 
 import os
 import io
+import copy
+import logging
 import pandas as pd
 import glob
 from flask import Blueprint, render_template, request, flash, redirect, url_for, send_file, current_app, session
@@ -28,6 +30,7 @@ try:
 except Exception:
     CAIROSVG_AVAILABLE = False
 
+logger = logging.getLogger(__name__)
 certificados_bp = Blueprint('certificados', __name__)
 
 LETTER = letter
@@ -363,22 +366,23 @@ def generate_pdf_certificate(data: dict) -> io.BytesIO:
     # Combinar con el formato oficial
     try:
         template_pdf = PdfReader(formato_path)
+        base_template_page = template_pdf.pages[0]
         overlay_pdf = PdfReader(overlay_buffer)
         output = PdfWriter()
-        
-        # Aplicar el formato oficial a cada página del overlay
+
+        # Aplicar el formato oficial a cada página del overlay sin releer el archivo
         for page_num in range(len(overlay_pdf.pages)):
-            template_page = PdfReader(formato_path).pages[0]
+            template_page = copy.deepcopy(base_template_page)
             overlay_page = overlay_pdf.pages[page_num]
             template_page.merge_page(overlay_page)
             output.add_page(template_page)
-        
+
         final_buffer = io.BytesIO()
         output.write(final_buffer)
         final_buffer.seek(0)
         return final_buffer
     except Exception as e:
-        print(f'Error al combinar con formato oficial: {e}')
+        logger.warning(f"Error al combinar con formato oficial: {e}")
         overlay_buffer.seek(0)
         return overlay_buffer
     
@@ -569,7 +573,7 @@ def generate_pdf_certificate(data: dict) -> io.BytesIO:
         final_buffer.seek(0)
         return final_buffer
     except Exception as e:
-        print(f'Error al combinar con formato oficial: {e}')
+        logger.warning(f"Error al combinar con formato oficial: {e}")
         overlay_buffer.seek(0)
         return overlay_buffer
 
@@ -662,30 +666,34 @@ def generar_lote_certificados():
         indices = request.form.getlist('indices[]')
         if not indices:
             return {'success': False, 'error': 'No hay solicitudes seleccionadas'}, 400
-        
-        # Leer CSV una sola vez
-        import csv as csv_module
+
+        # Leer CSV una sola vez y asegurar columna estado
         df = pd.read_csv(solicitudes_path, encoding='utf-8')
+        if 'estado' not in df.columns:
+            df['estado'] = 'nuevo'
         df['id'] = df.index
-        rows = []
-        with open(solicitudes_path, 'r', encoding='utf-8') as f:
-            reader = csv_module.reader(f)
-            rows = list(reader)
-        
+
         generados = 0
         errores = []
-        
-        # Generar cada PDF
+        indices_int = []
         for idx_str in indices:
             try:
-                idx = int(idx_str)
-                if idx not in df['id'].values:
+                indices_int.append(int(idx_str))
+            except ValueError:
+                errores.append(f'ID inválido: {idx_str}')
+
+        subset = df[df['id'].isin(indices_int)]
+
+        # Generar cada PDF y actualizar estado en memoria
+        for idx in indices_int:
+            try:
+                row_series = subset.loc[subset['id'] == idx]
+                if row_series.empty:
                     errores.append(f'Solicitud {idx} no encontrada')
                     continue
-                
-                row = df.loc[df['id'] == idx].iloc[0].to_dict()
-                
-                # Generar PDF
+
+                row = row_series.iloc[0].to_dict()
+
                 pdf_buf = generate_pdf_certificate({
                     'municipio': row.get('municipio'),
                     'nit': row.get('nit'),
@@ -699,44 +707,33 @@ def generar_lote_certificados():
                     'sector': row.get('sector'),
                     'codigo_bpim': row.get('codigo_bpim'),
                 })
-                
-                # Guardar PDF
+
                 outfile = os.path.join(output_dir, f"certificado_{idx}.pdf")
                 with open(outfile, 'wb') as f:
                     f.write(pdf_buf.getvalue())
-                
-                # Actualizar estado en memoria (no guardar aún)
-                if idx + 1 < len(rows):
-                    if len(rows[idx + 1]) > 11:
-                        rows[idx + 1][11] = 'generado'
-                    else:
-                        rows[idx + 1].append('generado')
-                
+
+                df.loc[df['id'] == idx, 'estado'] = 'generado'
                 generados += 1
             except Exception as e:
-                errores.append(f'Error en solicitud {idx_str}: {str(e)}')
-        
-        # Guardar CSV UNA SOLA VEZ al final con todos los cambios
+                errores.append(f'Error en solicitud {idx}: {str(e)}')
+
+        # Guardar CSV una sola vez al final
         if generados > 0:
-            with open(solicitudes_path, 'w', newline='', encoding='utf-8') as f:
-                writer = csv_module.writer(f)
-                writer.writerows(rows)
-                f.flush()
-                os.fsync(f.fileno())
-                
-        # --- NUEVO: Retornar ZIP ---
+            df.to_csv(solicitudes_path, index=False, encoding='utf-8')
+
+        # Retornar ZIP con los generados
         if generados > 0:
             import zipfile
             from io import BytesIO
-            
+
             memory_file = BytesIO()
             with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zf:
-                for idx_str in indices:
-                    fname = f"certificado_{idx_str}.pdf"
+                for idx in indices_int:
+                    fname = f"certificado_{idx}.pdf"
                     fpath = os.path.join(output_dir, fname)
                     if os.path.exists(fpath):
                         zf.write(fpath, fname)
-                        
+
             memory_file.seek(0)
             return send_file(
                 memory_file,
@@ -744,16 +741,16 @@ def generar_lote_certificados():
                 download_name=f"certificados_lote_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.zip",
                 mimetype='application/zip'
             )
-            
+
         return {
             'success': True,
             'generados': generados,
             'errores': errores,
             'total': len(indices)
         }
-    
+
     except Exception as e:
-        print(f"Error generando lote: {e}")
+        logger.error(f"Error generando lote: {e}", exc_info=True)
         return {'success': False, 'error': str(e)}, 500
 
 
@@ -762,6 +759,8 @@ def generar_certificado():
     idx = int(request.form['index'])
     solicitudes_path = current_app.config['SOLICITUDES_PATH']
     df  = pd.read_csv(solicitudes_path, encoding='utf-8')
+    if 'estado' not in df.columns:
+        df['estado'] = 'nuevo'
     df['id'] = df.index
     
     if idx not in df['id'].values:
@@ -784,34 +783,14 @@ def generar_certificado():
         'codigo_bpim':   row.get('codigo_bpim'),
     })
     
-    # Save a copy if needed or just return
-    # The original code logic for 'generados' relied on file count in output dir.
-    # We should save it to output dir to increment count.
     output_dir = current_app.config['CERTIFICADOS_OUTPUT_DIR']
     outfile = os.path.join(output_dir, f"certificado_{idx}.pdf")
     with open(outfile, 'wb') as f:
         f.write(pdf_buf.getvalue())
     
-    # Actualizar el estado a 'generado' en el CSV
-    import csv as csv_module
-    rows = []
-    with open(solicitudes_path, 'r', encoding='utf-8') as f:
-        reader = csv_module.reader(f)
-        rows = list(reader)
-    
-    # Actualizar la fila con estado 'generado' (columna 11)
-    if idx + 1 < len(rows):  # +1 porque la primera fila es header
-        if len(rows[idx + 1]) > 11:
-            rows[idx + 1][11] = 'generado'
-        else:
-            rows[idx + 1].append('generado')
-    
-    # Guardar el CSV actualizado
-    with open(solicitudes_path, 'w', newline='', encoding='utf-8') as f:
-        writer = csv_module.writer(f)
-        writer.writerows(rows)
-        f.flush()  # Flush del buffer Python
-        os.fsync(f.fileno())  # Sincronización forzada al disco
+    # Actualizar el estado a 'generado' y guardar una sola vez
+    df.loc[df['id'] == idx, 'estado'] = 'generado'
+    df.to_csv(solicitudes_path, index=False, encoding='utf-8')
     
     pdf_buf.seek(0)
     return send_file(
