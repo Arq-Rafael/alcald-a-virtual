@@ -141,6 +141,11 @@ def create_app(config_class=Config):
                 
                 db.session.commit()
                 print("✅ [RAILWAY LOG] Usuarios creados correctamente")
+                
+            # Sembrar metas
+            from .utils.seeds import seed_metas
+            seed_metas()
+            
         except Exception as e:
             print(f"❌ [RAILWAY ERROR] Error inicializando DB: {e}")
 
