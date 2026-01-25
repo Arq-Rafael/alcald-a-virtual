@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Oficio {{ numero }}</title>
+  <style>
+    /* wkhtmltopdf: hoja A4 sin márgenes del motor */
+    @page {
+      size: A4;
+      margin: 0;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Helvetica", Arial, sans-serif;
+      font-size: 11.5pt;
+      color: #111;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* Fondo de TODAS las páginas */
+    body {
+      background: url('{{ bg }}') top center no-repeat;
+      /* La plantilla PNG ocupa exacto el tamaño A4 */
+      background-size: 210mm 297mm;
+    }
+
+    /* Zona útil que se repetirá en cada página por flujo natural */
+    .content {
+      /* márgenes internos del oficio (ajústalos si necesitas) */
+      box-sizing: border-box;
+      margin: 46mm 17mm 28mm 23mm;
+      /* top right bottom left */
+      line-height: 1.5;
+    }
+
+    /* Bloques */
+    .meta {
+      margin-bottom: 10mm;
+      line-height: 1.4;
+    }
+
+    .meta .nro {
+      float: right;
+      font-weight: bold;
+    }
+
+    .clear {
+      clear: both;
+    }
+
+    .dest {
+      margin-bottom: 8mm;
+      line-height: 1.4;
+    }
+
+    .asunto {
+      margin: 2mm 0 6mm;
+      font-weight: bold;
+    }
+
+    .referencia {
+      margin: 0 0 6mm;
+      color: #333;
+    }
+
+    .cuerpo {
+      text-align: justify;
+      white-space: pre-wrap;
+      /* respeta saltos de línea del textarea */
+    }
+
+    .firma {
+      margin-top: 16mm;
+      line-height: 1.4;
+    }
+
+    .firma .nom {
+      margin-top: 12mm;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .firma .cargo {
+      margin-top: 1mm;
+    }
+
+    .firma .dep {
+      color: #333;
+    }
+
+    .extras {
+      margin-top: 12mm;
+      font-size: 10pt;
+      color: #333;
+    }
+
+    .extras div {
+      margin-top: 2mm;
+    }
+
+    .foot-interno {
+      margin-top: 10mm;
+      font-size: 9pt;
+      color: #333;
+    }
+
+    .foot-interno span {
+      margin-right: 8mm;
+    }
+
+    /* Evita que títulos se queden al final de página */
+    .asunto,
+    .referencia,
+    .dest {
+      page-break-inside: avoid;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="content">
+
+    <!-- Meta y número -->
+    <div class="meta">
+      <div class="nro">Oficio N° {{ numero }}</div>
+      <div>{{ ciudad_dest or "Supatá" }}, {{ fecha }}</div>
+      <div class="clear"></div>
+    </div>
+
+    <!-- Destinatario -->
+    <div class="dest">
+      <div><strong>{{ destinatario }}</strong></div>
+      {% if cargo_dest %}<div>{{ cargo_dest }}</div>{% endif %}
+      {% if entidad_dest %}<div>{{ entidad_dest }}</div>{% endif %}
+      {% if ciudad_dest %}<div>{{ ciudad_dest }}</div>{% endif %}
+    </div>
+
+    <!-- Asunto y referencia -->
+    {% if asunto %}<div class="asunto">Asunto: {{ asunto }}</div>{% endif %}
+    {% if referencia %}<div class="referencia">Ref.: {{ referencia }}</div>{% endif %}
+
+    <!-- Cuerpo -->
+    <div class="cuerpo">{{ cuerpo }}</div>
+
+    <!-- Firma -->
+    <div class="firma">
+      <div class="nom">{{ firmante_nombre }}</div>
+      <div class="cargo">{{ firmante_cargo }}</div>
+      {% if dependencia %}<div class="dep">{{ dependencia }}</div>{% endif %}
+    </div>
+
+    <!-- Extras -->
+    <div class="extras">
+      {% if anexos %}<div><strong>Anexos:</strong> {{ anexos }}</div>{% endif %}
+      {% if copias %}<div><strong>Copias (CC):</strong> {{ copias }}</div>{% endif %}
+    </div>
+
+    <!-- Pie interno -->
+    <div class="foot-interno">
+      {% if elaboro %}<span><strong>Elaboró:</strong> {{ elaboro }}</span>{% endif %}
+      {% if reviso %}<span><strong>Revisó:</strong> {{ reviso }}</span>{% endif %}
+      {% if telefono %}<span><strong>Tel.:</strong> {{ telefono }}</span>{% endif %}
+      {% if email %}<span><strong>Email:</strong> {{ email }}</span>{% endif %}
+    </div>
+
+  </div>
+</body>
+
+</html>

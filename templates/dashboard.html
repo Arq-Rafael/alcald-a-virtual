@@ -1,0 +1,577 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Premium{% endblock %}
+
+{% block styles %}
+<style>
+/* ========================================
+   iOS 26 MODO CLARO - DEGRADADO SUAVE
+   Inspirado en diseños modernos premium
+   ======================================== */
+
+:root {
+  --ios-bg-light: #f0f4ff;
+  --ios-bg-gradient-start: #667eea;
+  --ios-bg-gradient-end: #764ba2;
+  --ios-card-bg: rgba(255, 255, 255, 0.85);
+  --ios-card-hover: rgba(255, 255, 255, 0.95);
+  --ios-text: #1a202c;
+  --ios-text-secondary: #4a5568;
+  --ios-border: rgba(255, 255, 255, 0.4);
+  --ios-teal: #14b8a6;
+  --ios-purple: #a78bfa;
+  --ios-blue: #60a5fa;
+  --ios-orange: #fb923c;
+  --ios-red: #f87171;
+  --ios-green: #4ade80;
+  --ios-yellow: #fbbf24;
+}
+
+* {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif !important;
+}
+
+body {
+  background: var(--ios-bg-light) !important;
+  color: var(--ios-text) !important;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+.dashboard-container {
+  background: #f5f7fa;
+  border-radius: 32px;
+  padding: 2.5rem;
+  margin: 2rem auto;
+  max-width: 1400px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
+}
+
+.dashboard-bg {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #7cb342 0%, #9ccc65 25%, #c0ca33 50%, #ffd54f 75%, #ffb74d 100%);
+  z-index: -1;
+  opacity: 1 !important;
+  display: block !important;
+}
+
+.dashboard-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 600px;
+  height: 600px;
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 255, 255, 0.03) 2px,
+    rgba(255, 255, 255, 0.03) 4px
+  );
+  border-radius: 50%;
+  opacity: 0.6;
+}
+
+.dashboard-bg::after {
+  content: '';
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 500px;
+  height: 500px;
+  border: 80px solid rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  box-shadow: 
+    0 0 0 1px rgba(255, 255, 255, 0.03),
+    0 0 0 40px rgba(255, 255, 255, 0.02);
+}
+
+/* ========================================
+   HEADER - iOS 26 CLARO
+   ======================================== */
+
+.dashboard-header {
+  padding: 1.5rem 0 1.8rem;
+  background: transparent;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+  margin-bottom: 1rem;
+}
+
+@keyframes slideDown {
+  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(-20px); }
+}
+
+.dashboard-header h2 {
+  font-size: 1.8rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.5px !important;
+  color: #1a202c !important;
+  margin: 0 !important;
+  line-height: 1.2;
+}
+
+.dashboard-header p {
+  font-size: 0.9rem !important;
+  color: #718096 !important;
+  margin: 0.4rem 0 0 0 !important;
+  font-weight: 400 !important;
+}
+
+.dashboard-header .badge {
+  background: linear-gradient(135deg, var(--ios-teal) 0%, var(--ios-purple) 100%) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 20px !important;
+  padding: 0.7rem 1.6rem !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px !important;
+  box-shadow: 0 8px 24px rgba(20, 184, 166, 0.3) !important;
+  animation: scaleIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+  opacity: 0;
+}
+
+@keyframes scaleIn {
+  to { opacity: 1; transform: scale(1); }
+  from { opacity: 0; transform: scale(0.8); }
+}
+
+/* ========================================
+   GRID - ESPACIOSO Y LIMPIO
+   ======================================== */
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 1.5rem 0;
+  animation: fadeIn 0.8s ease-out 0.1s forwards;
+  opacity: 0;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+  from { opacity: 0; }
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 1.8rem;
+  }
+}
+
+/* ========================================
+   GLASS CARD - iOS 26 MODO CLARO
+   ======================================== */
+
+.glass-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 1.8rem 1.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  animation: cardSlide 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.glass-card:nth-child(1) { animation-delay: 0.05s; }
+.glass-card:nth-child(2) { animation-delay: 0.10s; }
+.glass-card:nth-child(3) { animation-delay: 0.15s; }
+.glass-card:nth-child(4) { animation-delay: 0.20s; }
+.glass-card:nth-child(5) { animation-delay: 0.25s; }
+.glass-card:nth-child(6) { animation-delay: 0.30s; }
+.glass-card:nth-child(7) { animation-delay: 0.35s; }
+.glass-card:nth-child(8) { animation-delay: 0.40s; }
+.glass-card:nth-child(9) { animation-delay: 0.45s; }
+.glass-card:nth-child(10) { animation-delay: 0.50s; }
+.glass-card:nth-child(11) { animation-delay: 0.55s; }
+.glass-card:nth-child(12) { animation-delay: 0.60s; }
+.glass-card:nth-child(13) { animation-delay: 0.65s; }
+
+@keyframes cardSlide {
+  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(24px); }
+}
+
+.glass-card:hover {
+  background: white;
+  border-color: #667eea;
+  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.15);
+  transform: translateY(-4px);
+}
+
+.glass-card:active {
+  transform: translateY(-3px);
+}
+
+/* ========================================
+   ICON - COLORFUL iOS 26
+   ======================================== */
+
+.card-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  margin-bottom: 1.2rem;
+  font-size: 1.6rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.glass-card:hover .card-icon-wrapper {
+  transform: scale(1.12) rotate(-3deg);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+  opacity: 1 !important; /* Asegurar que el icono NO desaparece */
+}
+
+.card-icon-wrapper.text-primary { 
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); 
+  color: white;
+  box-shadow: 0 8px 24px rgba(20, 184, 166, 0.4);
+}
+
+.card-icon-wrapper.text-success { 
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); 
+  color: white;
+  box-shadow: 0 8px 24px rgba(74, 222, 128, 0.4);
+}
+
+.card-icon-wrapper.text-warning { 
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); 
+  color: white;
+  box-shadow: 0 8px 24px rgba(251, 191, 36, 0.4);
+}
+
+.card-icon-wrapper.text-info { 
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); 
+  color: white;
+  box-shadow: 0 8px 24px rgba(96, 165, 250, 0.4);
+}
+
+.card-icon-wrapper.text-danger { 
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%); 
+  color: white;
+  box-shadow: 0 8px 24px rgba(248, 113, 113, 0.4);
+}
+
+.card-icon-wrapper.text-secondary { 
+  background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%); 
+  color: white;
+  box-shadow: 0 8px 24px rgba(167, 139, 250, 0.4);
+}
+
+.card-icon-wrapper.text-dark { 
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%); 
+  color: white;
+  box-shadow: 0 8px 24px rgba(148, 163, 184, 0.4);
+}
+
+/* ========================================
+   TEXT CONTENT
+   ======================================== */
+
+.glass-card h5 {
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+  color: #1a202c !important;
+  margin: 0 0 0.5rem 0 !important;
+  letter-spacing: -0.2px;
+}
+
+.glass-card p {
+  font-size: 0.85rem !important;
+  color: #718096 !important;
+  line-height: 1.5 !important;
+  margin: 0 0 1.2rem 0 !important;
+  flex-grow: 1;
+}
+
+/* ========================================
+   BUTTON - PREMIUM iOS 26
+   ======================================== */
+
+.btn-premium {
+  background: linear-gradient(135deg, var(--ios-teal) 0%, #0d9488 100%) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 14px !important;
+  padding: 0.85rem 1.4rem !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.3px !important;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow: 0 6px 20px rgba(20, 184, 166, 0.3) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+}
+
+.btn-premium::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.5s, height 0.5s;
+}
+
+.btn-premium:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-premium:hover {
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 10px 32px rgba(20, 184, 166, 0.4) !important;
+}
+
+.btn-premium:active {
+  transform: translateY(-1px) !important;
+}
+
+.btn-premium i {
+  font-size: 1rem;
+  transition: transform 0.3s ease-out;
+}
+
+.btn-premium:hover i {
+  transform: translateX(4px);
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+  .dashboard-header h2 {
+    font-size: 1.8rem !important;
+  }
+
+  .glass-card {
+    padding: 1.8rem 1.5rem;
+  }
+
+  .card-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    font-size: 1.8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-bg"></div>
+
+<div class="dashboard-container">
+  <div class="dashboard-header d-flex justify-content-between align-items-center">
+    <div>
+      <h2>¡Bienvenido, {{ session.user }}!</h2>
+      <p>Panel de Control General de la Alcaldía</p>
+    </div>
+    <span class="badge">{{ session.user_role|upper }}</span>
+  </div>
+
+<div class="dashboard-grid">
+
+  <!-- Redactar Oficios (Movido de IA Municipal) -->
+  <div class="glass-card">
+    <div class="card-icon-wrapper text-warning">
+      <i class="bi bi-pencil-square"></i>
+    </div>
+    <h5>Redactar Oficios</h5>
+    <p>Genera documentos institucionales automáticamente.</p>
+    <a href="{{ url_for('ia.letter') }}" class="btn btn-premium">
+      REDACTAR <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+
+  <!-- Solicitudes -->
+  {% if can('solicitudes') %}
+  <div class="glass-card">
+    <div class="card-icon-wrapper text-primary">
+      <i class="bi bi-file-earmark-text-fill"></i>
+    </div>
+    <h5>Solicitudes</h5>
+    <p>Gestiona las inscripciones al Banco de Programas y Proyectos.</p>
+    <a href="{{ url_for('solicitudes.index') }}" class="btn btn-premium">
+      ACCEDER <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- Certificados -->
+  {% if can('certificados') %}
+  <div class="glass-card">
+    <div class="card-icon-wrapper text-success">
+      <i class="bi bi-patch-check-fill"></i>
+    </div>
+    <h5>Certificados</h5>
+    <p>Genera y descarga certificados de manera ágil.</p>
+    <a href="{{ url_for('certificados.index') }}" class="btn btn-premium">
+      GENERAR <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- Licencias -->
+  <div class="glass-card">
+    <div class="card-icon-wrapper text-warning">
+      <i class="bi bi-buildings-fill"></i>
+    </div>
+    <h5>Licencias</h5>
+    <p>Radica y gestiona actos de licencia urbanística.</p>
+    <a href="/licencias" class="btn btn-premium">
+      GESTIONAR <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+
+  <!-- IA Municipal -->
+  {% if can('ia') %}
+  <div class="glass-card">
+    <div class="card-icon-wrapper text-secondary">
+      <i class="bi bi-cpu-fill"></i>
+    </div>
+    <h5>IA Municipal</h5>
+    <p>Asistente inteligente y analítica avanzada.</p>
+    <a href="{{ url_for('ia.index') }}" class="btn btn-premium">
+      CONSULTAR IA <i class="bi bi-stars"></i>
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- Calendario -->
+  <div class="glass-card">
+    <div class="card-icon-wrapper text-info">
+      <i class="bi bi-calendar-event-fill"></i>
+    </div>
+    <h5>Calendario</h5>
+    <p>Eventos, alertas y programación municipal.</p>
+    <a href="/calendario" class="btn btn-premium">
+      VER AGENDA <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+
+  <!-- Participación -->
+  {% if can('participacion') %}
+  <div class="glass-card">
+    <div class="card-icon-wrapper text-danger">
+      <i class="bi bi-people-fill"></i>
+    </div>
+    <h5>Participación</h5>
+    <p>Atención al ciudadano y gestión de radicados.</p>
+    <a href="{{ url_for('participacion.index') }}" class="btn btn-premium">
+      PARTICIPACIÓN <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- GEOPORTAL - Fusión de Casco Urbano + Usos del Suelo -->
+  <div class="glass-card">
+    <div class="card-icon-wrapper text-primary">
+      <i class="bi bi-globe-americas"></i>
+    </div>
+    <h5>Geoportal</h5>
+    <p>Mapas interactivos y cartografía municipal.</p>
+    <a href="{{ url_for('main.geoportal') }}" class="btn btn-premium">
+      VER MAPAS <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+
+  <!-- SEGUIMIENTO Y METAS - Fusión -->
+  {% if can('seguimiento') %}
+  <div class="glass-card">
+    <div class="card-icon-wrapper text-purple">
+      <i class="bi bi-graph-up-arrow"></i>
+    </div>
+    <h5>Seguimiento y Metas</h5>
+    <p>Monitoreo de indicadores y progreso del Plan.</p>
+    <a href="{{ url_for('seguimiento.index') }}" class="btn btn-premium">
+      VER INDICADORES <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- GESTIÓN AMBIENTAL - Fusión de Arbolado + Comité + Gestión Riesgo -->
+  <div class="glass-card">
+    <div class="card-icon-wrapper text-success">
+      <i class="bi bi-tree-fill"></i>
+    </div>
+    <h5>Gestión del Riesgo</h5>
+    <p>Arbolado urbano, actas CMGR y planes de contingencia.</p>
+    <a href="{{ url_for('main.gestion_riesgo') }}" class="btn btn-premium">
+      GESTIONAR <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+
+  <!-- Contratación -->
+  <div class="glass-card">
+    <div class="card-icon-wrapper text-info">
+      <i class="bi bi-file-earmark-contract-fill"></i>
+    </div>
+    <h5>Contratación</h5>
+    <p>Gestión de contratos municipales.</p>
+    <a href="/contratos" class="btn btn-premium">
+      CONTRATOS <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+
+  <!-- Configuración -->
+  {% if session.user_role == 'admin' %}
+  <div class="glass-card">
+    <div class="card-icon-wrapper text-dark">
+      <i class="bi bi-gear-fill"></i>
+    </div>
+    <h5>Configuración</h5>
+    <p>Gestión de usuarios y permisos.</p>
+    <a href="{{ url_for('configuracion.index') }}" class="btn btn-premium">
+      CONFIGURAR <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+
+</div>
+
+{% endblock %}

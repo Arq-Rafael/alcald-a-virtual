@@ -1,0 +1,220 @@
+/* ===========================
+   SPLASH SCREEN & SCREEN SAVER
+   Animación futurista del logo
+   =========================== */
+
+:root {
+    --neon-green: #39ff14;
+    --neon-green-dim: #1f8a0b;
+    --neon-gold: #ffd700;
+    --neon-cyan: #00f3ff;
+    --bg-dark: #000205;
+    --text-gray: rgba(255, 255, 255, 0.4);
+}
+
+/* Overlay para Splash Screen y Screen Saver */
+#splashScreen,
+#screenSaver {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-dark);
+    background-image: radial-gradient(circle at 50% 50%, #0a0a0a 0%, #000000 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    overflow: hidden;
+    perspective: 1000px;
+}
+
+#splashScreen.hidden,
+#screenSaver.hidden {
+    display: none;
+}
+
+/* Canvas de fondo con partículas */
+.splash-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Contenedor principal */
+.splash-container {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* --- HUD RINGS (Anillos Circulares) --- */
+.hud-circle {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.circle-1 {
+    width: 650px;
+    height: 650px;
+    border-top: 2px solid var(--neon-green-dim);
+    border-bottom: 2px solid var(--neon-green-dim);
+    box-shadow: 0 0 15px rgba(57, 255, 20, 0.1);
+    animation: rotate-cw 20s linear infinite;
+}
+
+.circle-1::after {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    right: 15px;
+    bottom: 15px;
+    border-radius: 50%;
+    border-left: 2px solid var(--neon-green);
+    border-right: 2px solid var(--neon-green);
+    opacity: 0.3;
+}
+
+.circle-2 {
+    width: 500px;
+    height: 500px;
+    border: 1px dashed var(--neon-gold);
+    animation: rotate-ccw 25s linear infinite;
+    opacity: 0.3;
+}
+
+.circle-3 {
+    width: 750px;
+    height: 750px;
+    border-left: 1px solid var(--neon-gold);
+    animation: rotate-cw 40s linear infinite;
+    opacity: 0.15;
+}
+
+/* --- LOGO WRAPPER --- */
+.splash-logo-wrapper {
+    position: relative;
+    padding: 80px;
+    z-index: 5;
+    background: transparent;
+    backdrop-filter: none;
+    border-radius: 0;
+    box-shadow: none;
+    animation: hover-float 6s ease-in-out infinite;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Línea decorativa bajo el logo */
+.cyber-lines {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 2px;
+    background: var(--neon-green);
+    box-shadow: 0 0 10px var(--neon-green);
+    opacity: 0.5;
+}
+
+/* --- LOGO IMAGE --- */
+.splash-logo {
+    max-width: 600px;
+    width: 80vw;
+    display: block;
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.6)) 
+            drop-shadow(0 0 10px rgba(255, 255, 255, 0.3)) 
+            drop-shadow(0 0 20px rgba(57, 255, 20, 0.4));
+    z-index: 10;
+}
+
+/* Texto de carga opcional */
+.splash-text {
+    position: absolute;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 20;
+    color: var(--text-gray);
+    font-size: 0.9rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 500;
+    animation: pulse-text 2s ease-in-out infinite;
+}
+
+/* Mensaje para screen saver */
+.screensaver-message {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 20;
+    color: var(--text-gray);
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    opacity: 0.6;
+    animation: pulse-text 3s ease-in-out infinite;
+}
+
+/* --- ANIMATIONS --- */
+@keyframes rotate-cw {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes rotate-ccw {
+    from { transform: rotate(360deg); }
+    to { transform: rotate(0deg); }
+}
+
+@keyframes hover-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+@keyframes pulse-text {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* Animación de salida del splash */
+#splashScreen.fade-out {
+    animation: fadeOut 0.8s ease-out forwards;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .circle-1 { width: 450px; height: 450px; }
+    .circle-2 { width: 350px; height: 350px; }
+    .circle-3 { width: 550px; height: 550px; }
+    .splash-logo { max-width: 400px; }
+    .splash-logo-wrapper { padding: 50px; }
+}
+
+@media (max-width: 480px) {
+    .circle-1 { width: 320px; height: 320px; }
+    .circle-2 { width: 250px; height: 250px; }
+    .circle-3 { width: 400px; height: 400px; }
+    .splash-logo { max-width: 280px; }
+    .splash-text { font-size: 0.75rem; }
+}

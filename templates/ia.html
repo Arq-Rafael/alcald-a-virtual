@@ -1,0 +1,366 @@
+{# templates/ia.html - Rediseño iOS 26 #}
+{% extends "base.html" %}
+
+{% block styles %}
+<style>
+/* IA Module - iOS 26 Design System */
+.ia-container {
+  padding: 2.5rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.ia-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+  animation: fadeInDown 0.6s ease-out;
+}
+
+.ia-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1b5e20 0%, #4caf50 50%, #f9a825 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.75rem;
+  letter-spacing: -1px;
+}
+
+.ia-header p {
+  color: var(--text-secondary, #6b7280);
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+
+.ia-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  animation: fadeInGrid 0.8s ease-out 0.2s backwards;
+}
+
+@media (min-width: 1200px) {
+  .ia-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .ia-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* iOS 26 Glass Cards */
+.ia-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.88) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 24px;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 12px 40px rgba(27, 94, 32, 0.08),
+              0 4px 12px rgba(0, 0, 0, 0.04),
+              inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  padding: 2.25rem 1.75rem;
+  text-align: center;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.ia-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, var(--card-gradient-start), var(--card-gradient-end));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.ia-card:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: 0 24px 60px rgba(27, 94, 32, 0.15),
+              0 8px 20px rgba(0, 0, 0, 0.08),
+              inset 0 1px 0 rgba(255, 255, 255, 1);
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+.ia-card:hover::before {
+  opacity: 1;
+}
+
+/* Icon Containers - iOS Style */
+.ia-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: white;
+  background: var(--card-gradient, linear-gradient(135deg, #1b5e20, #4caf50));
+  box-shadow: 0 8px 24px var(--card-shadow, rgba(27, 94, 32, 0.25)),
+              inset 0 -3px 6px rgba(0,0,0,0.1),
+              inset 0 1px 3px rgba(255,255,255,0.3);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.ia-card:hover .ia-icon {
+  transform: scale(1.1) rotate(-5deg);
+  box-shadow: 0 12px 32px var(--card-shadow, rgba(27, 94, 32, 0.35)),
+              inset 0 -3px 6px rgba(0,0,0,0.15);
+}
+
+/* Color Variants */
+.ia-card.primary {
+  --card-gradient-start: #1b5e20;
+  --card-gradient-end: #4caf50;
+  --card-gradient: linear-gradient(135deg, #1b5e20, #4caf50);
+  --card-shadow: rgba(27, 94, 32, 0.25);
+}
+
+.ia-card.secondary {
+  --card-gradient-start: #f9a825;
+  --card-gradient-end: #fdd835;
+  --card-gradient: linear-gradient(135deg, #f9a825, #fdd835);
+  --card-shadow: rgba(249, 168, 37, 0.25);
+}
+
+.ia-card.accent {
+  --card-gradient-start: #66bb6a;
+  --card-gradient-end: #81c784;
+  --card-gradient: linear-gradient(135deg, #66bb6a, #81c784);
+  --card-shadow: rgba(102, 187, 106, 0.25);
+}
+
+.ia-card.teal {
+  --card-gradient-start: #0f766e;
+  --card-gradient-end: #14b8a6;
+  --card-gradient: linear-gradient(135deg, #0f766e, #14b8a6);
+  --card-shadow: rgba(15, 118, 110, 0.25);
+}
+
+.ia-card.purple {
+  --card-gradient-start: #7c3aed;
+  --card-gradient-end: #a78bfa;
+  --card-gradient: linear-gradient(135deg, #7c3aed, #a78bfa);
+  --card-shadow: rgba(124, 58, 237, 0.25);
+}
+
+.ia-card.orange {
+  --card-gradient-start: #ea580c;
+  --card-gradient-end: #fb923c;
+  --card-gradient: linear-gradient(135deg, #ea580c, #fb923c);
+  --card-shadow: rgba(234, 88, 12, 0.25);
+}
+
+/* Card Content */
+.ia-card h5 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.3px;
+}
+
+.ia-card p {
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 1.75rem;
+  flex-grow: 1;
+}
+
+/* iOS 26 Action Buttons */
+.ia-btn {
+  padding: 0.875rem 2rem;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+  border: none;
+  background: linear-gradient(135deg, var(--card-gradient-start), var(--card-gradient-end));
+  color: white;
+  box-shadow: 0 4px 16px var(--card-shadow),
+              inset 0 1px 2px rgba(255,255,255,0.3);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.ia-btn:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 24px var(--card-shadow),
+              inset 0 1px 2px rgba(255,255,255,0.4);
+  color: white;
+}
+
+.ia-btn:active {
+  transform: translateY(-1px) scale(1.02);
+}
+
+/* Badge for "Nuevo" */
+.ia-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: linear-gradient(135deg, #f9a825, #fdd835);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.35rem 0.85rem;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  box-shadow: 0 4px 12px rgba(249, 168, 37, 0.3);
+}
+
+/* Animations */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInGrid {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Staggered card animations */
+.ia-card:nth-child(1) { animation: slideUpFade 0.6s ease-out 0.1s backwards; }
+.ia-card:nth-child(2) { animation: slideUpFade 0.6s ease-out 0.2s backwards; }
+.ia-card:nth-child(3) { animation: slideUpFade 0.6s ease-out 0.3s backwards; }
+.ia-card:nth-child(4) { animation: slideUpFade 0.6s ease-out 0.4s backwards; }
+.ia-card:nth-child(5) { animation: slideUpFade 0.6s ease-out 0.5s backwards; }
+.ia-card:nth-child(6) { animation: slideUpFade 0.6s ease-out 0.6s backwards; }
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ia-container">
+  <!-- Header -->
+  <div class="ia-header">
+    <h1>
+      <i class="bi bi-cpu-fill"></i> IA Municipal
+    </h1>
+    <p>Asistente inteligente y analítica avanzada para la gestión municipal</p>
+  </div>
+
+  <!-- Grid de Módulos -->
+  <div class="ia-grid">
+    
+    <!-- Análisis Inteligente (NUEVO) -->
+    <div class="ia-card accent">
+      <span class="ia-badge">Nuevo</span>
+      <div class="ia-icon">
+        <i class="bi bi-graph-up-arrow"></i>
+      </div>
+      <h5>Análisis Inteligente</h5>
+      <p>Extrae datos clave y estadísticas de documentos municipales.</p>
+      <a href="{{ url_for('ia.analysis') }}" class="ia-btn">
+        Analizar Documentos
+      </a>
+    </div>
+
+    <!-- Asistente Normativo (NUEVO) -->
+    <div class="ia-card teal">
+      <span class="ia-badge">Nuevo</span>
+      <div class="ia-icon">
+        <i class="bi bi-book-half"></i>
+      </div>
+      <h5>Asistente Normativo</h5>
+      <p>Búsqueda rápida en leyes, decretos y normativas municipales.</p>
+      <a href="{{ url_for('ia.normative') }}" class="ia-btn">
+        Consultar Normas
+      </a>
+    </div>
+
+    <!-- Predicción de Tendencias (NUEVO) -->
+    <div class="ia-card purple">
+      <span class="ia-badge">Nuevo</span>
+      <div class="ia-icon">
+        <i class="bi bi-graph-down-arrow"></i>
+      </div>
+      <h5>Predicción de Tendencias</h5>
+      <p>Análisis predictivo basado en datos históricos municipales.</p>
+      <a href="{{ url_for('ia.trends') }}" class="ia-btn">
+        Ver Predicciones
+      </a>
+    </div>
+
+    <!-- Generador de Informes (NUEVO) -->
+    <div class="ia-card orange">
+      <span class="ia-badge">Nuevo</span>
+      <div class="ia-icon">
+        <i class="bi bi-file-earmark-bar-graph-fill"></i>
+      </div>
+      <h5>Generador de Informes</h5>
+      <p>Crea reportes ejecutivos en PDF con gráficos y análisis.</p>
+      <a href="{{ url_for('ia.reports') }}" class="ia-btn">
+        Generar Informe
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Efecto de entrada suave para las tarjetas
+  document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.ia-card');
+    
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -100px 0px'
+    };
+    
+    const observer = new IntersectionObserver(function(entries) {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+    
+    cards.forEach(card => {
+      observer.observe(card);
+    });
+  });
+</script>
+{% endblock %}

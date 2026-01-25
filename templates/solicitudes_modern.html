@@ -1,0 +1,970 @@
+{% extends "base.html" %}
+
+{% block title %}Nueva Solicitud - iOS 26{% endblock %}
+
+{% block styles %}
+<style>
+/* ========================================
+   SOLICITUDES - DISEÑO iOS 26 MODERNO
+   ======================================== */
+
+.solicitud-container {
+  background: linear-gradient(135deg, #7cb342 0%, #c0ca33 100%);
+  min-height: calc(100vh - 80px);
+  padding: 2.5rem 1.5rem;
+  position: relative;
+}
+
+.solicitud-container::before {
+  content: '';
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.form-card {
+  max-width: 900px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(25px);
+  border-radius: 32px;
+  padding: 3rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+@keyframes slideUp {
+  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(30px); }
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid rgba(124, 179, 66, 0.1);
+}
+
+.form-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #558b2f;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.5px;
+}
+
+.form-header p {
+  color: #7cb342;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.form-grid {
+  display: grid;
+  gap: 1.8rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.form-group {
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #558b2f;
+  margin-bottom: 0.6rem;
+  letter-spacing: 0.3px;
+}
+
+.form-control, .form-select, textarea {
+  width: 100%;
+  padding: 0.9rem 1.2rem;
+  border: 2px solid #e8f5e9;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  color: #2d5016;
+  background: white;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+}
+
+.form-control:focus, .form-select:focus, textarea:focus {
+  outline: none;
+  border-color: #7cb342;
+  box-shadow: 0 0 0 4px rgba(124, 179, 66, 0.1);
+  transform: translateY(-2px);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.form-control::placeholder {
+  color: #a5d6a7;
+  opacity: 0.8;
+}
+
+.btn-submit {
+  background: linear-gradient(135deg, #7cb342 0%, #9ccc65 100%);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 1rem 2.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 24px rgba(124, 179, 66, 0.25);
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.btn-submit:hover {
+  background: linear-gradient(135deg, #689f38 0%, #8bc34a 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(124, 179, 66, 0.35);
+}
+
+.btn-submit:active {
+  transform: translateY(-1px);
+}
+
+.btn-cancel {
+  background: transparent;
+  color: #7cb342;
+  border: 2px solid #7cb342;
+  border-radius: 14px;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  margin-left: 1rem;
+}
+
+.btn-cancel:hover {
+  background: rgba(124, 179, 66, 0.1);
+  transform: translateY(-2px);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 2px solid rgba(124, 179, 66, 0.1);
+}
+
+.input-icon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a5d6a7;
+  font-size: 1.2rem;
+  pointer-events: none;
+}
+
+.required-badge {
+  color: #ef5350;
+  margin-left: 0.3rem;
+  font-weight: 700;
+}
+
+/* === BOTONES DE ACCIÓN CON TOOLTIP iOS 26 === */
+.action-btn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 0 0.4rem;
+}
+
+.action-btn:hover {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Tooltip estilo nube iOS */
+.action-btn::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 0.5rem 0.9rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+.action-btn::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% - 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.85);
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 999;
+}
+
+.action-btn:hover::after,
+.action-btn:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Botón Editar - Verde */
+.btn-edit {
+  background: linear-gradient(135deg, #7cb342, #9ccc65);
+  color: white;
+}
+
+.btn-edit:active {
+  transform: scale(0.95);
+}
+
+/* Botón Enviar - Naranja */
+.btn-send {
+  background: linear-gradient(135deg, #ff9100, #ffb74d);
+  color: white;
+}
+
+.btn-send:active {
+  transform: scale(0.95);
+}
+
+/* Botón Eliminar - Rojo */
+.btn-delete {
+  background: linear-gradient(135deg, #ef5350, #e53935);
+  color: white;
+}
+
+.btn-delete:active {
+  transform: scale(0.95);
+}
+
+/* === BADGES DE ESTADO COMPACTOS === */
+.estado-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 14px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s ease;
+}
+
+.estado-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+}
+
+.estado-nuevo { background: linear-gradient(135deg, #29b6f6, #4fc3f7); }
+.estado-editado { background: linear-gradient(135deg, #ff9100, #ffb74d); }
+.estado-pendiente { background: linear-gradient(135deg, #ffa726, #ffb74d); }
+.estado-generado { background: linear-gradient(135deg, #66bb6a, #81c784); }
+.estado-borrador { background: linear-gradient(135deg, #90a4ae, #b0bec5); }
+
+.info-card {
+  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+  border-left: 4px solid #7cb342;
+  border-radius: 12px;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.info-card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #558b2f;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.info-card-text {
+  font-size: 0.875rem;
+  color: #689f38;
+  line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .form-card {
+    padding: 2rem 1.5rem;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .btn-cancel {
+    margin-left: 0;
+  }
+}
+
+/* Select2 overrides */
+.select2-container--bootstrap-5 .select2-selection {
+  border: 2px solid #e8f5e9 !important;
+  border-radius: 14px !important;
+  padding: 0.4rem 0.5rem !important;
+  min-height: 48px !important;
+}
+
+.select2-container--bootstrap-5.select2-container--focus .select2-selection {
+  border-color: #7cb342 !important;
+  box-shadow: 0 0 0 4px rgba(124, 179, 66, 0.1) !important;
+}
+
+/* Mejorados de tabla */
+.table {
+  font-size: 0.95rem;
+}
+
+.table thead th {
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 1rem 0.75rem !important;
+}
+
+.table tbody td {
+  padding: 1rem 0.75rem !important;
+  vertical-align: middle;
+  font-size: 0.9rem;
+}
+
+.table tbody tr {
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.table tbody tr:hover {
+  background: rgba(124, 179, 66, 0.1) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.badge-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.2rem;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-action {
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.btn-action:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="solicitud-container">
+  <div class="form-card">
+    
+    <div class="form-header">
+      <h1><i class="bi bi-file-earmark-text-fill"></i> Nueva Solicitud</h1>
+      <p>Banco de Programas y Proyectos - Supatá</p>
+    </div>
+
+    <div class="info-card">
+      <div class="info-card-title">
+        <i class="bi bi-info-circle-fill"></i>
+        Información Importante
+      </div>
+      <div class="info-card-text">
+        Complete todos los campos marcados con asterisco (*). La solicitud será guardada en formato CSV y podrá generar un PDF posteriormente.
+      </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('solicitudes.index') }}">
+      
+      <div class="form-grid">
+        
+        <!-- Fila 1: Datos básicos -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Municipio <span class="required-badge">*</span></label>
+            <input 
+              type="text" 
+              name="municipio" 
+              class="form-control" 
+              value="Municipio de Supatá" 
+              readonly
+              required>
+          </div>
+          
+          <div class="form-group">
+            <label>NIT <span class="required-badge">*</span></label>
+            <input 
+              type="text" 
+              name="nit" 
+              class="form-control" 
+              value="899999398-5" 
+              readonly
+              required>
+          </div>
+          
+          <div class="form-group">
+            <label>Fecha <span class="required-badge">*</span></label>
+            <input 
+              type="date" 
+              name="fecha" 
+              class="form-control" 
+              value="{{ today }}" 
+              required>
+          </div>
+        </div>
+
+        <!-- Fila 2: Secretaría -->
+        <div class="form-group">
+          <label>Secretaría Solicitante <span class="required-badge">*</span></label>
+          <select name="secretaria" class="form-select" required>
+            <option value="">Selecciona una...</option>
+            {% for sec in secretarias %}
+            <option value="{{ sec }}">{{ sec }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Fila 3: Objeto del Proyecto -->
+        <div class="form-group">
+          <label>Objeto del Proyecto <span class="required-badge">*</span></label>
+          <textarea 
+            name="objeto" 
+            class="form-control" 
+            placeholder="Describe brevemente el objeto del proyecto..."
+            required></textarea>
+        </div>
+
+        <!-- Fila 4: Justificación -->
+        <div class="form-group">
+          <label>Justificación <span class="required-badge">*</span></label>
+          <textarea 
+            name="justificacion" 
+            class="form-control" 
+            placeholder="Justifica la necesidad del proyecto..."
+            required></textarea>
+        </div>
+
+        <!-- Fila 5: Valor, Meta, Eje -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Valor (COP) <span class="required-badge">*</span></label>
+            <input 
+              type="text" 
+              name="valor" 
+              class="form-control" 
+              placeholder="0"
+              required>
+          </div>
+          
+          <div class="form-group">
+            <label>Meta Producto</label>
+            <select name="meta_producto" class="form-select select2-meta">
+              <option value="">Selecciona una...</option>
+              {% for item in plan_list %}
+              <option value="{{ item['meta de producto'] }}">{{ item['meta de producto'] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Eje</label>
+            <input 
+              type="text" 
+              name="eje" 
+              class="form-control" 
+              placeholder="Eje estratégico">
+          </div>
+        </div>
+
+        <!-- Fila 6: Sector, BPIM -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Sector</label>
+            <input 
+              type="text" 
+              name="sector" 
+              class="form-control" 
+              placeholder="Sector">
+          </div>
+          
+          <div class="form-group">
+            <label>Código BPIM</label>
+            <input 
+              type="text" 
+              name="codigo_bpim" 
+              class="form-control" 
+              placeholder="Código BPIM">
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Acciones -->
+      <div class="form-actions">
+        <button type="submit" class="btn-submit">
+          <i class="bi bi-check-circle-fill"></i>
+          Radicar Solicitud
+        </button>
+        <a href="{{ url_for('main.dashboard') }}" class="btn-cancel">
+          Cancelar
+        </a>
+      </div>
+
+    </form>
+
+  </div>
+
+  <!-- ============================================
+       MIS SOLICITUDES - HISTORIAL DEL USUARIO
+       ============================================ -->
+  <div class="form-card" style="margin-top: 2rem;">
+    <div class="form-header">
+      <h2 style="font-size: 1.6rem; font-weight: 700; color: #558b2f; margin-bottom: 0.5rem;">
+        <i class="bi bi-clipboard-check"></i> Mis Solicitudes
+      </h2>
+      <p style="color: #7cb342; font-size: 0.95rem;">Revisa y edita tus solicitudes anteriores</p>
+    </div>
+
+    {% if user_solicitudes and user_solicitudes|length > 0 %}
+    <div class="table-responsive" style="background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(15px); border-radius: 20px; padding: 1rem; border: 1px solid rgba(255, 255, 255, 0.3);">
+      <table class="table table-hover" style="background: transparent; margin-bottom: 0;">
+        <thead>
+          <tr style="background: rgba(124, 179, 66, 0.15); border-bottom: 2px solid rgba(124, 179, 66, 0.3);">
+            <th style="color: #558b2f; font-weight: 600; padding: 0.75rem; font-size: 0.9rem;">Fecha</th>
+            <th style="color: #558b2f; font-weight: 600; padding: 0.75rem; font-size: 0.9rem;">Secretaría</th>
+            <th style="color: #558b2f; font-weight: 600; padding: 0.75rem; font-size: 0.9rem;">Objeto</th>
+            <th style="color: #558b2f; font-weight: 600; padding: 0.75rem; font-size: 0.9rem;">Valor</th>
+            <th style="color: #558b2f; font-weight: 600; padding: 0.75rem; font-size: 0.9rem;">Meta</th>
+            <th style="color: #558b2f; font-weight: 600; padding: 0.75rem; font-size: 0.9rem; text-align: center;">Estado</th>
+            <th style="color: #558b2f; font-weight: 600; padding: 0.75rem; font-size: 0.9rem; text-align: center;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sol in user_solicitudes %}
+          <tr style="border-bottom: 1px solid rgba(124, 179, 66, 0.1);">
+            <td style="padding: 0.75rem; color: #2d5016; font-size: 0.85rem;">{{ sol.fecha }}</td>
+            <td style="padding: 0.75rem; color: #2d5016; font-size: 0.85rem;">{{ sol.secretaria[:30] }}...</td>
+            <td style="padding: 0.75rem; color: #2d5016; font-size: 0.85rem;">{{ sol.objeto[:40] }}...</td>
+            <td style="padding: 0.75rem; color: #558b2f; font-weight: 600; font-size: 0.85rem;">{{ sol.valor }}</td>
+            <td style="padding: 0.75rem; color: #2d5016; font-size: 0.8rem;">{{ sol.meta_producto[:30] }}...</td>
+            <td style="padding: 0.75rem; text-align: center;">
+              {% if sol.estado == 'nuevo' %}
+                <span class="estado-badge estado-nuevo">
+                  <i class="bi bi-star-fill"></i> Nuevo
+                </span>
+              {% elif sol.estado == 'editado' %}
+                <span class="estado-badge estado-editado">
+                  <i class="bi bi-pencil"></i> Editado
+                </span>
+              {% elif sol.estado == 'pendiente' %}
+                <span class="estado-badge estado-pendiente">
+                  <i class="bi bi-hourglass-split"></i> Pendiente
+                </span>
+              {% elif sol.estado == 'generado' %}
+                <span class="estado-badge estado-generado">
+                  <i class="bi bi-check-circle-fill"></i> Generado
+                </span>
+              {% else %}
+                <span class="estado-badge estado-borrador">
+                  <i class="bi bi-file-earmark"></i> Borrador
+                </span>
+              {% endif %}
+            </td>
+            <td style="padding: 0.75rem; text-align: center;">
+              <button 
+                onclick="editarSolicitud({{ loop.index0 }})" 
+                class="action-btn btn-edit"
+                data-tooltip="Editar solicitud"
+                title="Editar">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+              
+              {% if sol.estado == 'editado' %}
+              <form method="POST" action="{{ url_for('solicitudes.enviar_certificado') }}" style="display: inline;">
+                <input type="hidden" name="indice" value="{{ loop.index0 }}">
+                <button 
+                  type="submit"
+                  class="action-btn btn-send"
+                  data-tooltip="Enviar para generar certificado"
+                  title="Enviar">
+                  <i class="bi bi-send"></i>
+                </button>
+              </form>
+              {% endif %}
+
+              {% if is_admin %}
+              <form method="POST" action="{{ url_for('solicitudes.eliminar_solicitud') }}" style="display: inline;" onsubmit="return confirm('¿Eliminar esta solicitud?');">
+                <input type="hidden" name="indice" value="{{ loop.index0 }}">
+                <button 
+                  type="submit"
+                  class="action-btn btn-delete"
+                  data-tooltip="Eliminar solicitud"
+                  title="Eliminar">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 3rem; color: #7cb342;">
+      <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.5;"></i>
+      <p style="margin-top: 1rem; font-size: 1.1rem; font-weight: 500;">No tienes solicitudes registradas aún</p>
+      <p style="color: #9ccc65;">Completa el formulario de arriba para crear tu primera solicitud</p>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- Modal para Editar Solicitud -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content" style="border-radius: 24px; border: none; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+      <div class="modal-header" style="background: linear-gradient(135deg, #7cb342, #c0ca33); color: white; border-radius: 24px 24px 0 0; padding: 1.5rem;">
+        <h5 class="modal-title" style="font-size: 1.3rem; font-weight: 700;">
+          <i class="bi bi-pencil-square"></i> Editar Solicitud
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="padding: 2rem; max-height: 70vh; overflow-y: auto;">
+        <form id="editForm" method="POST" action="{{ url_for('solicitudes.editar_solicitud') }}">
+          <input type="hidden" name="indice" id="edit_indice">
+          <input type="hidden" name="municipio" id="edit_municipio">
+          <input type="hidden" name="nit" id="edit_nit">
+          <input type="hidden" name="eje" id="edit_eje">
+          <input type="hidden" name="sector" id="edit_sector">
+          <input type="hidden" name="codigo_bpim" id="edit_codigo_bpim">
+          
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" style="color: #558b2f; font-weight: 700; font-size: 0.95rem;">
+                <i class="bi bi-calendar-event"></i> Fecha
+              </label>
+              <input type="date" name="fecha" id="edit_fecha" class="form-control" style="border-radius: 12px; border: 2px solid #e8f5e9; padding: 0.75rem; font-weight: 500;">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" style="color: #558b2f; font-weight: 700; font-size: 0.95rem;">
+                <i class="bi bi-building"></i> Secretaría
+              </label>
+              <select name="secretaria" id="edit_secretaria" class="form-select" style="border-radius: 12px; border: 2px solid #e8f5e9; padding: 0.75rem; font-weight: 500;">
+                {% for sec in secretarias %}
+                <option value="{{ sec }}">{{ sec }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label" style="color: #558b2f; font-weight: 700; font-size: 0.95rem;">
+                <i class="bi bi-card-text"></i> Objeto
+              </label>
+              <textarea name="objeto" id="edit_objeto" class="form-control" rows="2" style="border-radius: 12px; border: 2px solid #e8f5e9; padding: 0.75rem; font-weight: 500;"></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label" style="color: #558b2f; font-weight: 700; font-size: 0.95rem;">
+                <i class="bi bi-justify"></i> Justificación
+              </label>
+              <textarea name="justificacion" id="edit_justificacion" class="form-control" rows="3" style="border-radius: 12px; border: 2px solid #e8f5e9; padding: 0.75rem; font-weight: 500;"></textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" style="color: #558b2f; font-weight: 700; font-size: 0.95rem;">
+                <i class="bi bi-cash-coin"></i> Valor
+              </label>
+              <input type="text" name="valor" id="edit_valor" class="form-control" style="border-radius: 12px; border: 2px solid #e8f5e9; padding: 0.75rem; font-weight: 500;">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" style="color: #558b2f; font-weight: 700; font-size: 0.95rem;">
+                <i class="bi bi-target"></i> Meta Producto
+              </label>
+              <select name="meta_producto" id="edit_meta" class="form-select select2-edit-meta" style="border-radius: 12px;">
+                <option value="">Selecciona...</option>
+                {% for item in plan_list %}
+                <option value="{{ item['meta de producto'] }}">{{ item['meta de producto'] }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </form>
+        
+        <!-- Estado actual -->
+        <div id="estadoActual" style="margin-top: 1.5rem; padding: 1rem; background: rgba(124, 179, 66, 0.1); border-radius: 12px; border-left: 4px solid #7cb342;">
+          <small style="color: #558b2f; font-weight: 600;">Estado Actual:</small>
+          <span id="estadoSpan" style="display: inline-block; margin-left: 0.5rem; padding: 0.3rem 0.8rem; border-radius: 10px; font-weight: 700; font-size: 0.85rem; background: #90a4ae; color: white;"></span>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding: 1.5rem; border-top: 1px solid #e8f5e9;">
+        <button type="button" class="btn" data-bs-dismiss="modal" style="border: 2px solid #7cb342; color: #7cb342; border-radius: 12px; padding: 0.6rem 1.5rem; font-weight: 700;">
+          <i class="bi bi-x-circle"></i> Cancelar
+        </button>
+        <button type="submit" form="editForm" class="btn" style="background: linear-gradient(135deg, #7cb342, #9ccc65); color: white; border: none; border-radius: 12px; padding: 0.6rem 1.5rem; font-weight: 700; box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);">
+          <i class="bi bi-save"></i> Guardar Cambios
+        </button>
+        <button type="button" id="guardarYEnviarBtn" class="btn" style="background: linear-gradient(135deg, #ff9100, #ffb74d); color: white; border: none; border-radius: 12px; padding: 0.6rem 1.5rem; font-weight: 700; box-shadow: 0 4px 12px rgba(255, 145, 0, 0.3); display: none;">
+          <i class="bi bi-send"></i> Guardar y Enviar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ====== DATA ======
+const userSolicitudes = {{ user_solicitudes|tojson|safe }};
+const planData = {{ plan_list|tojson|safe }};
+
+// ====== MAIN FUNCTIONALITY ======
+$(document).ready(function() {
+  initializeSelect2();
+  setupEventListeners();
+});
+
+// Initialize Select2 for meta fields
+function initializeSelect2() {
+  if (!$.fn.select2) return;
+  
+  // Formulario principal
+  $('.select2-meta').select2({
+    theme: 'bootstrap-5',
+    placeholder: 'Selecciona una meta...',
+    allowClear: true,
+    width: '100%'
+  });
+  
+  // Modal de edición
+  $('.select2-edit-meta').select2({
+    theme: 'bootstrap-5',
+    placeholder: 'Selecciona una meta...',
+    allowClear: true,
+    width: '100%',
+    dropdownParent: $('#editModal')
+  });
+}
+
+// Setup event listeners
+function setupEventListeners() {
+  // Auto-completar campos en formulario principal
+  $('.select2-meta').on('change', function() {
+    autoFillFields($('input[name="eje"]'), $('input[name="sector"]'), $('input[name="codigo_bpim"]'), $(this).val());
+  });
+  
+  // Auto-completar campos en modal de edición
+  $('.select2-edit-meta').on('change', function() {
+    autoFillFields($('#edit_eje'), $('#edit_sector'), $('#edit_codigo_bpim'), $(this).val());
+  });
+  
+  // Guardar y enviar desde el modal
+  $('#guardarYEnviarBtn').on('click', function() {
+    guardarYEnviarSolicitud();
+  });
+}
+
+// Auto-fill Eje, Sector, y BPIM basado en Meta seleccionada
+function autoFillFields(ejeInput, sectorInput, bpimInput, selectedMeta) {
+  if (selectedMeta) {
+    const metaData = planData.find(item => item['meta de producto'] === selectedMeta);
+    if (metaData) {
+      ejeInput.val(metaData['eje'] || '');
+      sectorInput.val(metaData['sector'] || '');
+      bpimInput.val(metaData['codigo bpim'] || '');
+    }
+  } else {
+    ejeInput.val('');
+    sectorInput.val('');
+    bpimInput.val('');
+  }
+}
+
+// Editar solicitud - Abre el modal con datos
+function editarSolicitud(index) {
+  const sol = userSolicitudes[index];
+  
+  // Llenar formulario del modal
+  document.getElementById('edit_indice').value = index;
+  document.getElementById('edit_fecha').value = sol.fecha;
+  document.getElementById('edit_secretaria').value = sol.secretaria;
+  document.getElementById('edit_objeto').value = sol.objeto;
+  document.getElementById('edit_justificacion').value = sol.justificacion;
+  document.getElementById('edit_valor').value = sol.valor;
+  
+  // Llenar campos adicionales
+  document.getElementById('edit_municipio').value = sol.municipio;
+  document.getElementById('edit_nit').value = sol.nit;
+  
+  // Actualizar estado actual en el modal
+  const estadoSpan = document.getElementById('estadoSpan');
+  const estado = sol.estado || 'nuevo';
+  
+  let estadoClass = '';
+  let estadoIcon = '';
+  let estadoColor = '#90a4ae';
+  let estadoText = 'Borrador';
+  
+  if (estado === 'nuevo') {
+    estadoColor = '#29b6f6';
+    estadoIcon = 'star-fill';
+    estadoText = 'Nuevo';
+  } else if (estado === 'editado') {
+    estadoColor = '#ff9100';
+    estadoIcon = 'pencil';
+    estadoText = 'Editado';
+  } else if (estado === 'pendiente') {
+    estadoColor = '#ffa726';
+    estadoIcon = 'hourglass-split';
+    estadoText = 'Pendiente';
+  } else if (estado === 'generado') {
+    estadoColor = '#66bb6a';
+    estadoIcon = 'check-circle-fill';
+    estadoText = 'Generado';
+  }
+  
+  estadoSpan.textContent = estadoText;
+  estadoSpan.style.background = estadoColor;
+  
+  // Seleccionar meta en Select2
+  const metaSelect = $('.select2-edit-meta');
+  metaSelect.val(sol.meta_producto).trigger('change');
+  
+  // Auto-llenar otros campos
+  setTimeout(() => {
+    autoFillFields(
+      $('#edit_eje'),
+      $('#edit_sector'),
+      $('#edit_codigo_bpim'),
+      sol.meta_producto
+    );
+  }, 100);
+  
+  // Mostrar/ocultar botón según el estado
+  const btnEnviar = $('#guardarYEnviarBtn');
+  if (sol.estado === 'editado') {
+    btnEnviar.show();
+  } else {
+    btnEnviar.hide();
+  }
+  
+  // Abrir modal
+  const modal = new bootstrap.Modal(document.getElementById('editModal'));
+  modal.show();
+}
+
+// Guardar y enviar solicitud desde el modal
+function guardarYEnviarSolicitud() {
+  // Primero guardar
+  const indice = document.getElementById('edit_indice').value;
+  const form = document.getElementById('editForm');
+  
+  // Crear FormData y agregar indice
+  const formData = new FormData(form);
+  
+  // Enviar guardado
+  fetch(form.action, {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => {
+    if (response.ok) {
+      // Ahora enviar a certificados
+      setTimeout(() => {
+        const enviarForm = document.createElement('form');
+        enviarForm.method = 'POST';
+        enviarForm.action = '{{ url_for("solicitudes.enviar_certificado") }}';
+        
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'indice';
+        input.value = indice;
+        
+        enviarForm.appendChild(input);
+        document.body.appendChild(enviarForm);
+        enviarForm.submit();
+      }, 500);
+    }
+  })
+  .catch(err => console.error('Error:', err));
+}
+
+// Formatear número como moneda
+function formatCurrency(num) {
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0
+  }).format(num);
+}
+</script>
+{% endblock %}

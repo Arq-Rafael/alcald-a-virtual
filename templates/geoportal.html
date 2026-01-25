@@ -1,0 +1,1027 @@
+{# templates/geoportal.html - Geoportal Profesional iOS 26 #}
+{% extends "base.html" %}
+
+{% block styles %}
+<style>
+/* ========================================
+   GEOPORTAL PROFESIONAL - iOS 26
+   Diseño Premium con Glassmorphism Avanzado
+   ======================================== */
+
+:root {
+  --geo-dark: #1a3a1f;
+  --geo-primary: #2d5016;
+  --geo-primary-light: #4a7c2f;
+  --geo-accent: #d4a574;
+  --geo-accent-bright: #f4c896;
+  --geo-glass-dark: rgba(42, 65, 48, 0.85);
+  --geo-glass-light: rgba(255, 255, 255, 0.12);
+  --geo-border: rgba(255, 255, 255, 0.15);
+}
+
+* {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif !important;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.geo-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a3a1f 0%, #2d5016 50%, #3d6b22 100%);
+  padding: 0;
+}
+
+.geo-container {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Top Navigation Bar */
+.geo-topbar {
+  background: var(--geo-dark);
+  padding: 0.75rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.geo-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.geo-logo i {
+  font-size: 1.8rem;
+  color: var(--geo-accent);
+}
+
+.geo-nav {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.geo-nav-item {
+  color: rgba(255,255,255,0.8);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+}
+
+.geo-nav-item:hover {
+  color: white;
+  background: rgba(255,255,255,0.1);
+}
+
+.geo-nav-item.active {
+  color: white;
+  background: rgba(255,255,255,0.15);
+}
+
+.geo-search {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  color: white;
+  font-size: 0.9rem;
+  width: 250px;
+  outline: none;
+}
+
+.geo-search::placeholder {
+  color: rgba(255,255,255,0.5);
+}
+
+/* Map Container */
+.map-container {
+  position: relative;
+  height: calc(100vh - 60px);
+  overflow: hidden;
+}
+
+.map-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Floating Panels - Professional Design */
+.floating-panel {
+  position: absolute;
+  background: var(--geo-glass-dark);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border-radius: 16px;
+  border: 1px solid var(--geo-border);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4), 
+              inset 0 1px 0 rgba(255,255,255,0.1);
+  z-index: 100;
+  transition: all 0.3s ease;
+}
+
+.floating-panel:hover {
+  box-shadow: 0 24px 70px rgba(0,0,0,0.5);
+}
+
+/* Left Panel - Layers & Filters */
+.left-panel {
+  left: 20px;
+  top: 20px;
+  width: 280px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+/* Right Panel - Parcel Details */
+.right-panel {
+  right: 20px;
+  top: 20px;
+  width: 320px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+/* Panel Header */
+.panel-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: move;
+  user-select: none;
+}
+
+.panel-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--geo-accent), var(--geo-accent-bright));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--geo-dark);
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.panel-title {
+  flex: 1;
+}
+
+.panel-title h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.3px;
+}
+
+.panel-title p {
+  margin: 2px 0 0 0;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.6);
+}
+
+/* Panel Content */
+.panel-content {
+  padding: 16px 20px;
+}
+
+/* Collapsible Section */
+.section {
+  margin-bottom: 20px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.section-header h4 {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.section-toggle {
+  color: rgba(255,255,255,0.6);
+  transition: transform 0.3s;
+}
+
+.section.collapsed .section-toggle {
+  transform: rotate(-90deg);
+}
+
+.section-content {
+  padding-top: 8px;
+  max-height: 500px;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.section.collapsed .section-content {
+  max-height: 0;
+  padding-top: 0;
+}
+
+/* Layer Item with Toggle */
+.layer-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+
+.layer-item:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.layer-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.layer-info i {
+  color: var(--geo-accent);
+  font-size: 1rem;
+}
+
+.layer-info span {
+  color: rgba(255,255,255,0.9);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.toggle-switch.active {
+  background: var(--geo-accent);
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.toggle-switch.active::after {
+  transform: translateX(20px);
+}
+
+/* Base Map Selector */
+.basemap-selector {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.basemap-btn {
+  flex: 1;
+  padding: 8px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  color: rgba(255,255,255,0.8);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.basemap-btn:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+.basemap-btn.active {
+  background: var(--geo-accent);
+  color: var(--geo-dark);
+  border-color: var(--geo-accent);
+}
+
+/* Filter Chips */
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.filter-chip {
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px;
+  color: rgba(255,255,255,0.8);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-chip:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+.filter-chip.active {
+  background: var(--geo-accent);
+  color: var(--geo-dark);
+  border-color: var(--geo-accent);
+}
+
+/* Slider */
+.slider-group {
+  margin-top: 12px;
+}
+
+.slider-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: rgba(255,255,255,0.8);
+  font-size: 0.8rem;
+}
+
+.slider {
+  width: 100%;
+  height: 4px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--geo-accent);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--geo-accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* Parcel Details Card */
+.parcel-card {
+  background: linear-gradient(135deg, var(--geo-accent) 0%, var(--geo-accent-bright) 100%);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  color: var(--geo-dark);
+}
+
+.parcel-code {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  opacity: 0.8;
+}
+
+.parcel-id {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.parcel-detail {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.parcel-detail i {
+  font-size: 1rem;
+  margin-top: 2px;
+  opacity: 0.7;
+}
+
+.parcel-detail-content {
+  flex: 1;
+}
+
+.parcel-detail-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+  opacity: 0.7;
+}
+
+.parcel-detail-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Tabs in Parcel Details */
+.parcel-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  background: rgba(0,0,0,0.1);
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.parcel-tab {
+  flex: 1;
+  padding: 6px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--geo-dark);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0.6;
+}
+
+.parcel-tab.active {
+  background: rgba(255,255,255,0.4);
+  opacity: 1;
+}
+
+/* Info List */
+.info-list {
+  background: rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.9);
+  font-size: 0.8rem;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  opacity: 0.7;
+}
+
+.info-value {
+  font-weight: 600;
+}
+
+/* Action Button */
+.action-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--geo-accent), var(--geo-accent-bright));
+  border: none;
+  border-radius: 10px;
+  color: var(--geo-dark);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212, 165, 116, 0.4);
+}
+
+/* 3D Controls */
+.controls-3d {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--geo-glass-dark);
+  backdrop-filter: blur(30px);
+  border-radius: 12px;
+  border: 1px solid var(--geo-border);
+  padding: 12px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.control-btn {
+  width: 36px;
+  height: 36px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.control-btn:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.control-btn.active {
+  background: var(--geo-accent);
+  color: var(--geo-dark);
+  border-color: var(--geo-accent);
+}
+
+.control-label {
+  color: rgba(255,255,255,0.8);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Scrollbar Styling */
+.left-panel::-webkit-scrollbar,
+.right-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.left-panel::-webkit-scrollbar-track,
+.right-panel::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.05);
+  border-radius: 3px;
+}
+
+.left-panel::-webkit-scrollbar-thumb,
+.right-panel::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
+  border-radius: 3px;
+}
+
+.left-panel::-webkit-scrollbar-thumb:hover,
+.right-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.floating-panel {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .left-panel, .right-panel {
+    width: 260px;
+  }
+  
+  .geo-nav {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .geo-topbar {
+    padding: 0.5rem 1rem;
+  }
+  
+  .geo-nav {
+    display: none;
+  }
+  
+  .left-panel {
+    width: calc(100% - 40px);
+    max-width: 300px;
+  }
+  
+  .right-panel {
+    width: calc(100% - 40px);
+    max-width: 300px;
+    top: auto;
+    bottom: 20px;
+    right: 20px;
+  }
+  
+  .controls-3d {
+    bottom: 10px;
+    padding: 8px 12px;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="geo-wrapper">
+  <div class="geo-container">
+    
+    <!-- Top Navigation Bar -->
+    <div class="geo-topbar">
+      <div class="geo-logo">
+        <i class="bi bi-shield-fill-check"></i>
+        <span>GEOPORTAL MUNICIPAL</span>
+      </div>
+      
+      <div class="geo-nav">
+        <a href="#" class="geo-nav-item">
+          <i class="bi bi-house-fill"></i> Home
+        </a>
+        <a href="#" class="geo-nav-item active">
+          <i class="bi bi-map-fill"></i> Map View
+        </a>
+        <a href="#" class="geo-nav-item">
+          <i class="bi bi-database-fill"></i> Data Catalog
+        </a>
+        <a href="#" class="geo-nav-item">
+          <i class="bi bi-gear-fill"></i> Services
+        </a>
+        <a href="#" class="geo-nav-item">
+          <i class="bi bi-question-circle-fill"></i> Help & Support
+        </a>
+      </div>
+      
+      <input type="text" class="geo-search" placeholder="Search Parcels, Places...">
+    </div>
+
+    <!-- Map Container -->
+    <div class="map-container">
+      <iframe src="{{ url_for('usos_suelo.catastro_3d') }}" class="map-iframe"></iframe>
+
+      <!-- Left Panel - Layers & Filters -->
+      <div class="floating-panel left-panel" id="leftPanel">
+        <div class="panel-header">
+          <div class="panel-icon">
+            <i class="bi bi-layers-fill"></i>
+          </div>
+          <div class="panel-title">
+            <h3>LAYERS & FILTERS</h3>
+          </div>
+        </div>
+        
+        <div class="panel-content">
+          <!-- Layers Section -->
+          <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+              <h4>Layers</h4>
+              <i class="bi bi-chevron-down section-toggle"></i>
+            </div>
+            <div class="section-content">
+              <div class="layer-item">
+                <div class="layer-info">
+                  <i class="bi bi-building"></i>
+                  <span>Cadastre</span>
+                </div>
+                <div class="toggle-switch active" onclick="toggleLayer(this)"></div>
+              </div>
+              
+              <div class="layer-item">
+                <div class="layer-info">
+                  <i class="bi bi-map"></i>
+                  <span>Land Use</span>
+                </div>
+                <div class="toggle-switch active" onclick="toggleLayer(this)"></div>
+              </div>
+              
+              <div class="layer-item">
+                <div class="layer-info">
+                  <i class="bi bi-tree-fill"></i>
+                  <span>Environment</span>
+                </div>
+                <div class="toggle-switch" onclick="toggleLayer(this)"></div>
+              </div>
+              
+              <div class="layer-item">
+                <div class="layer-info">
+                  <i class="bi bi-sign-turn-right-fill"></i>
+                  <span>Infrastructure</span>
+                </div>
+                <div class="toggle-switch" onclick="toggleLayer(this)"></div>
+              </div>
+              
+              <!-- Base Map -->
+              <div style="margin-top:16px">
+                <div class="slider-label">
+                  <span style="font-weight:600">Base Map</span>
+                </div>
+                <div class="basemap-selector">
+                  <button class="basemap-btn" onclick="selectBasemap(this)">Street</button>
+                  <button class="basemap-btn active" onclick="selectBasemap(this)">Satellite</button>
+                  <button class="basemap-btn" onclick="selectBasemap(this)">Hybrid</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filters Section -->
+          <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+              <h4>Filters</h4>
+              <i class="bi bi-chevron-down section-toggle"></i>
+            </div>
+            <div class="section-content">
+              <!-- Zoning Type -->
+              <div style="margin-bottom:16px">
+                <div class="slider-label">
+                  <span>Zoning Type</span>
+                </div>
+                <div class="filter-chips">
+                  <div class="filter-chip active" onclick="toggleChip(this)">Residential</div>
+                  <div class="filter-chip" onclick="toggleChip(this)">Commercial</div>
+                  <div class="filter-chip" onclick="toggleChip(this)">Industrial</div>
+                </div>
+              </div>
+              
+              <!-- Parcel Size -->
+              <div class="slider-group">
+                <div class="slider-label">
+                  <span>Parcel Size</span>
+                  <span id="sizeValue">100m² - 10,000m²</span>
+                </div>
+                <input type="range" class="slider" min="100" max="10000" value="5000" 
+                       oninput="document.getElementById('sizeValue').textContent = this.value + 'm²'">
+              </div>
+              
+              <!-- Date of Last Update -->
+              <div class="slider-group">
+                <div class="slider-label">
+                  <span>Date of Last Update</span>
+                  <span id="dateValue">June 2023</span>
+                </div>
+                <select style="width:100%;padding:8px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:white;font-size:0.85rem;outline:none">
+                  <option>June 2023</option>
+                  <option>May 2023</option>
+                  <option>April 2023</option>
+                </select>
+              </div>
+              
+              <!-- Property Value -->
+              <div class="slider-group">
+                <div class="slider-label">
+                  <span>Property Value</span>
+                </div>
+                <input type="range" class="slider" min="0" max="100" value="50">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel - Parcel Details -->
+      <div class="floating-panel right-panel" id="rightPanel">
+        <div class="panel-header">
+          <div class="panel-icon">
+            <i class="bi bi-file-earmark-text-fill"></i>
+          </div>
+          <div class="panel-title">
+            <h3>PARCEL DETAILS</h3>
+          </div>
+        </div>
+        
+        <div class="panel-content">
+          <!-- Parcel Code Card -->
+          <div class="parcel-card">
+            <div class="parcel-code">PARCEL CODE</div>
+            <div class="parcel-id">MUNI-2024-87348</div>
+            
+            <div class="parcel-detail">
+              <i class="bi bi-person-fill"></i>
+              <div class="parcel-detail-content">
+                <div class="parcel-detail-label">OWNER</div>
+                <div class="parcel-detail-value">John & Jane Doe</div>
+              </div>
+            </div>
+            
+            <div class="parcel-detail">
+              <i class="bi bi-rulers"></i>
+              <div class="parcel-detail-content">
+                <div class="parcel-detail-label">AREA</div>
+                <div class="parcel-detail-value">1,250 m²</div>
+              </div>
+            </div>
+            
+            <div class="parcel-detail">
+              <i class="bi bi-house-fill"></i>
+              <div class="parcel-detail-content">
+                <div class="parcel-detail-label">ZONING</div>
+                <div class="parcel-detail-value">Residential - Low Density</div>
+              </div>
+            </div>
+            
+            <div class="parcel-detail">
+              <i class="bi bi-geo-alt-fill"></i>
+              <div class="parcel-detail-content">
+                <div class="parcel-detail-label">ADDRESS</div>
+                <div class="parcel-detail-value">123 Maple Avenue<br>Municipal Town, MT 54321</div>
+              </div>
+            </div>
+            
+            <div class="parcel-detail">
+              <i class="bi bi-cash-coin"></i>
+              <div class="parcel-detail-content">
+                <div class="parcel-detail-label">TAX ASSESSMENT</div>
+                <div class="parcel-detail-value">$450,000 (2023)</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Tabs -->
+          <div class="parcel-tabs">
+            <button class="parcel-tab active" onclick="switchParcelTab(this, 'history')">History</button>
+            <button class="parcel-tab" onclick="switchParcelTab(this, 'documents')">Documents</button>
+            <button class="parcel-tab" onclick="switchParcelTab(this, 'taxes')">Taxes</button>
+            <button class="parcel-tab" onclick="switchParcelTab(this, 'permits')">Related Permits</button>
+          </div>
+          
+          <!-- Tab Content -->
+          <div id="tab-history" class="tab-content">
+            <div class="info-list">
+              <div class="info-item">
+                <span class="info-label">Ownership Transfer - June 15, 2023</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label" style="padding-left:16px;font-size:0.75rem;opacity:0.6">June 15, 2023</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Ownership Transfer - June 15, 2023</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label" style="padding-left:16px;font-size:0.75rem;opacity:0.6">June 15, 2023</span>
+              </div>
+            </div>
+          </div>
+          
+          <button class="action-btn">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+            VIEW FULL REPORT
+          </button>
+        </div>
+      </div>
+
+      <!-- 3D Controls -->
+      <div class="controls-3d">
+        <span class="control-label">3D View:</span>
+        <button class="control-btn" onclick="toggle3D(this)" title="Toggle 3D Buildings">
+          <i class="bi bi-building"></i>
+        </button>
+        <button class="control-btn active" onclick="toggle3D(this)" title="Toggle Terrain">
+          <i class="bi bi-globe"></i>
+        </button>
+        <button class="control-btn" onclick="toggle3D(this)" title="Toggle Shadows">
+          <i class="bi bi-brightness-high-fill"></i>
+        </button>
+        <span class="control-label" style="margin-left:8px">|</span>
+        <button class="control-btn" onclick="resetView()" title="Reset View">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Toggle Section Collapse
+function toggleSection(header) {
+  header.parentElement.classList.toggle('collapsed');
+}
+
+// Toggle Layer Switch
+function toggleLayer(toggle) {
+  toggle.classList.toggle('active');
+}
+
+// Select Basemap
+function selectBasemap(btn) {
+  document.querySelectorAll('.basemap-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Toggle Filter Chip
+function toggleChip(chip) {
+  chip.classList.toggle('active');
+}
+
+// Switch Parcel Tab
+function switchParcelTab(btn, tabName) {
+  document.querySelectorAll('.parcel-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  // Here you would show/hide tab content
+}
+
+// Toggle 3D Controls
+function toggle3D(btn) {
+  btn.classList.toggle('active');
+}
+
+// Reset View
+function resetView() {
+  console.log('Resetting view...');
+}
+
+// Make panels draggable
+function makeDraggable(panel) {
+  const header = panel.querySelector('.panel-header');
+  if (!header) return;
+  
+  let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  header.style.cursor = 'move';
+  
+  header.onmousedown = dragMouseDown;
+  
+  function dragMouseDown(e) {
+    e.preventDefault();
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    document.onmousemove = elementDrag;
+  }
+  
+  function elementDrag(e) {
+    e.preventDefault();
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    panel.style.top = (panel.offsetTop - pos2) + "px";
+    panel.style.left = (panel.offsetLeft - pos1) + "px";
+  }
+  
+  function closeDragElement() {
+    document.onmouseup = null;
+    document.onmousemove = null;
+  }
+}
+
+// Initialize draggable panels
+document.addEventListener('DOMContentLoaded', () => {
+  makeDraggable(document.getElementById('leftPanel'));
+  makeDraggable(document.getElementById('rightPanel'));
+});
+</script>
+{% endblock %}

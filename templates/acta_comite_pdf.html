@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<style>
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 12pt; color:#111; }
+  h1,h2,h3 { margin: 0 0 8px 0; }
+  .muted{ color:#555; }
+  .box { margin-bottom:14px; }
+  .label{ font-weight:bold; }
+  .sep { margin: 18px 0; border-top:1px solid #ccc; }
+</style>
+<body>
+  <h2>Acta Comité de Gestión del Riesgo</h2>
+  <div class="muted">Fecha: {{ a['fecha'] }} &nbsp; | &nbsp; Acta N° {{ a['numero_acta'] or '—' }}</div>
+  <div class="sep"></div>
+
+  <div class="box"><span class="label">Tema:</span> {{ a['tema'] or '—' }}</div>
+  <div class="box"><span class="label">Acuerdos:</span><br>{{ (a['acuerdos'] or '—').replace('\n','<br>')|safe }}</div>
+  <div class="box"><span class="label">Tareas:</span><br>{{ (a['tareas'] or '—').replace('\n','<br>')|safe }}</div>
+
+  {% if a['transcripcion'] %}
+  <div class="sep"></div>
+  <div class="box"><span class="label">Transcripción de la sesión:</span><br>{{ (a['transcripcion'] or '').replace('\n','<br>')|safe }}</div>
+  {% endif %}
+
+  <div class="sep"></div>
+  <div>Generado: {{ hoy }}</div>
+</body>
+</html>

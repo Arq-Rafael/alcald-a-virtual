@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block title %}Gestión del Riesgo - Alcaldía Virtual{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/gestion_riesgo.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="riesgo-wrapper">
+    <div class="riesgo-surface">
+    <!-- HERO SECTION -->
+    <section class="riesgo-hero">
+        <div class="riesgo-hero-bg"></div>
+        <div class="riesgo-hero-content">
+            <div class="riesgo-hero-badge">🛡️ SISTEMA INTEGRADO</div>
+            <h1 class="riesgo-hero-title">Gestión del Riesgo</h1>
+            <p class="riesgo-hero-subtitle">Gestión arbórea, actas del comité y planes de contingencia municipal</p>
+        </div>
+    </section>
+
+    <!-- KPI CARDS -->
+    <section class="riesgo-kpis-container">
+        <div class="riesgo-kpi-card" data-tooltip="Solicitudes activas">
+            <div class="riesgo-kpi-icon">🌳</div>
+            <div class="riesgo-kpi-content">
+                <div class="riesgo-kpi-value" id="kpi-solicitudes">0</div>
+                <div class="riesgo-kpi-label">Solicitudes Arbóreas</div>
+            </div>
+        </div>
+
+        <div class="riesgo-kpi-card" data-tooltip="Actas registradas">
+            <div class="riesgo-kpi-icon">📋</div>
+            <div class="riesgo-kpi-content">
+                <div class="riesgo-kpi-value" id="kpi-actas">0</div>
+                <div class="riesgo-kpi-label">Actas CMGR</div>
+            </div>
+        </div>
+
+        <div class="riesgo-kpi-card" data-tooltip="Planes activos">
+            <div class="riesgo-kpi-icon">📑</div>
+            <div class="riesgo-kpi-content">
+                <div class="riesgo-kpi-value" id="kpi-planes">0</div>
+                <div class="riesgo-kpi-label">Planes Contingencia</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODULE CARDS -->
+    <section class="riesgo-modules">
+        <div class="riesgo-modules-header">
+            <h2>Módulos del Sistema</h2>
+            <p>Seleccione el módulo para gestionar</p>
+        </div>
+
+        <div class="riesgo-modules-grid">
+            <!-- MÓDULO 1: Gestión Arbórea -->
+            <div class="riesgo-module-card riesgo-card-green">
+                <span class="riesgo-module-chip">Nuevo</span>
+                <div class="riesgo-module-header">
+                    <div class="riesgo-module-icon">
+                        <i class="bi bi-tree-fill"></i>
+                    </div>
+                    <span class="riesgo-module-badge">Gestión Arbórea</span>
+                </div>
+                
+                <div class="riesgo-module-body">
+                    <h3>Solicitudes de Tala y Poda</h3>
+                    <p>Radicación y seguimiento de solicitudes de intervención del arbolado urbano y rural.</p>
+                    
+                    <div class="riesgo-module-features">
+                        <div class="riesgo-feature-item">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Radicación de solicitudes</span>
+                        </div>
+                        <div class="riesgo-feature-item">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Gestión de autorizaciones</span>
+                        </div>
+                        <div class="riesgo-feature-item">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Seguimiento de estado</span>
+                        </div>
+                        <div class="riesgo-feature-item">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Historial y reportes</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="riesgo-module-footer">
+                    <a href="/riesgo/gestion-arborea" class="riesgo-btn riesgo-btn-green">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        ACCEDER AL MÓDULO
+                    </a>
+                </div>
+            </div>
+
+            <!-- MÓDULO 2: Actas CMGR -->
+            <div class="riesgo-module-card riesgo-card-blue">
+                <span class="riesgo-module-chip">Nuevo</span>
+                <div class="riesgo-module-header">
+                    <div class="riesgo-module-icon">
+                        <i class="bi bi-journal-text"></i>
+                    </div>
+                    <span class="riesgo-module-badge">Actas CMGR</span>
+                </div>
+                
+                <div class="riesgo-module-body">
+                    <h3>Actas del Comité Municipal</h3>
+                    <p>Transcripción, generación y archivo de actas del Comité Municipal de Gestión del Riesgo.</p>
+                    
+                    <div class="riesgo-module-features">
+                        <div class="riesgo-feature-item">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Transcribir actas de sesión</span>
+                        </div>
+                        <div class="riesgo-feature-item">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Generar documentos oficiales</span>
+                        </div>
+                        <div class="riesgo-feature-item">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Archivo digital organizado</span>
+                        </div>
+                        <div class="riesgo-feature-item">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Búsqueda y consulta</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="riesgo-module-footer">
+                    <a href="/riesgo/actas-cmgr" class="riesgo-btn riesgo-btn-blue">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        ACCEDER AL MÓDULO
+                    </a>
+                </div>
+            </div>
+
+            <!-- MÓDULO 3: Planes de Contingencia -->
+            <div class="riesgo-module-card riesgo-card-orange">
+                <span class="riesgo-module-chip">Nuevo</span>
+                <div class="riesgo-module-header">
+                    <div class="riesgo-module-icon">
+                        <i class="bi bi-shield-fill-exclamation"></i>
+                    </div>
+                    <span class="riesgo-module-badge">Planes de Contingencia</span>
+                </div>
+                
+                <div class="riesgo-module-body">
+                    <h3>Planes de Contingencia Municipal</h3>
+                    <p>Creación y gestión de planes de contingencia en formato oficial de la alcaldía.</p>
+                    
+                    <div class="riesgo-module-features">
+                        <div class="riesgo-feature-item">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Crear planes de contingencia</span>
+                        </div>
+                        <div class="riesgo-feature-item">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Formato oficial de la alcaldía</span>
+                        </div>
+                        <div class="riesgo-feature-item">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Gestión de versiones</span>
+                        </div>
+                        <div class="riesgo-feature-item">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Exportación a PDF</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="riesgo-module-footer">
+                    <a href="/riesgo/planes-contingencia" class="riesgo-btn riesgo-btn-orange">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        ACCEDER AL MÓDULO
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    </div>
+</div>
+
+<script>
+// KPIs Animation
+document.addEventListener('DOMContentLoaded', async () => {
+    // Cargar datos reales desde la API
+    try {
+        // Planes de contingencia
+        const resPlanes = await fetch('/api/contingencia?per_page=1');
+        const dataPlanes = await resPlanes.json();
+        const totalPlanes = dataPlanes.total || 0;
+        
+        animarNumero('kpi-solicitudes', 0, 800);
+        animarNumero('kpi-actas', 0, 800);
+        animarNumero('kpi-planes', totalPlanes, 800);
+    } catch (error) {
+        console.error('Error cargando KPIs:', error);
+        // Mostrar 0 en caso de error
+        document.getElementById('kpi-solicitudes').textContent = '0';
+        document.getElementById('kpi-actas').textContent = '0';
+        document.getElementById('kpi-planes').textContent = '0';
+    }
+});
+
+function animarNumero(eleId, target, duration) {
+    const ele = document.getElementById(eleId);
+    const start = 0;
+    const increment = target / (duration / 16);
+    let current = start;
+
+    const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+            ele.textContent = Math.round(target);
+            clearInterval(timer);
+        } else {
+            ele.textContent = Math.round(current);
+        }
+    }, 16);
+}
+</script>
+{% endblock %}

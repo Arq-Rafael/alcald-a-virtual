@@ -1,0 +1,186 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Licencia {{ lic['consecutivo'] }}</title>
+  <style>
+    @page {
+      margin: 18mm 15mm;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 12px;
+      color: #111;
+    }
+
+    .hdr {
+      text-align: center;
+      border-bottom: 1px solid #000;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+    }
+
+    .watermark {
+      position: fixed;
+      top: 35%;
+      left: 18%;
+      opacity: 0.08;
+      font-size: 120px;
+      transform: rotate(-20deg);
+    }
+
+    h1 {
+      font-size: 18px;
+      text-align: center;
+      margin: 4px 0 6px 0;
+    }
+
+    h2 {
+      font-size: 14px;
+      margin: 14px 0 6px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      page-break-inside: avoid;
+    }
+
+    td,
+    th {
+      border: 1px solid #333;
+      padding: 6px;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f5f5f5;
+      text-align: left;
+      width: 32%;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .col {
+      flex: 1;
+    }
+
+    .foot {
+      margin-top: 26px;
+    }
+
+    .muted {
+      color: #666;
+    }
+
+    .nowrap {
+      white-space: nowrap;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="watermark">SUPATÁ</div>
+
+  <div class="hdr">
+    <div><strong>MUNICIPIO DE SUPATÁ – SECRETARÍA DE PLANEACIÓN Y OBRAS PÚBLICAS</strong></div>
+    <div><em>Constancia / Acto de trámite de licencia urbanística</em></div>
+    <div>Fecha: {{ hoy }} &nbsp;—&nbsp; Consecutivo: <strong>{{ lic['consecutivo'] }}</strong></div>
+  </div>
+
+  <h1>
+    {{ lic['tipo'] }}
+    {% if lic['modalidad'] %} <span class="muted">(Modalidad: {{ lic['modalidad'] }})</span>{% endif %}
+    {% if lic['objeto'] %}<br><span class="muted">Objeto del trámite: {{ lic['objeto'] }}</span>{% endif %}
+  </h1>
+
+  <h2>I. Identificación del predio y del trámite</h2>
+  <table>
+    <tr>
+      <th>Dirección</th>
+      <td>{{ lic['direccion'] }}</td>
+    </tr>
+    <tr>
+      <th>Cédula catastral / Matrícula</th>
+      <td>{{ lic['chip'] or 'N/A' }} / {{ lic['matricula'] or 'N/A' }}</td>
+    </tr>
+    <tr>
+      <th>Clasificación del suelo</th>
+      <td>{{ lic['clasificacion_suelo'] or 'N/A' }}</td>
+    </tr>
+    <tr>
+      <th>Uso</th>
+      <td>
+        {{ lic['uso'] }}
+        {% if lic['uso']=='Otro' and lic['uso_otro'] %}: {{ lic['uso_otro'] }}{% endif %}
+      </td>
+    </tr>
+    <tr>
+      <th>Áreas</th>
+      <td>Construida: {{ lic['area_const'] or 0 }}&nbsp;m² — Lote: {{ lic['area_lote'] or 0 }}&nbsp;m²</td>
+    </tr>
+  </table>
+
+  <h2>II. Intervinientes</h2>
+  <table>
+    <tr>
+      <th>Solicitante</th>
+      <td>
+        {{ lic['solicitante'] }}
+        {% if lic['tipo_doc_solicitante'] or lic['doc_solicitante'] %}
+        ({{ lic['tipo_doc_solicitante'] or '' }} {{ lic['doc_solicitante'] or '' }})
+        {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <th>Responsable técnico</th>
+      <td>{{ lic['responsable'] or 'N/A' }} {% if lic['matricula_prof'] %}(MP {{ lic['matricula_prof'] }}){% endif %}
+      </td>
+    </tr>
+    <tr>
+      <th>Tipo de vivienda</th>
+      <td>{{ lic['tipo_vivienda'] or 'N/A' }}</td>
+    </tr>
+    <tr>
+      <th>Bien de Interés Cultural (BIC)</th>
+      <td>{{ lic['bic'] or 'No' }}</td>
+    </tr>
+  </table>
+
+  <h2>III. Estado del trámite</h2>
+  <table>
+    <tr>
+      <th>Estado</th>
+      <td>{{ lic['estado'] }}</td>
+    </tr>
+    <tr>
+      <th>Observaciones</th>
+      <td>{{ lic['observaciones'] or 'N/A' }}</td>
+    </tr>
+    <tr>
+      <th>Valor</th>
+      <td>${{ '%.0f'|format(lic['valor'] or 0) }}</td>
+    </tr>
+    <tr>
+      <th>Fechas</th>
+      <td>
+        Creado: {{ lic['creado_en'] }}<br>
+        Última actualización: {{ lic['actualizado_en'] }}
+      </td>
+    </tr>
+  </table>
+
+  <div class="foot">
+    <p class="muted">Este documento se emite para constancia del trámite de licencia urbanística, sin perjuicio de las
+      verificaciones y requisitos establecidos en la normatividad vigente.</p>
+    <p><strong>Firma:</strong> Secretario(a) de Planeación y Obras Públicas</p>
+  </div>
+</body>
+
+</html>

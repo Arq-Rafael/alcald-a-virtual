@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ccc;
+        }
+        form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 8px;
+            flex: 1;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        select, button {
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: none;
+            background-color: #6d9f60;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #5a844f;
+        }
+        .flash-messages li {
+            background-color: #f2f2f2;
+            padding: 10px;
+            border-left: 5px solid #2196F3;
+            margin-bottom: 10px;
+            list-style: none;
+        }
+        .success { border-color: #4CAF50; }
+        .error { border-color: #f44336; }
+        .warning { border-color: #ff9800; }
+        .info { border-color: #2196F3; }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h2>Alcaldía Virtual</h2>
+            <nav>
+                <a href="/dashboard">🏠 Inicio</a>
+                <a href="/usuarios">🔑 Usuarios</a>
+                <a href="/logout">🚪 Cerrar sesión</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="container">
+                <h1>Gestión de Usuarios</h1>
+
+                <!-- Mostrar mensajes flash -->
+                {% with mensajes = get_flashed_messages(with_categories=true) %}
+                    {% if mensajes %}
+                        <ul class="flash-messages">
+                            {% for categoria, mensaje in mensajes %}
+                                <li class="{{ categoria }}">{{ mensaje }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Formulario -->
+                <form method="POST">
+                    <input type="text" name="usuario" placeholder="Usuario" required>
+                    <input type="text" name="clave" placeholder="Contraseña" required>
+                    <select name="accion" required>
+                        <option value="agregar">Agregar</option>
+                        <option value="cambiar">Cambiar Clave</option>
+                        <option value="eliminar">Eliminar</option>
+                    </select>
+                    <button type="submit">Ejecutar</button>
+                </form>
+
+                <!-- Tabla de usuarios -->
+                <h2>Lista de Usuarios</h2>
+                <table>
+                    <tr><th>Usuario</th><th>Clave</th></tr>
+                    {% for usuario, clave in usuarios %}
+                    <tr><td>{{ usuario }}</td><td>{{ clave }}</td></tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

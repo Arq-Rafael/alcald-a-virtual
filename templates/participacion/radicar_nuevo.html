@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bg-animated"></div>
+
+<div class="container fade-in-up" style="max-width: 900px; padding-top: 40px; padding-bottom: 60px;">
+    
+    <!-- Back Button -->
+    <a href="{{ url_for('participacion.index') }}" class="btn btn-light-ios-back mb-4 shadow-sm">
+        <i class="bi bi-arrow-left me-2"></i> Volver
+    </a>
+
+    <div class="glass-card p-5 rounded-4 shadow-lg">
+        <div class="text-center mb-5">
+            <div class="icon-square-lg bg-primary-gradient text-white mx-auto mb-3 shadow">
+                <i class="bi bi-cloud-upload-fill" style="font-size: 2rem;"></i>
+            </div>
+            <h2 class="fw-bold mb-1 text-dark">Nuevo Radicado</h2>
+            <p class="text-secondary">Registro oficial de correspondencia entrante</p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+            
+            <!-- Section: Remitente -->
+            <h5 class="fw-bold text-dark mb-4 border-bottom pb-2">Información del Remitente</h5>
+            
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold text-secondary fs-7">Nombre Completo</label>
+                    <input type="text" name="remitente_nombre" class="form-control form-control-ios" placeholder="Ej. Juan Pérez" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold text-secondary fs-7">Entidad / Organización</label>
+                    <input type="text" name="remitente_entidad" class="form-control form-control-ios" placeholder="Ej. Particular / Junta Acción Comunal">
+                </div>
+            </div>
+
+            <!-- Section: Detalle -->
+            <h5 class="fw-bold text-dark mb-4 border-bottom pb-2 pt-2">Detalles del Radicado</h5>
+            
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold text-secondary fs-7">Tipo de Documento</label>
+                    <select name="tipo" class="form-select form-control-ios" required>
+                        <option value="Oficio Externo">Oficio Externo</option>
+                        <option value="PQRS">PQRS</option>
+                        <option value="Derecho de Petición">Derecho de Petición</option>
+                        <option value="Invitación">Invitación</option>
+                        <option value="Solicitud Información">Solicitud Información</option>
+                        <option value="Tutela / Judicial">Tutela / Judicial</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold text-secondary fs-7">Asignar a (Responsable)</label>
+                    <select name="asignado_a" class="form-select form-control-ios" required>
+                        <option value="" selected disabled>Seleccione funcionario...</option>
+                        {% for user_row in users %}
+                        <option value="{{ user_row.usuario }}">{{ user_row.usuario }} - {{ user_row.rol }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-bold text-secondary fs-7">Asunto</label>
+                    <input type="text" name="asunto" class="form-control form-control-ios" placeholder="Resumen breve del tema" required>
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-bold text-secondary fs-7">Descripción / Observaciones</label>
+                    <textarea name="descripcion" class="form-control form-control-ios" rows="4" placeholder="Detalles adicionales del documento recibido..."></textarea>
+                </div>
+            </div>
+
+            <!-- Section: Adjuntos -->
+            <h5 class="fw-bold text-dark mb-4 border-bottom pb-2 pt-2">Soportes Digitales</h5>
+            
+            <div class="mb-5">
+                <div class="upload-zone p-5 text-center rounded-4 border-dashed bg-white-50" id="drop-zone">
+                    <i class="bi bi-cloud-arrow-up display-4 text-primary opacity-50 mb-3"></i>
+                    <p class="mb-2 fw-bold text-dark">Arrastre archivos aquí o haga clic para subir</p>
+                    <small class="text-secondary d-block">PDF, JPG, PNG, DOCX (Máx 10MB)</small>
+                    <input type="file" name="adjuntos" multiple class="d-none" id="file-input">
+                    <div id="file-preview" class="mt-3 d-flex flex-wrap justify-content-center gap-2"></div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary-ios btn-lg w-100 shadow-lg py-3">
+                    <i class="bi bi-check-circle-fill me-2"></i> Radicar Documento
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const preview = document.getElementById('file-preview');
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) { dropZone.classList.add('dragover'); }
+    function unhighlight(e) { dropZone.classList.remove('dragover'); }
+
+    dropZone.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        handleFiles(files);
+        fileInput.files = files; 
+    }
+
+    fileInput.addEventListener('change', function() {
+        handleFiles(this.files);
+    });
+
+    function handleFiles(files) {
+        preview.innerHTML = '';
+        [...files].forEach(file => {
+            const div = document.createElement('div');
+            div.className = 'file-badge';
+            div.innerHTML = `<i class="bi bi-paperclip me-2 text-primary"></i> ${file.name}`;
+            preview.appendChild(div);
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+    <div>
+        <h1 class="fw-bold text-success mb-0">Contratación Municipal</h1>
+        <small class="text-muted">Gestión, seguimiento y control de contratos institucionales</small>
+    </div>
+    <div class="text-end d-none d-md-block">
+        <span class="badge bg-success me-1">En curso</span>
+        <span class="badge bg-warning text-dark me-1">Por vencer</span>
+        <span class="badge bg-danger">Vencidos</span>
+    </div>
+</div>
+
+{# KPIs rápidos (se calculan aquí mismo) #}
+{% set cnt_total = rows|length %}
+{% set cnt_vencidos = rows|selectattr('dias','lt',0)|list|length %}
+{% set cnt_prox = rows|selectattr('dias','ge',0)|selectattr('dias','le',15)|list|length %}
+{% set cnt_en_curso = cnt_total - cnt_vencidos - cnt_prox %}
+{% set cnt_secop = rows|selectattr('tipo','equalto','SECOP')|list|length %}
+
+<div class="row g-3 mb-3">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body py-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title mb-0 text-success"><i class="bi bi-graph-up"></i> Resumen de vigencia
+                        contractual</h5>
+                    <small class="text-muted">Registros: {{ cnt_total }}</small>
+                </div>
+                <div class="progress" style="height:20px;">
+                    {% set total = cnt_total if cnt_total else 1 %}
+                    <div class="progress-bar bg-success" style="width: {{ (cnt_en_curso/total*100)|round(1) }}%">En
+                        curso</div>
+                    <div class="progress-bar bg-warning text-dark" style="width: {{ (cnt_prox/total*100)|round(1) }}%">
+                        Por vencer</div>
+                    <div class="progress-bar bg-danger" style="width: {{ (cnt_vencidos/total*100)|round(1) }}%">Vencidos
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body py-3">
+                <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                    <span class="badge bg-primary fs-6"><i class="bi bi-cash-coin"></i> Total activo: {{ tot_activos_fmt
+                        }}</span>
+                    <span class="badge bg-dark"><i class="bi bi-box-arrow-up-right"></i> SECOP: {{ cnt_secop }}</span>
+                    <span class="badge bg-secondary"><i class="bi bi-collection"></i> Registros: {{ cnt_total }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Barra de acciones + filtros #}
+<div class="card mb-2 shadow-sm">
+    <div class="card-body py-2">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-6 d-flex gap-2">
+                <a class="btn btn-success" href="{{ url_for('contrat_nuevo') }}"><i class="bi bi-plus-circle"></i>
+                    Nuevo</a>
+                <a class="btn btn-outline-secondary" href="{{ url_for('contrat_export_csv') }}"><i
+                        class="bi bi-download"></i> Exportar CSV</a>
+            </div>
+            <div class="col-md-6">
+                <div class="row g-2">
+                    <div class="col-8">
+                        <input id="flt-texto" class="form-control"
+                            placeholder="Filtrar por código, objeto, contratista/entidad…">
+                    </div>
+                    <div class="col-4">
+                        <div class="input-group">
+                            <select id="flt-tipo" class="form-select">
+                                <option value="">— Todos los tipos —</option>
+                                <option>OPS</option>
+                                <option>Convenio</option>
+                                <option>Obra</option>
+                                <option>Interventoría</option>
+                                <option>SECOP</option>
+                            </select>
+                            <button id="flt-clear" class="btn btn-outline-secondary"><i class="bi bi-x-lg"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<table class="table table-hover table-striped align-middle table-sm shadow-sm" id="tabla-contratos">
+    <thead class="table-light sticky-top" style="top: 60px; z-index: 1;">
+        <tr>
+            <th style="min-width:120px">Código</th>
+            <th>Tipo</th>
+            <th style="width:40%">Objeto</th>
+            <th>Contratista / Entidad</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th>Estado</th>
+            <th class="text-end">Días</th>
+            <th class="text-end">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in rows %}
+        <tr data-tipo="{{ r.tipo|default('') }}">
+            <td class="fw-semibold">{{ r.codigo or '—' }}</td>
+
+            <td>
+                <span class="badge 
+          {% if r.tipo == 'OPS' %}bg-info
+          {% elif r.tipo == 'Convenio' %}bg-secondary
+          {% elif r.tipo == 'SECOP' %}bg-dark
+          {% elif r.tipo in ['Obra','Interventoría'] %}bg-primary
+          {% else %}bg-light text-dark{% endif %}">
+                    {{ r.tipo or '—' }}
+                </span>
+            </td>
+
+            <td class="text-truncate" style="max-width:520px" title="{{ r.objeto }}">{{ r.objeto or '—' }}</td>
+
+            <td>
+                {% if r.tipo == 'Convenio' %}
+                {{ r.entidad or '—' }}
+                {% else %}
+                {{ r.contratista or '—' }}
+                {% endif %}
+            </td>
+
+            <td class="text-nowrap">{{ r.fecha_inicio or '—' }}</td>
+            <td class="text-nowrap">{% if r.tipo == 'SECOP' %}—{% else %}{{ r.fecha_fin or '—' }}{% endif %}</td>
+
+            <td>
+                {% set etiqueta = 'En curso' %}
+                {% if r.dias is not none and r.dias < 0 %}{% set etiqueta='Vencido' %} {% elif r.dias is not none and
+                    r.dias <=15 %}{% set etiqueta='Próximo a vencer' %}{% endif %} <span class="badge 
+          {% if r.color == 'danger' %}bg-danger
+          {% elif r.color == 'warning' %}bg-warning text-dark
+          {% elif r.color == 'success' %}bg-success
+          {% else %}bg-secondary{% endif %}">
+                    {{ r.estado or etiqueta }}
+                    </span>
+                    {% if r.tipo == 'SECOP' and r.secop_url %}
+                    <a class="ms-1 small" href="{{ r.secop_url }}" target="_blank" rel="noopener"
+                        title="Abrir en SECOP">🔗</a>
+                    {% endif %}
+            </td>
+
+            <td class="text-end">
+                {% if r.dias is not none %}
+                <span
+                    class="fw-semibold {% if r.dias < 0 %}text-danger{% elif r.dias <= 15 %}text-warning{% else %}text-success{% endif %}">
+                    {{ r.dias }}
+                </span>
+                {% else %}—{% endif %}
+            </td>
+
+            <td class="text-end">
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                        Acciones
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{{ url_for('contrat_detalle', contrato_id=r.id) }}"><i
+                                    class="bi bi-eye"></i> Ver detalle</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('contrat_ficha_pdf', contrato_id=r.id) }}"><i
+                                    class="bi bi-filetype-pdf"></i> Ficha PDF</a></li>
+                        {% if session.get('user_role') == 'admin' or session.get('role') == 'admin' %}
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <form action="{{ url_for('contrat_eliminar', cid=r.id) }}" method="post"
+                                onsubmit="return confirm('¿Eliminar contrato {{ r.codigo }}?');">
+                                <button class="dropdown-item text-danger"><i class="bi bi-trash"></i> Eliminar</button>
+                            </form>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="9" class="text-center text-muted py-4">Sin contratos</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{# Estilos locales #}
+<style>
+    body {
+        background-color: #f8faf9 !important;
+    }
+
+    #tabla-contratos .badge {
+        font-weight: 600;
+    }
+
+    #tabla-contratos tbody tr td {
+        vertical-align: middle;
+    }
+
+    .text-truncate {
+        cursor: help;
+    }
+
+    .table-sm>tbody>tr>td,
+    .table-sm>thead>tr>th {
+        padding-top: .5rem;
+        padding-bottom: .5rem;
+    }
+
+    tr:hover {
+        box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.05);
+    }
+</style>
+
+{# Filtros en cliente (JS vanilla) #}
+<script>
+    (function () {
+        const txt = document.getElementById('flt-texto');
+        const sel = document.getElementById('flt-tipo');
+        const clear = document.getElementById('flt-clear');
+        const rows = Array.from(document.querySelectorAll('#tabla-contratos tbody tr'));
+
+        function norm(s) { return (s || '').toString().toLowerCase(); }
+        function apply() {
+            const q = norm(txt.value);
+            const tipo = sel.value;
+            rows.forEach(tr => {
+                const hayTipo = !tipo || tr.dataset.tipo === tipo;
+                const hayTexto = !q || norm(tr.innerText).includes(q);
+                tr.style.display = (hayTipo && hayTexto) ? '' : 'none';
+            });
+        }
+        txt.addEventListener('input', apply);
+        sel.addEventListener('change', apply);
+        clear.addEventListener('click', () => { txt.value = ''; sel.value = ''; apply(); });
+    })();
+</script>
+
+{% endblock %}

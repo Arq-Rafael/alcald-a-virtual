@@ -1,0 +1,9 @@
+# IMPORTANTE: Base de Datos Protegida
+# No eliminar archivos en esta carpeta
+# Contiene: db.sqlite (usuarios y datos del sistema)
+
+# Usuarios registrados:
+# - admin / admin123 (superadmin)
+
+# NOTA: Si necesitas limpiar, usar solo init_db.py con cuidado
+# Este archivo (.gitkeep) asegura que la carpeta se preserve en git

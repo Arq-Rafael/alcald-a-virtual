@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<style>
+.normative-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.normative-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.normative-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0f766e;
+  margin-bottom: 0.5rem;
+}
+
+.search-box {
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.88));
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: 0 12px 40px rgba(15, 118, 110, 0.1);
+  margin-bottom: 2rem;
+}
+
+.search-input {
+  border-radius: 16px;
+  padding: 1rem 1.5rem;
+  border: 2px solid #14b8a6;
+  font-size: 1.05rem;
+}
+
+.search-input:focus {
+  border-color: #0f766e;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+}
+
+.btn-search {
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+  color: white;
+  border: none;
+  padding: 1rem 2.5rem;
+  border-radius: 14px;
+  font-weight: 700;
+  box-shadow: 0 8px 24px rgba(15, 118, 110, 0.3);
+}
+
+.btn-search:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(15, 118, 110, 0.4);
+  color: white;
+}
+
+.norm-card {
+  background: rgba(255,255,255,0.9);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border-left: 4px solid #14b8a6;
+  transition: all 0.3s ease;
+}
+
+.norm-card:hover {
+  transform: translateX(8px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="normative-container">
+  <div class="normative-header">
+    <h2><i class="bi bi-book-half"></i> Asistente Normativo</h2>
+    <p class="text-muted">Búsqueda rápida en leyes, decretos y normativas municipales</p>
+  </div>
+
+  <div class="search-box">
+    <form method="POST">
+      <div class="input-group input-group-lg">
+        <input type="text" name="query" class="form-control search-input" 
+               placeholder="Buscar en normativas..." 
+               value="{{ query if query else '' }}" required>
+        <button type="submit" class="btn btn-search">
+          <i class="bi bi-search"></i> Buscar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  {% if query %}
+  <div class="results-section">
+    <h4 class="mb-3">Resultados para: "{{ query }}"</h4>
+    
+    {% if results %}
+      {% for result in results %}
+      <div class="norm-card">
+        <h5>{{ result.title }}</h5>
+        <p class="text-muted mb-2">{{ result.description }}</p>
+        <span class="badge bg-info">{{ result.type }}</span>
+        <span class="badge bg-secondary">{{ result.year }}</span>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> No se encontraron resultados para esta búsqueda.
+      </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div class="mt-4 text-center">
+    <a href="{{ url_for('ia.index') }}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> Volver a IA Municipal
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+body.login-page {
+    margin: 0;
+    font-family: 'Rubik', sans-serif;
+    background-color: #f5f7fb;
+    /* imagen de fondo */
+    background-image: url("../img/rana_supata.png");
+    background-repeat: no-repeat;
+    background-position: bottom right;
+    background-size: 300px;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-box {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.login-box h2 {
+    margin-bottom: 20px;
+    color: #4a7c4a;
+}
+
+.login-box input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.login-box button {
+    background-color: #6d9f60;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.login-box button:hover {
+    background-color: #5a844f;
+}
+
+.flashes {
+    color: red;
+    list-style: none;
+    padding: 0;
+    margin-bottom: 10px;
+}

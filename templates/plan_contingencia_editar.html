@@ -1,0 +1,577 @@
+{% extends "base.html" %}
+{% block title %}Editar Plan de Contingencia{% endblock %}
+
+{% block styles %}
+<style>
+  body {
+    background: linear-gradient(135deg, #f5f5f7 0%, #efefef 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  .container-editar {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .header-edicion {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    border-top: 4px solid #2d5016;
+  }
+
+  .header-edicion h1 {
+    font-size: 28px;
+    color: #1d1d1f;
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .header-edicion .plan-info {
+    color: #666;
+    font-size: 14px;
+    margin-top: 8px;
+  }
+
+  /* FORMULARIO */
+  .formulario-edicion {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  }
+
+  .form-group {
+    margin-bottom: 24px;
+  }
+
+  label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1d1d1f;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  textarea,
+  select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid #e5e5e7;
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+  }
+
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  input[type="date"]:focus,
+  textarea:focus,
+  select:focus {
+    border-color: #2d5016;
+    background: #fafafa;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(45, 80, 22, 0.1);
+  }
+
+  textarea {
+    min-height: 140px;
+    resize: vertical;
+  }
+
+  /* BOTONES */
+  .btn-grupo-edicion {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+    justify-content: space-between;
+  }
+
+  .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-guardar {
+    background: linear-gradient(135deg, #2d5016 0%, #5a8a3a 100%);
+    color: white;
+    flex: 1;
+    box-shadow: 0 4px 12px rgba(45, 80, 22, 0.2);
+  }
+
+  .btn-guardar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(45, 80, 22, 0.3);
+  }
+
+  .btn-cancelar {
+    background: white;
+    color: #2d5016;
+    border: 1.5px solid #2d5016;
+    flex: 0.5;
+  }
+
+  .btn-cancelar:hover {
+    background: #f5f5f7;
+  }
+
+  /* HELP TEXT */
+  .help-text {
+    font-size: 12px;
+    color: #999;
+    margin-top: 6px;
+    font-style: italic;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .formulario-edicion {
+      padding: 20px;
+    }
+
+    .btn-grupo-edicion {
+      flex-direction: column;
+    }
+
+    .btn {
+      width: 100%;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-editar">
+  <!-- HEADER -->
+  <div class="header-edicion">
+    <h1>✏ Editar Plan de Contingencia</h1>
+    <p class="plan-info" id="planInfoHeader">Cargando plan...</p>
+  </div>
+
+  <!-- FORMULARIO -->
+  <form class="formulario-edicion">
+    <h3 style="color:#2d5016; margin-top:0;">1. Datos básicos</h3>
+    <div class="form-group">
+      <label>Número de Plan</label>
+      <input type="text" name="numero_plan" placeholder="Ej: PC-2026-001" required>
+    </div>
+
+    <div class="form-group">
+      <label>Nombre del Plan</label>
+      <input type="text" name="nombre_plan" placeholder="Ej: Plan de Contingencia - Concierto 2026" required>
+    </div>
+
+    <div class="form-group">
+      <label>Tipo de Evento</label>
+      <select name="tipo_evento" required>
+        <option value="">Seleccionar tipo de evento...</option>
+        <option value="Concierto">Concierto</option>
+        <option value="Festival">Festival</option>
+        <option value="Manifestación">Manifestación</option>
+        <option value="Evento Deportivo">Evento Deportivo</option>
+        <option value="Acto Institucional">Acto Institucional</option>
+        <option value="Otro">Otro</option>
+      </select>
+    </div>
+
+    <h3 style="color:#2d5016;">2. Introducción</h3>
+    <div class="form-group">
+      <label>Descripción del Evento</label>
+      <textarea name="introduccion_descripcion" placeholder="Describe brevemente el evento..." required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Justificación del Plan</label>
+      <textarea name="introduccion_justificacion" placeholder="¿Por qué es importante este plan? Referencia a Ley 1523..." required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Contexto</label>
+      <textarea name="introduccion_contexto" placeholder="Contexto del municipio, condiciones especiales..."></textarea>
+    </div>
+
+    <h3 style="color:#2d5016;">3. Objetivos y Alcance</h3>
+    <div class="form-group">
+      <label>Objetivo General</label>
+      <textarea name="objetivo_general" placeholder="Ej: Proteger la vida, salud y bienes de los asistentes..." required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Alcance del Evento</label>
+      <textarea name="alcance_evento" placeholder="A qué evento específicamente aplica este plan" required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Ubicación</label>
+      <input type="text" name="alcance_ubicacion" placeholder="Ej: Estadio Municipal, Calle Principal, Salón ABC" required>
+    </div>
+
+    <div class="form-group">
+      <label>Duración / Fechas</label>
+      <input type="text" name="alcance_duracion" placeholder="Ej: 15-20 de agosto 2026, 10 AM - 6 PM" required>
+    </div>
+
+    <div class="form-group">
+      <label>Aforo Estimado</label>
+      <input type="number" name="alcance_aforo" placeholder="Ej: 5000" min="1" required>
+    </div>
+
+    <h3 style="color:#2d5016;">4. Marco Normativo</h3>
+    <div class="form-group">
+      <label>Normatividad Aplicable</label>
+      <textarea name="marco_normativo" placeholder="Ley 1523 de 2012, Decreto 2157 de 2017, Normativas locales..." required></textarea>
+    </div>
+
+    <h3 style="color:#2d5016;">5. Organización y Responsables</h3>
+    <div class="form-group">
+      <label>Coordinador General</label>
+      <input type="text" name="coordinador_general" placeholder="Nombre y cargo" required>
+    </div>
+
+    <div class="form-group">
+      <label>Ubicación del PMU</label>
+      <input type="text" name="pmu_ubicacion" placeholder="Ej: Cabina de sonido / Carpa de mando" required>
+    </div>
+
+    <div class="form-group">
+      <label>Organismos de Apoyo</label>
+      <textarea name="organismos_apoyo" placeholder="Bomberos, Cruz Roja, Policía, hospitales..." required></textarea>
+    </div>
+
+    <h3 style="color:#2d5016;">6. Análisis de Riesgos</h3>
+    <div class="form-group">
+      <label>Descripción del Escenario</label>
+      <textarea name="descripcion_escenario" placeholder="Tipo de evento, lugar, características de la multitud..." required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Amenazas Identificadas</label>
+      <textarea name="amenazas_identificadas" placeholder="Amenazas naturales, tecnológicas, antrópicas..." required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Vulnerabilidades</label>
+      <textarea name="vulnerabilidades" placeholder="Infraestructura, personal, público vulnerables..." required></textarea>
+    </div>
+
+    <h3 style="color:#2d5016;">7. Medidas de Intervención</h3>
+    <div class="form-group">
+      <label>Medidas de Seguridad</label>
+      <textarea name="medidas_seguridad" placeholder="Control de aforo, extintores, señalización..." required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Adecuación del Lugar</label>
+      <textarea name="adecuacion_lugar" placeholder="Rutas de evacuación, iluminación, salidas..." required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Capacitación del Personal</label>
+      <textarea name="capacitacion_personal" placeholder="Entrenamientos, simulacros previstos..."></textarea>
+    </div>
+
+    <h3 style="color:#2d5016;">8. Respuesta y Recursos</h3>
+    <div class="form-group">
+      <label>Procedimiento General</label>
+      <textarea name="procedimiento_general" placeholder="Evaluación, evacuación, activación de recursos..." required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Rutas de Evacuación</label>
+      <textarea name="rutas_evacuacion" placeholder="Rutas principales y alternas, salidas..." required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Puntos de Encuentro</label>
+      <textarea name="puntos_encuentro" placeholder="Lugares seguros para evacuados..." required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Tiempo Estimado de Evacuación</label>
+      <input type="text" name="capacidad_rutas" placeholder="Ej: 8 minutos para evacuar totalmente" required>
+    </div>
+
+    <div class="form-group">
+      <label>Recursos Disponibles</label>
+      <textarea name="recursos_disponibles" placeholder="Extintores, botiquines, ambulancias..." required></textarea>
+    </div>
+
+    <h3 style="color:#2d5016;">9. Actualización y Mejora</h3>
+    <div class="form-group">
+      <label>Responsable de Actualización</label>
+      <input type="text" name="responsable_actualizacion" placeholder="Nombre y cargo" required>
+    </div>
+
+    <div class="form-group">
+      <label>Frecuencia de Actualización</label>
+      <select name="frecuencia_actualizacion" required>
+        <option value="">Selecciona frecuencia</option>
+        <option value="Anual">Anual</option>
+        <option value="Semestral">Semestral</option>
+        <option value="Trimestral">Trimestral</option>
+        <option value="Según cambios">Según cambios significativos</option>
+      </select>
+    </div>
+
+    <h3 style="color:#2d5016;">10. Observaciones y Anexos</h3>
+    <div class="form-group">
+      <label>Observaciones Adicionales</label>
+      <textarea name="observaciones" placeholder="Notas, comentarios finales, documentos de referencia..."></textarea>
+    </div>
+
+    <div class="form-group" style="margin-top: 10px; border-top: 2px solid #e0e0e0; padding-top: 15px;">
+      <h3 style="color: #2d5016; margin-bottom: 15px;">📎 Anexos (Imágenes, Mapas, PDFs)</h3>
+      <button type="button" onclick="agregarAnexo()" style="background: #7cb342; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 15px;">
+        ➕ Agregar Anexo
+      </button>
+      <div class="anexos-container">
+        <!-- Aquí se cargarán los anexos existentes y nuevos -->
+      </div>
+    </div>
+
+    <!-- BOTONES -->
+    <div class="btn-grupo-edicion">
+      <a href="/gestion-riesgo/planes-contingencia-v2" class="btn btn-cancelar">← Volver a la Lista</a>
+      <button type="button" class="btn btn-guardar" onclick="guardarCambios()">✓ Guardar Cambios</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  const planId = {{ plan_id }};
+  
+  function cargarPlanParaEditar() {
+    const planes = JSON.parse(localStorage.getItem('planes_contingencia') || '[]');
+    const plan = planes.find(p => p.id === planId);
+    
+    if (!plan) {
+      alert('Plan no encontrado');
+      window.location.href = '/gestion-riesgo/planes-contingencia-v2';
+      return;
+    }
+    
+    // Actualizar header
+    document.getElementById('planInfoHeader').textContent = (plan.nombre_plan || 'Sin nombre') + ' (' + (plan.numero_plan || 'N/A') + ')';
+    
+    // Rellenar todos los campos disponibles
+    Object.keys(plan).forEach(key => {
+      const field = document.querySelector(`[name="${key}"]`);
+      if (field) {
+        field.value = plan[key];
+      }
+    });
+    
+    // Cargar anexos existentes si los hay
+    if (plan.anexos_imagenes && plan.anexos_imagenes.length > 0) {
+      plan.anexos_imagenes.forEach((anexo, index) => {
+        agregarAnexoConDatos(anexo);
+      });
+    }
+  }
+  
+  // Contador global de anexos
+  let contadorAnexos = 0;
+  
+  function agregarAnexo() {
+    contadorAnexos++;
+    const anexoId = `anexo-${contadorAnexos}`;
+    
+    const anexoHtml = `
+      <div class="anexo-item" id="${anexoId}" style="border: 2px solid #e0e0e0; border-radius: 12px; padding: 20px; margin-bottom: 15px; background: #fafafa;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+          <h4 style="margin: 0; color: #424242;">📎 Anexo ${contadorAnexos}</h4>
+          <button type="button" onclick="eliminarAnexo('${anexoId}')" style="background: #e53935; color: white; border: none; border-radius: 6px; padding: 6px 12px; cursor: pointer;">
+            🗑️ Eliminar
+          </button>
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 15px;">
+          <label style="font-weight: 600; color: #424242;">Descripción del Anexo</label>
+          <input type="text" class="anexo-descripcion" placeholder="Ej: Mapa de ubicación, Plano de evacuación..." style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+        </div>
+        
+        <div class="form-group">
+          <label style="font-weight: 600; color: #424242;">Seleccionar Imagen/PDF</label>
+          <input type="file" class="anexo-archivo" accept="image/*,.pdf" onchange="previsualizarAnexo(this, '${anexoId}')" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; background: white;">
+          <small style="color: #757575; display: block; margin-top: 5px;">📋 Formatos: JPG, PNG, PDF | Máximo 3MB</small>
+        </div>
+        
+        <div class="anexo-preview" id="preview-${anexoId}" style="margin-top: 15px; text-align: center;"></div>
+        <input type="hidden" class="anexo-data-original" value="">
+      </div>
+    `;
+    
+    const container = document.querySelector('.anexos-container');
+    if (container) {
+      container.insertAdjacentHTML('beforeend', anexoHtml);
+    }
+  }
+  
+  function agregarAnexoConDatos(anexo) {
+    contadorAnexos++;
+    const anexoId = `anexo-${contadorAnexos}`;
+    
+    const anexoHtml = `
+      <div class="anexo-item" id="${anexoId}" style="border: 2px solid #e0e0e0; border-radius: 12px; padding: 20px; margin-bottom: 15px; background: #fafafa;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+          <h4 style="margin: 0; color: #424242;">📎 Anexo ${contadorAnexos}</h4>
+          <button type="button" onclick="eliminarAnexo('${anexoId}')" style="background: #e53935; color: white; border: none; border-radius: 6px; padding: 6px 12px; cursor: pointer;">
+            🗑️ Eliminar
+          </button>
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 15px;">
+          <label style="font-weight: 600; color: #424242;">Descripción del Anexo</label>
+          <input type="text" class="anexo-descripcion" value="${anexo.descripcion || ''}" placeholder="Ej: Mapa de ubicación..." style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+        </div>
+        
+        <div class="form-group">
+          <label style="font-weight: 600; color: #424242;">Imagen Actual</label>
+          <div class="anexo-preview" id="preview-${anexoId}" style="margin: 15px 0; text-align: center;">
+            ${anexo.tipo && anexo.tipo.startsWith('image') ? `<img src="${anexo.data}" alt="${anexo.descripcion}" style="max-width: 100%; max-height: 300px; border-radius: 8px;">` : `<p>📄 ${anexo.nombre_archivo}</p>`}
+          </div>
+          <label style="font-weight: 600; color: #424242;">Cambiar Imagen (opcional)</label>
+          <input type="file" class="anexo-archivo" accept="image/*,.pdf" onchange="previsualizarAnexo(this, '${anexoId}')" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; background: white;">
+          <small style="color: #757575; display: block; margin-top: 5px;">Dejar vacío para mantener la imagen actual</small>
+        </div>
+        
+        <input type="hidden" class="anexo-data-original" value='${JSON.stringify(anexo)}'>
+      </div>
+    `;
+    
+    const container = document.querySelector('.anexos-container');
+    if (container) {
+      container.insertAdjacentHTML('beforeend', anexoHtml);
+    }
+  }
+  
+  function eliminarAnexo(anexoId) {
+    if (confirm('¿Eliminar este anexo?')) {
+      document.getElementById(anexoId).remove();
+    }
+  }
+  
+  function previsualizarAnexo(input, anexoId) {
+    const preview = document.getElementById(`preview-${anexoId}`);
+    const file = input.files[0];
+    
+    if (!file) {
+      return;
+    }
+    
+    if (file.size > 3 * 1024 * 1024) {
+      alert('⚠️ El archivo es muy grande. Máximo 3MB.');
+      input.value = '';
+      return;
+    }
+    
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+      const isPDF = file.type === 'application/pdf';
+      
+      if (isPDF) {
+        preview.innerHTML = `
+          <div style="padding: 20px; background: #fff3cd; border-radius: 8px; border: 1px solid #ffc107;">
+            <p style="margin: 0; color: #856404;">📄 <strong>${file.name}</strong></p>
+            <small style="color: #856404;">PDF adjunto correctamente</small>
+          </div>
+        `;
+      } else {
+        preview.innerHTML = `
+          <img src="${e.target.result}" alt="Preview" style="max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <p style="margin-top: 10px; color: #757575; font-size: 14px;">${file.name}</p>
+        `;
+      }
+    };
+    
+    reader.readAsDataURL(file);
+  }
+  
+  async function guardarCambios() {
+    const form = document.querySelector('.formulario-edicion');
+    if (!form) return;
+    
+    const formData = new FormData(form);
+    const planActualizado = { id: planId };
+    
+    formData.forEach((value, key) => {
+      planActualizado[key] = value;
+    });
+    
+    // Capturar anexos
+    const anexos = [];
+    const anexosItems = document.querySelectorAll('.anexo-item');
+    
+    for (let item of anexosItems) {
+      const descripcion = item.querySelector('.anexo-descripcion').value;
+      const archivoInput = item.querySelector('.anexo-archivo');
+      const dataOriginal = item.querySelector('.anexo-data-original').value;
+      
+      if (archivoInput.files.length > 0 && descripcion.trim()) {
+        // Nueva imagen cargada
+        const file = archivoInput.files[0];
+        const base64 = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result);
+          reader.readAsDataURL(file);
+        });
+        
+        anexos.push({
+          descripcion: descripcion,
+          nombre_archivo: file.name,
+          tipo: file.type,
+          data: base64
+        });
+      } else if (dataOriginal && descripcion.trim()) {
+        // Mantener anexo existente
+        const anexoOriginal = JSON.parse(dataOriginal);
+        anexoOriginal.descripcion = descripcion; // Actualizar descripción si cambió
+        anexos.push(anexoOriginal);
+      }
+    }
+    
+    planActualizado.anexos_imagenes = anexos;
+    
+    // Mantener datos del plan original que no están en el formulario
+    const planes = JSON.parse(localStorage.getItem('planes_contingencia') || '[]');
+    const planOriginal = planes.find(p => p.id === planId);
+    
+    if (planOriginal) {
+      // Preservar campos que no se editan
+      planActualizado.fecha_creacion = planOriginal.fecha_creacion;
+      planActualizado.municipio = planOriginal.municipio;
+      planActualizado.departamento = planOriginal.departamento;
+      planActualizado.poblacion_municipio = planOriginal.poblacion_municipio;
+    }
+    
+    // Actualizar el plan
+    const planesActualizados = planes.map(p => p.id === planId ? planActualizado : p);
+    
+    // Guardar en localStorage
+    localStorage.setItem('planes_contingencia', JSON.stringify(planesActualizados));
+    
+    alert('✓ Plan actualizado correctamente\n\nAnexos: ' + anexos.length);
+    window.location.href = '/gestion-riesgo/planes-contingencia-v2';
+  }
+  
+  // Cargar al inicio
+  document.addEventListener('DOMContentLoaded', cargarPlanParaEditar);
+</script>
+{% endblock %}

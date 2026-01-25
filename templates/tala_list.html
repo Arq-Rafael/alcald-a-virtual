@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="mb-3">Tala de Árboles</h1>
+
+<form class="row g-2 mb-3" method="get">
+  <div class="col-auto">
+    <select name="estado" class="form-select">
+      <option value="">Todos</option>
+      {% for e in ['Radicada','En inspección','Aprobada','Negada','En compensación','Cerrada'] %}
+      <option value="{{e}}" {% if request.args.get('estado')==e %}selected{% endif %}>{{e}}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <input name="q" class="form-control" placeholder="Buscar solicitante/dirección" value="{{ request.args.get('q','') }}">
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-primary">Filtrar</button>
+    <a class="btn btn-secondary" href="{{ url_for('tala_list') }}">Limpiar</a>
+    <a class="btn btn-success" href="{{ url_for('tala_nueva') }}">+ Nueva solicitud</a>
+  </div>
+</form>
+
+<table class="table table-hover table-sm align-middle">
+  <thead class="table-light">
+    <tr>
+      <th>#</th>
+      <th>Solicitante</th>
+      <th>Dirección</th>
+      <th>Motivo</th>
+      <th>Estado</th>
+      <th>Fecha</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rows %}
+    <tr>
+      <td><strong>{{ r['consecutivo'] }}</strong></td>
+      <td>{{ r['solicitante'] }} ({{ r['doc_solicitante'] }})</td>
+      <td>{{ r['direccion'] }}{% if r['barrio_vereda'] %} — {{ r['barrio_vereda'] }}{% endif %}</td>
+      <td>{{ r['motivo'] }}</td>
+      <td><span class="badge bg-info">{{ r['estado'] }}</span></td>
+      <td>{{ r['fecha'] }}</td>
+      <td class="text-end">
+        <a class="btn btn-sm btn-outline-primary" href="{{ url_for('tala_detalle', solicitud_id=r['id']) }}">Abrir</a>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" class="text-center text-muted">Sin resultados</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

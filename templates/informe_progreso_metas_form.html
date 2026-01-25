@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="mb-4">
+  <h2 class="mb-0">Nuevo Informe de Progreso de Metas</h2>
+  <p class="text-muted">Registra el avance de una meta, asocia contrato, evidencia fotográfica y contexto.</p>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="row g-4">
+
+  <!-- Meta del Plan con búsqueda -->
+  <div class="col-md-6">
+    <label for="meta_id" class="form-label">Meta del Plan</label>
+    <select id="meta_id" name="meta_id" class="form-select select2" required>
+      <option value="">-- Selecciona una meta --</option>
+      {% for m in metas %}
+      <option value="{{ m.id }}">
+        {{ m.programa }} – {{ m.meta_producto }}
+      </option>
+      {% endfor %}
+    </select>
+    <div class="form-text">Empieza a escribir para buscar la meta relevante.</div>
+  </div>
+
+  <!-- Número de contrato -->
+  <div class="col-md-6">
+    <label for="contrato_num" class="form-label">Número de Contrato</label>
+    <input type="text" id="contrato_num" name="contrato_num" class="form-control" placeholder="Ej: C-2025-001" required>
+  </div>
+
+  <!-- Avance y observaciones -->
+  <div class="col-md-4">
+    <label for="avance_manual" class="form-label">Avance registrado (%)</label>
+    <input type="number" step="0.1" min="0" max="100" id="avance_manual" name="avance_manual" class="form-control"
+      placeholder="Ej: 72.5" value="{{ informe.avance_manual if informe else '' }}">
+    <div class="form-text">Ingresa el porcentaje de cumplimiento manualmente.</div>
+  </div>
+
+  <div class="col-md-8">
+    <label for="observaciones" class="form-label">Observaciones adicionales</label>
+    <textarea id="observaciones" name="observaciones" class="form-control" rows="2"
+      placeholder="Notas breves, contexto, restricciones...">{{ informe.observaciones if informe else '' }}</textarea>
+  </div>
+
+  <!-- Descripción -->
+  <div class="col-12">
+    <label for="descripcion" class="form-label">Descripción de Cumplimiento</label>
+    <textarea id="descripcion" name="descripcion" class="form-control" rows="5"
+      placeholder="Describe cómo se está cumpliendo la meta..."
+      required>{{ informe.descripcion if informe else '' }}</textarea>
+  </div>
+
+  <!-- Fotos + captions dinámicos -->
+  <div class="col-12">
+    <label class="form-label">Evidencias fotográficas</label>
+    <div id="foto-captions-wrapper" class="mb-2">
+      <div class="foto-caption-pair row g-2 align-items-start mb-2">
+        <div class="col-md-5">
+          <input type="file" name="fotos" accept="image/*" class="form-control foto-input">
+        </div>
+        <div class="col-md-5">
+          <input type="text" name="captions" class="form-control" placeholder="Leyenda de la foto">
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm btn-add">
+            + Foto
+          </button>
+          <button type="button" class="btn btn-outline-danger btn-sm btn-remove">
+            &times;
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="form-text mb-2">Agrega tantas fotos con su leyenda como necesites. Puedes previsualizarlas antes de
+      guardar.</div>
+    <div id="preview" class="mt-2 d-flex flex-wrap gap-2"></div>
+  </div>
+
+  <!-- Acciones -->
+  <div class="col-12 d-flex gap-2">
+    <button type="submit" class="btn btn-success">Guardar Informe</button>
+    <a href="{{ url_for('informe_progreso_metas') }}" class="btn btn-secondary">Cancelar</a>
+  </div>
+</form>
+
+<!-- Select2 CSS/JS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+s9Y+E6XyM0sGzvH9dX+eQ2+a3W9U8bW9H4f8jk=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Init select2
+    $('.select2').select2({
+      width: '100%',
+      placeholder: 'Buscar meta...',
+      allowClear: true,
+      dropdownAutoWidth: true
+    });
+
+    // Dynamic foto+caption pairs
+    const wrapper = document.getElementById('foto-captions-wrapper');
+
+    function bindPairControls(pair) {
+      const addBtn = pair.querySelector('.btn-add');
+      const removeBtn = pair.querySelector('.btn-remove');
+      const fotoInput = pair.querySelector('.foto-input');
+
+      addBtn.addEventListener('click', function () {
+        const clone = pair.cloneNode(true);
+        // limpia valores
+        clone.querySelector('input[type=file]').value = '';
+        clone.querySelector('input[name="captions"]').value = '';
+        wrapper.appendChild(clone);
+        bindPairControls(clone);
+      });
+
+      removeBtn.addEventListener('click', function () {
+        if (wrapper.querySelectorAll('.foto-caption-pair').length > 1) {
+          pair.remove();
+          refreshPreview();
+        }
+      });
+
+      // Preview en miniatura cuando se elige imagen (actualiza global)
+      fotoInput.addEventListener('change', refreshPreview);
+    }
+
+    function refreshPreview() {
+      const preview = document.getElementById('preview');
+      preview.innerHTML = '';
+      const fotoInputs = wrapper.querySelectorAll('input[type=file]');
+      fotoInputs.forEach(input => {
+        const file = input.files[0];
+        if (file && file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.style.maxWidth = '120px';
+            img.style.borderRadius = '6px';
+            img.style.border = '1px solid #ccc';
+            img.alt = file.name;
+            preview.appendChild(img);
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+
+    // Inicial binding
+    document.querySelectorAll('.foto-caption-pair').forEach(bindPairControls);
+  });
+</script>
+
+{% endblock %}

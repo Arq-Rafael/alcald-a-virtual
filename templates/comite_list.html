@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="mb-3">Comité de Gestión del Riesgo</h1>
+<div class="mb-3">
+  <a class="btn btn-success" href="{{ url_for('comite_nueva') }}">+ Nueva acta</a>
+</div>
+<table class="table table-hover table-sm align-middle">
+  <thead class="table-light">
+    <tr>
+      <th>#</th><th>Fecha</th><th>Lugar</th><th>Asistentes</th><th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rows %}
+    <tr>
+      <td><strong>{{ r['consecutivo'] }}</strong></td>
+      <td>{{ r['fecha'] }}</td>
+      <td>{{ r['lugar'] }}</td>
+      <td class="text-truncate" style="max-width:380px">{{ r['asistentes'] }}</td>
+      <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('comite_detalle', acta_id=r['id']) }}">Abrir</a></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5" class="text-center text-muted">Sin actas</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

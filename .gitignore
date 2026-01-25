@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+ENV/
+
+# Database
+*.db
+*.sqlite*
+
+# Environment
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# EXCLUIR TODO LO PESADO
+uploads/
+documentos_generados/
+screenshots_manual/
+Manual_*.pdf
+*.xlsx
+*.xls
+static/imagenes/*.png
+static/imagenes/*.jpg
+!static/imagenes/escudo.png
+!static/imagenes/logo_new.png
+
+# Temporales
+capturar_*.py
+generar_manual*.py
+test_*.py
+
+# Archivos con secretos/claves
+procedimiento para volver a cargar la web de python.txt
+*.key
+*.pem
+.env*

@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-0">Informes de Progreso de Metas</h2>
+    <small class="text-muted">Seguimiento estratégico con contrato y evidencias.</small>
+  </div>
+  <div class="d-flex gap-2">
+    <input id="filtro" type="text" class="form-control" placeholder="Filtrar por meta o contrato"
+      style="min-width:240px;">
+    <a href="{{ url_for('nuevo_informe_progreso_metas') }}" class="btn btn-success">
+      Nuevo Informe
+    </a>
+  </div>
+</div>
+
+{# Métricas rápidas #}
+<div class="row mb-4">
+  <div class="col-md-4 mb-2">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>Informes totales</div>
+          <div class="fs-5 fw-bold">{{ informes|length }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-2">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>Metas distintas</div>
+          <div class="fs-5 fw-bold">
+            {{ informes | map(attribute='meta.meta_producto') | unique | list | length }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-2">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>Último informe</div>
+          {% if informes %}
+          <div class="fs-5 fw-bold">#{{ informes[0].id }}</div>
+          {% else %}
+          <div class="fs-5 fw-bold text-muted">—</div>
+          {% endif %}
+        </div>
+        {% if informes %}
+        <div class="small text-muted">{{ informes[0].fecha_informe.strftime('%Y-%m-%d') }}</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="table-responsive">
+  <table id="tabla-informes" class="table table-hover align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>ID</th>
+        <th>Meta</th>
+        <th>Contrato</th>
+        <th>Fecha</th>
+        <th>% Cumplimiento</th>
+        <th class="text-end">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for inf in informes %}
+      {% set pct = inf.meta.porcentaje_cumplimiento() %}
+      <tr data-meta="{{ inf.meta.meta_producto | lower }}" data-contrato="{{ inf.contrato_num | lower }}">
+        <td>{{ inf.id }}</td>
+        <td style="max-width:400px;">
+          <div class="d-flex align-items-start gap-2">
+            <div class="flex-grow-1 text-truncate" title="{{ inf.meta.meta_producto }}">
+              {{ inf.meta.meta_producto }}
+            </div>
+          </div>
+        </td>
+        <td>{{ inf.contrato_num }}</td>
+        <td>{{ inf.fecha_informe.strftime('%Y-%m-%d') }}</td>
+        <td>
+          <span class="badge {{ 'bg-success' if pct >= 75 else 'bg-warning' if pct >= 40 else 'bg-danger' }}"
+            title="Porcentaje de cumplimiento">
+            {{ ('%0.1f' % pct).rstrip('0').rstrip('.') }}%
+          </span>
+        </td>
+        <td class="text-end">
+          <a href="{{ url_for('pdf_informe_metas', informe_id=inf.id) }}" class="btn btn-sm btn-primary me-1">
+            Generar PDF
+          </a>
+          {% if session.get('user_role') == 'admin' %}
+          <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal"
+            data-informe-id="{{ inf.id }}"
+            data-informe-label="#{{ inf.id }} / {{ inf.meta.meta_producto[:30] ~ ('...' if inf.meta.meta_producto|length > 30 else '') }}">
+            Eliminar
+          </button>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+      {% if not informes %}
+      <tr>
+        <td colspan="6" class="text-center text-muted py-4">No hay informes creados aún.</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+{# Modal de confirmación de borrado #}
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="post" id="deleteForm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Eliminar informe</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p>Estás a punto de eliminar el informe <strong id="informeLabel"></strong>.</p>
+          <p class="text-danger">Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger">Eliminar definitivamente</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Filtrado en cliente
+  document.getElementById('filtro').addEventListener('input', function (e) {
+    const v = e.target.value.trim().toLowerCase();
+    document.querySelectorAll('#tabla-informes tbody tr').forEach(row => {
+      const meta = row.dataset.meta || '';
+      const contrato = row.dataset.contrato || '';
+      if (!v || meta.includes(v) || contrato.includes(v)) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  });
+
+  // Modal de confirmación: arma el action dinámico
+  const confirmModal = document.getElementById('confirmDeleteModal');
+  confirmModal.addEventListener('show.bs.modal', function (event) {
+    const btn = event.relatedTarget;
+    const informeId = btn.getAttribute('data-informe-id');
+    const label = btn.getAttribute('data-informe-label');
+
+    const form = document.getElementById('deleteForm');
+    form.action = `/informe_progreso_metas/${informeId}/eliminar`;
+    document.getElementById('informeLabel').textContent = label;
+  });
+</script>
+{% endblock %}

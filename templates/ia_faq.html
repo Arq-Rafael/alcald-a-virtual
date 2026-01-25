@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+  <h1 class="mb-4">FAQs Municipales</h1>
+
+  <div class="input-group mb-3">
+    <input id="faq-query" type="text" class="form-control" placeholder="Escribe tu pregunta…">
+    <button id="faq-btn" class="btn btn-info">Buscar</button>
+  </div>
+
+  <div id="faq-result" class="border rounded p-3" style="white-space: pre-wrap; min-height: 100px;"></div>
+
+  <a href="{{ url_for('ia') }}" class="btn btn-link mt-3">← Volver a IA Municipal</a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('faq-btn').addEventListener('click', async () => {
+  const q = document.getElementById('faq-query').value.trim();
+  const out = document.getElementById('faq-result');
+  if (!q) return;
+  out.innerHTML = '<em>Buscando…</em>';
+  try {
+    const res = await fetch('{{ url_for("ia_faq") }}?q=' + encodeURIComponent(q));
+    const data = await res.json();
+    out.textContent = data.answer ?? 'Sin respuesta.';
+  } catch(e) {
+    out.textContent = 'Error de red: ' + e.message;
+  }
+});
+</script>
+{% endblock %}

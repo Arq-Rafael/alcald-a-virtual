@@ -1,0 +1,257 @@
+{# templates/gestion_ambiental.html - Rediseño iOS 26 #}
+{% extends "base.html" %}
+
+{% block styles %}
+<style>
+/* Gestión Ambiental Module - iOS 26 Design System */
+.ambiental-container {
+  padding: 2.5rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.ambiental-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+  animation: fadeInDown 0.6s ease-out;
+}
+
+.ambiental-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #2e7d32 0%, #66bb6a 50%, #81c784 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.75rem;
+  letter-spacing: -1px;
+}
+
+.ambiental-header p {
+  color: var(--text-secondary, #6b7280);
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+
+.ambiental-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  animation: fadeInGrid 0.8s ease-out 0.2s backwards;
+}
+
+@media (min-width: 1200px) {
+  .ambiental-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .ambiental-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* iOS 26 Glass Cards */
+.ambiental-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.88) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 24px;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 12px 40px rgba(46, 125, 50, 0.08),
+              0 4px 12px rgba(0, 0, 0, 0.04),
+              inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  padding: 2.25rem 1.75rem;
+  text-align: center;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.ambiental-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, var(--card-gradient-start), var(--card-gradient-end));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.ambiental-card:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: 0 24px 60px rgba(46, 125, 50, 0.15),
+              0 8px 20px rgba(0, 0, 0, 0.08),
+              inset 0 1px 0 rgba(255, 255, 255, 1);
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+.ambiental-card:hover::before {
+  opacity: 1;
+}
+
+/* Icon Containers */
+.ambiental-icon {
+  width: 85px;
+  height: 85px;
+  margin: 0 auto 1.5rem;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.6rem;
+  color: white;
+  background: var(--card-gradient, linear-gradient(135deg, #2e7d32, #66bb6a));
+  box-shadow: 0 8px 24px var(--card-shadow, rgba(46, 125, 50, 0.25)),
+              inset 0 -3px 6px rgba(0,0,0,0.1),
+              inset 0 1px 3px rgba(255,255,255,0.3);
+  transition: all 0.3s ease;
+}
+
+.ambiental-card:hover .ambiental-icon {
+  transform: scale(1.1) rotate(-5deg);
+  box-shadow: 0 12px 32px var(--card-shadow, rgba(46, 125, 50, 0.35));
+}
+
+/* Color Variants */
+.ambiental-card.green {
+  --card-gradient-start: #2e7d32;
+  --card-gradient-end: #66bb6a;
+  --card-gradient: linear-gradient(135deg, #2e7d32, #66bb6a);
+  --card-shadow: rgba(46, 125, 50, 0.25);
+}
+
+.ambiental-card.warning {
+  --card-gradient-start: #f57c00;
+  --card-gradient-end: #ffb74d;
+  --card-gradient: linear-gradient(135deg, #f57c00, #ffb74d);
+  --card-shadow: rgba(245, 124, 0, 0.25);
+}
+
+.ambiental-card.danger {
+  --card-gradient-start: #d32f2f;
+  --card-gradient-end: #ef5350;
+  --card-gradient: linear-gradient(135deg, #d32f2f, #ef5350);
+  --card-shadow: rgba(211, 47, 47, 0.25);
+}
+
+/* Card Content */
+.ambiental-card h5 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.3px;
+}
+
+.ambiental-card p {
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 1.75rem;
+  flex-grow: 1;
+}
+
+/* iOS 26 Buttons */
+.ambiental-btn {
+  padding: 0.875rem 2rem;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+  border: none;
+  background: linear-gradient(135deg, var(--card-gradient-start), var(--card-gradient-end));
+  color: white;
+  box-shadow: 0 4px 16px var(--card-shadow),
+              inset 0 1px 2px rgba(255,255,255,0.3);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ambiental-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px var(--card-shadow);
+  color: white;
+  text-decoration: none;
+}
+
+/* Animations */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInGrid {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ambiental-container">
+  <div class="ambiental-header">
+    <h1>🌳 Gestión Ambiental</h1>
+    <p>Gestión de riesgos y recursos ambientales del municipio</p>
+  </div>
+
+  <div class="ambiental-grid">
+    <!-- Arbolado Urbano -->
+    <div class="ambiental-card green">
+      <div class="ambiental-icon">
+        <i class="bi bi-tree-fill"></i>
+      </div>
+      <h5>Arbolado Urbano</h5>
+      <p>Gestión de autorizaciones de tala y poda del arbolado urbano.</p>
+      <a href="/tala" class="ambiental-btn">
+        GESTIONAR <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+    <!-- Comité de Riesgo -->
+    <div class="ambiental-card warning">
+      <div class="ambiental-icon">
+        <i class="bi bi-shield-fill-exclamation"></i>
+      </div>
+      <h5>Comité de Riesgo</h5>
+      <p>Actas y sesiones del Comité Municipal de Gestión del Riesgo.</p>
+      <a href="/comite" class="ambiental-btn">
+        ACCEDER <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+    <!-- Gestión de Riesgo -->
+    <div class="ambiental-card danger">
+      <div class="ambiental-icon">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+      </div>
+      <h5>Gestión de Riesgo</h5>
+      <p>Seguimiento y gestión de riesgos identificados en el municipio.</p>
+      <a href="/riesgo" class="ambiental-btn">
+        GESTIONAR <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

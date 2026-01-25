@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Actas CMGR - Gestión del Riesgo{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/gestion_riesgo.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="riesgo-wrapper">
+  <div class="riesgo-surface">
+    <section class="riesgo-hero">
+      <div class="riesgo-hero-content">
+        <div class="riesgo-hero-badge">Nuevo</div>
+        <h1 class="riesgo-hero-title">Actas del CMGR</h1>
+        <p class="riesgo-hero-subtitle">Transcribe, genera y archiva actas del Comité Municipal de Gestión del Riesgo.</p>
+      </div>
+    </section>
+
+    <section class="riesgo-modules-grid" style="margin-top: 10px;">
+      <div class="riesgo-module-card riesgo-card-blue">
+        <span class="riesgo-module-chip">Crear</span>
+        <div class="riesgo-module-header">
+          <div class="riesgo-module-icon"><i class="bi bi-journal-text"></i></div>
+          <span class="riesgo-module-badge">Nueva Acta</span>
+        </div>
+        <div class="riesgo-module-body">
+          <h3>Generar acta</h3>
+          <p>Captura la información de la sesión y genera el acta en formato oficial.</p>
+          <form>
+            <div class="mb-2">
+              <label class="form-label">Fecha</label>
+              <input type="date" class="form-control" />
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Tema principal</label>
+              <input type="text" class="form-control" placeholder="Tema o asunto tratado" />
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Asistentes</label>
+              <textarea class="form-control" rows="2" placeholder="Nombres separados por coma"></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Acuerdos</label>
+              <textarea class="form-control" rows="3" placeholder="Compromisos y responsables"></textarea>
+            </div>
+            <button type="button" class="riesgo-btn riesgo-btn-blue">Guardar acta</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="riesgo-module-card riesgo-card-orange">
+        <span class="riesgo-module-chip">Archivo</span>
+        <div class="riesgo-module-header">
+          <div class="riesgo-module-icon"><i class="bi bi-archive"></i></div>
+          <span class="riesgo-module-badge">Histórico</span>
+        </div>
+        <div class="riesgo-module-body">
+          <h3>Consulta rápida</h3>
+          <p>Accede a las actas previas y descarga los documentos oficiales.</p>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle">
+              <thead>
+                <tr>
+                  <th>ID</th><th>Fecha</th><th>Tema</th><th>Estado</th><th>Descarga</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>ACT-014</td><td>2026-01-10</td><td>Plan de contingencia lluvias</td><td><span class="badge bg-success">Aprobada</span></td><td><a href="#">PDF</a></td></tr>
+                <tr><td>ACT-013</td><td>2025-12-15</td><td>Simulacro comunitario</td><td><span class="badge bg-secondary">Archivada</span></td><td><a href="#">PDF</a></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <a href="{{ url_for('main.gestion_riesgo') }}" class="riesgo-btn riesgo-btn-orange">Volver al hub</a>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="mb-3">Nueva solicitud de tala</h1>
+<form class="row g-3" method="post">
+  <div class="col-md-6"><label class="form-label">Solicitante</label><input name="solicitante" class="form-control" required></div>
+  <div class="col-md-3"><label class="form-label">Documento</label><input name="doc_solicitante" class="form-control"></div>
+  <div class="col-md-6"><label class="form-label">Dirección</label><input name="direccion" class="form-control" required></div>
+  <div class="col-md-3"><label class="form-label">Barrio/Vereda</label><input name="barrio_vereda" class="form-control"></div>
+  <div class="col-md-3">
+    <label class="form-label">Motivo</label>
+    <select name="motivo" class="form-select">
+      <option>Riesgo</option><option>Afectación</option><option>Obra</option><option>Otro</option>
+    </select>
+  </div>
+  <div class="col-12">
+    <label class="form-label">Árboles (JSON)</label>
+    <textarea name="arboles_json" class="form-control" rows="2" placeholder='[{"especie":"Urapán","diametro":35,"altura":10,"estado":"inestable"}]'></textarea>
+  </div>
+  <div class="col-12"><label class="form-label">Observaciones</label><textarea name="observaciones" class="form-control" rows="2"></textarea></div>
+  <div class="col-12">
+    <button class="btn btn-success">Radicar</button>
+    <a class="btn btn-secondary" href="{{ url_for('tala_list') }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

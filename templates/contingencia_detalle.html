@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Detalle Plan de Contingencia{% endblock %}
+{% block content %}
+<div class="container" style="padding:20px 10px; color:#e2e8f0;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+    <h2 style="margin:0;">{{ plan.numero_plan }} – {{ plan.nombre_plan }}</h2>
+    <div>
+      <a class="btn btn-secondary" href="{{ url_for('contingencia_views.index') }}">← Volver</a>
+      <a class="btn btn-primary" href="/api/contingencia/{{ plan.id }}/pdf">📄 PDF</a>
+    </div>
+  </div>
+  <div style="margin-bottom:16px; color:#cbd5e1;">
+    Tipo: {{ plan.tipo_evento }} · Estado: {{ plan.estado }} · Responsable: {{ plan.responsable_principal or '-' }}
+  </div>
+
+  {% set oficial = oficial or {} %}
+  {% macro bloque(titulo, contenido) %}
+    <div style="background:#0f172a; border-radius:12px; padding:14px; margin-bottom:10px;">
+      <h4 style="margin:0 0 8px 0;">{{ titulo }}</h4>
+      <div style="white-space:pre-line; color:#cbd5e1;">{{ contenido or 'Sin información' }}</div>
+    </div>
+  {% endmacro %}
+
+  {{ bloque('1. Introducción', oficial.get('introduccion',{}).get('descripcion')) }}
+  {{ bloque('Justificación', oficial.get('introduccion',{}).get('justificacion')) }}
+  {{ bloque('Contexto normativo', oficial.get('introduccion',{}).get('contexto')) }}
+
+  {{ bloque('2. Objetivos y Alcance', oficial.get('objetivos',{}).get('objetivo_general')) }}
+  {{ bloque('Objetivos específicos', '\n'.join(oficial.get('objetivos',{}).get('objetivos_especificos', []))) }}
+  {{ bloque('Datos del evento', oficial.get('objetivos',{}).get('datos_evento')) }}
+
+  {{ bloque('3. Marco Normativo', oficial.get('normativo',{}).get('marco')) }}
+
+  {{ bloque('4. Organización y Roles', oficial.get('organizacion',{}).get('organizacion')) }}
+  {{ bloque('Organismos de apoyo', oficial.get('organizacion',{}).get('organismos')) }}
+  {{ bloque('Directorio de emergencias', oficial.get('organizacion',{}).get('directorio')) }}
+
+  {{ bloque('5. Análisis de Riesgos', oficial.get('riesgos',{}).get('escenario')) }}
+  {{ bloque('Amenazas', oficial.get('riesgos',{}).get('amenazas')) }}
+  {{ bloque('Matriz de riesgos', oficial.get('riesgos',{}).get('matriz')) }}
+
+  {{ bloque('6. Medidas de Reducción', oficial.get('medidas',{}).get('medidas_seguridad')) }}
+  {{ bloque('Adecuaciones', oficial.get('medidas',{}).get('adecuaciones')) }}
+  {{ bloque('Capacitación / Seguros', oficial.get('medidas',{}).get('capacitacion')) }}
+
+  {{ bloque('7. Plan de Respuesta', oficial.get('respuesta',{}).get('alertas')) }}
+  {{ bloque('Comando y coordinación', oficial.get('respuesta',{}).get('comando')) }}
+  {{ bloque('Protocolos', oficial.get('respuesta',{}).get('protocolos')) }}
+  {{ bloque('Evacuación / PMA / Comunicaciones', oficial.get('respuesta',{}).get('apoyos')) }}
+
+  {{ bloque('8. Actualización y Mejora', oficial.get('actualizacion',{}).get('mecanismos')) }}
+  {{ bloque('9. Anexos Técnicos', oficial.get('anexos',{}).get('anexos')) }}
+</div>
+{% endblock %}

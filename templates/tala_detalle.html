@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <h1>Tala #{{ s['consecutivo'] }}</h1>
+  <a href="{{ url_for('tala_list') }}" class="btn btn-secondary">Volver</a>
+</div>
+
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card mb-3">
+      <div class="card-header">Solicitud</div>
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-sm-3">Solicitante</dt>
+          <dd class="col-sm-9">{{ s['solicitante'] }} ({{ s['doc_solicitante'] }})</dd>
+          <dt class="col-sm-3">Dirección</dt>
+          <dd class="col-sm-9">{{ s['direccion'] }}{% if s['barrio_vereda'] %} — {{ s['barrio_vereda'] }}{% endif %}
+          </dd>
+          <dt class="col-sm-3">Motivo</dt>
+          <dd class="col-sm-9">{{ s['motivo'] }}</dd>
+          <dt class="col-sm-3">Fecha</dt>
+          <dd class="col-sm-9">{{ s['fecha'] }}</dd>
+          <dt class="col-sm-3">Árboles</dt>
+          <dd class="col-sm-9">
+            <pre class="mb-0" style="white-space:pre-wrap">{{ s['arboles_json'] or 'N/A' }}</pre>
+          </dd>
+          <dt class="col-sm-3">Obs.</dt>
+          <dd class="col-sm-9">{{ s['observaciones'] or '—' }}</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header">Compensaciones</div>
+      <div class="card-body">
+        <form class="row g-2 mb-3" method="post" action="{{ url_for('comp_nueva', solicitud_id=s['id']) }}">
+          <div class="col-md-3"><input name="especie" class="form-control" placeholder="Especie" required></div>
+          <div class="col-md-2"><input name="cantidad" type="number" class="form-control" placeholder="Cantidad" min="1"
+              required></div>
+          <div class="col-md-4"><input name="sitio" class="form-control" placeholder="Sitio de plantación" required>
+          </div>
+          <div class="col-md-3"><input name="fecha_maxima" type="date" class="form-control" required></div>
+          <div class="col-12"><button class="btn btn-outline-success">+ Agregar plan</button></div>
+        </form>
+
+        <ul class="list-group">
+          {% for c in comps %}
+          <li class="list-group-item">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <strong>{{ c.especie }}</strong> — {{ c.cantidad }} en {{ c.sitio }} |
+                Vence: {{ c.fecha_maxima }} |
+                <span class="badge bg-{{ c.color }}">{{ c.dias_restantes }} días</span>
+                <div class="small text-muted">Plantados: {{ c.plantados }} — Verificado: {{ 'Sí' if c.verificado else
+                  'No' }}</div>
+              </div>
+              <form class="d-flex gap-2" method="post" action="{{ url_for('comp_actualizar', comp_id=c.id) }}"
+                enctype="multipart/form-data">
+                <input name="plantados" type="number" class="form-control form-control-sm" value="{{ c.plantados }}"
+                  min="0" style="width:100px">
+                <select name="verificado" class="form-select form-select-sm" style="width:120px">
+                  <option value="0" {% if not c.verificado %}selected{% endif %}>No verificado</option>
+                  <option value="1" {% if c.verificado %}selected{% endif %}>Verificado</option>
+                </select>
+                <input type="file" name="verif_file" class="form-control form-control-sm" style="width:220px">
+                <input type="text" name="observaciones" class="form-control form-control-sm"
+                  placeholder="Obs. verificación" style="width:220px">
+                <button class="btn btn-sm btn-primary">Guardar</button>
+              </form>
+            </div>
+          </li>
+          {% else %}
+          <li class="list-group-item text-muted">Sin planes de compensación.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header">Bitácora</div>
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          {% for l in bitacora %}
+          <li class="list-group-item d-flex justify-content-between">
+            <div><strong>{{ l['evento'] }}</strong> — {{ l['detalle'] }} <small class="text-muted">por {{ l['user']
+                }}</small></div>
+            <small class="text-muted">{{ l['ts'] }}</small>
+          </li>
+          {% else %}
+          <li class="list-group-item text-muted">Sin eventos</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card mb-3">
+      <div class="card-header">Gestión</div>
+      <div class="card-body">
+        <form method="post">
+          <div class="mb-2">
+            <label class="form-label">Estado</label>
+            <select name="estado" class="form-select">
+              {% for e in ['Radicada','En inspección','Aprobada','Negada','En compensación','Cerrada'] %}
+              <option value="{{e}}" {% if s['estado']==e %}selected{% endif %}>{{e}}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Observaciones</label>
+            <textarea name="observaciones" class="form-control" rows="3">{{ s['observaciones'] or '' }}</textarea>
+          </div>
+          <button class="btn btn-primary w-100">Guardar cambios</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Soportes</div>
+      <div class="card-body">
+        <form action="{{ url_for('tala_subir', solicitud_id=s['id']) }}" method="post" enctype="multipart/form-data"
+          class="mb-2">
+          <input type="file" name="file" class="form-control mb-2" required>
+          <button class="btn btn-success w-100">Subir</button>
+        </form>
+        <ul class="list-group">
+          {% for a in archivos %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>{{ a['filename'] }}</span>
+            <a class="btn btn-sm btn-outline-secondary"
+              href="{{ url_for('tala_descargar_archivo', archivo_id=a['id']) }}">Descargar</a>
+          </li>
+          {% else %}
+          <li class="list-group-item text-muted">Sin archivos</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    {# ... dentro de la col-lg-4, después de "Gestión" ... #}
+
+    <div class="card mb-3">
+      <div class="card-header">Visita ocular</div>
+      <div class="card-body">
+        {% if s['visita_path'] %}
+        <p class="mb-2"><span class="text-muted">Archivo
+            cargado:</span><br><code>{{ s['visita_path']|replace(app.root_path, '') }}</code></p>
+        <a class="btn btn-outline-secondary" href="{{ url_for('tala_descargar_archivo', archivo_id='') }}"
+          onclick="return false;" title="Descargar desde Soportes">Descargar desde Soportes</a>
+        <div class="text-muted small mt-2">Nota: el informe de visita se conserva en “Soportes”.</div>
+        {% else %}
+        <form action="{{ url_for('tala_subir_visita', solicitud_id=s['id']) }}" method="post"
+          enctype="multipart/form-data">
+          <input type="file" name="visita_file" class="form-control mb-2" accept="application/pdf,image/*" required>
+          <button class="btn btn-warning w-100">Cargar informe de visita</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Certificación</span>
+        {% if s['cert_fecha'] %}
+        <span class="badge bg-info">Emitida: {{ s['cert_fecha'][:10] }}</span>
+        {% endif %}
+      </div>
+      <div class="card-body">
+        {% if s['cert_path'] %}
+        <p class="mb-2">
+          <strong>Compensación:</strong>
+          {{ s['arboles_compensar'] or 'N/D' }} árboles (ratio {{ '%.2f'|format(s['comp_ratio'] or 0) }})<br>
+          <strong>Vence:</strong> {{ s['cert_vence'][:10] if s['cert_vence'] else 'N/D' }}
+        </p>
+        <a class="btn btn-outline-secondary w-100"
+          href="{{ url_for('tala_descargar_certificado', solicitud_id=s['id']) }}">Descargar certificación</a>
+        {% else %}
+        <form action="{{ url_for('tala_generar_certificacion', solicitud_id=s['id']) }}" method="post">
+          <div class="input-group mb-2">
+            <span class="input-group-text">Ratio</span>
+            <input type="number" step="0.1" min="0" name="comp_ratio" class="form-control" placeholder="p.ej. 2.0"
+              value="">
+          </div>
+          <button class="btn btn-primary w-100">Generar certificación (10 días hábiles)</button>
+          <div class="small text-muted mt-2">Se toma el # de árboles del JSON de la solicitud y se multiplica por el
+            ratio
+            (por defecto 2:1 si no se especifica).</div>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if is_admin %}
+    <div class="card mt-3 border-danger">
+      <div class="card-header bg-danger text-white">
+        Acciones administrativas
+      </div>
+      <div class="card-body">
+        <form method="post" action="{{ url_for('tala_eliminar', solicitud_id=s['id']) }}"
+          onsubmit="return confirm('¿Estás seguro de eliminar esta solicitud? Esta acción no se puede revertir.');">
+          <button class="btn btn-danger w-100">
+            🗑️ Eliminar solicitud
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

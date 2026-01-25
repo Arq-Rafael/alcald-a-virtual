@@ -1,0 +1,639 @@
+{% extends "base.html" %}
+{% block title %}{{ plan.nombre_plan }}{% endblock %}
+
+{% block styles %}
+<style>
+  body {
+    background: linear-gradient(135deg, #f5f5f7 0%, #efefef 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+  }
+
+  .container-detalle {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  /* HEADER DETALLE */
+  .header-detalle {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    border-top: 4px solid #2d5016;
+  }
+
+  .header-detalle-titulo {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .header-detalle h1 {
+    font-size: 28px;
+    color: #1d1d1f;
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .header-detalle-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .meta-item-label {
+    font-size: 12px;
+    color: #999;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .meta-item-valor {
+    font-size: 15px;
+    color: #1d1d1f;
+    font-weight: 500;
+  }
+
+  /* BADGES */
+  .badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .badge-publicado {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .badge-edicion {
+    background: #fff3cd;
+    color: #856404;
+  }
+
+  .badge-borrador {
+    background: #f0f0f0;
+    color: #666;
+  }
+
+  /* BARRA DE PROGRESO GRANDE */
+  .progreso-container {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .progreso-title {
+    font-size: 14px;
+    color: #666;
+    font-weight: 600;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+
+  .barra-grande {
+    width: 100%;
+    height: 12px;
+    background: #e5e5e7;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+
+  .barra-relleno {
+    height: 100%;
+    background: linear-gradient(90deg, #2d5016 0%, #5a8a3a 100%);
+    border-radius: 6px;
+    transition: width 0.3s ease;
+  }
+
+  .progreso-porcentaje {
+    text-align: right;
+    font-size: 14px;
+    font-weight: 600;
+    color: #2d5016;
+  }
+
+  /* NAVEGACIÓN DE SECCIONES */
+  .secciones-nav {
+    background: white;
+    border-radius: 16px;
+    padding: 8px;
+    margin-bottom: 25px;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .seccion-tab {
+    flex: 1;
+    min-width: 120px;
+    padding: 12px 14px;
+    border: none;
+    background: transparent;
+    color: #666;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+  }
+
+  .seccion-tab:hover {
+    background: #f5f5f7;
+  }
+
+  .seccion-tab.active {
+    background: #2d5016;
+    color: white;
+    box-shadow: 0 4px 12px rgba(45, 80, 22, 0.2);
+  }
+
+  /* CONTENIDO DE SECCIÓN */
+  .seccion-contenido {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    display: none;
+  }
+
+  .seccion-contenido.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .seccion-titulo {
+    font-size: 22px;
+    color: #1d1d1f;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .seccion-descripcion {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  .seccion-field {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .seccion-field:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .field-label {
+    font-size: 13px;
+    color: #999;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .field-value {
+    font-size: 14px;
+    color: #1d1d1f;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  /* TABLA DE DIRECTORIO */
+  .tabla-organismos {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+
+  .tabla-organismos thead {
+    background: #2d5016;
+    color: white;
+  }
+
+  .tabla-organismos th,
+  .tabla-organismos td {
+    padding: 12px;
+    text-align: left;
+    font-size: 13px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .tabla-organismos tbody tr:hover {
+    background: #fafafa;
+  }
+
+  /* BOTONES DE ACCIÓN */
+  .btn-grupo-acciones {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+    justify-content: flex-start;
+  }
+
+  .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-editar {
+    background: linear-gradient(135deg, #2d5016 0%, #5a8a3a 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(45, 80, 22, 0.2);
+  }
+
+  .btn-editar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(45, 80, 22, 0.3);
+  }
+
+  .btn-publicar {
+    background: #34c759;
+    color: white;
+    box-shadow: 0 4px 12px rgba(52, 199, 89, 0.2);
+  }
+
+  .btn-publicar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(52, 199, 89, 0.3);
+  }
+
+  .btn-volver {
+    background: white;
+    color: #2d5016;
+    border: 1.5px solid #2d5016;
+  }
+
+  .btn-volver:hover {
+    background: #f5f5f7;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .header-detalle-titulo {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .header-detalle-meta {
+      grid-template-columns: 1fr;
+    }
+
+    .secciones-nav {
+      overflow-x: scroll;
+    }
+
+    .seccion-contenido {
+      padding: 20px;
+    }
+
+    .btn-grupo-acciones {
+      flex-direction: column;
+    }
+
+    .btn {
+      width: 100%;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-detalle">
+  <!-- HEADER DETALLE -->
+  <div class="header-detalle">
+    <div class="header-detalle-titulo">
+      <div>
+        <h1>{{ plan.nombre_plan }}</h1>
+        <p style="color: #999; font-size: 14px; margin: 8px 0 0 0;">{{ plan.numero_plan }}</p>
+      </div>
+      <span class="badge badge-{{ plan.estado|lower }}">{{ plan.estado|replace('_', ' ')|title }}</span>
+    </div>
+
+    <div class="header-detalle-meta">
+      <div class="meta-item">
+        <span class="meta-item-label">Municipio</span>
+        <span class="meta-item-valor">{{ plan.municipio }}, {{ plan.departamento }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-item-label">Tipo de Evento</span>
+        <span class="meta-item-valor">{{ plan.tipo_evento or 'No especificado' }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-item-label">Aforo Esperado</span>
+        <span class="meta-item-valor">{{ plan.alcance_aforo|default('N/A') }} personas</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-item-label">Creado</span>
+        <span class="meta-item-valor">{{ plan.fecha_creacion.strftime('%d/%m/%Y %H:%M') if plan.fecha_creacion else 'N/A' }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-item-label">Versión</span>
+        <span class="meta-item-valor">{{ plan.version }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-item-label">Última Actualización</span>
+        <span class="meta-item-valor">{{ plan.fecha_ultima_actualizacion.strftime('%d/%m/%Y %H:%M') if plan.fecha_ultima_actualizacion else 'N/A' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BARRA DE PROGRESO -->
+  <div class="progreso-container">
+    <div class="progreso-title">Progreso del Plan</div>
+    <div class="barra-grande">
+      <div class="barra-relleno" style="width: {{ progreso }}%;"></div>
+    </div>
+    <div class="progreso-porcentaje">{{ progreso }}% Completado</div>
+  </div>
+
+  <!-- NAVEGACIÓN DE SECCIONES -->
+  <div class="secciones-nav">
+    <button class="seccion-tab active" onclick="mostrarSeccion('introduccion')">1. Intro</button>
+    <button class="seccion-tab" onclick="mostrarSeccion('objetivos')">2. Objetivos</button>
+    <button class="seccion-tab" onclick="mostrarSeccion('normativo')">3. Normativo</button>
+    <button class="seccion-tab" onclick="mostrarSeccion('organizacion')">4. Organización</button>
+    <button class="seccion-tab" onclick="mostrarSeccion('amenazas')">5. Amenazas</button>
+    <button class="seccion-tab" onclick="mostrarSeccion('medidas')">6. Medidas</button>
+    <button class="seccion-tab" onclick="mostrarSeccion('respuesta')">7. Respuesta</button>
+    <button class="seccion-tab" onclick="mostrarSeccion('actualizacion')">8. Actualización</button>
+    <button class="seccion-tab" onclick="mostrarSeccion('anexos')">9. Anexos</button>
+  </div>
+
+  <!-- SECCIÓN 1: INTRODUCCIÓN -->
+  <div id="sec-introduccion" class="seccion-contenido active">
+    <h2 class="seccion-titulo">1. Introducción</h2>
+    
+    <div class="seccion-field">
+      <span class="field-label">Descripción del Evento</span>
+      <p class="field-value">{{ plan.introduccion_descripcion or 'No especificado' }}</p>
+    </div>
+
+    <div class="seccion-field">
+      <span class="field-label">Justificación del Plan</span>
+      <p class="field-value">{{ plan.introduccion_justificacion or 'No especificado' }}</p>
+    </div>
+
+    <div class="seccion-field">
+      <span class="field-label">Contexto General</span>
+      <p class="field-value">{{ plan.introduccion_contexto or 'No especificado' }}</p>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 2: OBJETIVOS Y ALCANCE -->
+  <div id="sec-objetivos" class="seccion-contenido">
+    <h2 class="seccion-titulo">2. Objetivos y Alcance</h2>
+    
+    <div class="seccion-field">
+      <span class="field-label">Objetivo General</span>
+      <p class="field-value">{{ plan.objetivo_general or 'No especificado' }}</p>
+    </div>
+
+    <div class="seccion-field">
+      <span class="field-label">Alcance del Evento</span>
+      <p class="field-value">{{ plan.alcance_evento or 'No especificado' }}</p>
+    </div>
+
+    <div class="seccion-field">
+      <span class="field-label">Ubicación</span>
+      <p class="field-value">{{ plan.alcance_ubicacion or 'No especificado' }}</p>
+    </div>
+
+    <div class="seccion-field">
+      <span class="field-label">Fecha y Duración</span>
+      <p class="field-value">{{ plan.alcance_duracion or 'No especificado' }}</p>
+    </div>
+
+    <div class="seccion-field">
+      <span class="field-label">Aforo Esperado</span>
+      <p class="field-value">{{ plan.alcance_aforo or 'No especificado' }} personas</p>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 3: MARCO NORMATIVO -->
+  <div id="sec-normativo" class="seccion-contenido">
+    <h2 class="seccion-titulo">3. Marco Normativo</h2>
+    
+    <div class="seccion-field">
+      <span class="field-label">Normas Aplicables</span>
+      <p class="field-value">{{ plan.marco_normativo or 'No especificado' }}</p>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 4: ORGANIZACIÓN -->
+  <div id="sec-organizacion" class="seccion-contenido">
+    <h2 class="seccion-titulo">4. Organización y Roles</h2>
+    
+    <div class="seccion-field">
+      <span class="field-label">Coordinador General</span>
+      <p class="field-value">{{ plan.coordinador_general or 'No especificado' }}</p>
+    </div>
+
+    <div class="seccion-field">
+      <span class="field-label">PMU (Puesto de Mando Unificado)</span>
+      <p class="field-value">{{ plan.pmu_ubicacion or 'No especificado' }}</p>
+    </div>
+
+    <div class="seccion-field">
+      <span class="field-label">Organismos de Apoyo</span>
+      <p class="field-value">{{ plan.organismos_apoyo or 'No especificado' }}</p>
+    </div>
+
+    <!-- DIRECTORIO DE EMERGENCIAS -->
+    {% if organismos %}
+      <div class="seccion-field">
+        <span class="field-label">Directorio de Emergencias - Supatá</span>
+        <table class="tabla-organismos">
+          <thead>
+            <tr>
+              <th>Organismo</th>
+              <th>Tipo</th>
+              <th>Teléfono</th>
+              <th>Ubicación</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for org in organismos %}
+              <tr>
+                <td><strong>{{ org.nombre }}</strong></td>
+                <td>{{ org.tipo }}</td>
+                <td>{{ org.telefono }}</td>
+                <td>{{ org.get('ubicacion', 'N/A') }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- SECCIÓN 5: AMENAZAS -->
+  <div id="sec-amenazas" class="seccion-contenido">
+    <h2 class="seccion-titulo">5. Identificación de Amenazas</h2>
+    
+    <div class="seccion-field">
+      <span class="field-label">Descripción del Escenario</span>
+      <p class="field-value">{{ plan.descripcion_escenario or 'No especificado' }}</p>
+    </div>
+
+    <div class="seccion-field">
+      <span class="field-label">Amenazas Identificadas</span>
+      <p class="field-value">{{ plan.amenazas_identificadas or 'No especificado' }}</p>
+    </div>
+
+    <div class="seccion-field">
+      <span class="field-label">Vulnerabilidades</span>
+      <p class="field-value">{{ plan.vulnerabilidades or 'No especificado' }}</p>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 6: MEDIDAS -->
+  <div id="sec-medidas" class="seccion-contenido">
+    <h2 class="seccion-titulo">6. Medidas de Reducción del Riesgo</h2>
+    
+    <div class="seccion-field">
+      <span class="field-label">Medidas de Seguridad</span>
+      <p class="field-value">{{ plan.medidas_seguridad or 'No especificado' }}</p>
+    </div>
+
+    <div class="seccion-field">
+      <span class="field-label">Adecuación del Lugar</span>
+      <p class="field-value">{{ plan.adecuacion_lugar or 'No especificado' }}</p>
+    </div>
+
+    <div class="seccion-field">
+      <span class="field-label">Capacitación del Personal</span>
+      <p class="field-value">{{ plan.capacitacion_personal or 'No especificado' }}</p>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 7: RESPUESTA -->
+  <div id="sec-respuesta" class="seccion-contenido">
+    <h2 class="seccion-titulo">7. Plan de Respuesta a Emergencias</h2>
+    
+    <div class="seccion-field">
+      <span class="field-label">Procedimiento General</span>
+      <p class="field-value">{{ plan.procedimiento_general or 'No especificado' }}</p>
+    </div>
+
+    <div class="seccion-field">
+      <span class="field-label">Rutas de Evacuación</span>
+      <p class="field-value">{{ plan.rutas_evacuacion or 'No especificado' }}</p>
+    </div>
+
+    <div class="seccion-field">
+      <span class="field-label">Puntos de Encuentro</span>
+      <p class="field-value">{{ plan.puntos_encuentro or 'No especificado' }}</p>
+    </div>
+
+    <div class="seccion-field">
+      <span class="field-label">Recursos Disponibles</span>
+      <p class="field-value">{{ plan.recursos_disponibles or 'No especificado' }}</p>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 8: ACTUALIZACIÓN -->
+  <div id="sec-actualizacion" class="seccion-contenido">
+    <h2 class="seccion-titulo">8. Mecanismos de Actualización</h2>
+    
+    <div class="seccion-field">
+      <span class="field-label">Responsable</span>
+      <p class="field-value">{{ plan.responsable_actualizacion or 'No especificado' }}</p>
+    </div>
+
+    <div class="seccion-field">
+      <span class="field-label">Frecuencia</span>
+      <p class="field-value">{{ plan.frecuencia_actualizacion or 'No especificado' }}</p>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 9: ANEXOS -->
+  <div id="sec-anexos" class="seccion-contenido">
+    <h2 class="seccion-titulo">9. Anexos Técnicos</h2>
+    
+    <div class="seccion-field">
+      <span class="field-label">Observaciones</span>
+      <p class="field-value">{{ plan.observaciones or 'No hay observaciones' }}</p>
+    </div>
+  </div>
+
+  <!-- BOTONES DE ACCIÓN -->
+  <div class="btn-grupo-acciones" style="margin-top: 40px;">
+    <a href="{{ url_for('contingencia.listar_planes') }}" class="btn btn-volver">
+      ← Volver a Planes
+    </a>
+    {% if plan.estado != 'PUBLICADO' %}
+      <a href="{{ url_for('contingencia.editar_seccion', id=plan.id, seccion='introduccion') }}" class="btn btn-editar">
+        ✏ Editar Plan
+      </a>
+    {% endif %}
+    {% if plan.estado == 'EN_EDICIÓN' or plan.estado == 'BORRADOR' %}
+      <form method="POST" action="{{ url_for('contingencia.publicar_plan', id=plan.id) }}" style="display: inline;">
+        <button type="submit" class="btn btn-publicar">✓ Publicar Plan</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  function mostrarSeccion(nombre) {
+    // Ocultar todas
+    document.querySelectorAll('.seccion-contenido').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.seccion-tab').forEach(t => t.classList.remove('active'));
+    
+    // Mostrar actual
+    document.getElementById('sec-' + nombre).classList.add('active');
+    event.target.classList.add('active');
+    
+    // Scroll arriba
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,1706 @@
+{% extends "base.html" %}
+{% block title %}Calendario – {{ mes_nombre }} {{ año }}{% endblock %}
+
+{% block content_classes %}container-fluid{% endblock %}
+
+{% block styles %}
+<style>
+    /* ===== ESTILOS iOS26 - CALENDAR MODULE ===== */
+    
+    :root {
+        --primary-green: #7cb342;
+        --primary-green-light: #a5d6a7;
+        --primary-green-dark: #558b2f;
+        --glass-bg: rgba(255, 255, 255, 0.7);
+        --glass-border: rgba(255, 255, 255, 0.3);
+        --text-primary: #1a1a1a;
+        --text-secondary: #666666;
+        --text-muted: #999999;
+    }
+    
+    .calendar-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 50%, #e8f5e9 100%);
+        padding: 2rem 1rem;
+        position: relative;
+    }
+    
+    @media (max-width: 1400px) {
+        .create-event-panel {
+            position: sticky !important;
+            right: auto !important;
+            top: 80px;
+            width: 100% !important;
+        }
+        
+        .create-event-panel.show {
+            right: auto !important;
+        }
+    }
+    
+    @media (max-width: 1200px) {
+        .calendar-container[style*="display: grid"] {
+            grid-template-columns: 1fr !important;
+        }
+        
+        .create-event-panel {
+            position: fixed;
+            right: -380px;
+            top: 80px;
+            width: 360px;
+            transition: right 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .create-event-panel.show {
+            right: 1rem;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .create-event-panel {
+            width: 90%;
+            right: -100%;
+            left: 5%;
+            top: auto;
+            bottom: 0;
+            max-height: 80vh;
+            border-radius: 24px 24px 0 0;
+            position: fixed;
+        }
+        
+        .create-event-panel.show {
+            right: auto;
+            bottom: 0;
+        }
+        
+        .floating-action-btn {
+            display: flex !important;
+            bottom: 1.5rem;
+            left: 1.5rem;
+        }
+    }
+
+    
+    /* Header con navegación */
+    .calendar-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        padding: 0 1rem;
+    }
+    
+    .calendar-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+    
+    .nav-buttons {
+        display: flex;
+        gap: 0.75rem;
+    }
+    
+    .nav-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: none;
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--glass-border);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-green);
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        text-decoration: none;
+    }
+    
+    .nav-btn:hover {
+        background: rgba(124, 179, 66, 0.1);
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(124, 179, 66, 0.2);
+        color: var(--primary-green);
+    }
+    
+    .nav-btn:active {
+        transform: scale(0.95);
+    }
+    
+    /* Main calendar grid */
+    .main-grid {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    
+    @media (max-width: 1024px) {
+        .main-grid {
+            grid-template-columns: 1fr;
+        }
+        .sidebar {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .main-grid {
+            gap: 1rem;
+        }
+        .sidebar {
+            display: flex !important;
+            flex-direction: column;
+        }
+    }
+    
+    /* Calendar panel glassmorphic */
+    .calendar-panel {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        border: 1px solid var(--glass-border);
+        padding: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    /* Grid de días */
+    .weekdays {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .weekday-label {
+        text-align: center;
+        font-weight: 600;
+        color: var(--primary-green);
+        font-size: 0.875rem;
+        padding: 0.75rem 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .days-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.5rem;
+    }
+    
+    .day-cell {
+        aspect-ratio: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 16px;
+        border: 2px solid rgba(124, 179, 66, 0.1);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        font-weight: 500;
+        color: var(--text-primary);
+        min-height: 100px;
+        padding: 0.5rem;
+        overflow: hidden;
+    }
+    
+    .day-cell:hover:not(.empty):not(.other-month) {
+        background: rgba(124, 179, 66, 0.08);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(124, 179, 66, 0.2);
+        border-color: rgba(124, 179, 66, 0.3);
+    }
+    
+    .day-cell.empty {
+        background: transparent;
+        border: none;
+        cursor: default;
+    }
+    
+    .day-cell.other-month {
+        color: var(--text-muted);
+        background: rgba(0, 0, 0, 0.02);
+        opacity: 0.5;
+    }
+    
+    .day-cell.has-events {
+        background: rgba(124, 179, 66, 0.1);
+        border: 2px solid var(--primary-green);
+    }
+    
+    .day-number {
+        font-size: 1rem;
+        line-height: 1;
+    }
+    
+    .event-indicators {
+        display: flex;
+        gap: 2px;
+        margin-top: 2px;
+        justify-content: center;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+    
+    .event-dot {
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--primary-green);
+    }
+    
+    /* Eventos en celdas */
+    .cell-events {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        margin-top: 0.5rem;
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .cell-event-badge {
+        background: linear-gradient(135deg, var(--primary-green-light), var(--primary-green));
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        font-size: 0.6rem;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 6px rgba(124, 179, 66, 0.2);
+    }
+    
+    .cell-event-badge:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
+    }
+    
+    /* Sidebar */
+    .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .sidebar-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        border: 1px solid var(--glass-border);
+        padding: 1.5rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .sidebar-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .sidebar-title i {
+        color: var(--primary-green);
+        font-size: 1.2rem;
+    }
+    
+    /* Formulario de nuevo evento */
+    .new-event-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .form-group label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        padding: 0.75rem;
+        border-radius: 12px;
+        border: 1px solid rgba(124, 179, 66, 0.2);
+        background: rgba(255, 255, 255, 0.7);
+        font-size: 0.875rem;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        transition: all 0.2s ease;
+    }
+    
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--primary-green);
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 0 0 3px rgba(124, 179, 66, 0.1);
+    }
+    
+    .form-group textarea {
+        resize: vertical;
+        min-height: 60px;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    .color-picker {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .color-option {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .color-option.primary {
+        background: #6a85f1;
+    }
+    
+    .color-option.success {
+        background: var(--primary-green);
+    }
+    
+    .color-option.warning {
+        background: #ffb64d;
+    }
+    
+    .color-option.danger {
+        background: #ff6b6b;
+    }
+    
+    .color-option.info {
+        background: #17a2b8;
+    }
+    
+    .color-option.selected {
+        border-color: var(--text-primary);
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7), 0 0 0 4px var(--text-primary);
+    }
+    
+    .btn-create-event {
+        padding: 0.875rem;
+        border-radius: 12px;
+        border: none;
+        background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.875rem;
+        box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
+    }
+    
+    .btn-create-event:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(124, 179, 66, 0.4);
+    }
+    
+    .btn-create-event:active {
+        transform: translateY(0);
+    }
+    
+    /* Próximos eventos */
+    .events-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .events-list::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .events-list::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    
+    .events-list::-webkit-scrollbar-thumb {
+        background: rgba(124, 179, 66, 0.3);
+        border-radius: 3px;
+    }
+    
+    .events-list::-webkit-scrollbar-thumb:hover {
+        background: rgba(124, 179, 66, 0.5);
+    }
+    
+    .event-item {
+        background: rgba(124, 179, 66, 0.08);
+        border-left: 3px solid var(--primary-green);
+        border-radius: 8px;
+        padding: 0.75rem;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .event-item:hover {
+        background: rgba(124, 179, 66, 0.15);
+        transform: translateX(2px);
+    }
+    
+    .event-time {
+        font-size: 0.75rem;
+        color: var(--primary-green);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .event-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0.25rem 0;
+    }
+    
+    .event-desc {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+    
+    /* Notificación flotante */
+    .notification-toast {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        border: 1px solid var(--glass-border);
+        padding: 1rem 1.5rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        max-width: 350px;
+        z-index: 1100;
+        animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(100px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .notification-toast.show {
+        animation: slideIn 0.3s ease forwards;
+    }
+    
+    .notification-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .notification-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-green-light), var(--primary-green));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+    
+    .notification-title {
+        font-weight: 700;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+    }
+    
+    .notification-text {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        line-height: 1.4;
+    }
+    
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-muted);
+    }
+    
+    .empty-state-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .empty-state-text {
+        font-size: 0.875rem;
+    }
+    
+    @media (max-width: 768px) {
+        .calendar-container {
+            padding: 1rem;
+        }
+        
+        .calendar-header {
+            padding: 0;
+        }
+        
+        .calendar-header h1 {
+            font-size: 2rem;
+        }
+        
+        .calendar-panel {
+            padding: 1rem;
+        }
+    }
+    
+    /* Panel de detalles del evento */
+    .event-detail-panel {
+        position: fixed;
+        right: -400px;
+        top: 0;
+        width: 400px;
+        height: 100vh;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border-left: 1px solid var(--glass-border);
+        box-shadow: -8px 0 32px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+        z-index: 1050;
+        transition: right 0.3s ease;
+        padding: 2rem 1.5rem;
+    }
+    
+    .event-detail-panel.show {
+        right: 0;
+    }
+    
+    .event-detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .event-detail-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+    
+    .close-detail-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(124, 179, 66, 0.1);
+        color: var(--primary-green);
+        cursor: pointer;
+        font-size: 1.2rem;
+        transition: all 0.2s ease;
+    }
+    
+    .close-detail-btn:hover {
+        background: rgba(124, 179, 66, 0.2);
+    }
+    
+    .event-detail-item {
+        margin-bottom: 1.5rem;
+    }
+    
+    .event-detail-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--primary-green);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .event-detail-value {
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        line-height: 1.5;
+    }
+    
+    .event-detail-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(124, 179, 66, 0.1);
+    }
+    
+    .event-action-btn {
+        flex: 1;
+        padding: 0.75rem;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.875rem;
+    }
+    
+    .event-action-complete {
+        background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+        color: white;
+        box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
+    }
+    
+    .event-action-complete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(124, 179, 66, 0.4);
+    }
+    
+    .event-action-delete {
+        background: rgba(255, 107, 107, 0.1);
+        color: #ff6b6b;
+        border: 1px solid rgba(255, 107, 107, 0.2);
+    }
+    
+    .event-action-delete:hover {
+        background: rgba(255, 107, 107, 0.2);
+    }
+    
+    @media (max-width: 1024px) {
+        .event-detail-panel {
+            width: 100%;
+            right: -100%;
+        }
+    }
+    
+    /* Modal flotante para crear evento */
+    .floating-action-btn {
+        position: fixed;
+        bottom: 2rem;
+        left: 2rem;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(124, 179, 66, 0.3);
+        transition: all 0.3s ease;
+        z-index: 999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .floating-action-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 24px rgba(124, 179, 66, 0.4);
+    }
+    
+    .floating-action-btn:active {
+        transform: scale(0.95);
+    }
+    
+    /* Quick event creation modal */
+    .quick-event-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .quick-event-overlay.show {
+        display: flex;
+    }
+    
+    .quick-event-modal {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 28px;
+        padding: 3rem;
+        max-width: 600px;
+        width: 95%;
+        box-shadow: 0 25px 65px rgba(0, 0, 0, 0.25);
+        animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .quick-event-header {
+        margin-bottom: 2rem;
+    }
+    
+    .quick-event-header h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 0.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .quick-event-header p {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+    
+    .quick-event-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+    
+    .quick-event-form .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .quick-event-form label {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    
+    .quick-event-form input,
+    .quick-event-form textarea {
+        padding: 0.85rem;
+        border-radius: 12px;
+        border: 1px solid rgba(124, 179, 66, 0.25);
+        background: rgba(255, 255, 255, 0.8);
+        font-size: 0.95rem;
+        font-family: inherit;
+        transition: all 0.2s ease;
+    }
+    
+    .quick-event-form input:focus,
+    .quick-event-form textarea:focus {
+        outline: none;
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 3px rgba(124, 179, 66, 0.1);
+        background: white;
+    }
+    
+    .quick-event-form textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+    
+    .quick-event-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .quick-event-btn {
+        padding: 0.85rem 1.5rem;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.95rem;
+    }
+    
+    .quick-event-btn-primary {
+        background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+        color: white;
+        box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
+    }
+    
+    .quick-event-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(124, 179, 66, 0.4);
+    }
+    
+    .quick-event-btn-secondary {
+        background: rgba(124, 179, 66, 0.1);
+        color: var(--primary-green);
+        border: 1px solid var(--primary-green);
+    }
+    
+    .quick-event-btn-secondary:hover {
+        background: rgba(124, 179, 66, 0.15);
+    }
+    
+    /* Modal de crear evento */
+    .event-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 2000;
+        animation: fadeIn 0.2s ease;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .event-modal-overlay.show {
+        display: flex;
+    }
+    
+    .event-modal-content {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        border: 1px solid var(--glass-border);
+        padding: 2rem;
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    
+    .event-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(124, 179, 66, 0.1);
+    }
+    
+    .event-modal-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+    
+    .event-modal-close {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(124, 179, 66, 0.1);
+        color: var(--primary-green);
+        cursor: pointer;
+        font-size: 1.3rem;
+        transition: all 0.2s ease;
+    }
+    
+    .event-modal-close:hover {
+        background: rgba(124, 179, 66, 0.2);
+    }
+    
+    @media (max-width: 768px) {
+        .floating-action-btn {
+            bottom: 1.5rem;
+            left: 1.5rem;
+        }
+        
+        .event-modal-content {
+            width: 95%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4" style="margin-left: 0; margin-right: 0;">
+<div class="calendar-container" style="display: grid; grid-template-columns: 1fr 420px; gap: 2rem; max-width: 100%; align-items: start; padding-right: 2rem;">
+    <div>
+    <!-- Header con navegación -->
+    <div class="calendar-header">
+        <h1>{{ mes_nombre }} {{ año }}</h1>
+        <div class="nav-buttons">
+            <a href="{{ url_for('solicitudes.calendario', year=mes_anterior.año, month=mes_anterior.mes) }}" class="nav-btn" title="Mes anterior">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            <a href="{{ url_for('solicitudes.calendario') }}" class="nav-btn" title="Hoy">
+                <i class="bi bi-calendar3"></i>
+            </a>
+            <a href="{{ url_for('solicitudes.calendario', year=mes_siguiente.año, month=mes_siguiente.mes) }}" class="nav-btn" title="Próximo mes">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Calendario Principal -->
+    <div style="max-width: 1000px; width: 100%;">
+        <div class="calendar-panel">
+            <!-- Weekday labels -->
+            <div class="weekdays">
+                {% for dia in dias_semana %}
+                    <div class="weekday-label">{{ dia }}</div>
+                {% endfor %}
+            </div>
+            
+            <!-- Days grid -->
+            <div class="days-grid">
+                {% for semana in calendario %}
+                    {% for dia in semana %}
+                        {% if dia == 0 %}
+                            <div class="day-cell empty"></div>
+                        {% else %}
+                            <div class="day-cell {% if eventos_por_dia.get(dia) %}has-events{% endif %}" onclick="abrirQuickModal({{ dia }})">
+                                <div style="width: 100%; text-align: right; padding-bottom: 0.25rem;">
+                                    <div class="day-number">{{ dia }}</div>
+                                </div>
+                                {% if eventos_por_dia.get(dia) %}
+                                    <div class="cell-events">
+                                        {% set eventos_list = eventos_por_dia.get(dia)[:2] %}
+                                        {% for evento in eventos_list %}
+                                            <div class="cell-event-badge" onclick="abrirDetalleEvento({{ evento.id }}, event)" title="{{ evento.titulo }}">
+                                                {{ evento.titulo[:12] }}{% if evento.titulo|length > 12 %}...{% endif %}
+                                            </div>
+                                        {% endfor %}
+                                        {% if eventos_por_dia.get(dia)|length > 2 %}
+                                            <div style="font-size: 0.65rem; color: var(--text-muted); text-align: center; margin-top: 0.25rem;">
+                                                +{{ eventos_por_dia.get(dia)|length - 2 }} más
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Panel flotante para crear evento (derecha) -->
+    <div class="create-event-panel" id="createEventPanel">
+        <!-- TAB 1: Crear Evento -->
+        <div id="tabCrearEvento" style="display: none;">
+            <div class="create-event-header">
+                <h3>
+                    <i class="bi bi-plus-circle"></i>
+                    Crear Evento
+                </h3>
+                <button class="create-event-close" onclick="toggleCreatePanel()">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            
+            <form id="formNuevoEvento" class="new-event-form">
+                    <div class="form-group">
+                        <label for="evTitulo">Título</label>
+                        <input type="text" id="evTitulo" name="titulo" placeholder="Nombre del evento" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="evDesc">Descripción</label>
+                        <textarea id="evDesc" name="descripcion" placeholder="Detalles opcionales"></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="evInicio">Inicio</label>
+                            <input type="datetime-local" id="evInicio" name="fecha_inicio" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="evFin">Fin</label>
+                            <input type="datetime-local" id="evFin" name="fecha_fin">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select name="categoria" id="evCategoria">
+                            <option value="personal">Personal</option>
+                            <option value="trabajo">Trabajo</option>
+                            <option value="recordatorio">Recordatorio</option>
+                            <option value="tarea">Tarea</option>
+                            <option value="reunion">Reunión</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Color</label>
+                        <div class="color-picker">
+                            <div class="color-option primary selected" data-color="primary"></div>
+                            <div class="color-option success" data-color="success"></div>
+                            <div class="color-option warning" data-color="warning"></div>
+                            <div class="color-option danger" data-color="danger"></div>
+                            <div class="color-option info" data-color="info"></div>
+                        </div>
+                        <input type="hidden" id="evColor" name="color" value="primary">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="evNotif">Notificación</label>
+                        <select id="evNotif" name="notificacion_minutos">
+                            <option value="5">5 minutos antes</option>
+                            <option value="15" selected>15 minutos antes</option>
+                            <option value="30">30 minutos antes</option>
+                            <option value="60">1 hora antes</option>
+                            <option value="1440">1 día antes</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn-create-event">
+                        <i class="bi bi-check2-circle" style="margin-right: 0.5rem;"></i>
+                        Crear Evento
+                    </button>
+            </form>
+        </div>
+        
+        <!-- TAB 2: Historial y Próximos Eventos -->
+        <div id="tabHistorialEventos" style="display: block;">
+            <div class="create-event-header">
+                <h3>
+                    <i class="bi bi-clock-history"></i>
+                    Próximos Eventos
+                </h3>
+            </div>
+            
+            <!-- Próximos eventos -->
+            <div id="proximosEventosList" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
+                {% if proximos_eventos %}
+                    {% for evento in proximos_eventos %}
+                        <div style="background: rgba(124, 179, 66, 0.08); border: 1px solid rgba(124, 179, 66, 0.2); border-radius: 12px; padding: 1rem; cursor: pointer;" onclick="abrirDetalleEvento({{ evento.id }}, null)">
+                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">{{ evento.titulo }}</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                                <i class="bi bi-clock"></i> {{ evento.fecha_inicio_formato }}
+                            </div>
+                            {% if evento.descripcion %}
+                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">{{ evento.descripcion[:50] }}{% if evento.descripcion|length > 50 %}...{% endif %}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📅</div>
+                        <div>No hay eventos próximos</div>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Opción para agregar reunión virtual -->
+            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(124, 179, 66, 0.1);">
+                <h4 style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="bi bi-camera-video"></i>
+                    Agregar Reunión Virtual
+                </h4>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                    <button type="button" style="padding: 0.7rem; background: rgba(59, 89, 152, 0.15); border: 1px solid rgba(59, 89, 152, 0.3); border-radius: 8px; color: #3B5998; font-weight: 600; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;" onmouseover="this.style.background='rgba(59, 89, 152, 0.25)'" onmouseout="this.style.background='rgba(59, 89, 152, 0.15)'" onclick="agregarPlataforma('meet')">
+                        <i class="bi bi-google" style="margin-right: 0.3rem;"></i>
+                        Google Meet
+                    </button>
+                    <button type="button" style="padding: 0.7rem; background: rgba(0, 102, 204, 0.15); border: 1px solid rgba(0, 102, 204, 0.3); border-radius: 8px; color: #0066CC; font-weight: 600; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;" onmouseover="this.style.background='rgba(0, 102, 204, 0.25)'" onmouseout="this.style.background='rgba(0, 102, 204, 0.15)'" onclick="agregarPlataforma('zoom')">
+                        <i class="bi bi-camera-video" style="margin-right: 0.3rem;"></i>
+                        Zoom
+                    </button>
+                    <button type="button" style="padding: 0.7rem; background: rgba(31, 131, 255, 0.15); border: 1px solid rgba(31, 131, 255, 0.3); border-radius: 8px; color: #1F83FF; font-weight: 600; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;" onmouseover="this.style.background='rgba(31, 131, 255, 0.25)'" onmouseout="this.style.background='rgba(31, 131, 255, 0.15)'" onclick="agregarPlataforma('teams')">
+                        <i class="bi bi-microsoft" style="margin-right: 0.3rem;"></i>
+                        Teams
+                    </button>
+                    <button type="button" style="padding: 0.7rem; background: rgba(124, 179, 66, 0.15); border: 1px solid rgba(124, 179, 66, 0.3); border-radius: 8px; color: var(--primary-green); font-weight: 600; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;" onmouseover="this.style.background='rgba(124, 179, 66, 0.25)'" onmouseout="this.style.background='rgba(124, 179, 66, 0.15)'" onclick="agregarPlataforma('otra')">
+                        <i class="bi bi-plus-lg" style="margin-right: 0.3rem;"></i>
+                        Otra
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Botón flotante para abrir panel (solo en mobile) -->
+<button class="floating-action-btn" onclick="toggleCreatePanel()" title="Crear nuevo evento" style="display: none;">
+    <i class="bi bi-plus-lg"></i>
+</button>
+
+<!-- Notificaciones flotantes -->
+<div id="notificationsContainer"></div>
+
+<!-- Modal rápido para crear evento (al hacer click en un día) -->
+<div class="quick-event-overlay" id="quickEventModal">
+    <div class="quick-event-modal" onclick="event.stopPropagation()">
+        <div class="quick-event-header">
+            <h2>
+                <i class="bi bi-calendar-plus"></i>
+                Nuevo Evento
+            </h2>
+            <p id="quickEventDate">Selecciona una fecha</p>
+        </div>
+        
+        <form id="formQuickEvento" class="quick-event-form">
+            <div class="form-group">
+                <label for="quickEvTitulo">Evento</label>
+                <input type="text" id="quickEvTitulo" name="titulo" placeholder="Nombre del evento" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="quickEvHora">Hora</label>
+                <input type="time" id="quickEvHora" name="hora" value="09:00" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="quickEvDesc">Descripción</label>
+                <textarea id="quickEvDesc" name="descripcion" placeholder="Detalles del evento"></textarea>
+            </div>
+            
+            <input type="hidden" id="quickEvFecha" name="fecha_inicio">
+            
+            <div class="quick-event-actions">
+                <button type="button" class="quick-event-btn quick-event-btn-secondary" onclick="cerrarQuickModal()">
+                    Cancelar
+                </button>
+                <button type="submit" class="quick-event-btn quick-event-btn-primary">
+                    <i class="bi bi-check-circle" style="margin-right: 0.5rem;"></i>
+                    Crear
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Panel de detalles del evento -->
+<div id="eventDetailPanel" class="event-detail-panel">
+    <div class="event-detail-header">
+        <h2 class="event-detail-title" id="detailTitle">Evento</h2>
+        <button class="close-detail-btn" onclick="cerrarDetalleEvento()">
+            <i class="bi bi-x"></i>
+        </button>
+    </div>
+    
+    <div id="detailContent" style="display: none;">
+        <div class="event-detail-item">
+            <div class="event-detail-label">⏰ Hora</div>
+            <div class="event-detail-value" id="detailTime">-</div>
+        </div>
+        
+        <div class="event-detail-item">
+            <div class="event-detail-label">📅 Fecha</div>
+            <div class="event-detail-value" id="detailDate">-</div>
+        </div>
+        
+        <div class="event-detail-item" id="detailDescContainer" style="display: none;">
+            <div class="event-detail-label">📝 Descripción</div>
+            <div class="event-detail-value" id="detailDesc">-</div>
+        </div>
+        
+        <div class="event-detail-item">
+            <div class="event-detail-label">🏷️ Categoría</div>
+            <div class="event-detail-value" id="detailCategory">-</div>
+        </div>
+        
+        <div class="event-detail-item">
+            <div class="event-detail-label">🔔 Notificación</div>
+            <div class="event-detail-value" id="detailNotification">-</div>
+        </div>
+        
+        <div class="event-detail-actions">
+            <button class="event-action-btn event-action-complete" onclick="completarEventoDesdePanel()" id="btnCompleteDetail">
+                Marcar completado
+            </button>
+            <button class="event-action-btn event-action-delete" onclick="eliminarEventoDesdePanel()">
+                Eliminar
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ===== JAVASCRIPT: CALENDAR FUNCTIONALITY =====
+    
+    let selectedColor = 'primary';
+    let currentEventId = null;
+    
+    // Alternar panel de crear evento
+    function toggleCreatePanel() {
+        const panel = document.getElementById('createEventPanel');
+        panel.classList.toggle('show');
+    }
+    
+    // Abrir panel de crear evento
+    function abrirCreatePanel() {
+        document.getElementById('createEventPanel').classList.add('show');
+    }
+    
+    // Cerrar panel de crear evento
+    function cerrarCreatePanel() {
+        document.getElementById('createEventPanel').classList.remove('show');
+    }
+    
+    // ===== QUICK EVENT MODAL FUNCTIONS =====
+    
+    let selectedQuickDate = null;
+    
+    // Abrir modal rápido al hacer click en un día
+    function abrirQuickModal(dia) {
+        const mes = {{ mes }};
+        const año = {{ año }};
+        
+        // Crear fecha completa
+        const fecha = new Date(año, mes - 1, dia);
+        selectedQuickDate = fecha;
+        
+        // Mostrar fecha formateada
+        const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const fechaFormato = fecha.toLocaleDateString('es-ES', opciones);
+        document.getElementById('quickEventDate').textContent = '📅 ' + fechaFormato;
+        
+        // Establecer la fecha oculta
+        document.getElementById('quickEvFecha').value = fecha.toISOString().split('T')[0];
+        
+        // Limpiar form
+        document.getElementById('formQuickEvento').reset();
+        document.getElementById('quickEvHora').value = '09:00';
+        
+        // Mostrar modal
+        document.getElementById('quickEventModal').classList.add('show');
+        document.getElementById('quickEvTitulo').focus();
+    }
+    
+    // Cerrar modal rápido
+    function cerrarQuickModal() {
+        document.getElementById('quickEventModal').classList.remove('show');
+        selectedQuickDate = null;
+    }
+    
+    // Crear evento desde modal rápido
+    const formQuick = document.getElementById('formQuickEvento');
+    if (formQuick) {
+        formQuick.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!selectedQuickDate) return;
+            
+            const titulo = document.getElementById('quickEvTitulo').value;
+            const hora = document.getElementById('quickEvHora').value;
+            const descripcion = document.getElementById('quickEvDesc').value;
+            
+            // Crear datetime completo - CORRECCIÓN: usar zona local (no UTC)
+            const [hours, minutes] = hora.split(':');
+            const fechaInicio = new Date(selectedQuickDate);
+            fechaInicio.setHours(parseInt(hours), parseInt(minutes));
+            
+            // Convertir a ISO string local (sin conversión a UTC)
+            const año = fechaInicio.getFullYear();
+            const mes = String(fechaInicio.getMonth() + 1).padStart(2, '0');
+            const dia = String(fechaInicio.getDate()).padStart(2, '0');
+            const h = String(fechaInicio.getHours()).padStart(2, '0');
+            const m = String(fechaInicio.getMinutes()).padStart(2, '0');
+            const isoLocal = `${año}-${mes}-${dia}T${h}:${m}:00`;
+            
+            const formData = new FormData();
+            formData.append('titulo', titulo);
+            formData.append('descripcion', descripcion);
+            formData.append('fecha_inicio', isoLocal);
+            formData.append('fecha_fin', isoLocal);
+            formData.append('categoria', 'personal');
+            formData.append('color', 'primary');
+            formData.append('notificacion_minutos', 15);
+            
+            try {
+                const response = await fetch('{{ url_for("solicitudes.crear_evento") }}', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Reproducir sonido de notificación tipo iPhone
+                    reproducirSonidoNotificacion();
+                    showNotification('Evento creado', '✅ ' + data.message, 'success');
+                    cerrarQuickModal();
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    reproducirSonidoNotificacion('error');
+                    showNotification('Error', '❌ ' + data.error, 'error');
+                }
+            } catch (error) {
+                showNotification('Error', '❌ No se pudo crear el evento', 'error');
+                console.error(error);
+            }
+        });
+    }
+    
+    // Cerrar modal al hacer click fuera
+    document.getElementById('quickEventModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            cerrarQuickModal();
+        }
+    });
+    
+    // Color picker
+    document.querySelectorAll('.color-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+            this.classList.add('selected');
+            selectedColor = this.dataset.color;
+            document.getElementById('evColor').value = selectedColor;
+        });
+    });
+    
+    // Form submission
+    const form = document.getElementById('formNuevoEvento');
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            
+            try {
+                const response = await fetch('{{ url_for("solicitudes.crear_evento") }}', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Evento creado', '✅ ' + data.message, 'success');
+                    e.target.reset();
+                    selectedColor = 'primary';
+                    cerrarModalEvento();
+                    document.querySelector('.color-option.primary').classList.add('selected');
+                    
+                    // Recargar después de 1 segundo
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showNotification('Error', '❌ ' + data.error, 'error');
+                }
+            } catch (error) {
+                showNotification('Error', '❌ No se pudo crear el evento', 'error');
+                console.error(error);
+            }
+        });
+    }
+    
+    // Mostrar notificación flotante
+    function showNotification(title, text, type = 'info') {
+        const container = document.getElementById('notificationsContainer');
+        const notification = document.createElement('div');
+        notification.className = 'notification-toast show';
+        
+        const iconClass = type === 'success' ? 'bi-check-circle' : type === 'error' ? 'bi-exclamation-circle' : 'bi-info-circle';
+        
+        notification.innerHTML = `
+            <div class="notification-header">
+                <div class="notification-icon">
+                    <i class="bi ${iconClass}"></i>
+                </div>
+                <div class="notification-title">${title}</div>
+            </div>
+            <div class="notification-text">${text}</div>
+        `;
+        
+        container.appendChild(notification);
+        
+        // Auto-remove después de 4 segundos
+        setTimeout(() => {
+            notification.style.animation = 'slideIn 0.3s ease reverse';
+            setTimeout(() => notification.remove(), 300);
+        }, 4000);
+    }
+    
+    // Agregar plataforma de reunión virtual
+    function agregarPlataforma(plataforma) {
+        let url = '';
+        let titulo = '';
+        
+        switch(plataforma) {
+            case 'meet':
+                url = 'https://meet.google.com/new';
+                titulo = 'Google Meet';
+                break;
+            case 'zoom':
+                url = 'https://zoom.us/';
+                titulo = 'Zoom';
+                break;
+            case 'teams':
+                url = 'https://teams.microsoft.com/';
+                titulo = 'Microsoft Teams';
+                break;
+            case 'otra':
+                url = prompt('Ingresa la URL de la plataforma de reunión:');
+                if (!url) return;
+                titulo = 'Reunión Virtual';
+                break;
+        }
+        
+        showNotification('Plataforma', `✅ Abre ${titulo} en una nueva ventana`, 'success');
+        window.open(url, '_blank');
+    }
+    
+    // Abrir detalles del evento
+    function abrirDetalleEvento(eventoId, event) {
+        if (event) event.stopPropagation();
+        currentEventId = eventoId;
+        
+        // Obtener datos del evento
+        const eventos = {{ eventos_por_dia | tojson }};
+        let eventoEncontrado = null;
+        
+        for (let dia in eventos) {
+            for (let evento of eventos[dia]) {
+                if (evento.id === eventoId) {
+                    eventoEncontrado = evento;
+                    break;
+                }
+            }
+            if (eventoEncontrado) break;
+        }
+        
+        if (eventoEncontrado) {
+            // Llenar panel de detalles
+            document.getElementById('detailTitle').textContent = eventoEncontrado.titulo;
+            
+            const fechaInicio = new Date(eventoEncontrado.fecha_inicio);
+            document.getElementById('detailTime').textContent = fechaInicio.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('detailDate').textContent = fechaInicio.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            
+            if (eventoEncontrado.descripcion) {
+                document.getElementById('detailDesc').textContent = eventoEncontrado.descripcion;
+                document.getElementById('detailDescContainer').style.display = 'block';
+            } else {
+                document.getElementById('detailDescContainer').style.display = 'none';
+            }
+            
+            document.getElementById('detailCategory').textContent = eventoEncontrado.categoria.charAt(0).toUpperCase() + eventoEncontrado.categoria.slice(1);
+            document.getElementById('detailNotification').textContent = eventoEncontrado.notificacion_minutos + ' minutos antes';
+            
+            document.getElementById('detailContent').style.display = 'block';
+            document.getElementById('eventDetailPanel').classList.add('show');
+        }
+    }
+    
+    // Cerrar panel de detalles
+    function cerrarDetalleEvento() {
+        document.getElementById('eventDetailPanel').classList.remove('show');
+        currentEventId = null;
+    }
+    
+    // Completar evento desde el panel
+    async function completarEventoDesdePanel() {
+        if (!currentEventId) return;
+        
+        try {
+            const response = await fetch(`{{ url_for('solicitudes.completar_evento', evento_id=0) }}`.replace('/0/', '/' + currentEventId + '/'), {
+                method: 'POST'
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                showNotification('Éxito', '✅ Evento marcado como ' + (data.completado ? 'completado' : 'pendiente'), 'success');
+                cerrarDetalleEvento();
+                setTimeout(() => location.reload(), 1000);
+            }
+        } catch (error) {
+            showNotification('Error', '❌ No se pudo completar el evento', 'error');
+        }
+    }
+    
+    // Eliminar evento desde el panel
+    async function eliminarEventoDesdePanel() {
+        if (!currentEventId || !confirm('¿Eliminar este evento permanentemente?')) return;
+        
+        try {
+            const response = await fetch(`{{ url_for('solicitudes.eliminar_evento', evento_id=0) }}`.replace('/0/', '/' + currentEventId + '/'), {
+                method: 'POST'
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                showNotification('Éxito', '✅ Evento eliminado', 'success');
+                cerrarDetalleEvento();
+                setTimeout(() => location.reload(), 1000);
+            }
+        } catch (error) {
+            showNotification('Error', '❌ No se pudo eliminar el evento', 'error');
+        }
+    }
+    
+    // Cerrar panel al hacer clic fuera
+    document.addEventListener('click', function(event) {
+        const panel = document.getElementById('eventDetailPanel');
+        if (panel && !panel.contains(event.target) && !event.target.closest('.cell-event-badge')) {
+            cerrarDetalleEvento();
+        }
+    });
+    
+    // Mostrar eventos próximos
+    function mostrarEventosDia(dia, event) {
+        if (event) event.stopPropagation();
+    }
+    
+    // Actualizar lista de próximos eventos cada 30 segundos
+    async function actualizarProximosEventos() {
+        try {
+            const response = await fetch('{{ url_for("solicitudes.obtener_proximos_eventos") }}');
+            const eventos = await response.json();
+            const container = document.getElementById('proximosEventosList');
+            
+            if (eventos.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📅</div>
+                        <div>No hay eventos próximos</div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = eventos.map(evento => `
+                    <div style="background: rgba(124, 179, 66, 0.08); border: 1px solid rgba(124, 179, 66, 0.2); border-radius: 12px; padding: 1rem; cursor: pointer;" onclick="abrirDetalleEvento(${evento.id}, null)">
+                        <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">${evento.titulo}</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                            <i class="bi bi-clock"></i> ${evento.fecha_inicio_formato}
+                        </div>
+                        ${evento.descripcion ? `<div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">${evento.descripcion.substring(0, 50)}${evento.descripcion.length > 50 ? '...' : ''}</div>` : ''}
+                    </div>
+                `).join('');
+            }
+        } catch (error) {
+            console.error('Error actualizando próximos eventos:', error);
+        }
+    }
+    
+    // Actualizar ahora y cada 30 segundos
+    actualizarProximosEventos();
+    setInterval(actualizarProximosEventos, 30000);
+    
+    // Inicializar panel en desktop
+    window.addEventListener('DOMContentLoaded', () => {
+        if (window.innerWidth > 1200) {
+            document.getElementById('createEventPanel').classList.add('show');
+        }
+        // Abrir detalle si se llega con ?open_event=ID
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const openId = params.get('open_event');
+            if (openId) {
+                setTimeout(() => { if (typeof abrirDetalleEvento === 'function') abrirDetalleEvento(parseInt(openId), null); }, 500);
+            }
+        } catch {}
+    });
+    
+    // Monitorear cambios de tamaño
+    window.addEventListener('resize', () => {
+        const panel = document.getElementById('createEventPanel');
+        if (window.innerWidth > 1200) {
+            panel.classList.add('show');
+        } else if (window.innerWidth <= 768) {
+            panel.classList.remove('show');
+        }
+    });
+    
+    // ===== SONIDO DE NOTIFICACIÓN TIPO IPHONE =====
+    // Crear sonido sintetizado tipo notificación de iPhone
+    function reproducirSonidoNotificacion(tipo = 'success') {
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const ahora = audioContext.currentTime;
+            
+            if (tipo === 'success') {
+                // Sonido de éxito: dos notas ascendentes
+                const osc1 = audioContext.createOscillator();
+                const osc2 = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                osc1.frequency.setValueAtTime(1000, ahora);
+                osc2.frequency.setValueAtTime(1200, ahora);
+                
+                osc1.type = 'sine';
+                osc2.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.25, ahora);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ahora + 0.3);
+                
+                osc1.connect(gainNode);
+                osc2.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                osc1.start(ahora);
+                osc2.start(ahora + 0.1);
+                osc1.stop(ahora + 0.15);
+                osc2.stop(ahora + 0.25);
+            } else if (tipo === 'error') {
+                // Sonido de error: nota baja
+                const osc = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                osc.frequency.setValueAtTime(400, ahora);
+                osc.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.25, ahora);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ahora + 0.4);
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                osc.start(ahora);
+                osc.stop(ahora + 0.4);
+            }
+        } catch (error) {
+            console.log('Audio context no disponible, notificación visual solamente');
+        }
+    }
+    
+    // Reproducir sonido cuando el recordatorio se dispara
+    // Usar la función anterior cuando se verifiquen notificaciones
+
+
+</script>
+
+{% endblock %}

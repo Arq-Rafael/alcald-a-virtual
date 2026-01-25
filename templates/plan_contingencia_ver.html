@@ -1,0 +1,330 @@
+{% extends "base.html" %}
+{% block title %}Ver Plan de Contingencia{% endblock %}
+
+{% block styles %}
+<style>
+  body {
+    background: linear-gradient(135deg, #f5f5f7 0%, #efefef 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  .container-detalle {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+  }
+
+  .detalle-card {
+    background: white;
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+  }
+
+  .detalle-header {
+    border-bottom: 2px solid #2d5016;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+  }
+
+  .detalle-header h1 {
+    color: #1d1d1f;
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+
+  .detalle-header p {
+    color: #666;
+    font-size: 14px;
+  }
+
+  .seccion {
+    margin-bottom: 30px;
+  }
+
+  .seccion h2 {
+    color: #2d5016;
+    font-size: 20px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #2d5016;
+  }
+
+  .campo {
+    margin-bottom: 18px;
+  }
+
+  .campo label {
+    display: block;
+    font-weight: 700;
+    color: #2d5016;
+    margin-bottom: 6px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .campo-valor {
+    background: #f8f9fa;
+    padding: 12px 16px;
+    border-left: 4px solid #2d5016;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #1d1d1f;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+
+  .btn-grupo {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+  }
+
+  .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-volver {
+    background: #f0f0f0;
+    color: #2d5016;
+  }
+
+  .btn-descargar {
+    background: linear-gradient(135deg, #2d5016 0%, #5a8a3a 100%);
+    color: white;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-detalle">
+  <div class="detalle-card">
+    <div class="detalle-header">
+      <h1 id="planTitulo">Cargando plan...</h1>
+      <p id="planNumero">-</p>
+    </div>
+
+    <div id="planContenido">
+      <!-- Se llenará con JavaScript -->
+    </div>
+
+    <div class="btn-grupo">
+      <a href="/gestion-riesgo/planes-contingencia-v2" class="btn btn-volver">
+        ← Volver a la Lista
+      </a>
+      <button class="btn btn-descargar" onclick="descargarPDF()">
+        📄 Descargar PDF
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const planId = {{ plan_id }};
+  let planActual = null;
+
+  function addCampo(html, label, valor) {
+    const contenido = (valor === 0 || valor === '' || valor) ? valor : '';
+    const texto = contenido ? contenido : 'No registrado';
+    return html + `<div class="campo"><label>${label}:</label><div class="campo-valor">${texto}</div></div>`;
+  }
+  
+  function cargarPlan() {
+    const planes = JSON.parse(localStorage.getItem('planes_contingencia') || '[]');
+    planActual = planes.find(p => p.id === planId);
+    
+    if (!planActual) {
+      document.getElementById('planContenido').innerHTML = '<p style="color: red;">Plan no encontrado.</p>';
+      return;
+    }
+    
+    // Actualizar header
+    document.getElementById('planTitulo').textContent = planActual.nombre_plan || 'Sin nombre';
+    document.getElementById('planNumero').textContent = planActual.numero_plan || 'N/A';
+    
+    let html = '';
+    
+    // 0. Datos Generales
+    html += '<div class="seccion">';
+    html += '<h2>📋 Datos Generales del Plan</h2>';
+    html = addCampo(html, 'Número de Plan', planActual.numero_plan || 'N/A');
+    html = addCampo(html, 'Nombre del Plan', planActual.nombre_plan || 'Sin nombre');
+    html = addCampo(html, 'Municipio', planActual.municipio || 'Supatá');
+    html = addCampo(html, 'Departamento', planActual.departamento || 'Cundinamarca');
+    html = addCampo(html, 'Población', (planActual.poblacion_municipio || '6428') + ' habitantes');
+    html = addCampo(html, 'Tipo de Evento', planActual.tipo_evento || 'No especificado');
+    html += '</div>';
+    
+    // 1. Introducción
+    html += '<div class="seccion">';
+    html += '<h2>1️⃣ Introducción</h2>';
+    html = addCampo(html, 'Descripción del Evento', planActual.introduccion_descripcion);
+    html = addCampo(html, 'Justificación del Plan', planActual.introduccion_justificacion);
+    html = addCampo(html, 'Contexto General', planActual.introduccion_contexto);
+    html += '</div>';
+    
+    // 2. Objetivos y Alcance
+    html += '<div class="seccion">';
+    html += '<h2>2️⃣ Objetivos y Alcance</h2>';
+    html = addCampo(html, 'Objetivo General', planActual.objetivo_general);
+    html = addCampo(html, 'Alcance del Evento', planActual.alcance_evento);
+    html = addCampo(html, 'Ubicación', planActual.alcance_ubicacion);
+    html = addCampo(html, 'Duración / Fechas', planActual.alcance_duracion);
+    html = addCampo(html, 'Aforo Estimado', planActual.alcance_aforo ? `${planActual.alcance_aforo} personas` : '');
+    html += '</div>';
+    
+    // 3. Marco Normativo
+    html += '<div class="seccion">';
+    html += '<h2>3️⃣ Marco Normativo</h2>';
+    html = addCampo(html, 'Normatividad Aplicable', planActual.marco_normativo);
+    html += '</div>';
+    
+    // 4. Organización y Responsables
+    html += '<div class="seccion">';
+    html += '<h2>4️⃣ Organización y Responsabilidades</h2>';
+    html = addCampo(html, 'Coordinador General', planActual.coordinador_general);
+    html = addCampo(html, 'Ubicación PMU', planActual.pmu_ubicacion);
+    html = addCampo(html, 'Organismos de Apoyo', planActual.organismos_apoyo);
+    html += '</div>';
+    
+    // 5. Análisis de Amenazas
+    html += '<div class="seccion">';
+    html += '<h2>5️⃣ Análisis de Amenazas</h2>';
+    html = addCampo(html, 'Descripción del Escenario', planActual.descripcion_escenario);
+    html = addCampo(html, 'Amenazas Identificadas', planActual.amenazas_identificadas);
+    html = addCampo(html, 'Vulnerabilidades', planActual.vulnerabilidades);
+    html += '</div>';
+    
+    // 6. Medidas de Reducción
+    html += '<div class="seccion">';
+    html += '<h2>6️⃣ Medidas de Reducción del Riesgo</h2>';
+    html = addCampo(html, 'Medidas de Seguridad', planActual.medidas_seguridad);
+    html = addCampo(html, 'Adecuación del Lugar', planActual.adecuacion_lugar);
+    html = addCampo(html, 'Capacitación del Personal', planActual.capacitacion_personal);
+    html += '</div>';
+    
+    // 7. Respuesta y Evacuación
+    html += '<div class="seccion">';
+    html += '<h2>7️⃣ Procedimientos de Respuesta</h2>';
+    html = addCampo(html, 'Procedimiento General', planActual.procedimiento_general);
+    html = addCampo(html, 'Rutas de Evacuación', planActual.rutas_evacuacion);
+    html = addCampo(html, 'Puntos de Encuentro', planActual.puntos_encuentro);
+    html = addCampo(html, 'Capacidad de Rutas', planActual.capacidad_rutas);
+    html = addCampo(html, 'Recursos Disponibles', planActual.recursos_disponibles);
+    html += '</div>';
+    
+    // 8. Actualización y Mejora
+    html += '<div class="seccion">';
+    html += '<h2>8️⃣ Actualización del Plan</h2>';
+    html = addCampo(html, 'Responsable de Actualización', planActual.responsable_actualizacion);
+    html = addCampo(html, 'Frecuencia de Actualización', planActual.frecuencia_actualizacion);
+    html += '</div>';
+    
+    // 9. Anexos / Observaciones
+    html += '<div class="seccion">';
+    html += '<h2>9️⃣ Anexos y Observaciones</h2>';
+    
+    // Mostrar anexos con imágenes
+    if (planActual.anexos_imagenes && planActual.anexos_imagenes.length > 0) {
+      html += '<div class="campo">';
+      html += '<strong>📎 Anexos Visuales</strong>';
+      html += '<div style="margin-top: 15px;">';
+      
+      planActual.anexos_imagenes.forEach((anexo, index) => {
+        html += '<div style="border: 2px solid #e0e0e0; border-radius: 12px; padding: 20px; margin-bottom: 20px; background: #fafafa;">';
+        html += `<h4 style="color: #424242; margin-top: 0;">Anexo ${index + 1}: ${anexo.descripcion}</h4>`;
+        
+        if (anexo.tipo && anexo.tipo.startsWith('image')) {
+          html += `<img src="${anexo.data}" alt="${anexo.descripcion}" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-top: 10px;">`;
+        } else if (anexo.tipo === 'application/pdf') {
+          html += `<div style="padding: 20px; background: #fff3cd; border-radius: 8px; border: 1px solid #ffc107; margin-top: 10px;">`;
+          html += `<p style="margin: 0; color: #856404;">📄 <strong>${anexo.nombre_archivo}</strong></p>`;
+          html += `<small style="color: #856404;">PDF adjunto</small>`;
+          html += `</div>`;
+        }
+        
+        html += `<p style="color: #757575; margin-top: 10px; font-size: 14px;"><em>${anexo.nombre_archivo}</em></p>`;
+        html += '</div>';
+      });
+      
+      html += '</div>';
+      html += '</div>';
+    }
+    
+    html = addCampo(html, 'Observaciones Adicionales', planActual.observaciones);
+    html += '</div>';
+    
+    // Información de creación
+    html += '<div class="seccion">';
+    html += '<h2>📅 Información de Creación</h2>';
+    html = addCampo(html, 'Fecha de Creación', new Date(planActual.fecha_creacion).toLocaleString('es-CO'));
+    html += '</div>';
+    
+    document.getElementById('planContenido').innerHTML = html;
+  }
+  
+  function descargarPDF() {
+    if (!planActual) {
+      alert('Plan no cargado');
+      return;
+    }
+    
+    const btnDescargar = document.querySelector('.btn-descargar');
+    const textoOriginal = btnDescargar.textContent;
+    btnDescargar.textContent = '⏳ Generando PDF...';
+    btnDescargar.disabled = true;
+    
+    // Enviar al backend para generar PDF profesional
+    fetch('/gestion-riesgo/planes-contingencia-v2/descargar-pdf/' + planActual.id, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(planActual)
+    })
+    .then(response => {
+      if (!response.ok) throw new Error('Error al descargar PDF');
+      return response.blob();
+    })
+    .then(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const nombreArchivo = (planActual.nombre_plan || 'Plan-Contingencia').replace(/\s+/g, '-') + '.pdf';
+      a.download = nombreArchivo;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      btnDescargar.textContent = textoOriginal;
+      btnDescargar.disabled = false;
+      alert('✓ PDF descargado correctamente');
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      btnDescargar.textContent = textoOriginal;
+      btnDescargar.disabled = false;
+      alert('Error al descargar PDF: ' + error.message);
+    });
+  }
+  
+  cargarPlan();
+</script>
+{% endblock %}

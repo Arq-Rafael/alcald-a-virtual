@@ -1,0 +1,120 @@
+<!-- WIDGET PLANES DE CONTINGENCIA - para agregar al dashboard -->
+<!-- Copiar en: templates/dashboard.html o crear enlace en menú -->
+
+<div class="widget-planes-contingencia" style="
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-left: 4px solid #2d5016;
+  margin-bottom: 20px;
+">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+    <div>
+      <h3 style="
+        font-size: 18px;
+        color: #1d1d1f;
+        margin: 0;
+        font-weight: 600;
+      ">
+        📋 Planes de Contingencia
+      </h3>
+      <p style="
+        color: #666;
+        font-size: 13px;
+        margin: 6px 0 0 0;
+      ">Gestiona planes para eventos masivos según Ley 1523</p>
+    </div>
+    <a href="{{ url_for('contingencia.listar_planes') }}" style="
+      background: linear-gradient(135deg, #2d5016 0%, #5a8a3a 100%);
+      color: white;
+      padding: 10px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 6px rgba(45, 80, 22, 0.15);
+    "
+    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 10px rgba(45, 80, 22, 0.25)';"
+    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 6px rgba(45, 80, 22, 0.15)';">
+      Ver Planes →
+    </a>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
+    <a href="{{ url_for('contingencia.crear_plan') }}" style="
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: #f9f9fb;
+      border: 1.5px solid #e5e5e7;
+      border-radius: 10px;
+      text-decoration: none;
+      color: #2d5016;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    "
+    onmouseover="this.style.background='#efefef'; this.style.borderColor='#2d5016';"
+    onmouseout="this.style.background='#f9f9fb'; this.style.borderColor='#e5e5e7';">
+      <span style="font-size: 24px; margin-bottom: 6px;">+</span>
+      Crear Plan
+    </a>
+
+    <a href="{{ url_for('contingencia.listar_planes') }}" style="
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: #f9f9fb;
+      border: 1.5px solid #e5e5e7;
+      border-radius: 10px;
+      text-decoration: none;
+      color: #2d5016;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    "
+    onmouseover="this.style.background='#efefef'; this.style.borderColor='#2d5016';"
+    onmouseout="this.style.background='#f9f9fb'; this.style.borderColor='#e5e5e7';">
+      <span style="font-size: 24px; margin-bottom: 6px;">📋</span>
+      Ver Planes
+    </a>
+
+    <a href="{{ url_for('contingencia.listar_planes') }}" style="
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: #f9f9fb;
+      border: 1.5px solid #e5e5e7;
+      border-radius: 10px;
+      text-decoration: none;
+      color: #2d5016;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    "
+    onmouseover="this.style.background='#efefef'; this.style.borderColor='#2d5016';"
+    onmouseout="this.style.background='#f9f9fb'; this.style.borderColor='#e5e5e7';">
+      <span style="font-size: 24px; margin-bottom: 6px;">📊</span>
+      Estadísticas
+    </a>
+  </div>
+
+  <div style="
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #f0f0f0;
+    font-size: 12px;
+    color: #999;
+  ">
+    <strong style="color: #1d1d1f;">ℹ Auto-datos de Supatá:</strong> Municipio, población (6,428), altitud (1,798 msnm), clima, organismos emergencia
+  </div>
+</div>

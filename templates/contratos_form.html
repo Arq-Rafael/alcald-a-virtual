@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="mb-3">
+    {% if modo == 'editar' %}Editar Contrato{% else %}Nuevo Contrato{% endif %}
+</h1>
+
+<form method="post" class="row g-3">
+
+    <!-- TIPO -->
+    <div class="col-md-3">
+        <label class="form-label">Tipo</label>
+        <select name="tipo" id="tipo" class="form-select" required>
+            {% set T = data.tipo or '' %}
+            <option value="">— Selecciona —</option>
+            <option value="OPS" {% if T=='OPS' %}selected{% endif %}>OPS</option>
+            <option value="Convenio" {% if T=='Convenio' %}selected{% endif %}>Convenio</option>
+            <option value="Obra" {% if T=='Obra' %}selected{% endif %}>Obra</option>
+            <option value="Interventoria" {% if T=='Interventoria' %}selected{% endif %}>Interventoría</option>
+            <option value="SECOP" {% if T=='SECOP' %}selected{% endif %}>En proceso (SECOP)</option>
+        </select>
+    </div>
+
+    <!-- NÚMERO INTERNO -->
+    <div class="col-md-3">
+        <label class="form-label">Número interno</label>
+        <input name="numero" class="form-control" value="{{ data.numero or '' }}" placeholder="(opcional)">
+    </div>
+
+    <!-- OBJETO -->
+    <div class="col-md-6">
+        <label class="form-label">Objeto</label>
+        <input name="objeto" class="form-control" value="{{ data.objeto or '' }}" required>
+    </div>
+
+    <!-- CONTRATISTA / ENTIDAD (según tipo) -->
+    <div class="col-md-6 tipo-ops tipo-obra tipo-interv">
+        <label class="form-label">Contratista</label>
+        <input name="contratista" class="form-control" value="{{ data.contratista or '' }}">
+    </div>
+
+    <div class="col-md-6 tipo-convenio d-none">
+        <label class="form-label">Entidad (Convenio)</label>
+        <input name="entidad" class="form-control" value="{{ data.entidad or '' }}">
+    </div>
+
+    <!-- SUPERVISOR / VALOR -->
+    <div class="col-md-4">
+        <label class="form-label">Supervisor</label>
+        <input name="supervisor" class="form-control" value="{{ data.supervisor or '' }}">
+    </div>
+
+    <div class="col-md-4">
+        <label class="form-label">Valor ($)</label>
+        <input type="number" step="0.01" name="valor" class="form-control" value="{{ data.valor or '' }}">
+    </div>
+
+    <!-- SECOP URL (solo SECOP) -->
+    <div class="col-md-4 tipo-secop d-none">
+        <label class="form-label">URL SECOP</label>
+        <input name="secop_url" class="form-control" value="{{ data.secop_url or '' }}" placeholder="https://...">
+    </div>
+
+    <!-- PLAZOS (no SECOP) -->
+    <div class="col-md-3 tipo-no-secop">
+        <label class="form-label">Fecha inicio</label>
+        <input type="date" id="fecha_inicio" name="fecha_inicio" class="form-control"
+            value="{{ data.fecha_inicio or '' }}">
+    </div>
+
+    <div class="col-md-2 tipo-no-secop">
+        <label class="form-label">Meses</label>
+        <input type="number" id="meses" name="meses" class="form-control" value="{{ data.meses or 0 }}">
+    </div>
+
+    <div class="col-md-2 tipo-no-secop">
+        <label class="form-label">Días</label>
+        <input type="number" id="dias" name="dias" class="form-control" value="{{ data.dias or 0 }}">
+    </div>
+
+    <div class="col-md-3 tipo-no-secop">
+        <label class="form-label">Umbral alerta (días)</label>
+        <input type="number" name="alerta_umbral" class="form-control" value="{{ data.alerta_umbral or 15 }}">
+    </div>
+
+    <!-- FECHA FIN CALCULADA (solo vista) + hidden real -->
+    <div class="col-md-2 tipo-no-secop">
+        <label class="form-label">Fecha fin (calculada)</label>
+        <input type="text" id="fecha_fin_preview" class="form-control" value="{{ data.fecha_fin or '' }}" disabled>
+        <input type="hidden" id="fecha_fin" name="fecha_fin" value="{{ data.fecha_fin or '' }}">
+    </div>
+
+    <div class="col-12">
+        <button class="btn btn-success">
+            {% if modo == 'editar' %}Guardar cambios{% else %}Crear{% endif %}
+        </button>
+        <a class="btn btn-secondary" href="{{ url_for('contrat_list') }}">Cancelar</a>
+    </div>
+</form>
+
+<script>
+    const tipoSel = document.getElementById('tipo');
+    const inicioInp = document.getElementById('fecha_inicio');
+    const mesesInp = document.getElementById('meses');
+    const diasInp = document.getElementById('dias');
+    const finPrev = document.getElementById('fecha_fin_preview');
+    const finHidden = document.getElementById('fecha_fin');
+
+    function toggleFields() {
+        const t = (tipoSel.value || '').toLowerCase();
+        const isSecop = (t === 'secop');
+
+        document.querySelectorAll('.tipo-secop')
+            .forEach(el => el.classList.toggle('d-none', !isSecop));
+        document.querySelectorAll('.tipo-no-secop')
+            .forEach(el => el.classList.toggle('d-none', isSecop));
+
+        const showContr = (t === 'ops' || t === 'obra' || t === 'interventoria');
+        document.querySelectorAll('.tipo-ops, .tipo-obra, .tipo-interv')
+            .forEach(el => el.classList.toggle('d-none', !showContr));
+
+        document.querySelectorAll('.tipo-convenio')
+            .forEach(el => el.classList.toggle('d-none', t !== 'convenio'));
+    }
+
+    // Suma meses y días a la fecha (manejo de fin de mes)
+    function addMonthsDays(dateStr, months, days) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return '';
+
+        // sumar meses
+        if (months && !isNaN(months)) {
+            const year = d.getFullYear();
+            const month = d.getMonth();
+            const day = d.getDate();
+            const targetMonth = month + Number(months);
+            const tmp = new Date(year, targetMonth + 1, 0); // último día del mes destino
+            const lastDayTargetMonth = tmp.getDate();
+            const newDay = Math.min(day, lastDayTargetMonth);
+            d.setFullYear(year);
+            d.setMonth(targetMonth);
+            d.setDate(newDay);
+        }
+
+        // sumar días
+        if (days && !isNaN(days)) {
+            d.setDate(d.getDate() + Number(days));
+        }
+
+        // formatear yyyy-mm-dd
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function recalcFechaFin() {
+        const inicio = inicioInp ? inicioInp.value : '';
+        const meses = mesesInp ? Number(mesesInp.value || 0) : 0;
+        const dias = diasInp ? Number(diasInp.value || 0) : 0;
+
+        // si está oculto por SECOP, no calculamos
+        const isSecop = (tipoSel.value || '').toLowerCase() === 'secop';
+        if (isSecop) {
+            finPrev.value = '';
+            finHidden.value = '';
+            return;
+        }
+
+        const fin = addMonthsDays(inicio, meses, dias);
+        finPrev.value = fin || '';
+        finHidden.value = fin || '';
+    }
+
+    // eventos
+    tipoSel.addEventListener('change', () => { toggleFields(); recalcFechaFin(); });
+    if (inicioInp) inicioInp.addEventListener('change', recalcFechaFin);
+    if (mesesInp) mesesInp.addEventListener('input', recalcFechaFin);
+    if (diasInp) diasInp.addEventListener('input', recalcFechaFin);
+
+    // init
+    toggleFields();
+    recalcFechaFin();
+</script>
+
+{% endblock %}

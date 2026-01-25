@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="mb-3">Compensaciones por Tala</h1>
+<table class="table table-hover table-sm align-middle">
+  <thead class="table-light">
+    <tr>
+      <th>Solicitud</th>
+      <th>Especie</th>
+      <th>Cant.</th>
+      <th>Sitio</th>
+      <th>Vence</th>
+      <th>Semáforo</th>
+      <th>Plantados</th>
+      <th>Verificado</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rows %}
+    <tr>
+      <td>#{{ r.consecutivo }} — {{ r.solicitante }} / {{ r.direccion }}</td>
+      <td>{{ r.especie }}</td>
+      <td>{{ r.cantidad }}</td>
+      <td>{{ r.sitio }}</td>
+      <td>{{ r.fecha_maxima }}</td>
+      <td><span class="badge bg-{{ r.color }}">{{ r.dias_restantes }} días</span></td>
+      <td>{{ r.plantados }}</td>
+      <td>{{ 'Sí' if r.verificado else 'No' }}</td>
+      <td class="text-end">
+        <a class="btn btn-sm btn-outline-primary" href="{{ url_for('tala_detalle', solicitud_id=r.solicitud_id) }}">Abrir</a>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="9" class="text-center text-muted">Sin compensaciones</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

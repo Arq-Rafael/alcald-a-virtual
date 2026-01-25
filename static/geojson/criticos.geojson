@@ -1,0 +1,9 @@
+{
+  "type":"FeatureCollection",
+  "features":[
+    { "type":"Feature",
+      "properties":{"criticidad":3,"nombre":"Talud inestable","observ":"Evento 2024"},
+      "geometry":{"type":"Point","coordinates":[-74.3525,5.0598]}
+    }
+  ]
+}

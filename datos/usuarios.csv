@@ -1,0 +1,7 @@
+usuario,clave,role,rol
+admin,admin123,admin,Administrador
+Sec.Planeacion,123,formulador,Secretaría de Planeación
+Sec.Gobierno,123,formulador,Secretaría de Gobierno
+Sec.DesRural,123,formulador,Secretaría Desarrollo Rural
+Sec.Hacienda,123,formulador,Secretaría de Hacienda
+Sec.DesSocial,123,formulador,Secretaría Desarrollo Social

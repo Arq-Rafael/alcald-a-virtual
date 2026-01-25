@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+  <h1 class="mb-4">Resumen de Documentos</h1>
+
+  <form id="summary-form" enctype="multipart/form-data" class="mb-4">
+    <label for="res-file" class="form-label">Selecciona un PDF:</label>
+    <input type="file" id="res-file" name="file"
+           accept="application/pdf"
+           class="form-control mb-2" required>
+    <button type="submit" class="btn btn-secondary">Subir y resumir</button>
+    <a href="{{ url_for('ia') }}" class="btn btn-link">Volver a IA Municipal</a>
+  </form>
+
+  <div id="summary-result"
+       class="border rounded p-3"
+       style="white-space: pre-wrap;"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('summary-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const fileInput = document.getElementById('res-file');
+  if (!fileInput.files.length) return;
+
+  const formData = new FormData();
+  formData.append('file', fileInput.files[0]);
+
+  const out = document.getElementById('summary-result');
+  out.textContent = '⏳ Resumiendo…';
+
+  try {
+    const res = await fetch('{{ url_for("ia_summary_api") }}', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+
+    if (data.summary) {
+      out.textContent = data.summary;
+    } else if (data.error) {
+      out.innerHTML = `<div class="text-danger">❌ ${data.error}</div>`;
+    } else {
+      out.innerHTML = `<div class="text-danger">❌ Respuesta inesperada del servidor.</div>`;
+    }
+
+  } catch (err) {
+    out.innerHTML = `<div class="text-danger">❌ Error de red: ${err.message}</div>`;
+  }
+});
+</script>
+{% endblock %}

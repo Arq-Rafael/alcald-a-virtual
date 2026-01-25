@@ -1,0 +1,202 @@
+{# templates/seguimiento_plan.html #}
+{% extends "base.html" %}
+{% block title %}Seguimiento al Plan de Desarrollo{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- KPI Cards -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-4">
+      <div class="card shadow-sm text-center">
+        <div class="card-body">
+          <h6 class="text-muted">Total Metas</h6>
+          <h2>{{ total_metas }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm text-center">
+        <div class="card-body">
+          <h6 class="text-muted">Metas con Avance</h6>
+          <h2>{{ metas_con_avance }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm text-center">
+        <div class="card-body">
+          <h6 class="text-muted">Avance Promedio (%)</h6>
+          <h2>{{ avance_promedio }}%</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Buttons -->
+  <div class="d-flex justify-content-end mb-3">
+    <a href="{{ url_for('seguimiento.export_seguimiento_excel') }}" class="btn btn-success me-2">
+      <i class="bi bi-file-earmark-spreadsheet"></i> Excel
+    </a>
+    <a href="{{ url_for('seguimiento.export_seguimiento_pdf') }}" class="btn btn-danger">
+      <i class="bi bi-file-earmark-pdf"></i> PDF
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body row g-3 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label">Buscar (texto libre)</label>
+        <input id="filtroTexto" type="text" class="form-control" placeholder="Programa, meta, sector...">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Línea Estratégica</label>
+        <select id="filtroLinea" class="form-select">
+          <option>Todas</option>
+          {% for lin in lineas %}
+          <option>{{ lin }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Sector</label>
+        <select id="filtroSector" class="form-select">
+          <option>Todos</option>
+          {% for sec in sectores %}
+          <option>{{ sec }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2 text-end">
+        <small id="conteoVisibles" class="text-muted">0 metas visibles</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráfico de Distribución -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title">Distribución de Metas por Línea Estratégica</h5>
+      <canvas id="chartDistribucion" height="120"></canvas>
+    </div>
+  </div>
+
+  <!-- Tabla de Metas -->
+  <div class="card shadow-sm">
+    <div class="card-header">
+      Listado de Metas
+    </div>
+    <div class="table-responsive">
+      <table id="tablaMetas" class="table table-striped mb-0">
+        <thead>
+          <tr>
+            <th>Línea Estratégica</th>
+            <th>Sector</th>
+            <th>Programa</th>
+            <th>Meta Producto</th>
+            <th class="text-end">Meta Cuatrienio</th>
+            <th class="text-end">Avance</th>
+            <th class="text-end">% Cumpl.</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {# Se llenará dinámicamente con JS #}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    // Datos inyectados desde Flask
+    const METAS = {{ metas_json | tojson }};
+
+    // Función para poblar la tabla según filtros
+    function poblarTabla() {
+      const ft = document.getElementById('filtroTexto').value.trim().toLowerCase();
+      const linea = document.getElementById('filtroLinea').value;
+      const sector = document.getElementById('filtroSector').value;
+      const tbody = document.querySelector('#tablaMetas tbody');
+      tbody.innerHTML = '';
+      let visibles = 0;
+
+      METAS.forEach(m => {
+        if (linea !== 'Todas' && m.linea !== linea) return;
+        if (sector !== 'Todos' && m.sector !== sector) return;
+        if (ft && !(
+          m.meta_producto.toLowerCase().includes(ft) ||
+          m.programa.toLowerCase().includes(ft) ||
+          m.sector.toLowerCase().includes(ft)
+        )) return;
+
+        visibles++;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${m.linea}</td>
+          <td>${m.sector}</td>
+          <td>${m.programa}</td>
+          <td>${m.meta_producto}</td>
+          <td class="text-end">${m.meta_cuatrenio}</td>
+          <td class="text-end">${m.avance_actual}</td>
+          <td class="text-end">${m.porcentaje}%</td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary">Editar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('conteoVisibles').innerText =
+        visibles + ' metas visibles';
+    }
+
+    // Gráfico horizontal de distribución por línea
+    function crearGraficoDistribucion() {
+      const ctx = document.getElementById('chartDistribucion').getContext('2d');
+      const conteo = {};
+      METAS.forEach(m => {
+        conteo[m.linea] = (conteo[m.linea] || 0) + 1;
+      });
+      const labels = Object.keys(conteo);
+      const data = Object.values(conteo);
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Número de Metas',
+            data: data,
+            backgroundColor: 'rgba(54, 162, 235, 0.5)'
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          scales: {
+            x: { beginAtZero: true }
+          },
+          responsive: true
+        }
+      });
+    }
+
+    // Eventos de filtro
+    document.getElementById('filtroTexto').addEventListener('input', poblarTabla);
+    document.getElementById('filtroLinea').addEventListener('change', poblarTabla);
+    document.getElementById('filtroSector').addEventListener('change', poblarTabla);
+
+    // Inicializar todo al cargar
+    window.addEventListener('DOMContentLoaded', () => {
+      poblarTabla();
+      crearGraficoDistribucion();
+    });
+  </script>
+{% endblock %}

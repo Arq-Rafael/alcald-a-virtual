@@ -1,0 +1,762 @@
+{% extends "base.html" %}
+{% block styles %}
+<style>
+  /* iOS 26 Glassmorphism Redactor Oficios */
+  body {
+    background: linear-gradient(-45deg, #1b5e20, #4caf50, #f9a825, #66bb6a, #fdd835) !important;
+    background-size: 400% 400% !important;
+    animation: gradientBG 15s ease infinite !important;
+  }
+
+  .oficios-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 1200px) {
+    .oficios-container {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Panel Editor */
+  .editor-panel {
+    background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+    backdrop-filter: blur(30px) saturate(180%);
+    border-radius: 20px;
+    border: 1.5px solid rgba(255,255,255,0.5);
+    padding: 1.5rem;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.8);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .historial-panel {
+    background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+    backdrop-filter: blur(30px) saturate(180%);
+    border-radius: 20px;
+    border: 1.5px solid rgba(255,255,255,0.5);
+    padding: 1.5rem;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  .section-title {
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #7cb342;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .section-title i {
+    font-size: 1.3rem;
+    color: #7cb342;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .form-control, .form-select {
+    background: rgba(255,255,255,0.9);
+    border: 1.5px solid rgba(124, 179, 66, 0.3);
+    border-radius: 10px;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.9rem;
+    color: #2c3e50;
+    transition: all 0.2s ease;
+    font-family: 'Calibri', 'Cambria', serif;
+    width: 100%;
+  }
+
+  .form-control:focus, .form-select:focus {
+    background: rgba(255,255,255,0.95);
+    border-color: #7cb342;
+    box-shadow: 0 0 0 3px rgba(124, 179, 66, 0.1);
+    outline: none;
+  }
+
+  textarea.form-control {
+    resize: vertical;
+    min-height: 150px;
+  }
+
+  /* Editor de contenido */
+  .editor-content {
+    background: white;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 1rem;
+    min-height: 200px;
+    outline: none;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    font-family: 'Calibri', 'Cambria', serif;
+  }
+
+  .editor-toolbar {
+    background: #f5f7fa;
+    padding: 0.6rem;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 10px 10px 0 0;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: -1px;
+  }
+
+  .editor-btn {
+    background: white;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .editor-btn:hover {
+    background: #7cb342;
+    color: white;
+    border-color: #7cb342;
+  }
+
+  /* Botones de acción */
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-accion {
+    flex: 1;
+    min-width: 140px;
+    padding: 0.65rem 1.3rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .btn-primary-ios {
+    background: linear-gradient(135deg, #7cb342, #689f38);
+    color: white;
+  }
+
+  .btn-primary-ios:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
+  }
+
+  .btn-outline-ios {
+    background: transparent;
+    border: 2px solid #7cb342;
+    color: #7cb342;
+  }
+
+  .btn-outline-ios:hover {
+    background: #7cb342;
+    color: white;
+  }
+
+  /* Historial */
+  .historial-item {
+    background: white;
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 0.9rem;
+    border: 1px solid rgba(0,0,0,0.04);
+    border-left: 4px solid #7cb342;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    cursor: pointer;
+  }
+
+  .historial-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  .historial-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .historial-numero {
+    font-weight: 700;
+    color: #1b5e20;
+    font-size: 1rem;
+  }
+
+  .historial-fecha {
+    font-size: 0.8rem;
+    color: #666;
+  }
+
+  .historial-asunto {
+    font-size: 0.9rem;
+    color: #333;
+    margin-top: 0.3rem;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .historial-body {
+    font-size: 0.82rem;
+    color: #555;
+    margin-top: 0.2rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .historial-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 0.2rem;
+  }
+
+  .btn-delete-oficio {
+    background: linear-gradient(135deg, #f44336, #e53935);
+    color: white;
+    border: none;
+    padding: 0.4rem 0.55rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-width: 42px;
+    justify-content: center;
+  }
+
+  .btn-delete-oficio:hover {
+    background: linear-gradient(135deg, #d32f2f, #c62828);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+  }
+
+  .historial-scroll {
+    max-height: 78vh;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+
+  /* Image upload */
+  .image-upload-area {
+    border: 2px dashed #7cb342;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: linear-gradient(135deg, rgba(124, 179, 66, 0.05), rgba(255, 152, 0, 0.05));
+  }
+
+  .image-upload-area:hover {
+    background: linear-gradient(135deg, rgba(124, 179, 66, 0.1), rgba(255, 152, 0, 0.1));
+    border-color: #ff9800;
+  }
+
+  .image-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 0.8rem;
+    margin-top: 0.8rem;
+  }
+
+  .image-thumbnail {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .image-thumbnail img {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+  }
+
+  .image-remove {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: rgba(244, 67, 54, 0.9);
+    color: white;
+    border: none;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <h1 class="h2 fw-bold mb-3">
+    <i class="bi bi-file-earmark-text"></i> Redactar Oficio Oficial
+  </h1>
+
+  <div class="oficios-container">
+    <!-- PANEL EDITOR -->
+    <div class="editor-panel">
+      <!-- ENCABEZADO -->
+      <div class="section-title">
+        <i class="bi bi-file-earmark"></i> Información del Oficio
+      </div>
+
+      <div class="row g-2 mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Número de Oficio</label>
+          <input type="text" class="form-control" id="numero" placeholder="2026-001" value="">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Fecha</label>
+          <input type="date" class="form-control" id="fecha" value="">
+        </div>
+      </div>
+
+      <div class="form-group mb-3">
+        <label class="form-label">Dependencia / Secretaría</label>
+        <select class="form-select" id="dependencia">
+          <option value="">Seleccione una secretaría...</option>
+          <option value="Despacho de la Alcaldía">Despacho de la Alcaldía</option>
+          <option value="Secretaría General y de Gobierno">Secretaría General y de Gobierno</option>
+          <option value="Secretaría de Planeación y Obras Públicas">Secretaría de Planeación y Obras Públicas</option>
+          <option value="Secretaría de Desarrollo Social y Comunitario">Secretaría de Desarrollo Social y Comunitario</option>
+          <option value="Secretaría de Desarrollo Rural Medio Ambiente y Competitividad">Secretaría de Desarrollo Rural Medio Ambiente y Competitividad</option>
+          <option value="Secretaría de Hacienda y Gestión Financiera">Secretaría de Hacienda y Gestión Financiera</option>
+        </select>
+      </div>
+
+      <!-- DESTINATARIO -->
+      <div class="section-title">
+        <i class="bi bi-person-badge"></i> Destinatario
+      </div>
+
+      <div class="form-group mb-2">
+        <label class="form-label">Nombre</label>
+        <input type="text" class="form-control" id="destinatario" placeholder="Nombre completo" value="">
+      </div>
+
+      <div class="row g-2 mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Cargo</label>
+          <input type="text" class="form-control" id="cargo_dest" placeholder="Director, Gerente, etc." value="">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Entidad</label>
+          <input type="text" class="form-control" id="entidad_dest" placeholder="Entidad" value="">
+        </div>
+      </div>
+
+      <div class="form-group mb-3">
+        <label class="form-label">Dirección / Ciudad</label>
+        <input type="text" class="form-control" id="ciudad_dest" placeholder="Dirección" value="">
+      </div>
+
+      <!-- CONTENIDO -->
+      <div class="section-title">
+        <i class="bi bi-pencil-square"></i> Contenido
+      </div>
+
+      <div class="form-group mb-2">
+        <label class="form-label">Asunto</label>
+        <input type="text" class="form-control" id="asunto" placeholder="Asunto del oficio" value="">
+      </div>
+
+      <div class="form-group mb-3">
+        <label class="form-label">Referencia</label>
+        <input type="text" class="form-control" id="referencia" placeholder="Radicado, Contrato, Norma" value="">
+      </div>
+
+      <div class="form-group mb-3">
+        <label class="form-label">Cuerpo del Oficio</label>
+        <div class="editor-toolbar">
+          <button type="button" class="editor-btn" onclick="document.execCommand('bold')"><i class="bi bi-type-bold"></i></button>
+          <button type="button" class="editor-btn" onclick="document.execCommand('italic')"><i class="bi bi-type-italic"></i></button>
+          <button type="button" class="editor-btn" onclick="document.execCommand('underline')"><i class="bi bi-type-underline"></i></button>
+          <button type="button" class="editor-btn" onclick="document.execCommand('insertUnorderedList')"><i class="bi bi-list-ul"></i></button>
+        </div>
+        <div class="editor-content" id="cuerpo" contenteditable="true"></div>
+      </div>
+
+      <!-- IMÁGENES -->
+      <div class="section-title">
+        <i class="bi bi-image"></i> Imágenes
+      </div>
+
+      <div class="image-upload-area" id="uploadArea" onclick="document.getElementById('imageInput').click()">
+        <i class="bi bi-cloud-arrow-up" style="font-size: 2rem; color: #7cb342;"></i>
+        <p class="mb-1"><strong>Arrastra imágenes aquí</strong></p>
+        <small class="text-muted">o haz clic para seleccionar</small>
+        <input type="file" id="imageInput" multiple accept="image/*" style="display: none;">
+      </div>
+
+      <div class="image-gallery" id="imageGallery"></div>
+
+      <!-- FIRMA -->
+      <div class="section-title">
+        <i class="bi bi-pen"></i> Firma
+      </div>
+
+      <div class="row g-2 mb-2">
+        <div class="col-md-6">
+          <label class="form-label">Firmante</label>
+          <input type="text" class="form-control" id="firmante_nombre" placeholder="Nombre completo" value="">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Cargo</label>
+          <input type="text" class="form-control" id="firmante_cargo" placeholder="Cargo" value="">
+        </div>
+      </div>
+
+      <div class="row g-2 mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Teléfono</label>
+          <input type="tel" class="form-control" id="telefono" placeholder="Tel." value="">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" id="email" placeholder="correo@alcaldia.gov.co" value="">
+        </div>
+      </div>
+
+      <div class="form-group mb-3">
+        <label class="form-label">Anexos (opcional)</label>
+        <textarea class="form-control" id="anexos" placeholder="Lista de anexos (uno por línea)" rows="3"></textarea>
+      </div>
+
+      <!-- BOTONES -->
+      <div class="action-buttons">
+        <button type="button" class="btn-accion btn-primary-ios" onclick="descargarPDF()">
+          <i class="bi bi-download"></i> Generar PDF
+        </button>
+        <button type="button" class="btn-accion btn-outline-ios" onclick="limpiarFormulario()">
+          <i class="bi bi-arrow-clockwise"></i> Nuevo Oficio
+        </button>
+      </div>
+
+      <div style="text-align: center; margin-top: 1rem;">
+        <a href="{{ url_for('ia.index') }}" class="btn btn-link">← Volver a IA</a>
+      </div>
+    </div>
+
+    <!-- PANEL HISTORIAL -->
+    <div class="historial-panel">
+      <div class="section-title">
+        <i class="bi bi-clock-history"></i> Historial de Oficios
+      </div>
+
+      <div class="historial-scroll" id="historialContainer">
+        <p class="text-muted text-center">Cargando historial...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let images = [];
+
+  const roleJs = "{{ (session.get('role') or session.get('user_role') or '')|lower }}";
+  const secretariaSesion = "{{ session.get('secretaria','') }}";
+  const mapaSecretarias = {
+    'secretaría de gobierno': 'Secretaría General y de Gobierno',
+    'secretaria de gobierno': 'Secretaría General y de Gobierno',
+    'secretaría de planeación': 'Secretaría de Planeación y Obras Públicas',
+    'secretaria de planeación': 'Secretaría de Planeación y Obras Públicas',
+    'secretaría de planeacion': 'Secretaría de Planeación y Obras Públicas',
+    'secretaria de planeacion': 'Secretaría de Planeación y Obras Públicas',
+    'secretaría desarrollo rural': 'Secretaría de Desarrollo Rural Medio Ambiente y Competitividad',
+    'secretaria desarrollo rural': 'Secretaría de Desarrollo Rural Medio Ambiente y Competitividad',
+    'secretaría de hacienda': 'Secretaría de Hacienda y Gestión Financiera',
+    'secretaria de hacienda': 'Secretaría de Hacienda y Gestión Financiera',
+    'secretaría desarrollo social': 'Secretaría de Desarrollo Social y Comunitario',
+    'secretaria desarrollo social': 'Secretaría de Desarrollo Social y Comunitario',
+    'administrador': 'Despacho de la Alcaldía'
+  };
+  const secretariaLarga = mapaSecretarias[secretariaSesion.toLowerCase()] || secretariaSesion;
+
+  // Setear fecha actual
+  document.getElementById('fecha').valueAsDate = new Date();
+  // Prefijar dependencia según la secretaría de la sesión (si existe)
+  if (secretariaLarga) {
+    const depSelect = document.getElementById('dependencia');
+    depSelect.value = secretariaLarga;
+  }
+
+  function getFormData() {
+    return {
+      numero: document.getElementById('numero').value || '2026-001',
+      fecha: document.getElementById('fecha').value,
+      dependencia: document.getElementById('dependencia').value || 'Despacho de la Alcaldía',
+      destinatario: document.getElementById('destinatario').value || 'Señor(a)',
+      cargo_dest: document.getElementById('cargo_dest').value || 'Cargo',
+      entidad_dest: document.getElementById('entidad_dest').value || 'Entidad',
+      ciudad_dest: document.getElementById('ciudad_dest').value || 'Ciudad',
+      asunto: document.getElementById('asunto').value || 'Asunto',
+      referencia: document.getElementById('referencia').value || '-',
+      cuerpo: document.getElementById('cuerpo').innerText || '[Contenido]',
+      firmante_nombre: document.getElementById('firmante_nombre').value || 'Firmante',
+      firmante_cargo: document.getElementById('firmante_cargo').value || 'Cargo',
+      telefono: document.getElementById('telefono').value || '-',
+      email: document.getElementById('email').value || '-',
+      anexos: document.getElementById('anexos').value,
+      imagenes: images
+    };
+  }
+
+  // Pre-fill from URL params (Integration with Radicacion)
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('destinatario_pre')) {
+      document.getElementById('destinatario').value = urlParams.get('destinatario_pre');
+  }
+  if (urlParams.get('asunto_pre')) {
+      document.getElementById('asunto').value = urlParams.get('asunto_pre');
+  }
+
+  async function descargarPDF() {
+    try {
+      const data = getFormData();
+      
+      // Enviar al backend para generar PDF con formato oficial
+      const response = await fetch('{{ url_for("ia.generar_pdf_oficio") }}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      // Descargar el PDF
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Oficio_${data.numero || '2026-001'}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      alert('PDF generado y descargado exitosamente');
+      cargarHistorial();
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al descargar PDF: ' + error.message);
+    }
+  }
+
+  async function cargarHistorial() {
+    try {
+      const response = await fetch('{{ url_for("ia.obtener_historial_oficios") }}');
+      const oficios = await response.json();
+      
+      const container = document.getElementById('historialContainer');
+      
+      if (oficios.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center">No hay oficios en el historial</p>';
+        return;
+      }
+      
+        // Verificar si el usuario es admin (admin/administrador/superadmin)
+        const isAdmin = ['admin','administrador','superadmin'].includes(roleJs);
+      
+      container.innerHTML = oficios.map(oficio => {
+          const asuntoResumen = (oficio.asunto || '').slice(0, 110) + ((oficio.asunto || '').length > 110 ? '…' : '');
+          const cuerpoResumen = (oficio.cuerpo || '').slice(0, 120) + ((oficio.cuerpo || '').length > 120 ? '…' : '');
+          return `
+          <div class="historial-item">
+            <div class="historial-content" onclick='regenerarOficio(${JSON.stringify(oficio)})'>
+              <div class="historial-numero">Oficio ${oficio.numero}</div>
+              <div class="historial-fecha">${oficio.fecha} - ${oficio.dependencia}</div>
+              <div class="historial-asunto">${asuntoResumen}</div>
+              <div class="historial-body">${cuerpoResumen}</div>
+            </div>
+            <div class="historial-actions">
+              ${isAdmin ? `<button class="btn-delete-oficio" title="Eliminar" onclick="event.stopPropagation(); eliminarOficio('${oficio.numero}')"><i class="bi bi-trash"></i></button>` : ''}
+            </div>
+        </div>
+        `;
+      }).join('');
+      
+    } catch (error) {
+      console.error('Error:', error);
+      document.getElementById('historialContainer').innerHTML = '<p class="text-danger text-center">Error al cargar historial</p>';
+    }
+  }
+
+    async function eliminarOficio(numero) {
+      if (!confirm(`¿Está seguro de eliminar el Oficio ${numero} del historial?`)) return;
+    
+      try {
+        const response = await fetch('{{ url_for("ia.eliminar_oficio") }}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ numero: numero })
+        });
+      
+        const result = await response.json();
+      
+        if (response.ok) {
+          alert(result.message || 'Oficio eliminado exitosamente');
+          cargarHistorial();
+        } else {
+          alert(result.error || 'Error al eliminar el oficio');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al eliminar oficio: ' + error.message);
+      }
+    }
+
+  async function regenerarOficio(oficio) {
+    if (!confirm(`¿Descargar nuevamente el Oficio ${oficio.numero}?`)) return;
+    
+    try {
+      const response = await fetch('{{ url_for("ia.regenerar_oficio") }}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(oficio)
+      });
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Oficio_${oficio.numero}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      alert('PDF descargado exitosamente');
+    } catch (error) {
+      alert('Error al descargar PDF: ' + error.message);
+    }
+  }
+
+  function limpiarFormulario() {
+    document.getElementById('numero').value = '';
+    document.getElementById('fecha').valueAsDate = new Date();
+    document.getElementById('dependencia').value = '';
+    document.getElementById('destinatario').value = '';
+    document.getElementById('cargo_dest').value = '';
+    document.getElementById('entidad_dest').value = '';
+    document.getElementById('ciudad_dest').value = '';
+    document.getElementById('asunto').value = '';
+    document.getElementById('referencia').value = '';
+    document.getElementById('firmante_nombre').value = '';
+    document.getElementById('firmante_cargo').value = '';
+    document.getElementById('telefono').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('anexos').value = '';
+    images = [];
+    document.getElementById('imageGallery').innerHTML = '';
+  }
+
+  // Manejo de imágenes
+  document.getElementById('imageInput').addEventListener('change', function(e) {
+    handleFiles(e.target.files);
+  });
+
+  document.getElementById('uploadArea').addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.style.borderColor = '#ff9800';
+  });
+
+  document.getElementById('uploadArea').addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    this.style.borderColor = '#7cb342';
+  });
+
+  document.getElementById('uploadArea').addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.style.borderColor = '#7cb342';
+    handleFiles(e.dataTransfer.files);
+  });
+
+  function handleFiles(files) {
+    Array.from(files).forEach(file => {
+      if (!file.type.startsWith('image/')) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        images.push(e.target.result);
+        renderImages();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function renderImages() {
+    const gallery = document.getElementById('imageGallery');
+    gallery.innerHTML = images.map((img, idx) => `
+      <div class="image-thumbnail">
+        <img src="${img}" alt="Imagen ${idx + 1}">
+        <button class="image-remove" onclick="removeImage(${idx})">×</button>
+      </div>
+    `).join('');
+  }
+
+  function removeImage(idx) {
+    images.splice(idx, 1);
+    renderImages();
+  }
+
+  // Cargar historial al inicio
+  window.addEventListener('load', () => {
+    cargarHistorial();
+  });
+</script>
+
+{% endblock %}

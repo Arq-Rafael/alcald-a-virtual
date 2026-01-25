@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="mb-3">Nuevo incidente</h1>
+
+<form class="row g-3" method="post">
+  <div class="col-md-3">
+    <label class="form-label">Tipo</label>
+    <select name="tipo" class="form-select" required>
+      <option>Inundación</option>
+      <option>Deslizamiento</option>
+      <option>Incendio forestal</option>
+      <option>Vendaval</option>
+      <option>Sismo</option>
+      <option>Avenida torrencial</option>
+      <option>Otro</option>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <label class="form-label">Alerta</label>
+    <select name="nivel" class="form-select">
+      <option>Verde</option>
+      <option selected>Amarillo</option>
+      <option>Rojo</option>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <label class="form-label">Estado</label>
+    <select name="estado" class="form-select">
+      <option selected>Abierto</option>
+      <option>En respuesta</option>
+      <option>Cerrado</option>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <label class="form-label">SLA (horas)</label>
+    <input name="plazo_horas" type="number" class="form-control" value="2" min="1">
+  </div>
+
+  <div class="col-md-6">
+    <label class="form-label">Dirección</label>
+    <input name="direccion" class="form-control" required>
+  </div>
+  <div class="col-md-3">
+    <label class="form-label">Sector (barrio/vereda)</label>
+    <input name="sector" class="form-control">
+  </div>
+  <div class="col-md-1">
+    <label class="form-label">Lat</label>
+    <input name="lat" class="form-control" placeholder="4.95">
+  </div>
+  <div class="col-md-1">
+    <label class="form-label">Lon</label>
+    <input name="lon" class="form-control" placeholder="-74.17">
+  </div>
+
+  <div class="col-12">
+    <label class="form-label">Descripción</label>
+    <textarea name="descripcion" class="form-control" rows="3"></textarea>
+  </div>
+
+  <div class="col-md-4">
+    <label class="form-label">Reportado por</label>
+    <input name="reportado_por" class="form-control">
+  </div>
+  <div class="col-md-4">
+    <label class="form-label">Contacto</label>
+    <input name="contacto" class="form-control">
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">Afectados</label>
+    <input name="afectados" type="number" class="form-control" value="0" min="0">
+  </div>
+  <div class="col-md-2">
+    <label class="form-label">Heridos</label>
+    <input name="heridos" type="number" class="form-control" value="0" min="0">
+  </div>
+  <div class="col-md-2">
+    <label class="form-label">Fallecidos</label>
+    <input name="fallecidos" type="number" class="form-control" value="0" min="0">
+  </div>
+  <div class="col-md-2">
+    <label class="form-label">Viviendas afectadas</label>
+    <input name="viv_afectadas" type="number" class="form-control" value="0" min="0">
+  </div>
+
+  <div class="col-12">
+    <label class="form-label">Recursos desplegados</label>
+    <input name="recursos" class="form-control" placeholder="Retro, volqueta, cuadrilla, ambulancia...">
+  </div>
+
+  <div class="col-12">
+    <button class="btn btn-success">Crear incidente</button>
+    <a href="{{ url_for('riesgo_list') }}" class="btn btn-secondary">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

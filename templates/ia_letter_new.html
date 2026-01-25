@@ -1,0 +1,613 @@
+{% extends "base.html" %}
+{% block styles %}
+<style>
+  /* iOS 26 Glassmorphism Redactor Oficios */
+  body {
+    background: linear-gradient(-45deg, #1b5e20, #4caf50, #f9a825, #66bb6a, #fdd835) !important;
+    background-size: 400% 400% !important;
+    animation: gradientBG 15s ease infinite !important;
+  }
+
+  .letter-container {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 1200px) {
+    .letter-container {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Panel Editor */
+  .editor-panel {
+    background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+    backdrop-filter: blur(30px) saturate(180%);
+    border-radius: 20px;
+    border: 1.5px solid rgba(255,255,255,0.5);
+    padding: 1.5rem;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08), 
+                inset 0 1px 0 rgba(255,255,255,0.8);
+    transition: all 0.3s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .section-title {
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #7cb342;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .section-title i {
+    font-size: 1.3rem;
+    color: #7cb342;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .form-control {
+    background: rgba(255,255,255,0.9);
+    border: 1.5px solid rgba(124, 179, 66, 0.3);
+    border-radius: 10px;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.9rem;
+    color: #2c3e50;
+    transition: all 0.2s ease;
+    font-family: 'Calibri', 'Cambria', serif;
+  }
+
+  .form-control:focus {
+    background: rgba(255,255,255,0.95);
+    border-color: #7cb342;
+    box-shadow: 0 0 0 3px rgba(124, 179, 66, 0.1);
+    outline: none;
+  }
+
+  textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  /* Editor de contenido */
+  .rich-text-editor {
+    background: white;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .editor-toolbar {
+    background: #f5f7fa;
+    padding: 0.6rem;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .editor-btn {
+    background: white;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .editor-btn:hover {
+    background: #7cb342;
+    color: white;
+    border-color: #7cb342;
+  }
+
+  .editor-content {
+    min-height: 150px;
+    padding: 1rem;
+    outline: none;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    font-family: 'Calibri', 'Cambria', serif;
+  }
+
+  /* Botones de acción */
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-accion {
+    flex: 1;
+    min-width: 140px;
+    padding: 0.65rem 1.3rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary-ios {
+    background: linear-gradient(135deg, #7cb342, #689f38);
+    color: white;
+  }
+
+  .btn-primary-ios:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
+  }
+
+  .btn-secondary-ios {
+    background: linear-gradient(135deg, #64b5f6, #42a5f5);
+    color: white;
+  }
+
+  .btn-outline-ios {
+    background: transparent;
+    border: 2px solid #7cb342;
+    color: #7cb342;
+  }
+
+  /* Panel de vista previa ESTABLE */
+  .preview-panel {
+    position: sticky;
+    top: 2rem;
+    height: 90vh;
+    overflow-y: auto;
+  }
+
+  .preview-document {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    font-family: 'Calibri', 'Cambria', Arial, sans-serif;
+    line-height: 1.5;
+    color: #000;
+    page-break-after: always;
+    position: relative;
+  }
+
+  /* Encabezado Oficial */
+  .preview-alcaldia-header {
+    border-bottom: 4px solid;
+    border-image: linear-gradient(90deg, #7cb342, #ff9800) 1;
+    padding: 1.5rem 1.2rem;
+    text-align: center;
+  }
+
+  .preview-alcaldia-logo {
+    font-size: 0.85rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: #1b5e20;
+    margin-bottom: 0.3rem;
+  }
+
+  .preview-alcaldia-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+
+  .preview-oficio-info {
+    padding: 0.8rem 1.2rem;
+    font-size: 0.8rem;
+    text-align: right;
+    border-bottom: 1px solid #ddd;
+    color: #666;
+  }
+
+  .preview-content {
+    padding: 1.2rem;
+    min-height: 400px;
+    font-size: 0.9rem;
+  }
+
+  .preview-destinatario {
+    margin-bottom: 1.2rem;
+    line-height: 1.6;
+  }
+
+  .preview-asunto {
+    margin-bottom: 0.8rem;
+    font-weight: bold;
+  }
+
+  .preview-body {
+    margin: 1.2rem 0;
+    text-align: justify;
+    line-height: 1.8;
+    min-height: 150px;
+  }
+
+  .preview-firma {
+    margin-top: 2.5rem;
+    text-align: center;
+  }
+
+  .preview-firma-linea {
+    border-top: 1px solid #000;
+    width: 200px;
+    margin: 0 auto 0.2rem;
+    height: 40px;
+  }
+
+  .preview-firma-nombre {
+    font-weight: bold;
+    font-size: 0.85rem;
+  }
+
+  .preview-firma-cargo {
+    font-size: 0.8rem;
+    color: #333;
+  }
+
+  .preview-footer {
+    padding: 0.8rem 1.2rem;
+    font-size: 0.75rem;
+    text-align: center;
+    border-top: 2px solid;
+    border-image: linear-gradient(90deg, #7cb342, #ff9800) 1;
+    color: #666;
+    line-height: 1.5;
+  }
+
+  /* Image gallery */
+  .image-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 0.8rem;
+    margin-top: 0.8rem;
+  }
+
+  .image-thumbnail {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .image-thumbnail img {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+  }
+
+  .image-remove {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: rgba(244, 67, 54, 0.8);
+    color: white;
+    border: none;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <h1 class="h2 fw-bold mb-3">
+    <i class="bi bi-file-earmark-text"></i> Redactar Oficio Oficial
+  </h1>
+
+  <div class="letter-container">
+    <!-- PANEL EDITOR -->
+    <div class="editor-panel">
+      <!-- ENCABEZADO -->
+      <div class="section-title">
+        <i class="bi bi-file-earmark"></i> Información del Oficio
+      </div>
+
+      <div class="row g-2 mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Número de Oficio</label>
+          <input type="text" class="form-control" id="numero" placeholder="2026-001" value="">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Fecha</label>
+          <input type="date" class="form-control" id="fecha" value="">
+        </div>
+      </div>
+
+      <div class="form-group mb-3">
+        <label class="form-label">Dependencia / Secretaría</label>
+        <input type="text" class="form-control" id="dependencia" placeholder="Ej. Secretaría de Planeación" value="">
+      </div>
+
+      <!-- DESTINATARIO -->
+      <div class="section-title">
+        <i class="bi bi-person-badge"></i> Destinatario
+      </div>
+
+      <div class="form-group mb-2">
+        <label class="form-label">Nombre</label>
+        <input type="text" class="form-control" id="destinatario" placeholder="Nombre completo" value="">
+      </div>
+
+      <div class="row g-2 mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Cargo</label>
+          <input type="text" class="form-control" id="cargo_dest" placeholder="Director, Gerente, etc." value="">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Entidad</label>
+          <input type="text" class="form-control" id="entidad_dest" placeholder="Entidad" value="">
+        </div>
+      </div>
+
+      <div class="form-group mb-3">
+        <label class="form-label">Dirección / Ciudad</label>
+        <input type="text" class="form-control" id="ciudad_dest" placeholder="Dirección" value="">
+      </div>
+
+      <!-- CONTENIDO -->
+      <div class="section-title">
+        <i class="bi bi-pencil-square"></i> Contenido
+      </div>
+
+      <div class="form-group mb-2">
+        <label class="form-label">Asunto</label>
+        <input type="text" class="form-control" id="asunto" placeholder="Asunto del oficio" value="">
+      </div>
+
+      <div class="form-group mb-3">
+        <label class="form-label">Referencia</label>
+        <input type="text" class="form-control" id="referencia" placeholder="Radicado, Contrato, Norma" value="">
+      </div>
+
+      <div class="form-group mb-3">
+        <label class="form-label">Cuerpo del Oficio</label>
+        <div class="rich-text-editor">
+          <div class="editor-toolbar">
+            <button type="button" class="editor-btn" onclick="document.execCommand('bold')"><i class="bi bi-type-bold"></i></button>
+            <button type="button" class="editor-btn" onclick="document.execCommand('italic')"><i class="bi bi-type-italic"></i></button>
+            <button type="button" class="editor-btn" onclick="document.execCommand('underline')"><i class="bi bi-type-underline"></i></button>
+            <button type="button" class="editor-btn" onclick="document.execCommand('insertUnorderedList')"><i class="bi bi-list-ul"></i></button>
+          </div>
+          <div class="editor-content" id="cuerpo" contenteditable="true"></div>
+        </div>
+      </div>
+
+      <!-- FIRMA -->
+      <div class="section-title">
+        <i class="bi bi-pen"></i> Firma
+      </div>
+
+      <div class="row g-2 mb-2">
+        <div class="col-md-6">
+          <label class="form-label">Firmante</label>
+          <input type="text" class="form-control" id="firmante_nombre" placeholder="Nombre completo" value="">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Cargo</label>
+          <input type="text" class="form-control" id="firmante_cargo" placeholder="Cargo" value="">
+        </div>
+      </div>
+
+      <div class="row g-2 mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Teléfono</label>
+          <input type="tel" class="form-control" id="telefono" placeholder="Tel." value="">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" id="email" placeholder="correo@alcaldia.gov.co" value="">
+        </div>
+      </div>
+
+      <div class="form-group mb-3">
+        <label class="form-label">Anexos (opcional)</label>
+        <input type="text" class="form-control" id="anexos" placeholder="Listado de anexos" value="">
+      </div>
+
+      <!-- BOTONES -->
+      <div class="action-buttons">
+        <button type="button" class="btn-accion btn-outline-ios" onclick="actualizarPreview()">
+          <i class="bi bi-eye"></i> Actualizar Vista
+        </button>
+        <button type="button" class="btn-accion btn-primary-ios" onclick="descargarPDF()">
+          <i class="bi bi-download"></i> Descargar PDF
+        </button>
+      </div>
+
+      <div style="text-align: center; margin-top: 1rem;">
+        <a href="{{ url_for('ia.index') }}" class="btn btn-link">← Volver a IA</a>
+      </div>
+    </div>
+
+    <!-- PANEL VISTA PREVIA -->
+    <div class="preview-panel">
+      <div class="preview-document" id="previewContainer">
+        <!-- Header Alcaldía -->
+        <div class="preview-alcaldia-header">
+          <div class="preview-alcaldia-logo">ALCALDÍA MUNICIPAL DE SUPATÁ</div>
+          <div class="preview-alcaldia-title">DESPACHO DEL ALCALDE</div>
+        </div>
+
+        <!-- Info Oficio -->
+        <div class="preview-oficio-info">
+          Oficio No. <span id="previewNumero">2026-001</span> | <span id="previewFecha2"></span>
+        </div>
+
+        <!-- Contenido -->
+        <div class="preview-content">
+          <div class="preview-destinatario">
+            <strong id="previewDestinatario">Señor(a)</strong><br>
+            <span id="previewCargoDest">Cargo</span><br>
+            <span id="previewEntidadDest">Entidad</span><br>
+            <span id="previewCiudadDest">Ciudad</span>
+          </div>
+
+          <div class="preview-asunto">
+            ASUNTO: <span id="previewAsunto">-</span>
+          </div>
+
+          <div style="font-size: 0.85rem; margin-bottom: 0.8rem;">
+            REFERENCIA: <span id="previewReferencia">-</span>
+          </div>
+
+          <p style="margin-bottom: 1rem;">Respetado(a) Señor(a),</p>
+
+          <div class="preview-body" id="previewCuerpo">
+            [Escriba aquí el contenido del oficio]
+          </div>
+
+          <div id="previewImagenes"></div>
+
+          <div class="preview-firma">
+            <div class="preview-firma-linea"></div>
+            <div class="preview-firma-nombre" id="previewFirmante">FIRMANTE</div>
+            <div class="preview-firma-cargo" id="previewCargoFirmante">Cargo</div>
+          </div>
+
+          <div style="margin-top: 1.5rem; font-size: 0.8rem; text-align: center; color: #666;">
+            Tel: <span id="previewTelefono">-</span> | Email: <span id="previewEmail">-</span>
+          </div>
+
+          <div style="margin-top: 1rem; font-size: 0.75rem; color: #999;">
+            <span id="previewAnexos"></span>
+          </div>
+        </div>
+
+        <!-- Footer Oficial -->
+        <div class="preview-footer">
+          NIT: 899999398-5 | Carrera 7 No 4-14<br>
+          Tel: 3133778741-3133779993 | alcaldia@supatá-cundinamarca.gov.co<br>
+          www.supatá-cundinamarca.gov.co
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let images = [];
+
+  // Setear fecha actual
+  document.getElementById('fecha').valueAsDate = new Date();
+
+  function getFormData() {
+    return {
+      numero: document.getElementById('numero').value || '2026-001',
+      fecha: document.getElementById('fecha').value,
+      dependencia: document.getElementById('dependencia').value || 'Secretaría',
+      destinatario: document.getElementById('destinatario').value || 'Señor(a)',
+      cargo_dest: document.getElementById('cargo_dest').value || 'Cargo',
+      entidad_dest: document.getElementById('entidad_dest').value || 'Entidad',
+      ciudad_dest: document.getElementById('ciudad_dest').value || 'Ciudad',
+      asunto: document.getElementById('asunto').value || 'Asunto',
+      referencia: document.getElementById('referencia').value || '-',
+      cuerpo: document.getElementById('cuerpo').innerText || '[Contenido]',
+      firmante_nombre: document.getElementById('firmante_nombre').value || 'Firmante',
+      firmante_cargo: document.getElementById('firmante_cargo').value || 'Cargo',
+      telefono: document.getElementById('telefono').value || '-',
+      email: document.getElementById('email').value || '-',
+      anexos: document.getElementById('anexos').value
+    };
+  }
+
+  function actualizarPreview() {
+    const data = getFormData();
+    
+    document.getElementById('previewNumero').textContent = data.numero;
+    document.getElementById('previewFecha2').textContent = data.fecha || new Date().toLocaleDateString('es-CO');
+    document.getElementById('previewDestinatario').textContent = data.destinatario;
+    document.getElementById('previewCargoDest').textContent = data.cargo_dest;
+    document.getElementById('previewEntidadDest').textContent = data.entidad_dest;
+    document.getElementById('previewCiudadDest').textContent = data.ciudad_dest;
+    document.getElementById('previewAsunto').textContent = data.asunto;
+    document.getElementById('previewReferencia').textContent = data.referencia;
+    document.getElementById('previewCuerpo').textContent = data.cuerpo;
+    document.getElementById('previewFirmante').textContent = data.firmante_nombre;
+    document.getElementById('previewCargoFirmante').textContent = data.firmante_cargo;
+    document.getElementById('previewTelefono').textContent = data.telefono;
+    document.getElementById('previewEmail').textContent = data.email;
+
+    if (data.anexos) {
+      document.getElementById('previewAnexos').innerHTML = `<strong>ANEXOS:</strong> ${data.anexos}`;
+    }
+  }
+
+  async function descargarPDF() {
+    try {
+      actualizarPreview();
+      
+      const data = getFormData();
+      
+      // Enviar al backend para generar PDF con formato oficial
+      const response = await fetch('{{ url_for("ia.generar_pdf_oficio") }}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      // Descargar el PDF
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Oficio_${data.numero || '2026-001'}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      alert('PDF generado y descargado exitosamente con formato oficial');
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al descargar PDF: ' + error.message);
+    }
+  }
+
+  // Auto-update
+  ['numero', 'fecha', 'dependencia', 'destinatario', 'cargo_dest', 'entidad_dest', 'ciudad_dest', 'asunto', 'referencia', 'firmante_nombre', 'firmante_cargo', 'telefono', 'email', 'anexos'].forEach(id => {
+    document.getElementById(id).addEventListener('change', actualizarPreview);
+  });
+  document.getElementById('cuerpo').addEventListener('input', actualizarPreview);
+
+  window.addEventListener('load', () => {
+    actualizarPreview();
+  });
+</script>
+
+{% endblock %}

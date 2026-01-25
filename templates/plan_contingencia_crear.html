@@ -1,0 +1,907 @@
+{% extends "base.html" %}
+{% block title %}Plan de Contingencia - Nuevo{% endblock %}
+
+{% block styles %}
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    background: linear-gradient(135deg, #f5f5f7 0%, #efefef 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+    min-height: 100vh;
+  }
+
+  .container-principal {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  /* HEADER */
+  .header-plan {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    border-top: 4px solid #2d5016;
+  }
+
+  .header-plan h1 {
+    font-size: 28px;
+    color: #1d1d1f;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+
+  .header-plan p {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* DATOS DE SUPATÁ - Card moderno */
+  .supata-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .supata-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .supata-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #5ac8fa 0%, #34c759 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .supata-content h3 {
+    font-size: 13px;
+    color: #999;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  .supata-content p {
+    font-size: 15px;
+    color: #1d1d1f;
+    font-weight: 500;
+  }
+
+  /* SECCIONADOR DE TABS */
+  .tabs-container {
+    background: white;
+    border-radius: 16px;
+    padding: 8px;
+    margin-bottom: 25px;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .tab-button {
+    flex: 1;
+    min-width: 120px;
+    padding: 12px 16px;
+    border: none;
+    background: transparent;
+    color: #666;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .tab-button:hover {
+    background: #f5f5f7;
+  }
+
+  .tab-button.active {
+    background: #2d5016;
+    color: white;
+    box-shadow: 0 4px 12px rgba(45, 80, 22, 0.2);
+  }
+
+  /* CONTENEDOR DE SECCIONES */
+  .seccion {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .seccion.active {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .seccion h2 {
+    font-size: 24px;
+    color: #1d1d1f;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .seccion-descripcion {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+
+  /* FORM FIELDS */
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1d1d1f;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  textarea,
+  select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid #e5e5e7;
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+  }
+
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  input[type="date"]:focus,
+  textarea:focus,
+  select:focus {
+    border-color: #2d5016;
+    background: #fafafa;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(45, 80, 22, 0.1);
+  }
+
+  textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+
+  /* TABLA - Matriz de Riesgos */
+  .tabla-riesgos {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .tabla-riesgos thead {
+    background: #2d5016;
+    color: white;
+  }
+
+  .tabla-riesgos th,
+  .tabla-riesgos td {
+    padding: 14px;
+    text-align: left;
+    font-size: 13px;
+  }
+
+  .tabla-riesgos tbody tr:nth-child(even) {
+    background: #f9f9fb;
+  }
+
+  .tabla-riesgos tbody tr:hover {
+    background: #efefef;
+  }
+
+  .riesgo-alto {
+    background: #ff3b30;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 11px;
+  }
+
+  .riesgo-medio {
+    background: #ff9500;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 11px;
+  }
+
+  .riesgo-bajo {
+    background: #34c759;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 11px;
+  }
+
+  /* BOTONES */
+  .btn-grupo {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+    justify-content: space-between;
+  }
+
+  .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-guardar {
+    background: linear-gradient(135deg, #2d5016 0%, #5a8a3a 100%);
+    color: white;
+    flex: 1;
+    box-shadow: 0 4px 12px rgba(45, 80, 22, 0.2);
+  }
+
+  .btn-guardar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(45, 80, 22, 0.3);
+  }
+
+  .btn-anterior {
+    background: white;
+    color: #2d5016;
+    border: 1.5px solid #2d5016;
+    flex: 0.5;
+  }
+
+  .btn-anterior:hover {
+    background: #f5f5f7;
+  }
+
+  /* BARRA DE PROGRESO */
+  .barra-progreso-container {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .progreso-titulo {
+    font-size: 13px;
+    color: #666;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .barra-progreso {
+    width: 100%;
+    height: 8px;
+    background: #e5e5e7;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .barra-relleno {
+    height: 100%;
+    background: linear-gradient(90deg, #2d5016 0%, #5a8a3a 100%);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+
+  .progreso-porcentaje {
+    font-size: 13px;
+    color: #2d5016;
+    font-weight: 600;
+    margin-top: 6px;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .supata-card {
+      grid-template-columns: 1fr;
+    }
+
+    .tabs-container {
+      overflow-x: scroll;
+    }
+
+    .btn-grupo {
+      flex-direction: column;
+    }
+
+    .seccion {
+      padding: 20px;
+    }
+
+    .header-plan h1 {
+      font-size: 22px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-principal">
+  <!-- HEADER -->
+  <div class="header-plan">
+    <h1>📋 Nuevo Plan de Contingencia</h1>
+    <p>Crea un plan de contingencia oficial para eventos masivos según normativa Ley 1523 de 2012</p>
+  </div>
+
+  <!-- DATOS AUTOMÁTICOS DE SUPATÁ -->
+  <div class="supata-card">
+    <div class="supata-item">
+      <div class="supata-icon">📍</div>
+      <div class="supata-content">
+        <h3>Municipio</h3>
+        <p>{{ supata_info.municipio }}, {{ supata_info.departamento }}</p>
+      </div>
+    </div>
+    <div class="supata-item">
+      <div class="supata-icon">👥</div>
+      <div class="supata-content">
+        <h3>Población</h3>
+        <p>{{ supata_info.poblacion_total|string|replace(',', '.') }} habitantes</p>
+      </div>
+    </div>
+    <div class="supata-item">
+      <div class="supata-icon">⛰️</div>
+      <div class="supata-content">
+        <h3>Altitud</h3>
+        <p>{{ supata_info.altitud }} m.s.n.m.</p>
+      </div>
+    </div>
+    <div class="supata-item">
+      <div class="supata-icon">🌡️</div>
+      <div class="supata-content">
+        <h3>Clima</h3>
+        <p>{{ supata_info.temperatura_promedio }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BARRA DE PROGRESO -->
+  <div class="barra-progreso-container">
+    <div class="progreso-titulo">Progreso del Plan</div>
+    <div class="barra-progreso">
+      <div class="barra-relleno" style="width: 0%;" id="barraProgreso"></div>
+    </div>
+    <div class="progreso-porcentaje" id="porcentajeProgreso">0% completado</div>
+  </div>
+
+  <!-- TABS DE SECCIONES -->
+  <div class="tabs-container">
+    <button class="tab-button active" onclick="cambiarSeccion('introduccion')">1. Introducción</button>
+    <button class="tab-button" onclick="cambiarSeccion('objetivos')">2. Objetivos</button>
+    <button class="tab-button" onclick="cambiarSeccion('normativo')">3. Normativo</button>
+    <button class="tab-button" onclick="cambiarSeccion('organizacion')">4. Organización</button>
+    <button class="tab-button" onclick="cambiarSeccion('amenazas')">5. Amenazas</button>
+    <button class="tab-button" onclick="cambiarSeccion('medidas')">6. Medidas</button>
+    <button class="tab-button" onclick="cambiarSeccion('respuesta')">7. Respuesta</button>
+    <button class="tab-button" onclick="cambiarSeccion('actualizacion')">8. Actualización</button>
+    <button class="tab-button" onclick="cambiarSeccion('anexos')">9. Anexos</button>
+  </div>
+
+  <!-- FORMULARIO DINÁMICO -->
+  <form id="formPlanContingencia">
+    
+    <!-- SECCIÓN 1: INTRODUCCIÓN -->
+    <div id="seccion-introduccion" class="seccion active">
+      <h2>1. Introducción</h2>
+      <p class="seccion-descripcion">Presenta una breve descripción del evento, justificación del plan y contexto general según Ley 1523 de 2012</p>
+      
+      <div class="form-group">
+        <label>Número de Plan</label>
+        <input type="text" name="numero_plan" placeholder="Ej: PC-2026-001" required>
+      </div>
+
+      <div class="form-group">
+        <label>Nombre del Plan</label>
+        <input type="text" name="nombre_plan" placeholder="Ej: Plan de Contingencia - Concierto 2026" required>
+      </div>
+
+      <div class="form-group">
+        <label>Tipo de Evento</label>
+        <select name="tipo_evento" required>
+          <option value="">Selecciona tipo de evento</option>
+          <option value="Lluvia">Lluvia / Inundación</option>
+          <option value="Incendio">Incendio</option>
+          <option value="Sismo">Sismo / Terremoto</option>
+          <option value="Eventos Masivos">Eventos Masivos</option>
+          <option value="Concierto">Concierto / Evento Cultural</option>
+          <option value="Deportivo">Evento Deportivo</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Descripción del Evento</label>
+        <textarea name="introduccion_descripcion" placeholder="Describe brevemente el evento..." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Justificación del Plan</label>
+        <textarea name="introduccion_justificacion" placeholder="¿Por qué es importante este plan? Referencia a Ley 1523..." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Contexto General</label>
+        <textarea name="introduccion_contexto" placeholder="Contexto del municipio, condiciones especiales..."></textarea>
+      </div>
+
+      <div class="btn-grupo">
+        <button type="button" class="btn btn-anterior" onclick="cambiarSeccion('introduccion')" style="visibility: hidden;"></button>
+        <button type="button" class="btn btn-guardar" onclick="cambiarSeccion('objetivos')">Siguiente: Objetivos →</button>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 2: OBJETIVOS Y ALCANCE -->
+    <div id="seccion-objetivos" class="seccion">
+      <h2>2. Objetivos y Alcance</h2>
+      <p class="seccion-descripcion">Define los objetivos generales y específicos del plan, así como su alcance geográfico y temporal</p>
+      
+      <div class="form-group">
+        <label>Objetivo General</label>
+        <textarea name="objetivo_general" placeholder="Ej: Proteger la vida, salud y bienes de los asistentes..." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Alcance del Plan - Evento</label>
+        <textarea name="alcance_evento" placeholder="A qué evento específicamente aplica este plan" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Ubicación Física</label>
+        <input type="text" name="alcance_ubicacion" placeholder="Ej: Estadio Municipal, Calle Principal, Salón ABC" required>
+      </div>
+
+      <div class="form-group">
+        <label>Fechas y Duración</label>
+        <input type="text" name="alcance_duracion" placeholder="Ej: 15-20 de agosto 2026, 10 AM - 6 PM" required>
+      </div>
+
+      <div class="form-group">
+        <label>Aforo Esperado (personas)</label>
+        <input type="number" name="alcance_aforo" placeholder="Ej: 5000" min="1" required>
+      </div>
+
+      <div class="btn-grupo">
+        <button type="button" class="btn btn-anterior" onclick="cambiarSeccion('introduccion')">← Anterior</button>
+        <button type="button" class="btn btn-guardar" onclick="cambiarSeccion('normativo')">Siguiente: Normativo →</button>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 3: MARCO NORMATIVO -->
+    <div id="seccion-normativo" class="seccion">
+      <h2>3. Marco Normativo</h2>
+      <p class="seccion-descripcion">Leyes, decretos y normas locales que rigen el plan</p>
+      
+      <div class="form-group">
+        <label>Normas Aplicables</label>
+        <textarea name="marco_normativo" placeholder="Ley 1523 de 2012, Decreto 2157 de 2017, Normativas locales..." required></textarea>
+      </div>
+
+      <div class="btn-grupo">
+        <button type="button" class="btn btn-anterior" onclick="cambiarSeccion('objetivos')">← Anterior</button>
+        <button type="button" class="btn btn-guardar" onclick="cambiarSeccion('organizacion')">Siguiente: Organización →</button>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 4: ORGANIZACIÓN Y ROLES -->
+    <div id="seccion-organizacion" class="seccion">
+      <h2>4. Organización y Roles</h2>
+      <p class="seccion-descripcion">Estructura organizativa, coordinadores y sus funciones</p>
+      
+      <div class="form-group">
+        <label>Coordinador General del Plan</label>
+        <input type="text" name="coordinador_general" placeholder="Nombre y cargo" required>
+      </div>
+
+      <div class="form-group">
+        <label>Ubicación del PMU (Puesto de Mando Unificado)</label>
+        <input type="text" name="pmu_ubicacion" placeholder="Ej: Cabina de sonido / Carpa de mando" required>
+      </div>
+
+      <div class="form-group">
+        <label>Organismos de Apoyo Externo</label>
+        <textarea name="organismos_apoyo" placeholder="Bomberos, Cruz Roja, Policía, hospitales..." required></textarea>
+      </div>
+
+      <div class="btn-grupo">
+        <button type="button" class="btn btn-anterior" onclick="cambiarSeccion('normativo')">← Anterior</button>
+        <button type="button" class="btn btn-guardar" onclick="cambiarSeccion('amenazas')">Siguiente: Amenazas →</button>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 5: AMENAZAS Y RIESGOS -->
+    <div id="seccion-amenazas" class="seccion">
+      <h2>5. Identificación de Amenazas y Análisis de Riesgos</h2>
+      <p class="seccion-descripcion">Matriz de riesgos según Ley 1523</p>
+      
+      <div class="form-group">
+        <label>Descripción del Escenario</label>
+        <textarea name="descripcion_escenario" placeholder="Tipo de evento, lugar, características de la multitud..." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Amenazas Identificadas</label>
+        <textarea name="amenazas_identificadas" placeholder="Amenazas naturales, tecnológicas, antrópicas..." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Análisis de Vulnerabilidades</label>
+        <textarea name="vulnerabilidades" placeholder="Infraestructura, personal, público vulnerables..." required></textarea>
+      </div>
+
+      <div class="btn-grupo">
+        <button type="button" class="btn btn-anterior" onclick="cambiarSeccion('organizacion')">← Anterior</button>
+        <button type="button" class="btn btn-guardar" onclick="cambiarSeccion('medidas')">Siguiente: Medidas →</button>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 6: MEDIDAS DE REDUCCIÓN -->
+    <div id="seccion-medidas" class="seccion">
+      <h2>6. Medidas de Reducción del Riesgo</h2>
+      <p class="seccion-descripcion">Prevención, mitigación y medidas de seguridad</p>
+      
+      <div class="form-group">
+        <label>Medidas de Seguridad</label>
+        <textarea name="medidas_seguridad" placeholder="Control de aforo, extintores, señalización..." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Adecuación del Lugar</label>
+        <textarea name="adecuacion_lugar" placeholder="Rutas de evacuación, iluminación, salidas..." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Capacitación del Personal</label>
+        <textarea name="capacitacion_personal" placeholder="Entrenamientos, simulacros previstos..."></textarea>
+      </div>
+
+      <div class="btn-grupo">
+        <button type="button" class="btn btn-anterior" onclick="cambiarSeccion('amenazas')">← Anterior</button>
+        <button type="button" class="btn btn-guardar" onclick="cambiarSeccion('respuesta')">Siguiente: Respuesta →</button>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 7: PLAN DE RESPUESTA -->
+    <div id="seccion-respuesta" class="seccion">
+      <h2>7. Plan de Respuesta a Emergencias</h2>
+      <p class="seccion-descripcion">Protocolos, procedimientos y actuaciones en emergencias</p>
+      
+      <div class="form-group">
+        <label>Procedimiento General de Respuesta</label>
+        <textarea name="procedimiento_general" placeholder="Evaluación, evacuación, activación de recursos..." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Rutas de Evacuación</label>
+        <textarea name="rutas_evacuacion" placeholder="Rutas principales y alternas, salidas..." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Puntos de Encuentro</label>
+        <textarea name="puntos_encuentro" placeholder="Lugares seguros para evacuados..." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Tiempo Estimado de Evacuación</label>
+        <input type="text" name="capacidad_rutas" placeholder="Ej: 8 minutos para evacuar totalmente" required>
+      </div>
+
+      <div class="form-group">
+        <label>Recursos Disponibles</label>
+        <textarea name="recursos_disponibles" placeholder="Extintores, botiquines, ambulancias..." required></textarea>
+      </div>
+
+      <div class="btn-grupo">
+        <button type="button" class="btn btn-anterior" onclick="cambiarSeccion('medidas')">← Anterior</button>
+        <button type="button" class="btn btn-guardar" onclick="cambiarSeccion('actualizacion')">Siguiente: Actualización →</button>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 8: ACTUALIZACIÓN Y MEJORA -->
+    <div id="seccion-actualizacion" class="seccion">
+      <h2>8. Mecanismos de Actualización y Mejora</h2>
+      <p class="seccion-descripcion">Versionamiento, capacitación y mejora continua</p>
+      
+      <div class="form-group">
+        <label>Responsable de Actualización</label>
+        <input type="text" name="responsable_actualizacion" placeholder="Nombre y cargo" required>
+      </div>
+
+      <div class="form-group">
+        <label>Frecuencia de Actualización</label>
+        <select name="frecuencia_actualizacion" required>
+          <option value="">Selecciona frecuencia</option>
+          <option value="Anual">Anual</option>
+          <option value="Semestral">Semestral</option>
+          <option value="Trimestral">Trimestral</option>
+          <option value="Según cambios">Según cambios significativos</option>
+        </select>
+      </div>
+
+      <div class="btn-grupo">
+        <button type="button" class="btn btn-anterior" onclick="cambiarSeccion('respuesta')">← Anterior</button>
+        <button type="button" class="btn btn-guardar" onclick="cambiarSeccion('anexos')">Siguiente: Anexos →</button>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 9: ANEXOS -->
+    <div id="seccion-anexos" class="seccion">
+      <h2>9. Anexos Técnicos</h2>
+      <p class="seccion-descripcion">Imágenes, mapas, planos y documentos de referencia</p>
+      
+      <!-- Contenedor de anexos con imágenes -->
+      <div id="anexos-container">
+        <div class="form-group">
+          <label>📎 Anexos Visuales (Mapas, Ubicaciones, Programación, Fotos)</label>
+          <button type="button" class="btn btn-agregar-anexo" onclick="agregarAnexo()" style="background: #7cb342; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 15px;">
+            ➕ Agregar Imagen/Mapa
+          </button>
+          
+          <div id="lista-anexos" style="margin-top: 15px;">
+            <!-- Aquí se agregarán dinámicamente los anexos -->
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Observaciones Adicionales</label>
+        <textarea name="observaciones" placeholder="Notas, comentarios finales, documentos de referencia..."></textarea>
+      </div>
+
+      <div class="btn-grupo">
+        <button type="button" class="btn btn-anterior" onclick="cambiarSeccion('actualizacion')">← Anterior</button>
+        <button type="button" class="btn btn-guardar" onclick="guardarPlanDirecto()">✓ Crear Plan de Contingencia</button>
+      </div>
+    </div>
+
+  </form>
+</div>
+
+<script>
+// Función global para guardar plan
+async function guardarPlanDirecto() {
+  console.log('=== guardarPlanDirecto() ejecutado ===');
+  
+  try {
+    const form = document.getElementById('formPlanContingencia');
+    if (!form) {
+      alert('Error: formulario no encontrado');
+      return;
+    }
+    
+    const formData = new FormData(form);
+    const planData = {};
+    
+    formData.forEach((value, key) => {
+      planData[key] = value;
+    });
+    
+    // ========== CAPTURAR ANEXOS ==========
+    const anexos = [];
+    const anexosItems = document.querySelectorAll('.anexo-item');
+    
+    for (let item of anexosItems) {
+      const descripcion = item.querySelector('.anexo-descripcion').value;
+      const archivoInput = item.querySelector('.anexo-archivo');
+      
+      if (archivoInput.files.length > 0 && descripcion.trim()) {
+        const file = archivoInput.files[0];
+        
+        // Convertir a base64
+        const base64 = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result);
+          reader.readAsDataURL(file);
+        });
+        
+        anexos.push({
+          descripcion: descripcion,
+          nombre_archivo: file.name,
+          tipo: file.type,
+          data: base64
+        });
+      }
+    }
+    
+    planData.anexos_imagenes = anexos;
+    console.log('Anexos capturados:', anexos.length);
+    
+    // Datos automáticos
+    planData.municipio = 'Supatá';
+    planData.departamento = 'Cundinamarca';
+    planData.poblacion_municipio = 6428;
+    planData.fecha_creacion = new Date().toISOString();
+    planData.id = Date.now();
+    
+    console.log('Plan a guardar:', planData);
+    
+    // Guardar en localStorage
+    let planes = JSON.parse(localStorage.getItem('planes_contingencia') || '[]');
+    planes.push(planData);
+    localStorage.setItem('planes_contingencia', JSON.stringify(planes));
+    
+    console.log('Total planes guardados:', planes.length);
+    
+    // Mostrar alerta
+    alert('✓ Plan creado correctamente\n\nNúmero: ' + (planData.numero_plan || 'Sin número') + '\nNombre: ' + (planData.nombre_plan || 'Sin nombre') + '\nAnexos: ' + anexos.length);
+    
+    // Redirigir
+    setTimeout(function() {
+      window.location.href = '/gestion-riesgo/planes-contingencia-v2';
+    }, 500);
+    
+  } catch (error) {
+    console.error('Error al guardar:', error);
+    alert('Error: ' + error.message);
+  }
+}
+
+// ========== GESTIÓN DE ANEXOS ==========
+let contadorAnexos = 0;
+
+function agregarAnexo() {
+  contadorAnexos++;
+  const anexoId = `anexo-${contadorAnexos}`;
+  
+  const anexoHtml = `
+    <div class="anexo-item" id="${anexoId}" style="border: 2px solid #e0e0e0; border-radius: 12px; padding: 20px; margin-bottom: 15px; background: #fafafa;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h4 style="margin: 0; color: #424242;">📎 Anexo ${contadorAnexos}</h4>
+        <button type="button" onclick="eliminarAnexo('${anexoId}')" style="background: #e53935; color: white; border: none; border-radius: 6px; padding: 6px 12px; cursor: pointer;">
+          🗑️ Eliminar
+        </button>
+      </div>
+      
+      <div class="form-group" style="margin-bottom: 15px;">
+        <label style="font-weight: 600; color: #424242;">Descripción del Anexo</label>
+        <input type="text" class="anexo-descripcion" placeholder="Ej: Mapa de ubicación del evento, Plano de evacuación, Cronograma fotográfico..." style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+      </div>
+      
+      <div class="form-group">
+        <label style="font-weight: 600; color: #424242;">Seleccionar Imagen/PDF</label>
+        <input type="file" class="anexo-archivo" accept="image/*,.pdf" onchange="previsualizarAnexo(this, '${anexoId}')" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; background: white;">
+        <small style="color: #757575; display: block; margin-top: 5px;">📋 Formatos: JPG, PNG, PDF | Máximo 3MB por archivo</small>
+      </div>
+      
+      <div class="anexo-preview" id="preview-${anexoId}" style="margin-top: 15px; text-align: center;">
+        <!-- Aquí se mostrará la vista previa -->
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('lista-anexos').insertAdjacentHTML('beforeend', anexoHtml);
+}
+
+function eliminarAnexo(anexoId) {
+  if (confirm('¿Eliminar este anexo?')) {
+    document.getElementById(anexoId).remove();
+  }
+}
+
+function previsualizarAnexo(input, anexoId) {
+  const preview = document.getElementById(`preview-${anexoId}`);
+  const file = input.files[0];
+  
+  if (!file) {
+    preview.innerHTML = '';
+    return;
+  }
+  
+  // Validar tamaño (3MB máximo)
+  if (file.size > 3 * 1024 * 1024) {
+    alert('⚠️ El archivo es muy grande. Máximo 3MB.');
+    input.value = '';
+    return;
+  }
+  
+  const reader = new FileReader();
+  
+  reader.onload = function(e) {
+    const isPDF = file.type === 'application/pdf';
+    
+    if (isPDF) {
+      preview.innerHTML = `
+        <div style="padding: 20px; background: #fff3cd; border-radius: 8px; border: 1px solid #ffc107;">
+          <p style="margin: 0; color: #856404;">📄 <strong>${file.name}</strong></p>
+          <small style="color: #856404;">PDF adjunto correctamente</small>
+        </div>
+      `;
+    } else {
+      preview.innerHTML = `
+        <img src="${e.target.result}" alt="Preview" style="max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <p style="margin-top: 10px; color: #757575; font-size: 14px;">${file.name}</p>
+      `;
+    }
+  };
+  
+  reader.readAsDataURL(file);
+}
+
+// Función para cambiar secciones
+function cambiarSeccion(seccion) {
+  document.querySelectorAll('.seccion').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+  
+  document.getElementById('seccion-' + seccion).classList.add('active');
+  const btnActivo = document.querySelector(`[onclick*="${seccion}"]`);
+  if (btnActivo) btnActivo.classList.add('active');
+  
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Cuando DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('✓ DOM cargado');
+  
+  // Configurar tabs
+  document.querySelectorAll('.tab-button').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+  
+  console.log('✓ Página lista');
+});
+</script>
+{% endblock %}
+

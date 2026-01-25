@@ -1,0 +1,833 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<style>
+/* ============================================
+   iMessage Style Chat - iOS 26 Design
+   ============================================ */
+
+.imessage-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  height: calc(100vh - 100px);
+  display: flex;
+  gap: 1rem;
+}
+
+/* Left Sidebar - Contacts List */
+.contacts-sidebar {
+  width: 340px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(255,255,255,0.95));
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border-radius: 24px;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08),
+              inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.contacts-header {
+  padding: 1.75rem 1.5rem 1rem;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.contacts-header h4 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.contacts-search {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.contacts-search input {
+  background: rgba(0,0,0,0.04);
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1rem 0.75rem 2.75rem;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.contacts-search input:focus {
+  background: rgba(0,0,0,0.06);
+  box-shadow: none;
+  outline: none;
+}
+
+.contacts-search i {
+  position: absolute;
+  left: 2.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-size: 1rem;
+}
+
+.contacts-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 0.25rem;
+  position: relative;
+}
+
+.contact-item:hover {
+  background: rgba(27, 94, 32, 0.08);
+}
+
+.contact-item.active {
+  background: linear-gradient(135deg, rgba(27, 94, 32, 0.15), rgba(76, 175, 80, 0.12));
+  box-shadow: 0 2px 8px rgba(27, 94, 32, 0.1);
+}
+
+.contact-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1b5e20, #4caf50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(27, 94, 32, 0.2);
+  position: relative;
+}
+
+.contact-avatar.online::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  background: #22c55e;
+  border: 2.5px solid white;
+  border-radius: 50%;
+}
+
+.contact-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.contact-name {
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 0.95rem;
+  margin-bottom: 0.15rem;
+}
+
+.contact-status {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.contact-unread {
+  width: 22px;
+  height: 22px;
+  background: #1b5e20;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+/* Chat Area */
+.chat-area {
+  flex: 1;
+  background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(255,255,255,0.95));
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border-radius: 24px;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08),
+              inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-header {
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255,255,255,0.5);
+}
+
+.chat-header-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1b5e20, #4caf50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(27, 94, 32, 0.2);
+}
+
+.chat-header-info h5 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.chat-header-info p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+/* Messages Area - iMessage Style */
+.messages-area {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: 
+    linear-gradient(135deg, rgba(248, 250, 252, 0.5) 0%, rgba(241, 245, 249, 0.5) 100%);
+}
+
+.message-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-width: 65%;
+}
+
+.message-group.sent {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.message-group.received {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+.message-bubble {
+  padding: 0.75rem 1.25rem;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+  position: relative;
+  animation: messagePop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  max-width: 100%;
+}
+
+@keyframes messagePop {
+  0% { opacity: 0; transform: scale(0.8) translateY(10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.message-group.sent .message-bubble {
+  background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+  color: white;
+  border-bottom-right-radius: 6px;
+}
+
+.message-group.received .message-bubble {
+  background: rgba(229, 231, 235, 0.95);
+  color: #1a1a1a;
+  border-bottom-left-radius: 6px;
+}
+
+.message-time {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  padding: 0 0.5rem;
+  margin-top: 0.15rem;
+}
+
+.message-group.sent .message-time {
+  text-align: right;
+}
+
+/* Message Input Area - iMessage Style */
+.message-input-area {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  background: rgba(255,255,255,0.7);
+}
+
+.message-input-wrapper {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  background: rgba(0,0,0,0.04);
+  border-radius: 22px;
+  padding: 0.5rem 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.message-input-wrapper:focus-within {
+  background: rgba(0,0,0,0.06);
+  box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.1);
+}
+
+.emoji-trigger {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  padding: 0.25rem;
+}
+
+.emoji-trigger:hover {
+  transform: scale(1.2);
+}
+
+.message-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  max-height: 120px;
+  min-height: 32px;
+  padding: 0.5rem 0.25rem;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.send-button {
+  background: linear-gradient(135deg, #1b5e20, #4caf50);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(27, 94, 32, 0.3);
+}
+
+.send-button:hover:not(:disabled) {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(27, 94, 32, 0.4);
+}
+
+.send-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.send-button i {
+  font-size: 1.1rem;
+}
+
+/* Emoji Picker */
+.emoji-picker {
+  position: absolute;
+  bottom: 80px;
+  left: 20px;
+  background: white;
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+  display: none;
+  z-index: 100;
+  max-width: 320px;
+}
+
+.emoji-picker.show {
+  display: block;
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.emoji-item {
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  text-align: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.emoji-item:hover {
+  background: rgba(27, 94, 32, 0.1);
+  transform: scale(1.2);
+}
+
+/* Empty State */
+.empty-chat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+}
+
+.empty-chat i {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.3;
+}
+
+.empty-chat h5 {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+/* Scrollbar Styling */
+.contacts-list::-webkit-scrollbar,
+.messages-area::-webkit-scrollbar {
+  width: 6px;
+}
+
+.contacts-list::-webkit-scrollbar-track,
+.messages-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.contacts-list::-webkit-scrollbar-thumb,
+.messages-area::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.15);
+  border-radius: 10px;
+}
+
+.contacts-list::-webkit-scrollbar-thumb:hover,
+.messages-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.25);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .imessage-container {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .contacts-sidebar {
+    width: 100%;
+    max-height: 300px;
+  }
+  
+  .chat-area {
+    min-height: 500px;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="imessage-container">
+  <!-- Contacts Sidebar -->
+  <div class="contacts-sidebar">
+    <div class="contacts-header">
+      <h4><i class="bi bi-chat-dots-fill"></i> Mensajes</h4>
+    </div>
+    
+    <div class="contacts-search position-relative">
+      <i class="bi bi-search"></i>
+      <input type="text" id="search-contacts" class="form-control" placeholder="Buscar contactos...">
+    </div>
+    
+    <div class="contacts-list" id="contacts-list">
+      <!-- Contacts will be loaded here -->
+    </div>
+  </div>
+
+  <!-- Chat Area -->
+  <div class="chat-area">
+    <div id="empty-state" class="empty-chat">
+      <i class="bi bi-chat-left-dots"></i>
+      <h5>Selecciona un contacto para comenzar</h5>
+      <p class="text-muted">Elige un usuario de la lista para enviar mensajes</p>
+    </div>
+
+    <div id="chat-content" style="display: none; flex: 1; display: flex; flex-direction: column; height: 100%;">
+      <div class="chat-header">
+        <div class="chat-header-avatar" id="chat-avatar">
+          U
+        </div>
+        <div class="chat-header-info">
+          <h5 id="chat-name">Usuario</h5>
+          <p id="chat-status">En línea</p>
+        </div>
+      </div>
+
+      <div class="messages-area" id="messages-area">
+        <!-- Messages will be loaded here -->
+      </div>
+
+      <div class="message-input-area">
+        <div class="emoji-picker" id="emoji-picker">
+          <div class="emoji-grid" id="emoji-grid"></div>
+        </div>
+        
+        <div class="message-input-wrapper">
+          <button class="emoji-trigger" id="emoji-trigger">😊</button>
+          <textarea 
+            class="message-input" 
+            id="message-input" 
+            placeholder="Escribe un mensaje..."
+            rows="1"></textarea>
+          <button class="send-button" id="send-button" disabled>
+            <i class="bi bi-send-fill"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ============================================
+// iMessage Style Chat - Full Implementation
+// ============================================
+
+const currentUser = "{{ session.user }}";
+let selectedContact = null;
+let messages = [];
+
+// Common emojis for picker
+const commonEmojis = ['😊', '😂', '❤️', '👍', '🎉', '🔥', '✨', '💯', '👏', '🙌', 
+                      '😍', '🤔', '😎', '🥳', '😢', '😅', '🤗', '💪', '🌟', '⭐',
+                      '✅', '❌', '⚡', '💡', '📌', '📎', '📊', '📈', '💼', '🏛️'];
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+  loadContacts();
+  initializeEmojiPicker();
+  initializeMessageInput();
+  initializeSearch();
+  
+  // Auto-refresh messages every 3 seconds
+  setInterval(() => {
+    if (selectedContact) {
+      loadMessages(selectedContact, false);
+    }
+  }, 3000);
+
+  // Abrir contacto si viene en querystring (?open=usuario)
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const toOpen = params.get('open');
+    if (toOpen) {
+      // Esperar a que se carguen los contactos y luego seleccionar
+      const trySelect = setInterval(() => {
+        const candidate = [...document.querySelectorAll('.contact-item')].find(el => el.dataset.user === toOpen);
+        if (candidate) {
+          candidate.click();
+          clearInterval(trySelect);
+        }
+      }, 200);
+      setTimeout(() => clearInterval(trySelect), 4000);
+    }
+  } catch (e) { console.warn('No se pudo abrir contacto por query:', e); }
+});
+
+// Load contacts from server
+async function loadContacts() {
+  try {
+    const response = await fetch('/api/chat/users');
+    const users = await response.json();
+    
+    const contactsList = document.getElementById('contacts-list');
+    contactsList.innerHTML = '';
+    
+    users.forEach(user => {
+      if (user.usuario !== currentUser) {
+        const contactEl = createContactElement(user);
+        contactsList.appendChild(contactEl);
+      }
+    });
+  } catch (error) {
+    console.error('Error loading contacts:', error);
+  }
+}
+
+// Create contact element
+function createContactElement(user) {
+  const div = document.createElement('div');
+  div.className = 'contact-item';
+  div.dataset.user = user.usuario;
+  
+  const initial = user.usuario.charAt(0).toUpperCase();
+  const isOnline = Math.random() > 0.5; // Simulated online status
+  
+  div.innerHTML = `
+    <div class="contact-avatar ${isOnline ? 'online' : ''}">${initial}</div>
+    <div class="contact-info">
+      <div class="contact-name">${user.usuario}</div>
+      <div class="contact-status">${user.rol || 'Usuario'}</div>
+    </div>
+  `;
+  
+  div.addEventListener('click', () => selectContact(user.usuario, user.rol));
+  
+  return div;
+}
+
+// Select contact
+function selectContact(username, role) {
+  selectedContact = username;
+  
+  // Update active state
+  document.querySelectorAll('.contact-item').forEach(el => {
+    el.classList.remove('active');
+    if (el.dataset.user === username) {
+      el.classList.add('active');
+    }
+  });
+  
+  // Show chat area
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('chat-content').style.display = 'flex';
+  
+  // Update header
+  const initial = username.charAt(0).toUpperCase();
+  document.getElementById('chat-avatar').textContent = initial;
+  document.getElementById('chat-name').textContent = username;
+  document.getElementById('chat-status').textContent = role || 'En línea';
+  
+  // Load messages
+  loadMessages(username);
+  
+  // Enable input
+  document.getElementById('message-input').disabled = false;
+}
+
+// Load messages
+async function loadMessages(contactUser, scrollToBottom = true) {
+  try {
+    const response = await fetch(`/api/chat/messages?user=${contactUser}`);
+    const data = await response.json();
+    messages = data.messages || [];
+    
+    renderMessages();
+    
+    if (scrollToBottom) {
+      scrollToLatestMessage();
+    }
+  } catch (error) {
+    console.error('Error loading messages:', error);
+  }
+}
+
+// Render messages
+function renderMessages() {
+  const messagesArea = document.getElementById('messages-area');
+  messagesArea.innerHTML = '';
+  
+  messages.forEach(msg => {
+    const isSent = msg.from === currentUser;
+    const messageGroup = document.createElement('div');
+    messageGroup.className = `message-group ${isSent ? 'sent' : 'received'}`;
+    
+    const bubble = document.createElement('div');
+    bubble.className = 'message-bubble';
+    bubble.textContent = msg.message;
+    
+    const time = document.createElement('div');
+    time.className = 'message-time';
+    time.textContent = formatMessageTime(msg.timestamp);
+    
+    messageGroup.appendChild(bubble);
+    messageGroup.appendChild(time);
+    messagesArea.appendChild(messageGroup);
+  });
+}
+
+// Send message
+async function sendMessage() {
+  const input = document.getElementById('message-input');
+  const message = input.value.trim();
+  
+  if (!message || !selectedContact) return;
+  
+  try {
+    const response = await fetch('/api/chat/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: selectedContact,
+        message: message
+      })
+    });
+    
+    if (response.ok) {
+      input.value = '';
+      input.style.height = 'auto';
+      loadMessages(selectedContact);
+      
+      // Play send sound (optional)
+      playMessageSound();
+    }
+  } catch (error) {
+    console.error('Error sending message:', error);
+  }
+}
+
+// Initialize emoji picker
+function initializeEmojiPicker() {
+  const emojiGrid = document.getElementById('emoji-grid');
+  commonEmojis.forEach(emoji => {
+    const span = document.createElement('span');
+    span.className = 'emoji-item';
+    span.textContent = emoji;
+    span.addEventListener('click', () => insertEmoji(emoji));
+    emojiGrid.appendChild(span);
+  });
+  
+  document.getElementById('emoji-trigger').addEventListener('click', () => {
+    document.getElementById('emoji-picker').classList.toggle('show');
+  });
+  
+  // Close picker when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.emoji-picker') && !e.target.closest('.emoji-trigger')) {
+      document.getElementById('emoji-picker').classList.remove('show');
+    }
+  });
+}
+
+// Insert emoji
+function insertEmoji(emoji) {
+  const input = document.getElementById('message-input');
+  const cursorPos = input.selectionStart;
+  const textBefore = input.value.substring(0, cursorPos);
+  const textAfter = input.value.substring(cursorPos);
+  
+  input.value = textBefore + emoji + textAfter;
+  input.focus();
+  input.selectionStart = input.selectionEnd = cursorPos + emoji.length;
+  
+  updateSendButton();
+}
+
+// Initialize message input
+function initializeMessageInput() {
+  const input = document.getElementById('message-input');
+  const sendBtn = document.getElementById('send-button');
+  
+  // Auto-resize textarea
+  input.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    updateSendButton();
+  });
+  
+  // Send on Enter (Shift+Enter for new line)
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+  
+  sendBtn.addEventListener('click', sendMessage);
+}
+
+// Update send button state
+function updateSendButton() {
+  const input = document.getElementById('message-input');
+  const sendBtn = document.getElementById('send-button');
+  sendBtn.disabled = !input.value.trim();
+}
+
+// Initialize search
+function initializeSearch() {
+  document.getElementById('search-contacts').addEventListener('input', function(e) {
+    const query = e.target.value.toLowerCase();
+    document.querySelectorAll('.contact-item').forEach(contact => {
+      const name = contact.querySelector('.contact-name').textContent.toLowerCase();
+      contact.style.display = name.includes(query) ? 'flex' : 'none';
+    });
+  });
+}
+
+// Helper functions
+function scrollToLatestMessage() {
+  const messagesArea = document.getElementById('messages-area');
+  messagesArea.scrollTop = messagesArea.scrollHeight;
+}
+
+function formatMessageTime(timestamp) {
+  if (!timestamp) return '';
+  const date = new Date(timestamp);
+  const now = new Date();
+  
+  if (date.toDateString() === now.toDateString()) {
+    return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  } else {
+    return date.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' });
+  }
+}
+
+function playMessageSound() {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.1);
+  } catch (e) {
+    console.log('Audio not available');
+  }
+}
+</script>
+{% endblock %}

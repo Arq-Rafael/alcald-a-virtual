@@ -1,0 +1,145 @@
+/* ========================================
+   SIDEBAR iOS 26 DESIGN
+   Glassmorphism + Modern Logo
+   ======================================== */
+
+.sidebar {
+  background: linear-gradient(180deg, #e8f5e9 0%, #f1f8e9 50%, #fffde7 100%) !important;
+  border-right: 1px solid rgba(124, 179, 66, 0.15);
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+.sidebar-header {
+  padding: 2rem 1rem !important;
+  text-align: center;
+  border-bottom: 1px solid rgba(124, 179, 66, 0.1);
+  margin-bottom: 1.2rem;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.logo-ios-modern {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.2) 0%, rgba(167, 139, 250, 0.2) 100%);
+  border: 1.5px solid rgba(20, 184, 166, 0.3);
+  border-radius: 24px;
+  box-shadow: 0 8px 24px rgba(20, 184, 166, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+}
+
+.logo-ios-modern::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+  animation: shine 3s ease-in-out infinite;
+}
+
+@keyframes shine {
+  0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(-45deg); opacity: 0; }
+  50% { transform: translateX(100%) translateY(100%) rotate(-45deg); opacity: 1; }
+}
+
+.logo-ios-modern i {
+  font-size: 2.4rem;
+  background: linear-gradient(135deg, #14b8a6 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  z-index: 1;
+  position: relative;
+  filter: drop-shadow(0 4px 12px rgba(20, 184, 166, 0.3));
+}
+
+.logo-ios-modern:hover {
+  transform: scale(1.06) rotate(1deg) translateY(-2px);
+  box-shadow: 0 12px 36px rgba(20, 184, 166, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  border-color: rgba(20, 184, 166, 0.5);
+}
+
+.sidebar-brand {
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.5px !important;
+  color: #2d5016 !important;
+  text-decoration: none !important;
+  display: block;
+}
+
+/* ========================================
+   NAVIGATION LINKS - iOS 26
+   ======================================== */
+
+.sidebar .nav-link {
+  background: transparent !important;
+  color: #558b2f !important;
+  border-radius: 12px !important;
+  padding: 0.75rem 1rem !important;
+  margin: 0.25rem 0.5rem !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  border: 1px solid transparent !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.7rem !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar .nav-link:hover {
+  background: rgba(123, 179, 66, 0.2) !important;
+  color: #7cb342 !important;
+  border-color: rgba(123, 179, 66, 0.3) !important;
+  transform: translateX(6px);
+  box-shadow: -4px 0 16px rgba(123, 179, 66, 0.2);
+}
+
+.sidebar .nav-link.active {
+  background: rgba(124, 179, 66, 0.18) !important;
+  color: #7cb342 !important;
+  border-color: rgba(124, 179, 66, 0.3) !important;
+  box-shadow: 0 4px 16px rgba(124, 179, 66, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  position: relative;
+}
+
+.sidebar .nav-link.active::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, #7cb342 0%, #9ccc65 100%);
+  border-radius: 0 4px 4px 0;
+}
+
+.sidebar .nav-link i {
+  font-size: 1rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0.9;
+  color: #558b2f;
+}
+
+.sidebar .nav-link:hover i {
+  opacity: 1;
+  color: #7cb342;
+  transform: scale(1.15);
+}
+
+.sidebar .nav-link.active i {
+  opacity: 1;
+  color: #9ccc65;
+  filter: drop-shadow(0 2px 6px rgba(123, 179, 66, 0.4));
+}

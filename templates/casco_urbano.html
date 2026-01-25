@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Casco Urbano 3D – Alcaldía Virtual</title>
+
+<!-- MapLibre CDN + fallback local -->
+<link id="ml-css-cdn" href="https://unpkg.com/maplibre-gl@3.7.0/dist/maplibre-gl.css" rel="stylesheet" />
+<script id="ml-js-cdn" src="https://unpkg.com/maplibre-gl@3.7.0/dist/maplibre-gl.js"></script>
+<link id="ml-css-local" href="{{ url_for('static', filename='lib/maplibre/maplibre-gl.css') }}" rel="stylesheet" disabled />
+<script id="ml-js-local" src="{{ url_for('static', filename='lib/maplibre/maplibre-gl.js') }}" defer></script>
+
+<!-- Turf -->
+<script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+
+<style>
+  :root{
+    color-scheme: dark;
+    --bg:#0b1220; --panel:#0f172a; --ink:#e6e9ee; --muted:#94a3b8; --stroke:rgba(148,163,184,.22);
+    --brand:#14b8a6; --brand-strong:#0d9488; --accent:#22d3ee; --ok:#10b981;
+  }
+  html,body{height:100%;overflow:hidden;background:var(--bg)}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto;color:var(--ink)}
+  #map{position:fixed;inset:0}
+
+  /* PANEL IZQ */
+  .panel{
+    position:fixed; top:16px; left:16px; width:304px;
+    background:rgba(15,23,42,.92); border:1px solid var(--stroke);
+    border-radius:16px; padding:14px; backdrop-filter:blur(6px);
+    box-shadow:0 10px 24px rgba(0,0,0,.25); z-index:5
+  }
+  .hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .hdr h2{margin:0;font-size:16px}
+  .chip{background:rgba(20,184,166,.15); color:#99f6e4; font-weight:700; font-size:10px;
+        padding:3px 10px; border-radius:999px; border:1px solid rgba(20,184,166,.35)}
+  label{font-size:12px;color:var(--muted);display:block;margin:10px 0 6px}
+  select,input[type="number"]{
+    width:100%;border:1px solid #334155;background:#0b1220;color:var(--ink);
+    border-radius:10px;padding:10px 12px;outline:none
+  }
+  select:focus,input:focus{box-shadow:0 0 0 3px rgba(34,211,238,.25);border-color:var(--accent)}
+  .switch{display:flex;align-items:center;gap:10px;margin:10px 0}
+  .switch input{width:16px;height:16px;accent-color:var(--brand)}
+  input[type="range"]{width:100%}
+  .row{display:flex;gap:10px;margin-top:8px}
+  .btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;user-select:none;
+       background:#0b1725;color:#e5e7eb;border:1px solid #1f2937;border-radius:10px;padding:10px 12px;font-weight:600}
+  .btn.primary{background:var(--brand-strong);border-color:var(--brand-strong);color:#fff}
+  .kpi{font-size:12px;color:var(--muted);margin-top:8px}
+  .kpi b{color:#fff}
+
+  /* TOOLBAR DER */
+  .toolbar{
+    position:fixed; right:16px; top:16px; display:flex; gap:8px; z-index:5;
+    background:rgba(15,23,42,.92); border:1px solid var(--stroke); border-radius:12px; padding:8px; align-items:center
+  }
+  .toolbar input{width:260px;border:1px solid var(--stroke);background:#0b1220;color:#e6e9ee;
+                 border-radius:10px;padding:8px 10px}
+
+  /* LEYENDA */
+  .legend{position:fixed; left:16px; bottom:16px; background:rgba(15,23,42,.92);
+          border:1px solid var(--stroke); color:#e6e9ee; padding:8px 10px; border-radius:10px; font-size:12px; z-index:4}
+
+  /* FICHA ANCLADA */
+  .dock{
+    position:fixed; left:16px; top: calc(16px + 460px + 12px); /* debajo del panel */
+    width:304px; z-index:5;
+    background:rgba(15,23,42,.92); border:1px solid var(--stroke);
+    border-radius:16px; box-shadow:0 10px 24px rgba(0,0,0,.25); backdrop-filter:blur(6px);
+  }
+  .dock .title{
+    padding:12px 14px; font-weight:700; font-size:13px;
+    background:linear-gradient(180deg, rgba(20,184,166,.25), rgba(20,184,166,.08));
+    border-bottom:1px solid rgba(20,184,166,.35)
+  }
+  .dock .body{ padding:12px 14px }
+  .kv{ display:grid; grid-template-columns:110px 1fr; gap:8px 12px; font-size:13px }
+  .kv .k{ color:var(--muted) }
+  .dock .actions{ padding:12px 14px; border-top:1px solid var(--stroke); display:flex; justify-content:flex-end; gap:8px; background:#0b1220 }
+  .btn-link{background:var(--ok);color:#052e22;border:0;border-radius:10px;padding:10px 14px;font-weight:700;text-decoration:none}
+  .btn-ghost{background:#0b1725;color:#e5e7eb;border:1px solid #1f2937;border-radius:10px;padding:10px 14px;font-weight:600}
+
+  /* Controles MapLibre a juego */
+  .maplibregl-ctrl,.maplibregl-ctrl-attrib{background:rgba(15,23,42,.9)!important;color:#cbd5e1!important;border:1px solid var(--stroke)!important}
+  .maplibregl-ctrl-group>button{border-radius:8px!important}
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<!-- Panel filtros -->
+<div class="panel" id="panel">
+  <div class="hdr">
+    <h2>Casco Urbano</h2><span class="chip">3D</span>
+  </div>
+
+  <label>Barrio</label>
+  <select id="filtroBarrio"><option value="">Todos</option></select>
+
+  <label>Altura mínima (m)</label>
+  <input id="minAltura" type="number" value="0" step="1" />
+
+  <div class="switch">
+    <input type="checkbox" id="toggleRelieve" checked />
+    <span style="font-size:12px;color:#cbd5e1">Ver relieve</span>
+  </div>
+
+  <label>Exageración del relieve: <span id="lblEx" style="color:#e6e9ee">1.6×</span></label>
+  <input id="exageracion" type="range" min="0" max="3" step="0.1" value="1.6" />
+
+  <div class="switch">
+    <input type="checkbox" id="verCriticos" checked />
+    <span style="font-size:12px;color:#cbd5e1">Ver puntos críticos</span>
+  </div>
+
+  <div class="switch">
+    <input type="checkbox" id="verHeatmap" checked />
+    <span style="font-size:12px;color:#cbd5e1">Heatmap de criticidad</span>
+  </div>
+
+  <div class="row">
+    <button class="btn" id="btnFitUrbano">Centrar urbano</button>
+    <button class="btn" id="btnReset">Reset vista</button>
+  </div>
+
+  <div class="kpi">Predios filtrados: <b id="kpiCount">—</b></div>
+</div>
+
+<!-- Ficha anclada debajo del panel -->
+<div class="dock" id="dock" style="display:none">
+  <div class="title">Ficha rápida del predio</div>
+  <div class="body">
+    <div class="kv">
+      <div class="k">COD_PRED</div><div id="d_cod">—</div>
+      <div class="k">Barrio</div><div id="d_barrio">—</div>
+      <div class="k">Área (m²)</div><div id="d_area">—</div>
+      <div class="k">Pisos</div><div id="d_pisos">—</div>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn-ghost" id="btnCerrarDock">Cerrar</button>
+    <a class="btn-link" id="d_link" href="#" target="_blank">Ver ficha completa</a>
+  </div>
+</div>
+
+<!-- Toolbar derecha -->
+<div class="toolbar">
+  <button class="btn" id="btnExport" title="Exportar PNG">📷 Exportar</button>
+  <input id="buscarId" type="text" placeholder="Buscar COD_PRED…" />
+  <button class="btn primary" id="btnBuscar">Buscar</button>
+</div>
+
+<div class="legend"><b>Color por pisos</b> · 1–2: suave · 3–5: medio · 6+: intenso</div>
+
+<script>
+  // Fallback CSS local si el CDN no entra
+  (function ensureMapLibreLoaded(){
+    function init(){ if(typeof maplibregl==='undefined') return setTimeout(init,100); boot(); }
+    setTimeout(()=>{ if(typeof maplibregl==='undefined') document.getElementById('ml-css-local').disabled=false; },800);
+    window.addEventListener('load', init);
+  })();
+
+  const PREDIOS_CANDIDATOS = [
+    '/static/geojson/predios.geojson',
+    '/static/geojson/predios_enriquecidos.geojson',
+    '/static/geojson/usos_predial.geojson'
+  ];
+  const URBANO_URL = '/static/geojson/urbano.geojson';
+  const CRITICOS_URL = '/static/geojson/criticos.geojson';
+
+  async function pickFirst(urls){
+    for(const url of urls){
+      try{ const r = await fetch(url,{cache:'no-store'}); if(r.ok) return {url, gj:await r.json()}; }catch(_){}
+    }
+    throw new Error('No se encontró ningún GeoJSON de predios en /static/geojson/.');
+  }
+  function onlyUrbano(predios, urbano){
+    try{
+      if(!urbano?.features?.length) return predios;
+      const poly = urbano.features[0].geometry;
+      const feats = predios.features.filter(f=>{ try{const c=turf.centroid(f); return turf.booleanPointInPolygon(c,poly);}catch(_){return false;} });
+      return {type:'FeatureCollection', features:feats};
+    }catch{ return predios; }
+  }
+
+  async function boot(){
+    const CENTER=[-74.352,5.060], START_ZOOM=14.8;
+
+    const prediosData = await pickFirst(PREDIOS_CANDIDATOS);
+    let urbano=null, urbanoBounds=null;
+    try{
+      const r = await fetch(URBANO_URL,{cache:'no-store'});
+      if(r.ok){ urbano=await r.json(); const bb=turf.bbox(urbano); urbanoBounds=[[bb[0],bb[1]],[bb[2],bb[3]]]; }
+    }catch(_){}
+    const predios = urbano ? onlyUrbano(prediosData.gj, urbano) : prediosData.gj;
+    let DATASET = predios;
+
+    const map = new maplibregl.Map({
+      container:'map',
+      preserveDrawingBuffer:true,
+      style:{
+        version:8,
+        sources:{
+          bg:{ type:'vector', tiles:[], attribution:'' },
+          osm:{ type:'raster', tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize:256 },
+          terrain:{
+            type:'raster-dem',
+            tiles:['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+            encoding:'terrarium', tileSize:256, maxzoom:15
+          },
+          esriHillshade:{
+            type:'raster',
+            tiles:['https://services.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}'],
+            tileSize:256, attribution:'© Esri World Hillshade'
+          },
+          predios:{ type:'geojson', data:predios },
+          criticos:{ type:'geojson', data:CRITICOS_URL },
+          sel:{ type:'geojson', data:{ type:'FeatureCollection', features:[] } } /* selección */
+        },
+        layers:[
+          { id:'bg',  type:'background', paint:{'background-color':'#dfe8f2'} },
+          { id:'osm', type:'raster',    source:'osm' }
+        ],
+        terrain:{ source:'terrain', exaggeration:1.0 },
+        sky: { 'sky-type':'atmosphere', 'sky-atmosphere-sun':[0.0,0.0], 'sky-atmosphere-sun-intensity':15 }
+      },
+      center:CENTER, zoom:START_ZOOM, pitch:55, bearing:20
+    });
+    window._map = map;
+
+    map.on('load', ()=>{
+      // RELIEVE con fallback
+      (function addReliefLayers(){
+        try {
+          map.addLayer({
+            id:'hillshade-dem', type:'hillshade', source:'terrain',
+            paint:{ 'hillshade-shadow-color':'#000', 'hillshade-highlight-color':'#fff', 'hillshade-exaggeration':1.0 }
+          }, 'osm');
+        } catch(e) {}
+        setTimeout(()=>{
+          const demSrc = map.getSource('terrain');
+          // @ts-ignore
+          const demOk = !!(demSrc && demSrc.loaded && demSrc.loaded());
+          if (!demOk) {
+            if (!map.getLayer('hillshade-esri')) {
+              map.addLayer({ id:'hillshade-esri', type:'raster', source:'esriHillshade', paint:{'raster-opacity':0.55} }, 'osm');
+            }
+            if (map.getLayer('hillshade-dem')) map.setLayoutProperty('hillshade-dem','visibility','none');
+          }
+        }, 2500);
+      })();
+
+      // URBANO
+      if(urbano){
+        map.addSource('urbano',{type:'geojson', data:urbano});
+        map.addLayer({id:'urbano-fill', type:'fill', source:'urbano', paint:{'fill-color':'#14b8a6','fill-opacity':0.06}});
+        map.addLayer({id:'urbano-line', type:'line', source:'urbano', paint:{'line-color':'#22d3ee','line-width':1.2}});
+      }
+
+      // PREDIOS
+      map.addLayer({ id:'predios-fill', type:'fill', source:'predios', paint:{ 'fill-color':'#2dd4bf', 'fill-opacity':0.22 } });
+      map.addLayer({ id:'predios-linea', type:'line', source:'predios', paint:{ 'line-color':'#67e8f9', 'line-width':0.6 } });
+      map.addLayer({
+        id:'predios-3d', type:'fill-extrusion', source:'predios',
+        paint:{
+          'fill-extrusion-color':[
+            'interpolate',['linear'],
+            ['coalesce',['to-number',['get','pisos']],['round',['/',['to-number',['get','altura_m']],3.2]],1],
+            1,'#a7f3d0', 3,'#34d399', 6,'#059669'
+          ],
+          'fill-extrusion-height':[
+            'case',
+            ['has','altura_m'], ['max',['to-number',['get','altura_m']],6],
+            ['has','pisos'],    ['max',['*',['to-number',['get','pisos']],3.2],6],
+            6
+          ],
+          'fill-extrusion-opacity':0.95
+        }
+      });
+
+      // CAPAS DE SELECCIÓN (resaltado)
+      map.addLayer({
+        id:'sel-3d', type:'fill-extrusion', source:'sel',
+        paint:{
+          'fill-extrusion-color':'#22d3ee',
+          'fill-extrusion-height':[
+            'case',
+            ['has','altura_m'], ['+', ['to-number',['get','altura_m']], 1.5],
+            ['has','pisos'],    ['+', ['*',['to-number',['get','pisos']],3.2], 1.5],
+            7.5
+          ],
+          'fill-extrusion-opacity':0.6
+        }
+      });
+      map.addLayer({ id:'sel-line', type:'line', source:'sel', paint:{ 'line-color':'#06b6d4','line-width':2.5 } });
+
+      // CRÍTICOS
+      fetch(CRITICOS_URL).then(r=>r.ok?r.json():null).then(g=>{
+        if(!g) return;
+        map.addSource('criticos-cluster',{type:'geojson', data:CRITICOS_URL, cluster:true, clusterRadius:40, clusterMaxZoom:16});
+        map.addLayer({id:'criticos-clusters', type:'circle', source:'criticos-cluster', filter:['has','point_count'],
+          paint:{'circle-radius':['step',['get','point_count'],12,10,16,30,22],'circle-stroke-width':1,'circle-stroke-color':'#0b1220','circle-color':'#fde047'}});
+        map.addLayer({id:'criticos-unclustered', type:'circle', source:'criticos-cluster', filter:['!', ['has','point_count']],
+          paint:{'circle-radius':6,'circle-stroke-color':'#0b1220','circle-stroke-width':1,
+                 'circle-color':['interpolate',['linear'],['get','criticidad'],0,'#9ca3af',1,'#fde047',2,'#fb923c',3,'#ef4444']}});
+      });
+
+      // Cursor mano
+      map.on('mousemove',(e)=>{
+        const f = map.queryRenderedFeatures(e.point,{layers:['predios-3d','predios-fill','predios-linea']});
+        map.getCanvas().style.cursor = f.length ? 'pointer' : '';
+      });
+
+      // -------- FICHA ANCLADA / SELECCIÓN --------
+      const dock = document.getElementById('dock');
+      const d_cod = document.getElementById('d_cod');
+      const d_barrio = document.getElementById('d_barrio');
+      const d_area = document.getElementById('d_area');
+      const d_pisos = document.getElementById('d_pisos');
+      const d_link = document.getElementById('d_link');
+      document.getElementById('btnCerrarDock').onclick = ()=>{
+        dock.style.display = 'none';
+        const src = map.getSource('sel'); if (src && src.setData) src.setData({type:'FeatureCollection', features:[]});
+      };
+
+      function setSelection(feature){
+        const src = map.getSource('sel');
+        if (!src || !src.setData) return;
+        src.setData({ type:'FeatureCollection', features:[feature] });
+      }
+      function fillDock(p){
+        const pisosCalc = (p.pisos!=null) ? p.pisos : (p.altura_m ? Math.round((+p.altura_m)/3.2) : '—');
+        d_cod.textContent   = (p.COD_PRED || p.COD_PRED_1 || '—');
+        d_barrio.textContent= (p.BARRIO || p.barrio || '—');
+        d_area.textContent  = (p.AREA_M2 || p.area_m2 || '—');
+        d_pisos.textContent = pisosCalc;
+        d_link.href = '/ficha/predio/' + (p.COD_PRED || p.COD_PRED_1 || '');
+        dock.style.display = 'block';
+      }
+
+      function handleClick(point){
+        const feats = map.queryRenderedFeatures(point,{ layers:['predios-3d','predios-fill','predios-linea'] });
+        if(!feats.length) return;
+        const f = feats[0];
+        setSelection(f);       // resaltar
+        fillDock(f.properties);// llenar tarjeta
+      }
+      map.on('click', (e)=> handleClick(e.point));
+      if (map.getLayer('urbano-fill')) map.on('click','urbano-fill',(e)=> handleClick(e.point));
+      // --------------------------------------------
+
+      // Filtros / relieve / KPI
+      const selBarrio = document.getElementById('filtroBarrio');
+      const minAlt = document.getElementById('minAltura');
+      const verCrit = document.getElementById('verCriticos');
+      const verHeat = document.getElementById('verHeatmap');
+      const chkRelieve = document.getElementById('toggleRelieve');
+      const rngEx = document.getElementById('exageracion');
+      const lblEx = document.getElementById('lblEx');
+      const kpiCount = document.getElementById('kpiCount');
+
+      const barrios = [...new Set(DATASET.features.map(f => (f.properties?.BARRIO || f.properties?.barrio || '').toString().trim()).filter(Boolean))].sort();
+      barrios.forEach(b=>{ const o=document.createElement('option'); o.value=b; o.textContent=b; selBarrio.appendChild(o); });
+
+      function predicateForJS(barrio, alturaMin){
+        const byBarrio = (f)=> !barrio || ((f.properties?.BARRIO||f.properties?.barrio||'')===barrio);
+        const altura = (f)=>{ const p=f.properties||{}; let h = p.altura_m!=null ? +p.altura_m : (p.pisos!=null ? (+p.pisos)*3.2 : 6); if (isNaN(h)) h=6; return h >= alturaMin; };
+        return (f)=> byBarrio(f) && altura(f);
+      }
+
+      function aplicarFiltros(){
+        const barrio = selBarrio.value;
+        const alturaMin = parseFloat(minAlt.value||0);
+        const filtroBarrio = barrio ? ['==',['coalesce',['get','BARRIO'],['get','barrio'],''],barrio] : true;
+        const filtroAltura = ['>=',
+          ['case',
+            ['has','altura_m'], ['max',['to-number',['get','altura_m']],6],
+            ['has','pisos'],    ['max',['*',['to-number',['get','pisos']],3.2],6],
+            6
+          ],
+          alturaMin
+        ];
+        const filterExpr = ['all', filtroBarrio, filtroAltura];
+        ['predios-fill','predios-3d','predios-linea'].forEach(id=> map.setFilter(id, filterExpr));
+
+        const match = predicateForJS(barrio, alturaMin);
+        kpiCount.textContent = DATASET.features.filter(match).length.toLocaleString('es-CO');
+
+        const vis=(id,on)=>{if(map.getLayer(id)) map.setLayoutProperty(id,'visibility',on?'visible':'none');};
+        vis('criticos-clusters', verCrit.checked);
+        vis('criticos-unclustered', verCrit.checked);
+        vis('criticos-heat', verHeat.checked);
+      }
+      function aplicarRelieve(){
+        const ex=parseFloat(rngEx.value||1.6);
+        lblEx.textContent = ex.toFixed(1)+'×';
+        if(chkRelieve.checked){
+          map.setTerrain({source:'terrain',exaggeration:ex});
+          if(map.getLayer('hillshade-dem')) map.setLayoutProperty('hillshade-dem','visibility','visible');
+        }else{
+          map.setTerrain(null);
+          if(map.getLayer('hillshade-dem')) map.setLayoutProperty('hillshade-dem','visibility','none');
+        }
+      }
+
+      selBarrio.addEventListener('change', aplicarFiltros);
+      minAlt.addEventListener('change', aplicarFiltros);
+      verCrit.addEventListener('change', aplicarFiltros);
+      verHeat.addEventListener('change', aplicarFiltros);
+      rngEx.addEventListener('input', aplicarRelieve);
+      chkRelieve.addEventListener('change', aplicarRelieve);
+
+      // Botones con manejo de errores mejorado
+      const btnFitUrbano = document.getElementById('btnFitUrbano');
+      if (btnFitUrbano) {
+        btnFitUrbano.addEventListener('click', function(e) {
+          e.preventDefault();
+          try {
+            if(urbanoBounds) map.fitBounds(urbanoBounds, {padding:60, maxZoom:18});
+            else alert('Límites urbanos no disponibles');
+          } catch(err) { console.error('Error en fitBounds:', err); }
+        });
+      }
+
+      const btnReset = document.getElementById('btnReset');
+      if (btnReset) {
+        btnReset.addEventListener('click', function(e) {
+          e.preventDefault();
+          try {
+            map.easeTo({center:CENTER, zoom:START_ZOOM, pitch:55, bearing:20, duration:800});
+          } catch(err) { console.error('Error en reset:', err); }
+        });
+      }
+
+      const btnCerrarDock = document.getElementById('btnCerrarDock');
+      if (btnCerrarDock) {
+        btnCerrarDock.addEventListener('click', function(e) {
+          e.preventDefault();
+          const dock = document.getElementById('dock');
+          if (dock) dock.style.display = 'none';
+        });
+      }
+
+      aplicarFiltros(); aplicarRelieve();
+      map.addControl(new maplibregl.NavigationControl({ visualizePitch:true }), 'top-right');
+      map.addControl(new maplibregl.ScaleControl({ maxWidth:120, unit:'metric' }), 'bottom-right');
+    });
+
+    // Búsqueda y exportar
+    const btnBuscar = document.getElementById('btnBuscar');
+    if (btnBuscar) {
+      btnBuscar.addEventListener('click', function(e) {
+        e.preventDefault();
+        const buscarId = document.getElementById('buscarId');
+        const term = (buscarId ? buscarId.value : '').trim();
+        if (!term) {
+          alert('Ingresa un código de predio para buscar');
+          return;
+        }
+        
+        const f = (DATASET.features || []).find(ft => {
+          const p = ft.properties || {};
+          return (p.COD_PRED && p.COD_PRED.toString() === term) || 
+                 (p.COD_PRED_1 && p.COD_PRED_1.toString() === term);
+        });
+        
+        if (!f) {
+          alert('Predio no encontrado. Verifica el código.');
+          return;
+        }
+        
+        const b = bboxFromGeom(f.geometry);
+        try {
+          window._map.fitBounds([[b.minX,b.minY],[b.maxX,b.maxY]], {padding:80, maxZoom:19});
+        } catch(err) {
+          console.error('Error buscando predio:', err);
+          alert('Error al localizar el predio');
+        }
+      });
+    }
+
+    const btnExport = document.getElementById('btnExport');
+    if (btnExport) {
+      btnExport.addEventListener('click', function(e) {
+        e.preventDefault();
+        try {
+          const dataURL = _map.getCanvas().toDataURL('image/png');
+          const a = document.createElement('a');
+          a.href = dataURL;
+          a.download = 'casco-urbano-3d.png';
+          a.click();
+        } catch(err) {
+          console.error('Error exportando:', err);
+          alert('No se pudo exportar la imagen. Intenta de nuevo.');
+        }
+      });
+    }
+
+    // Permitir búsqueda con tecla Enter
+    const buscarId = document.getElementById('buscarId');
+    if (buscarId) {
+      buscarId.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          btnBuscar?.click?.();
+        }
+      });
+    }
+
+    function bboxFromGeom(geom){
+      let c=[]; if(geom.type==='Polygon') c=geom.coordinates[0]; if(geom.type==='MultiPolygon') c=geom.coordinates[0][0];
+      let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+      c.forEach(([x,y])=>{ if(x<minX)minX=x; if(y<minY)minY=y; if(x>maxX)maxX=x; if(y>maxY)maxY=y; });
+      return {minX,minY,maxX,maxY};
+    }
+  }
+</script>
+</body>
+</html>

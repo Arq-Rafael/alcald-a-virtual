@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block title %}Ver Radicado – {{ radicado.numero_radicado }}{% endblock %}
+
+{% block styles %}
+<link href="{{ url_for('static', filename='css/participacion-ios26.css') }}" rel="stylesheet" />
+<style>
+    .detail-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+    
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--primary-green);
+        text-decoration: none;
+        margin-bottom: 2rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    
+    .back-button:hover {
+        transform: translateX(-4px);
+    }
+    
+    .detail-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        border: 1px solid var(--glass-border);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    .detail-section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--border-light);
+    }
+    
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+    <a href="{{ url_for('participacion.index') }}" class="back-button">
+        <i class="bi bi-arrow-left"></i> Volver al listado
+    </a>
+
+    <!-- INFORMACIÓN PRINCIPAL -->
+    <div class="detail-card">
+        <div class="detail-section-title">
+            <i class="bi bi-file-earmark me-2"></i>{{ radicado.numero_radicado }}
+        </div>
+        
+        <div class="detail-grid">
+            <div class="detail-item">
+                <span class="detail-label">Tipo</span>
+                <span class="detail-value">{{ radicado.tipo }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Estado</span>
+                <span class="detail-value" style="color: {{ radicado.semaforo_color }};">{{ radicado.estado }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Fecha Radicación</span>
+                <span class="detail-value">{{ radicado.fecha_radicacion.strftime('%Y-%m-%d %H:%M') }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Plazo</span>
+                <span class="detail-value">{{ radicado.plazo_dias }} días</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Vencimiento</span>
+                <span class="detail-value">{{ radicado.fecha_vencimiento.strftime('%Y-%m-%d') }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Días Restantes</span>
+                <span class="detail-value">
+                    {% if radicado.dias_restantes is not none %}
+                        {{ radicado.dias_restantes }} días
+                    {% else %}
+                        Respondido
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <h3 class="detail-section-title mt-4">Asunto</h3>
+        <p style="font-size: 1rem; color: var(--text-primary); margin-bottom: 0;">{{ radicado.asunto }}</p>
+    </div>
+
+    <!-- INFORMACIÓN DEL REMITENTE -->
+    <div class="detail-card">
+        <div class="detail-section-title">
+            <i class="bi bi-person me-2"></i>Información del Remitente
+        </div>
+        
+        <div class="detail-grid">
+            <div class="detail-item">
+                <span class="detail-label">Nombre</span>
+                <span class="detail-value">{{ radicado.remitente_nombre }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Entidad/Organización</span>
+                <span class="detail-value">{{ radicado.remitente_entidad or '—' }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Oficina Destino</span>
+                <span class="detail-value">{{ oficinas.get(radicado.oficina_destino, radicado.oficina_destino) }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- DESCRIPCIÓN -->
+    <div class="detail-card">
+        <div class="detail-section-title">
+            <i class="bi bi-file-text me-2"></i>Descripción Detallada
+        </div>
+        
+        <div style="background: rgba(124, 179, 66, 0.05); padding: 1rem; border-radius: 8px; color: var(--text-secondary); line-height: 1.6;">
+            {{ radicado.descripcion }}
+        </div>
+    </div>
+
+    <!-- ARCHIVOS ADJUNTOS -->
+    {% if radicado.get_adjuntos() %}
+    <div class="detail-card">
+        <div class="detail-section-title">
+            <i class="bi bi-paperclip me-2"></i>Archivos Adjuntos
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            {% for adjunto in radicado.get_adjuntos() %}
+            <a href="{{ url_for('participacion.descargar', id=radicado.id) }}" class="btn-action btn-action-secondary" style="text-align: left;">
+                <i class="bi bi-download"></i> {{ adjunto }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- RESPUESTAS -->
+    {% if respuestas %}
+    <div class="detail-card">
+        <div class="detail-section-title">
+            <i class="bi bi-chat-dots me-2"></i>Respuestas ({{ respuestas|length }})
+        </div>
+        
+        {% for respuesta in respuestas %}
+        <div style="background: rgba(124, 179, 66, 0.05); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+                <strong style="color: var(--primary-green);">{{ respuesta.respondido_por }}</strong>
+                <small style="color: var(--text-muted);">{{ respuesta.fecha | default('—') }}</small>
+            </div>
+            <p style="color: var(--text-secondary); margin: 0;">{{ respuesta.texto }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- ACCIONES -->
+    <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; margin-bottom: 2rem;">
+        {% if radicado.estado != 'RESPONDIDO' %}
+        <a href="{{ url_for('participacion.responder', id=radicado.id) }}" class="btn-action btn-action-primary" style="padding: 0.875rem 2rem;">
+            <i class="bi bi-reply-fill"></i> Responder
+        </a>
+        {% endif %}
+        
+        <a href="{{ url_for('participacion.descargar', id=radicado.id) }}" class="btn-action btn-action-secondary" style="padding: 0.875rem 2rem;">
+            <i class="bi bi-download"></i> Descargar
+        </a>
+        
+        {% if session.get('role') == 'admin' %}
+        <form action="{{ url_for('participacion.eliminar', id=radicado.id) }}" method="post" style="display: inline;" onsubmit="return confirm('¿Eliminar este radicado?');">
+            <button type="submit" class="btn-action btn-action-danger" style="padding: 0.875rem 2rem; width: 100%;">
+                <i class="bi bi-trash"></i> Eliminar
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

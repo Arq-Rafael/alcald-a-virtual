@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+  <h1 class="mb-4">Reporte Ejecutivo</h1>
+
+  <p>Genera y descarga un informe en PDF con tus gráficos y KPIs.</p>
+  <button id="report-btn" class="btn btn-danger">Descargar Reporte</button>
+
+  <a href="{{ url_for('ia') }}" class="btn btn-link mt-3">← Volver a IA Municipal</a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('report-btn').addEventListener('click', () => {
+  // Abre en pestaña nueva el endpoint que genera el PDF
+  window.open('{{ url_for("insights") }}?format=pdf', '_blank');
+});
+</script>
+{% endblock %}

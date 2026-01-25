@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-5">
+  <h2>Chatbot Gobernanza</h2>
+  <div id="chatbot" class="border rounded p-3" style="height:400px;overflow:auto;background:#f9f9f9"></div>
+  <div class="input-group mt-3">
+    <input id="prompt" class="form-control" placeholder="Pregunta algo…">
+    <button id="sendBtn" class="btn btn-primary">Enviar</button>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  // tu función initBotChat exacta aquí…
+</script>
+{% endblock %}

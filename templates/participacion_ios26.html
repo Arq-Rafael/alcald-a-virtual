@@ -1,0 +1,520 @@
+{% extends "base.html" %}
+{% block title %}Participación Ciudadana – Radicación{% endblock %}
+
+{% block styles %}
+<link href="{{ url_for('static', filename='css/participacion-ios26.css') }}" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+<div class="participacion-container">
+    <!-- HEADER -->
+    <div class="participacion-header">
+        <div>
+            <h1><i class="bi bi-file-earmark-check me-2"></i>Participación Ciudadana</h1>
+        </div>
+        <div class="header-actions">
+            {% if puede_radicar %}
+            <button class="btn-radicar-nuevo" id="btnRadicarNuevo" onclick="abrirModalRadicar()">
+                <i class="bi bi-plus-circle"></i>
+                Radicar Nuevo
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ESTADÍSTICAS RÁPIDAS -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number" id="statTotal">0</div>
+            <div class="stat-label">Total Radicados</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="statPendientes">0</div>
+            <div class="stat-label">Por Responder</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="statRespondidos">0</div>
+            <div class="stat-label">Respondidos</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="statCriticos">0</div>
+            <div class="stat-label">Vencimiento Crítico</div>
+        </div>
+    </div>
+
+    <!-- FILTROS Y BÚSQUEDA -->
+    <div class="filters-bar">
+        <input type="text" class="search-input" id="searchInput" placeholder="🔍 Buscar por número, asunto o remitente...">
+        <select class="filter-select" id="filterEstado">
+            <option value="">Todos los estados</option>
+            <option value="PENDIENTE">Pendiente</option>
+            <option value="EN_TRAMITE">En Trámite</option>
+            <option value="RESPONDIDO">Respondido</option>
+        </select>
+        <select class="filter-select" id="filterTipo">
+            <option value="">Todos los tipos</option>
+            <option value="Petición">Petición</option>
+            <option value="Queja">Queja</option>
+            <option value="Reclamo">Reclamo</option>
+            <option value="Sugerencia">Sugerencia</option>
+            <option value="Derecho de petición">Derecho de petición</option>
+        </select>
+    </div>
+
+    <!-- SECCIÓN DE HISTORIAL -->
+    <div class="radicados-section">
+        <h2 class="section-title">
+            <i class="bi bi-clock-history"></i>
+            Historial de Radicados
+        </h2>
+
+        <div id="radicadosContainer" class="radicados-list">
+            <!-- Se llena dinámicamente con JavaScript -->
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <div class="empty-state-icon">📋</div>
+            <h3 class="empty-state-title">Sin radicados aún</h3>
+            <p class="empty-state-text">No hay radicados que mostrar. {% if puede_radicar %}Comienza radicando uno nuevo.{% endif %}</p>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL FLOTANTE - RADICAR NUEVO ===== -->
+<script>
+    const ES_ADMIN = {{ 'true' if es_admin else 'false' }};
+</script>
+<div class="modal-overlay" id="modalRadicar">
+    <div class="modal-content">
+        <!-- Header -->
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <i class="bi bi-file-earmark-plus me-2"></i>Nuevo Radicado
+            </h2>
+            <button class="modal-close" onclick="cerrarModalRadicar()">×</button>
+        </div>
+
+        <!-- Body - Formulario -->
+        <div class="modal-body">
+            <form id="formRadicar" onsubmit="procesarFormularioRadicar(event)">
+                <!-- ROW 1: Tipo y Plazo -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tipoRadicado">Tipo de Radicado *</label>
+                        <select id="tipoRadicado" name="tipo" required>
+                            <option value="">Selecciona tipo</option>
+                            <option value="Petición">Petición</option>
+                            <option value="Queja">Queja</option>
+                            <option value="Reclamo">Reclamo</option>
+                            <option value="Sugerencia">Sugerencia</option>
+                            <option value="Derecho de petición">Derecho de petición</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="plazo">Plazo (días) *</label>
+                        <input type="number" id="plazo" name="plazo_dias" value="5" min="1" max="30" required>
+                    </div>
+                </div>
+
+                <!-- ROW 2: Remitente info -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="remitenteNombre">Nombre Remitente *</label>
+                        <input type="text" id="remitenteNombre" name="remitente_nombre" placeholder="Ej. Juan Pérez" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="remitenteEntidad">Entidad/Organización</label>
+                        <input type="text" id="remitenteEntidad" name="remitente_entidad" placeholder="Ej. Particular / Junta Acción Comunal">
+                    </div>
+                </div>
+
+                <!-- ROW 3: Oficina destino -->
+                <div class="form-group">
+                    <label for="oficina">Oficina Destinataria *</label>
+                    <select id="oficina" name="oficina_destino" required>
+                        <option value="">Selecciona oficina</option>
+                        {% for code, label in oficinas.items() %}
+                        <option value="{{ code }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- ROW 4: Asunto -->
+                <div class="form-group">
+                    <label for="asunto">Asunto *</label>
+                    <input type="text" id="asunto" name="asunto" placeholder="Describe brevemente el tema" required>
+                </div>
+
+                <!-- ROW 5: Descripción -->
+                <div class="form-group">
+                    <label for="descripcion">Descripción Detallada *</label>
+                    <textarea id="descripcion" name="descripcion" placeholder="Proporciona más detalles sobre el radicado..." required></textarea>
+                </div>
+
+                <!-- ROW 6: Archivo -->
+                <div class="form-group">
+                    <label>Archivo PDF *</label>
+                    <div class="file-upload-area" id="fileUploadArea" ondrop="handleFileDrop(event)" ondragover="handleFileDragOver(event)" ondragleave="handleFileDragLeave(event)">
+                        <div class="file-upload-icon">📄</div>
+                        <input type="file" id="pdfFile" name="pdf" accept=".pdf" style="display: none;" onchange="handleFileSelect(event)">
+                        <div class="file-upload-text">
+                            <strong>Arrastra aquí o haz clic</strong> para seleccionar archivo PDF (máx. 10MB)
+                        </div>
+                        <div id="fileName" style="margin-top: 0.5rem; color: var(--primary-green); font-weight: 600; display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- Info -->
+                <div style="background: rgba(124, 179, 66, 0.05); padding: 1rem; border-radius: 8px; margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary);">
+                    <strong>ℹ️ Nota:</strong> Todos los campos marcados con * son obligatorios. El radicado será procesado inmediatamente.
+                </div>
+            </form>
+        </div>
+
+        <!-- Footer - Botones -->
+        <div class="modal-actions">
+            <button type="button" class="btn-modal btn-modal-secondary" onclick="cerrarModalRadicar()">
+                Cancelar
+            </button>
+            <button type="submit" form="formRadicar" class="btn-modal btn-modal-primary">
+                <i class="bi bi-check-circle me-2"></i>Radicar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SCRIPT ===== -->
+<script>
+    // VARIABLES GLOBALES
+    const oficinas = {{ oficinas | tojson }};
+    const radicados = {{ radicados | tojson }};
+    let radicadosFiltrados = [...radicados];
+
+    // ===== MODAL FUNCTIONS =====
+    function abrirModalRadicar() {
+        const modal = document.getElementById('modalRadicar');
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function cerrarModalRadicar() {
+        const modal = document.getElementById('modalRadicar');
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+        document.getElementById('formRadicar').reset();
+        document.getElementById('fileName').style.display = 'none';
+    }
+
+    // Cerrar modal al hacer click fuera
+    document.getElementById('modalRadicar')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            cerrarModalRadicar();
+        }
+    });
+
+    // ===== FILE UPLOAD HANDLERS =====
+    const fileUploadArea = document.getElementById('fileUploadArea');
+    const pdfFileInput = document.getElementById('pdfFile');
+
+    fileUploadArea.addEventListener('click', () => pdfFileInput.click());
+
+    function handleFileDragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        fileUploadArea.classList.add('dragover');
+    }
+
+    function handleFileDragLeave(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        fileUploadArea.classList.remove('dragover');
+    }
+
+    function handleFileDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        fileUploadArea.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.type === 'application/pdf') {
+                if (file.size <= 10 * 1024 * 1024) {
+                    pdfFileInput.files = files;
+                    handleFileSelect({ target: { files } });
+                } else {
+                    alert('El archivo es demasiado grande. Máximo 10MB.');
+                }
+            } else {
+                alert('Solo se aceptan archivos PDF.');
+            }
+        }
+    }
+
+    function handleFileSelect(e) {
+        const files = e.target.files;
+        const fileName = document.getElementById('fileName');
+        if (files.length > 0) {
+            fileName.textContent = '✓ ' + files[0].name;
+            fileName.style.display = 'block';
+        }
+    }
+
+    // ===== FORM SUBMISSION =====
+    async function procesarFormularioRadicar(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(document.getElementById('formRadicar'));
+        
+        try {
+            const response = await fetch('{{ url_for("participacion.radicar_api") }}', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                mostrarNotificacion('✓ Éxito', 'Radicado creado exitosamente: ' + result.numero_radicado, 'success');
+                cerrarModalRadicar();
+                // Recargar lista
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                mostrarNotificacion('✗ Error', result.error || 'Error al crear radicado', 'error');
+            }
+        } catch (error) {
+            mostrarNotificacion('✗ Error', 'Error en la conexión: ' + error.message, 'error');
+        }
+    }
+
+    // ===== NOTIFICACIONES =====
+    function mostrarNotificacion(titulo, mensaje, tipo = 'info') {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            padding: 1.5rem;
+            max-width: 400px;
+            z-index: 2000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            animation: slideIn 0.3s ease;
+        `;
+        
+        const color = tipo === 'success' ? '#16a34a' : '#ef4444';
+        
+        toast.innerHTML = `
+            <div style="display: flex; gap: 1rem;">
+                <div style="width: 4px; background: ${color}; border-radius: 2px;"></div>
+                <div>
+                    <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">${titulo}</div>
+                    <div style="font-size: 0.875rem; color: var(--text-secondary);">${mensaje}</div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    // ===== RENDERIZAR RADICADOS =====
+    function renderizarRadicados() {
+        const container = document.getElementById('radicadosContainer');
+        const emptyState = document.getElementById('emptyState');
+
+        // Actualizar estadísticas
+        actualizarEstadisticas();
+
+        if (radicadosFiltrados.length === 0) {
+            container.style.display = 'none';
+            emptyState.style.display = 'block';
+            return;
+        }
+
+        container.style.display = 'grid';
+        emptyState.style.display = 'none';
+
+        container.innerHTML = radicadosFiltrados.map(r => `
+            <div class="radicado-card fade-in">
+                <div class="radicado-header">
+                    <span class="radicado-numero">#${r.numero_radicado}</span>
+                    <span class="radicado-tipo">${r.tipo}</span>
+                </div>
+
+                <h3 class="radicado-titulo">${r.asunto}</h3>
+                <p class="radicado-entidad">
+                    <strong>De:</strong> ${r.remitente_nombre}
+                    ${r.remitente_entidad ? `(${r.remitente_entidad})` : ''}
+                </p>
+
+                <div class="radicado-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Fecha Radicación</span>
+                        <span class="detail-value">${new Date(r.fecha_radicacion).toLocaleDateString('es-CO')}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Vencimiento</span>
+                        <span class="detail-value">${new Date(r.fecha_vencimiento).toLocaleDateString('es-CO')}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Destinatario</span>
+                        <span class="detail-value">${oficinas[r.oficina_destino] || r.oficina_destino}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Estado</span>
+                        <span class="detail-value" style="color: ${getStatusColor(r.estado)}">${r.estado}</span>
+                    </div>
+                </div>
+
+                <div class="radicado-status">
+                    <span class="status-badge status-${r.estado.toLowerCase().replace('_', '-')}">${r.estado}</span>
+                    <div class="semaforo-indicator">
+                        <div class="semaforo-dot semaforo-${r.semaforo}"></div>
+                        <span class="semaforo-text">${r.dias_restantes !== null ? r.dias_restantes + ' días' : 'Respondido'}</span>
+                    </div>
+                </div>
+
+                ${r.estado !== 'RESPONDIDO' ? `
+                <div class="plazo-info">
+                    ⏰ <strong>Plazo:</strong> ${r.plazo_dias} días | 
+                    <span class="dias-restantes">${r.dias_restantes || 0} días restantes</span>
+                </div>
+                ` : ''}
+
+                <div class="radicado-actions">
+                    <a href="/participacion/ver/${r.id}" class="btn-action btn-action-primary">
+                        <i class="bi bi-eye"></i> Ver
+                    </a>
+                    ${r.estado !== 'RESPONDIDO' ? `
+                    <a href="/participacion/responder/${r.id}" class="btn-action btn-action-primary">
+                        <i class="bi bi-reply"></i> Responder
+                    </a>
+                    ` : `
+                    <span class="btn-action btn-action-secondary" style="cursor: default;">
+                        <i class="bi bi-check-circle"></i> Respondido
+                    </span>
+                    `}
+                    <a href="/participacion/descargar/${r.id}" class="btn-action btn-action-secondary">
+                        <i class="bi bi-download"></i> Descargar
+                    </a>
+                    ${ES_ADMIN ? `
+                    <button onclick="eliminarRadicado(${r.id})" class="btn-action btn-action-danger">
+                        <i class="bi bi-trash"></i> Eliminar
+                    </button>
+                    ` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function getStatusColor(estado) {
+        const colors = {
+            'PENDIENTE': '#4f46e5',
+            'EN_TRAMITE': '#b45309',
+            'RESPONDIDO': '#16a34a'
+        };
+        return colors[estado] || '#6b7280';
+    }
+
+    // ===== ACTUALIZAR ESTADÍSTICAS =====
+    function actualizarEstadisticas() {
+        const stats = {
+            total: radicados.length,
+            pendientes: radicados.filter(r => r.estado === 'PENDIENTE').length,
+            respondidos: radicados.filter(r => r.estado === 'RESPONDIDO').length,
+            criticos: radicados.filter(r => r.dias_restantes !== null && r.dias_restantes <= 3).length
+        };
+
+        document.getElementById('statTotal').textContent = stats.total;
+        document.getElementById('statPendientes').textContent = stats.pendientes;
+        document.getElementById('statRespondidos').textContent = stats.respondidos;
+        document.getElementById('statCriticos').textContent = stats.criticos;
+    }
+
+    // ===== FILTROS =====
+    document.getElementById('searchInput')?.addEventListener('input', aplicarFiltros);
+    document.getElementById('filterEstado')?.addEventListener('change', aplicarFiltros);
+    document.getElementById('filterTipo')?.addEventListener('change', aplicarFiltros);
+
+    function aplicarFiltros() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const estado = document.getElementById('filterEstado').value;
+        const tipo = document.getElementById('filterTipo').value;
+
+        radicadosFiltrados = radicados.filter(r => {
+            const matchSearch = !search || 
+                r.numero_radicado.toLowerCase().includes(search) ||
+                r.asunto.toLowerCase().includes(search) ||
+                r.remitente_nombre.toLowerCase().includes(search);
+            
+            const matchEstado = !estado || r.estado === estado;
+            const matchTipo = !tipo || r.tipo === tipo;
+
+            return matchSearch && matchEstado && matchTipo;
+        });
+
+        renderizarRadicados();
+    }
+
+    // ===== ELIMINAR RADICADO (SOLO ADMIN) =====
+    function eliminarRadicado(id) {
+        if (!confirm('¿Estás seguro de que deseas eliminar este radicado? Esta acción no se puede deshacer.')) {
+            return;
+        }
+
+        fetch(`/participacion/eliminar/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                mostrarNotificacion('Eliminado', 'Radicado eliminado exitosamente', 'success');
+                // Eliminar del array local
+                const index = radicados.findIndex(r => r.id === id);
+                if (index > -1) {
+                    radicados.splice(index, 1);
+                }
+                renderizarRadicados();
+            } else {
+                mostrarNotificacion('Error', data.error || 'No se pudo eliminar el radicado', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarNotificacion('Error', 'Error al eliminar el radicado', 'error');
+        });
+    }
+
+    // ===== INICIALIZACIÓN =====
+    document.addEventListener('DOMContentLoaded', () => {
+        renderizarRadicados();
+    });
+
+    // Estilos de animación
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(400px); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+
+{% endblock %}

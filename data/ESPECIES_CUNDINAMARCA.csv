@@ -1,0 +1,83 @@
+nombre_comun,nombre_cientifico,familia,forma_copa,edad_promedio_anos,altura_promedio_m,dap_promedio_cm,copa_promedio_m,categoria,coeficiente_compensacion,es_nativa,descripcion
+Roble,Quercus humboldtii,Fagaceae,Redonda,150,30,80,25,Nativa,2.0,True,Árbol emblemático de Cundinamarca. Madera de excelente calidad
+Cedro,Cedrela odorata,Meliaceae,Piramidal,80,25,60,18,Nativa,1.8,True,Árbol valioso por su madera aromática
+Guanacaste,Enterolobium cyclocarpum,Fabaceae,Redonda,200,35,100,35,Nativa,2.0,True,Árbol de grandes dimensiones y copa muy amplia
+Nogal,Juglans neotropica,Juglandaceae,Piramidal,100,30,70,20,Nativa,1.9,True,Árbol precioso con maderable de gran valor
+Comino,Aniba rosaeodora,Lauraceae,Piramidal,60,20,40,12,Nativa,1.2,True,Árbol aromático con propiedades medicinales
+Laurel,Laurus nobilis,Lauraceae,Redonda,80,15,35,15,Nativa,1.3,True,Árbol aromático utilizado en cocina
+Chocaló,Erythroxylum coca,Erythroxylaceae,Arbustiva,30,6,15,4,Nativa,0.8,True,Arbusto con usos culturales y medicinales
+Caoba,Swietenia macrophylla,Meliaceae,Redonda,90,35,80,28,Nativa,1.9,True,Maderable de gran demanda comercial
+Pino Colombiano,Podocarpus oleifolius,Podocarpaceae,Piramidal,150,30,60,15,Nativa,1.7,True,Conífera nativa de zonas altas
+Aliso,Alnus acuminata,Betulaceae,Piramidal,60,25,50,12,Nativa,1.4,True,Árbol utilizado en sistemas agroforestales
+Eucalipto,Eucalyptus globulus,Myrtaceae,Piramidal,50,35,60,15,Exótica,1.0,False,Árbol de rápido crecimiento
+Pino Pátula,Pinus patula,Pinaceae,Piramidal,60,30,55,12,Exótica,1.1,False,Especie adaptada a climas templados
+Acacia,Acacia mangium,Fabaceae,Redonda,40,25,45,18,Exótica,1.0,False,Árbol utilizado en reforestación
+Jacarandá,Jacaranda mimosifolia,Bignoniaceae,Redonda,70,15,40,15,Exótica,1.2,False,Árbol ornamental de flores azules
+Ciruela,Prunus serotina,Rosaceae,Redonda,50,20,35,12,Nativa,1.1,True,Árbol frutal con flores vistosas
+Chical,Prumnopitys harmsiana,Podocarpaceae,Piramidal,120,25,50,10,Nativa,1.6,True,Conífera de zonas de niebla
+Encenillo,Weinmannia tomentosa,Cunoniaceae,Piramidal,80,20,40,10,Nativa,1.3,True,Árbol de zonas altas muy ramificado
+Murtilla,Blepharocalyx salicifolius,Myrtaceae,Arbustiva,50,8,20,6,Nativa,0.9,True,Arbusto frutal nativo de páramo
+Palma Vino,Ceroxylon quindiuense,Arecaceae,Piramidal,250,20,40,8,Nativa,1.8,True,Palma más alta del mundo (endémica)
+Chusco,Chusquea scandens,Poaceae,Arbustiva,30,15,5,6,Nativa,0.7,True,Bambú nativo de bosques andinos
+Pumamaque,Podocarpus lambertianus,Podocarpaceae,Piramidal,180,35,70,15,Nativa,1.7,True,Árbol sagrado para comunidades indígenas
+Árbol de Cera,Ceroxylon eriophorum,Arecaceae,Piramidal,200,18,35,7,Nativa,1.7,True,Palma nativa de los Andes
+Quina,Cinchona officinalis,Rubiaceae,Redonda,60,15,30,12,Nativa,1.2,True,Árbol medicinal históricamente importante
+Arrayán,Myrcia popayanensis,Myrtaceae,Arbustiva,40,6,15,5,Nativa,0.8,True,Arbusto aromático de flores blancas
+Sauce,Salix humboldtiana,Salicaceae,Llorona,40,20,35,15,Nativa,0.9,True,Árbol ribereño de raíces profundas
+Algarrobo,Hymenaea courbaril,Fabaceae,Redonda,200,30,80,25,Nativa,1.8,True,Árbol longevo con maderable valioso
+Fresno,Fraxinus excelsior,Oleaceae,Piramidal,70,25,45,15,Nativa,1.3,True,Árbol de madera flexible y resistente
+Aguacate,Persea americana,Lauraceae,Redonda,60,10,30,12,Nativa,0.95,True,Árbol frutal de importancia económica
+Zapote,Manilkara sapota,Sapotaceae,Redonda,350,30,70,20,Nativa,1.8,True,Árbol frutal tropical de larga vida
+Mamoncillo,Melicoccus bijugatus,Sapindaceae,Redonda,100,15,35,15,Nativa,1.1,True,Árbol frutal de climas cálidos
+Guanabana,Annona muricata,Annonaceae,Redonda,20,6,15,8,Nativa,0.8,True,Arbusto frutal medicinal
+Tomate de Árbol,Solanum betaceum,Solanaceae,Arbustiva,15,3,8,4,Exótica,0.6,False,Arbusto frutal andino
+Granadilla,Passiflora edulis,Passifloraceae,Arbustiva,10,5,5,3,Nativa,0.5,True,Vid frutal aromática
+Gulupa,Passiflora edulis var edulis,Passifloraceae,Arbustiva,8,3,3,2,Nativa,0.5,True,Fruto de demanda comercial
+Chachafruto,Erythrina edulis,Fabaceae,Redonda,40,10,25,10,Nativa,0.9,True,Árbol utilizado en sistemas agroforestales
+Guayabo,Psidium guajava,Myrtaceae,Arbustiva,30,8,15,8,Nativa,0.8,True,Árbol frutal muy productor
+Guayacán,Tabebuia serratifolia,Bignoniaceae,Redonda,150,25,55,18,Nativa,1.6,True,Maderable duro de color dorado
+Guayacán Blanco,Lapacho albo,Bignoniaceae,Redonda,100,20,40,15,Nativa,1.4,True,Árbol de madera muy dura
+Guayacán Amarillo,Tabebuia chrysantha,Bignoniaceae,Redonda,120,22,45,16,Nativa,1.5,True,Árbol de flores amarillas
+Abarco,Cariniana pyriformis,Lecythidaceae,Piramidal,300,40,90,25,Nativa,1.9,True,Árbol gigante de maderable valioso
+Brasilete,Haematoxylon brasiletto,Caesalpiniaceae,Redonda,100,12,30,12,Exótica,1.1,False,Árbol tintóreo
+Quebracho,Aspidosperma quebracho-blanco,Apocynaceae,Redonda,150,25,60,20,Nativa,1.7,True,Árbol de madera extremadamente dura
+Teak,Tectona grandis,Lamiaceae,Piramidal,80,35,70,20,Exótica,1.2,False,Maderable de excelente calidad
+Samán,Albizia saman,Fabaceae,Redonda,200,30,90,35,Nativa,1.8,True,Árbol de gran copa y sombra densa
+Caracolí,Anacardium excelsum,Anacardiaceae,Redonda,150,40,100,35,Nativa,1.9,True,Árbol gigante del trópico
+Bálsamo,Myroxylon balsamum,Fabaceae,Piramidal,300,30,70,18,Nativa,1.8,True,Árbol productor de resina aromática
+Almendro,Terminalia catappa,Combretaceae,Redonda,100,20,45,20,Exótica,1.2,False,Árbol ornamental de frutos secos
+Coco,Cocos nucifera,Arecaceae,Piramidal,80,25,30,10,Exótica,1.0,False,Palma tropical
+Dátil,Phoenix dactylifera,Arecaceae,Piramidal,100,20,30,8,Exótica,1.0,False,Palma productor de frutos
+Caña Brava,Gynerium sagittatum,Poaceae,Arbustiva,25,10,5,4,Nativa,0.6,True,Gramínea de bordes de ríos
+Bijao,Calathea lutea,Marantaceae,Arbustiva,15,3,8,3,Nativa,0.5,True,Hierba de hojas grandes
+Choclo,Zea mays,Poaceae,Herbácea,0.3,2.5,3,2,Nativa,0.3,True,Cultivo agrícola importante
+Caña de Azúcar,Saccharum officinarum,Poaceae,Herbácea,1,2,4,2,Nativa,0.4,True,Cultivo agroindustrial
+Plátano,Musa × paradisiaca,Musaceae,Arbustiva,6,7,15,8,Nativa,0.7,True,Cultivo de importancia alimentaria
+Papayo,Carica papaya,Caricaceae,Arbustiva,7,6,12,6,Exótica,0.7,False,Árbol frutal tropical
+Naranja,Citrus aurantium,Rutaceae,Redonda,40,8,20,8,Exótica,0.8,False,Árbol cítrico
+Limón,Citrus limon,Rutaceae,Redonda,35,6,15,6,Exótica,0.8,False,Árbol cítrico
+Mango,Mangifera indica,Anacardiaceae,Redonda,80,20,60,25,Exótica,1.3,False,Árbol frutal tropical de gran demanda
+Lúcumo,Pouteria lucuma,Sapotaceae,Redonda,300,25,50,18,Nativa,1.6,True,Árbol frutal de importancia andina
+Chontaduro,Bactris gasipaes,Arecaceae,Piramidal,30,10,15,6,Nativa,0.7,True,Palma frutal
+Piña,Ananas comosus,Bromeliaceae,Herbácea,2,1,2,1.5,Nativa,0.2,True,Cultivo herbáceo
+Cacao,Theobroma cacao,Sterculiaceae,Arbustiva,100,7,20,8,Nativa,0.8,True,Arbusto cultivado de importancia económica
+Café,Coffea arabica,Rubiaceae,Arbustiva,50,3,8,4,Exótica,0.5,False,Arbusto cultivado emblemático
+Té,Camellia sinensis,Theaceae,Arbustiva,100,1.5,5,3,Exótica,0.4,False,Arbusto cultivado
+Mora,Rubus fruticosus,Rosaceae,Arbustiva,15,2,5,3,Nativa,0.4,True,Arbusto espinoso productor de frutos
+Fresa,Fragaria × ananassa,Rosaceae,Herbácea,5,0.3,2,1,Exótica,0.1,False,Planta herbácea frutal
+Lúpulo,Humulus lupulus,Cannabaceae,Arbustiva,20,5,10,4,Exótica,0.6,False,Planta trepadora
+Flores de Jamaica,Hibiscus sabdariffa,Malvaceae,Arbustiva,20,2,10,5,Exótica,0.5,False,Arbusto ornamental
+Rosa,Rosa sp.,Rosaceae,Arbustiva,30,1.5,8,3,Exótica,0.4,False,Arbusto ornamental
+Clavel,Dianthus caryophyllus,Caryophyllaceae,Herbácea,3,0.5,2,1,Exótica,0.1,False,Planta herbácea ornamental
+Orquídea,Orchidaceae sp.,Orchidaceae,Epífita,10,0.3,1,0.5,Nativa,0.2,True,Flores epífitas
+Lirio,Lilium candidum,Liliaceae,Herbácea,2,1,3,1,Exótica,0.2,False,Planta herbácea de flores grandes
+Heliconia,Heliconia sp.,Heliconiaceae,Arbustiva,15,5,10,4,Nativa,0.6,True,Planta de hojas vistosas
+Anturio,Anthurium andraeanum,Araceae,Arbustiva,10,0.8,5,2,Exótica,0.3,False,Planta ornamental tropical
+Lirio de Agua,Eichhornia crassipes,Pontederiaceae,Acuática,1,0.5,2,1,Exótica,0.1,False,Planta acuática invasora
+Papiro,Cyperus papyrus,Cyperaceae,Herbácea,3,3,2,1,Exótica,0.3,False,Planta palustre
+Junco,Juncus effusus,Juncaceae,Herbácea,2,0.8,1,0.5,Nativa,0.2,True,Planta palustre
+Carrizo,Phragmites australis,Poaceae,Herbácea,5,4,3,2,Nativa,0.4,True,Gramínea palustre
+Camalote,Pistia stratiotes,Araceae,Acuática,0.5,0.2,1,0.3,Exótica,0.1,False,Planta acuática flotante
+Helecho Arbóreo,Alsophila trinitatis,Cyatheaceae,Arbustiva,200,10,15,8,Nativa,0.8,True,Helecho primitivo de gran tamaño
+Musgo,Bryophyta sp.,Bryophyta,Herbácea,1,0.05,0.1,0.1,Nativa,0.05,True,Briofita no vascular
+Liquen,Lichenes sp.,Lichenes,Epífita,50,0.1,0.5,0.5,Nativa,0.1,True,Simbiosis de hongo y alga

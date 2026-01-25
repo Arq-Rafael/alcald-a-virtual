@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h1>Contrato {{ c.codigo }}</h1>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary" href="{{ url_for('contrat_list') }}">Volver</a>
+
+        {# Ficha PDF: la ruta usa <contrato_id> #}
+            <a class="btn btn-primary" href="{{ url_for('contrat_ficha_pdf', contrato_id=c.id) }}">Ficha PDF</a>
+
+            {% if is_admin() %}
+            {# Eliminar: la ruta usa <cid> #}
+                <form method="post" action="{{ url_for('contrat_eliminar', cid=c.id) }}"
+                    onsubmit="return confirm('¿Eliminar contrato?')">
+                    <button class="btn btn-outline-danger">Eliminar</button>
+                </form>
+                {% endif %}
+    </div>
+</div>
+
+{# =======================
+ALERTA / ESTADO DINÁMICO
+======================= #}
+{% set umbral = (c.alerta_umbral if c.alerta_umbral is defined and c.alerta_umbral else 15) %}
+
+{% if c.tipo != 'SECOP' and c.fecha_fin %}
+{% if c.dias_restantes is not none %}
+{% if c.dias_restantes < 0 %} <div class="alert alert-danger d-flex justify-content-between align-items-center">
+    <div>
+        <strong>Vencido:</strong> el plazo terminó el <strong>{{ c.fecha_fin }}</strong>.
+        {% if c.tipo == 'OPS' %} Finaliza OPS: revisar liquidación y acta de terminación. {% endif %}
+    </div>
+    <span class="badge bg-danger fs-6">{{ c.dias_restantes }} días</span>
+    </div>
+    {% elif c.dias_restantes <= umbral %} <div
+        class="alert alert-warning d-flex justify-content-between align-items-center">
+        <div>
+            <strong>Próximo a vencer:</strong> faltan <strong>{{ c.dias_restantes }}</strong> días (vence {{ c.fecha_fin
+            }}).
+            {% if c.tipo == 'OPS' %} Notifica al supervisor y prepara cierre. {% endif %}
+        </div>
+        <span class="badge bg-warning text-dark fs-6">{{ c.dias_restantes }} días</span>
+        </div>
+        {% else %}
+        <div class="alert alert-success d-flex justify-content-between align-items-center">
+            <div>
+                <strong>En tiempo:</strong> faltan <strong>{{ c.dias_restantes }}</strong> días (vence {{ c.fecha_fin
+                }}).
+            </div>
+            <span class="badge bg-success fs-6">{{ c.dias_restantes }} días</span>
+        </div>
+        {% endif %}
+        {% endif %}
+        {% elif c.tipo == 'SECOP' %}
+        <div class="alert alert-info d-flex justify-content-between align-items-center">
+            <div>
+                <strong>En proceso (SECOP):</strong>
+                {% if c.secop_url %}
+                <a href="{{ c.secop_url }}" target="_blank" rel="noopener">ver proceso</a>
+                {% else %}
+                Cargar URL de SECOP en la ficha.
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-lg-7">
+                <div class="card mb-3">
+                    <div class="card-header">Información general</div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4">Objeto</dt>
+                            <dd class="col-sm-8">{{ c.objeto }}</dd>
+
+                            <dt class="col-sm-4">Tipo / Modalidad</dt>
+                            <dd class="col-sm-8">{{ c.tipo }}{% if c.modalidad %} — {{ c.modalidad }}{% endif %}</dd>
+
+                            {% if c.tipo == 'Convenio' %}
+                            <dt class="col-sm-4">Entidad</dt>
+                            <dd class="col-sm-8">{{ c.entidad or '—' }}</dd>
+                            {% else %}
+                            <dt class="col-sm-4">Contratista</dt>
+                            <dd class="col-sm-8">{{ c.contratista or '—' }}{% if c.nit %} ({{ c.nit }}){% endif %}</dd>
+                            {% endif %}
+
+                            <dt class="col-sm-4">Valor</dt>
+                            <dd class="col-sm-8">{{ c.valor_fmt }}</dd>
+
+                            <dt class="col-sm-4">Dependencia / Supervisor</dt>
+                            <dd class="col-sm-8">{{ c.dependencia or '—' }} / {{ c.supervisor or '—' }}</dd>
+
+                            <dt class="col-sm-4">Fuente</dt>
+                            <dd class="col-sm-8">{{ c.fuente or '—' }}</dd>
+
+                            <dt class="col-sm-4">Plazo</dt>
+                            <dd class="col-sm-8">
+                                {% if c.tipo == 'SECOP' %}
+                                En proceso
+                                {% else %}
+                                {{ c.fecha_inicio or '—' }} → {{ c.fecha_fin or '—' }}
+                                {% if c.dias_restantes is not none %} ({{ c.dias_restantes }} días restantes){% endif %}
+                                {% endif %}
+                            </dd>
+
+                            <dt class="col-sm-4">Estado</dt>
+                            <dd class="col-sm-8"><span class="badge bg-secondary">{{ c.estado }}</span></dd>
+
+                            {% if c.tipo == 'SECOP' and c.secop_url %}
+                            <dt class="col-sm-4">SECOP</dt>
+                            <dd class="col-sm-8"><a href="{{ c.secop_url }}" target="_blank" rel="noopener">{{
+                                    c.secop_url }}</a></dd>
+                            {% endif %}
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Actualizar estado</div>
+                    <div class="card-body">
+                        {# Ruta definida con <contrato_id> #}
+                            <form method="post" action="{{ url_for('contrat_estado', contrato_id=c.id) }}"
+                                class="d-flex gap-2">
+                                <select name="estado" class="form-select" style="max-width:260px">
+                                    {% for e in ['Activo','Suspendido','Terminado','Liquidado'] %}
+                                    <option value="{{ e }}" {% if c.estado==e %}selected{% endif %}>{{ e }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button class="btn btn-primary">Guardar</button>
+                            </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        {% if c.tipo == 'Convenio' %}Convenio{% else %}Contrato firmado{% endif %}
+                    </div>
+                    <div class="card-body">
+                        {% if c.contrato_pdf %}
+                        <a class="btn btn-outline-primary w-100" href="{{ '/' + c.contrato_pdf|replace('\\','/') }}">
+                            Descargar PDF
+                        </a>
+                        {% else %}
+                        <div class="text-muted">No hay archivo cargado.</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Documentos del contrato</div>
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data" class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <select name="tipo_doc" class="form-select" required>
+                                    <option value="">— Tipo de documento —</option>
+                                    <option>Contrato firmado</option>
+                                    <option>Acta de inicio</option>
+                                    <option>Suspensión</option>
+                                    <option>Reinicio</option>
+                                    <option>Prórroga</option>
+                                    <option>Terminación</option>
+                                    <option>Liquidación</option>
+                                    <option>Informe</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="date" name="fecha_doc" class="form-control" value="{{ c.fecha_inicio }}">
+                            </div>
+                            <div class="col-12">
+                                <input type="file" name="archivo" class="form-control" accept="application/pdf"
+                                    required>
+                            </div>
+                            <div class="col-12">
+                                <input name="notas" class="form-control" placeholder="Notas opcionales">
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-success">Subir documento</button>
+                            </div>
+                        </form>
+
+                        <ul class="list-group">
+                            {% for d in docs %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ d.tipo }}</strong> — {{ d.fecha }}
+                                    {% if d.notas %}<div class="small text-muted">{{ d.notas }}</div>{% endif %}
+                                </div>
+                                {# Descarga directa (no hay endpoint definido) #}
+                                <a class="btn btn-sm btn-outline-primary"
+                                    href="{{ '/' + d.archivo|replace('\\','/') }}">Descargar</a>
+                            </li>
+                            {% else %}
+                            <li class="list-group-item text-muted">Sin documentos aún.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% endblock %}

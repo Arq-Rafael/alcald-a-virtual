@@ -1,0 +1,190 @@
+{# templates/insights.html #}
+{% extends "base.html" %}
+
+{% block title %}Dashboard de Insights{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <h1 class="mb-4">Dashboard de Insights</h1>
+
+  <!-- KPI Cards -->
+  <div class="row g-4 mb-5">
+    <div class="col-md-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body text-center">
+          <h5>Total de solicitudes</h5>
+          <h2 class="display-4">{{ total_sol }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body text-center">
+          <h5>Total de certificados</h5>
+          <h2 class="display-4">{{ total_cert }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body text-center">
+          <h5>Solicitudes pendientes</h5>
+          <h2 class="display-4">{{ pendientes }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body text-center">
+          <h5>Tiempo medio (s)</h5>
+          <h2 class="display-4">{{ tiempo_medio }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row 1 -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-title">Solicitudes por Secretaría</h5>
+          <canvas id="chartSolicitudes" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-title">Certificados generados vs Pendientes</h5>
+          <canvas id="chartEstado" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row 2 -->
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-title">Certificados por Sector</h5>
+          <canvas id="chartSector" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-title">Top 5 Metas de Producto</h5>
+          <canvas id="chartMetas" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // 1) Solicitudes por Secretaría
+    new Chart(
+      document.getElementById('chartSolicitudes'),
+      {
+        type: 'bar',
+        data: {
+          labels: {{ sec_labels|tojson }},
+          datasets: [{
+            label: 'Número de solicitudes',
+            data: {{ sec_data|tojson }},
+            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          plugins: { legend:{ display:false } },
+          scales: {
+            x: { ticks:{ autoSkip: false, maxRotation: 45, minRotation: 45 } },
+            y: { beginAtZero: true }
+          }
+        }
+      }
+    );
+
+    // 2) Certificados generados vs Pendientes
+    new Chart(
+      document.getElementById('chartEstado'),
+      {
+        type: 'doughnut',
+        data: {
+          labels: ['Generados','Pendientes'],
+          datasets: [{
+            data: [{{ gen }}, {{ pen }}],
+            backgroundColor: [
+              'rgba(40, 167, 69, 0.6)',
+              'rgba(220, 53, 69, 0.6)'
+            ]
+          }]
+        },
+        options: {
+          plugins: {
+            legend: { position: 'bottom' },
+            tooltip: { callbacks:{ label(ctx){ return ctx.label + ': ' + ctx.raw; } } }
+          }
+        }
+      }
+    );
+
+    // 3) Certificados por Sector
+    new Chart(
+      document.getElementById('chartSector'),
+      {
+        type: 'bar',
+        data: {
+          labels: {{ cert_labels|tojson }},
+          datasets: [{
+            label: 'Cantidad',
+            data: {{ cert_data|tojson }},
+            backgroundColor: 'rgba(255, 159, 64, 0.6)',
+            borderColor: 'rgba(255, 159, 64, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          plugins: { legend:{ display:false } },
+          scales: {
+            x: { ticks:{ autoSkip: false, maxRotation: 45, minRotation: 45 } },
+            y: { beginAtZero: true }
+          }
+        }
+      }
+    );
+
+    // 4) Top 5 Metas de Producto
+    new Chart(
+      document.getElementById('chartMetas'),
+      {
+        type: 'bar',
+        data: {
+          labels: {{ metas_labels|tojson }},
+          datasets: [{
+            label: 'Cantidad',
+            data: {{ metas_data|tojson }},
+            backgroundColor: 'rgba(153, 102, 255, 0.6)',
+            borderColor: 'rgba(153, 102, 255, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          plugins: { legend:{ display:false } },
+          scales: {
+            x: { ticks:{ autoSkip: false, maxRotation: 45, minRotation: 45 } },
+            y: { beginAtZero: true }
+          }
+        }
+      }
+    );
+  </script>
+{% endblock %}

@@ -1,0 +1,766 @@
+{% extends "base.html" %}
+{% block title %}Seguimiento de Metas - Registros Actualizados{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/seguimiento_plan.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="seg-wrapper">
+    <!-- HERO MEJORADO -->
+    <section class="seg-hero seg-hero-enhanced">
+        <div class="seg-hero-bg"></div>
+        <div class="seg-hero-content">
+            <div class="seg-hero-badge">📊 REGISTRO_AVANCES</div>
+            <h1 class="seg-hero-title">Seguimiento de Metas</h1>
+            <p class="seg-hero-subtitle">Datos actualizados en tiempo real del Plan de Desarrollo Municipal</p>
+            <div class="seg-hero-pulse"></div>
+        </div>
+    </section>
+
+    <!-- KPI CARDS ANIMADAS -->
+    <section class="seg-kpis-container">
+        <div class="seg-kpi-card seg-kpi-total" data-tooltip="Total de metas registradas">
+            <div class="seg-kpi-icon">📌</div>
+            <div class="seg-kpi-content">
+                <div class="seg-kpi-value" id="kpi-total">0</div>
+                <div class="seg-kpi-label">Total Metas</div>
+                <div class="seg-kpi-spark"></div>
+            </div>
+        </div>
+
+        <div class="seg-kpi-card seg-kpi-cumplido" data-tooltip="Metas completadas">
+            <div class="seg-kpi-icon">✅</div>
+            <div class="seg-kpi-content">
+                <div class="seg-kpi-value" id="kpi-cumplido">0</div>
+                <div class="seg-kpi-label">Cumplidas</div>
+                <div class="seg-kpi-spark"></div>
+            </div>
+        </div>
+
+        <div class="seg-kpi-card seg-kpi-encurso" data-tooltip="Metas en progreso">
+            <div class="seg-kpi-icon">▶️</div>
+            <div class="seg-kpi-content">
+                <div class="seg-kpi-value" id="kpi-encurso">0</div>
+                <div class="seg-kpi-label">En Curso</div>
+                <div class="seg-kpi-spark"></div>
+            </div>
+        </div>
+
+        <div class="seg-kpi-card seg-kpi-riesgo" data-tooltip="Metas con retraso">
+            <div class="seg-kpi-icon">⚠️</div>
+            <div class="seg-kpi-content">
+                <div class="seg-kpi-value" id="kpi-riesgo">0</div>
+                <div class="seg-kpi-label">En Riesgo</div>
+                <div class="seg-kpi-spark"></div>
+            </div>
+        </div>
+
+        <div class="seg-kpi-card seg-kpi-avance" data-tooltip="Avance promedio físico">
+            <div class="seg-kpi-icon">📈</div>
+            <div class="seg-kpi-content">
+                <div class="seg-kpi-value" id="kpi-avance">0%</div>
+                <div class="seg-kpi-label">Avance Físico</div>
+                <div class="seg-kpi-spark"></div>
+            </div>
+        </div>
+
+        <div class="seg-kpi-card seg-kpi-financiero" data-tooltip="Ejecución financiera promedio">
+            <div class="seg-kpi-icon">💰</div>
+            <div class="seg-kpi-content">
+                <div class="seg-kpi-value" id="kpi-financiero">0%</div>
+                <div class="seg-kpi-label">Ejec Financ</div>
+                <div class="seg-kpi-spark"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN LAYOUT -->
+    <section class="seg-layout">
+        <!-- SIDEBAR FILTROS -->
+        <aside class="seg-sidebar">
+            <div class="seg-filters-header">
+                <h3>🔍 Filtros</h3>
+                <button class="seg-filters-reset" onclick="resetFiltros()">Limpiar</button>
+            </div>
+
+            <!-- Búsqueda -->
+            <div class="seg-filter-group seg-filter-group-search">
+                <label>Buscar Meta</label>
+                <div class="seg-search-wrapper">
+                    <input 
+                        type="text" 
+                        id="filtro-texto" 
+                        class="seg-filter-input"
+                        placeholder="ID, nombre, sector..."
+                        onkeyup="aplicarFiltros()"
+                    />
+                    <span class="seg-search-icon">🔎</span>
+                </div>
+            </div>
+
+            <!-- Estado -->
+            <div class="seg-filter-group">
+                <label>Estado</label>
+                <div class="seg-filter-checks">
+                    <label class="seg-check seg-check-cumplido">
+                        <input type="checkbox" value="Cumplida" onchange="aplicarFiltros()">
+                        <span class="seg-checkmark">✅ Cumplida</span>
+                    </label>
+                    <label class="seg-check seg-check-encurso">
+                        <input type="checkbox" value="En ejecución" onchange="aplicarFiltros()">
+                        <span class="seg-checkmark">▶️ En ejecución</span>
+                    </label>
+                    <label class="seg-check seg-check-retraso">
+                        <input type="checkbox" value="En riesgo" onchange="aplicarFiltros()">
+                        <span class="seg-checkmark">⚠️ En riesgo</span>
+                    </label>
+                    <label class="seg-check seg-check-sinicio">
+                        <input type="checkbox" value="No iniciada" onchange="aplicarFiltros()">
+                        <span class="seg-checkmark">⭕ No iniciada</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Eje -->
+            <div class="seg-filter-group">
+                <label>Eje Estratégico</label>
+                <select id="filtro-eje" class="seg-filter-select" onchange="aplicarFiltros()">
+                    <option value="">Todos los Ejes</option>
+                </select>
+            </div>
+
+            <!-- Año -->
+            <div class="seg-filter-group">
+                <label>Año</label>
+                <select id="filtro-ano" class="seg-filter-select" onchange="aplicarFiltros()">
+                    <option value="">Todos los Años</option>
+                </select>
+            </div>
+
+            <!-- Chart Mini -->
+            <div class="seg-filter-chart">
+                <h4>📊 Distribución</h4>
+                <canvas id="chartMini" width="150" height="150"></canvas>
+                <div class="seg-chart-legend" id="chartLegend"></div>
+            </div>
+        </aside>
+
+        <!-- MAIN GRID -->
+        <main class="seg-main">
+            <div class="seg-metas-header">
+                <h2 id="resultadosTitulo">Cargando metas...</h2>
+                <div class="seg-view-toggle">
+                    <button class="seg-view-btn active" id="btnGridView" onclick="cambiarVista('grid')">⊞ Grid</button>
+                    <button class="seg-view-btn" id="btnListView" onclick="cambiarVista('list')">☰ Lista</button>
+                </div>
+            </div>
+            <div class="seg-metas-grid" id="metasGrid">
+                <!-- Cards generadas por JavaScript -->
+            </div>
+            <div class="seg-no-results" id="noResults" style="display:none;">
+                <div class="seg-no-results-icon">🔍</div>
+                <p>No se encontraron metas con los filtros aplicados</p>
+            </div>
+        </main>
+    </section>
+
+    <!-- DETAIL PANEL (Fullscreen Overlay) -->
+    <div class="seg-detail-panel" id="detailPanel">
+        <button class="seg-detail-close" onclick="cerrarDetalle()">✕</button>
+        <div class="seg-detail-scroll">
+            <div class="seg-detail-content" id="detailContent">
+                <!-- Contenido generado por JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Template para cards -->
+    <template id="template-meta-card">
+        <div class="seg-meta-card" onclick="mostrarDetalle(this.dataset.meta)">
+            <!-- Corner Accent -->
+            <div class="seg-card-corner"></div>
+            
+            <!-- Header -->
+            <div class="seg-card-header">
+                <span class="seg-card-badge" id="badge"></span>
+                <span class="seg-card-emoji" id="emoji"></span>
+            </div>
+
+            <!-- Body -->
+            <div class="seg-card-body">
+                <h3 class="seg-card-id" id="cardId"></h3>
+                <p class="seg-card-producto" id="cardProducto"></p>
+                <div class="seg-card-meta" id="cardMeta"></div>
+            </div>
+
+            <!-- Progress -->
+            <div class="seg-card-progress">
+                <div class="seg-progress-bar">
+                    <div class="seg-progress-fill" id="progressFill"></div>
+                </div>
+                <span class="seg-progress-text" id="progressText"></span>
+            </div>
+
+            <!-- Footer -->
+            <div class="seg-card-footer">
+                <div class="seg-footer-item">
+                    <span>Eje:</span>
+                    <strong id="cardEje"></strong>
+                </div>
+                <div class="seg-footer-item">
+                    <span>Secretaría:</span>
+                    <strong id="cardSecre"></strong>
+                </div>
+            </div>
+
+            <!-- Hover overlay -->
+            <div class="seg-card-overlay">
+                <div class="seg-overlay-content">
+                    <div class="seg-overlay-stat">
+                        <span>Avance Físico</span>
+                        <strong id="hoverFisico"></strong>
+                    </div>
+                    <div class="seg-overlay-stat">
+                        <span>Ejecución Financiera</span>
+                        <strong id="hoverFinanciero"></strong>
+                    </div>
+                    <div class="seg-overlay-cta">Ver detalles →</div>
+                </div>
+            </div>
+        </div>
+    </template>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<script>
+  // Datos iniciales desde el servidor como respaldo si el fetch falla
+  window.METAS_INICIALES = {{ metas_consolidado|tojson|safe }} || [];  // DEFAULT: consolidado
+  window.METAS_CONSOLIDADO_INICIALES = {{ metas_consolidado|tojson|safe }} || [];
+  window.METAS_ANUALES_INICIALES = {{ metas_anuales|tojson|safe }} || [];  // Para años específicos
+  window.KPIS_INICIALES = {{ kpis|tojson|safe }} || {};
+  window.DISTRIB_INICIAL = {{ distrib_estados|tojson|safe }} || {};
+  window.RESUMEN_EJE_INICIAL = {{ resumen_eje|tojson|safe }} || [];
+</script>
+
+<script>
+  // ===============================
+  // 1. DATA INITIALIZATION
+  // ===============================
+  // Prefill con datos del servidor por si el fetch falla
+  let METAS = window.METAS_INICIALES || [];  // Por defecto: consolidado
+  let METAS_CONSOLIDADO = window.METAS_CONSOLIDADO_INICIALES || [];
+  let METAS_ANUALES = window.METAS_ANUALES_INICIALES || [];  // Para años específicos
+  let DISTRIB_ESTADOS = window.DISTRIB_INICIAL || {};
+  let RESUMEN_EJE = window.RESUMEN_EJE_INICIAL || [];
+  let chartMini = null;
+  let currentView = 'grid';
+
+  async function initData() {
+    try {
+      console.log('Iniciando carga de datos...');
+      const res = await fetch('/seguimiento/api/metas');
+      console.log('Respuesta del API:', res.status);
+      
+      if (!res.ok) {
+        console.error('Error HTTP:', res.status, 'usando datos inyectados');
+      } else {
+        const data = await res.json();
+        console.log('Datos recibidos:', data);
+        console.log('Metas consolidado:', data.metas_consolidado.length);
+        
+        // El API retorna consolidado por defecto
+        METAS = data.metas || data.items || METAS;
+        METAS_CONSOLIDADO = data.metas_consolidado || METAS_CONSOLIDADO;
+        DISTRIB_ESTADOS = data.distrib_estados || DISTRIB_ESTADOS;
+        RESUMEN_EJE = data.resumen_eje || RESUMEN_EJE;
+      }
+
+      // Si sigue vacío, usar inyectados
+      if (!METAS || METAS.length === 0) {
+        console.warn('Usando datos inyectados de respaldo');
+        METAS = window.METAS_INICIALES || [];
+        METAS_CONSOLIDADO = window.METAS_CONSOLIDADO_INICIALES || [];
+        DISTRIB_ESTADOS = window.DISTRIB_INICIAL || {};
+        RESUMEN_EJE = window.RESUMEN_EJE_INICIAL || [];
+      }
+      console.log(`Metas cargadas: ${METAS.length} (consolidado)`);
+
+      poblarFiltros();
+      aplicarFiltros();
+    } catch (e) {
+      console.error('Error crítico en initData:', e);
+      console.error('Stack:', e.stack);
+    }
+  }
+
+  // ===============================
+  // 2. POPULATE FILTERS
+  // ===============================
+  function poblarFiltros() {
+    const selectAno = document.getElementById('filtro-ano');
+    selectAno.innerHTML = '';
+    
+    // Detectar años dinámicamente de las metas anuales
+    const anosUnicos = [...new Set(METAS_ANUALES.map(m => m.ano))].filter(Boolean).sort();
+    
+    // Opciones de año
+    const opcionesAno = [
+      { value: 'CONSOLIDADO', label: 'Consolidado (94 metas)' },
+    ];
+    
+    // Agregar años dinámicamente
+    anosUnicos.forEach(ano => {
+      const countAno = METAS_ANUALES.filter(m => m.ano == ano).length;
+      opcionesAno.push({ value: ano.toString(), label: `Año ${ano} (${countAno} metas)` });
+    });
+    
+    opcionesAno.forEach(({ value, label }) => {
+      const opt = document.createElement('option');
+      opt.value = value;
+      opt.textContent = label;
+      selectAno.appendChild(opt);
+    });
+    
+    // Por defecto: CONSOLIDADO
+    selectAno.value = 'CONSOLIDADO';
+
+    // Poblar ejes desde consolidado (que tiene todas las metas únicas)
+    const ejes = [...new Set(METAS_CONSOLIDADO.map(m => m.eje))].filter(Boolean).sort();
+    const selectEje = document.getElementById('filtro-eje');
+    selectEje.innerHTML = '<option value="">Todos los Ejes</option>';
+    ejes.forEach(eje => {
+      const opt = document.createElement('option');
+      opt.value = eje;
+      opt.textContent = eje;
+      selectEje.appendChild(opt);
+    });
+  }
+
+  // ===============================
+  // 3. UPDATE KPIs
+  // ===============================
+  function actualizarKPIs() {
+    fetch('/seguimiento/api/resumen')
+      .then(r => {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(data => {
+        aplicarKPIs(data.kpis);
+      })
+      .catch(err => {
+        console.warn('KPIs: usando respaldo inyectado. Motivo:', err.message);
+        aplicarKPIs(window.KPIS_INICIALES || {});
+      });
+  }
+
+  function aplicarKPIs(kpis = {}) {
+    animarNumero('kpi-total', kpis.total_metas || 0, 800);
+    animarNumero('kpi-cumplido', kpis.metas_cumplidas || 0, 800);
+    animarNumero('kpi-encurso', kpis.metas_en_curso || 0, 800);
+    animarNumero('kpi-riesgo', kpis.metas_en_riesgo || 0, 800);
+    
+    animarPorcentaje('kpi-avance', kpis.avance_prom || 0, 800);
+    animarPorcentaje('kpi-financiero', kpis.ejec_fin_prom || 0, 800);
+  }
+
+  function animarNumero(eleId, target, duration) {
+    const ele = document.getElementById(eleId);
+    const start = 0;
+    const increment = target / (duration / 16);
+    let current = start;
+
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        ele.textContent = Math.round(target);
+        clearInterval(timer);
+      } else {
+        ele.textContent = Math.round(current);
+      }
+    }, 16);
+  }
+
+  function animarPorcentaje(eleId, target, duration) {
+    const ele = document.getElementById(eleId);
+    const start = 0;
+    const increment = target / (duration / 16);
+    let current = start;
+
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        ele.textContent = Math.round(target) + '%';
+        clearInterval(timer);
+      } else {
+        ele.textContent = Math.round(current) + '%';
+      }
+    }, 16);
+  }
+
+  // KPIs locales basados en el conjunto filtrado
+  function calcularKpisLocales(metas = []) {
+    const total = metas.length;
+    const metasCumplidas = metas.filter(m => (m.estado || '').includes('Cumplida')).length;
+    const metasEnCurso = metas.filter(m => (m.estado || '').includes('ejecución') || (m.estado || '').includes('curso')).length;
+    const metasEnRiesgo = metas.filter(m => (m.estado || '').includes('riesgo')).length;
+    const metasSinIniciar = metas.filter(m => (m.estado || '').includes('No iniciada')).length;
+    const avanceProm = total ? metas.reduce((acc, m) => acc + (m.avance_fisico_pct || 0), 0) / total : 0;
+    const ejecFinProm = total ? metas.reduce((acc, m) => acc + (m.ejec_fin_pct || 0), 0) / total : 0;
+
+    return {
+      total_metas: total,
+      metas_cumplidas: metasCumplidas,
+      metas_en_curso: metasEnCurso,
+      metas_en_riesgo: metasEnRiesgo,
+      metas_sin_iniciar: metasSinIniciar,
+      avance_prom: avanceProm,
+      ejec_fin_prom: ejecFinProm,
+    };
+  }
+
+  function calcularDistribEstados(metas = []) {
+    const base = { 'Cumplida': 0, 'En ejecución': 0, 'En riesgo': 0, 'No iniciada': 0 };
+    metas.forEach(m => {
+      const estado = m.estado || 'No iniciada';
+      // Mapear a las claves exactas
+      if (estado.includes('Cumplida')) base['Cumplida']++;
+      else if (estado.includes('ejecución') || estado.includes('curso')) base['En ejecución']++;
+      else if (estado.includes('riesgo')) base['En riesgo']++;
+      else if (estado.includes('No iniciada')) base['No iniciada']++;
+    });
+    return base;
+  }
+
+  // ===============================
+  // 4. RENDER META CARDS
+  // ===============================
+  function renderMetas(filtradas) {
+    console.log(`renderMetas llamado con ${filtradas.length} elementos`);
+    
+    const grid = document.getElementById('metasGrid');
+    const noResults = document.getElementById('noResults');
+    const titulo = document.getElementById('resultadosTitulo');
+    
+    grid.innerHTML = '';
+
+    if (!filtradas || filtradas.length === 0) {
+      console.warn('No hay metas para renderizar');
+      noResults.style.display = 'flex';
+      titulo.textContent = 'Sin resultados';
+      return;
+    }
+
+    noResults.style.display = 'none';
+    titulo.textContent = `${filtradas.length} metas encontradas`;
+
+    const template = document.getElementById('template-meta-card');
+    if (!template) {
+      console.error('Template no encontrado');
+      return;
+    }
+    
+    console.log(`Renderizando ${filtradas.length} tarjetas`);
+    
+    filtradas.forEach((meta, idx) => {
+      try {
+        const clone = template.content.cloneNode(true);
+        
+        // Acceso seguro a las propiedades
+        clone.querySelector('[id="cardId"]').textContent = meta.id_meta || 'N/A';
+        const producto = (meta.meta_producto || '').substring(0, 60);
+        clone.querySelector('[id="cardProducto"]').textContent = producto + (meta.meta_producto && meta.meta_producto.length > 60 ? '...' : '');
+        clone.querySelector('[id="cardMeta"]').innerHTML = `<span class="seg-card-chip">${meta.sector || 'N/A'}</span>`;
+
+        const stateColor = getStateColor(meta.estado);
+        const stateEmoji = getStateEmoji(meta.estado);
+        clone.querySelector('[id="badge"]').className = `seg-card-badge ${stateColor}`;
+        clone.querySelector('[id="badge"]').textContent = meta.estado || 'N/A';
+        clone.querySelector('[id="emoji"]').textContent = stateEmoji;
+
+        const avance = parseFloat(meta.avance_fisico_pct) || 0;
+        clone.querySelector('[id="progressFill"]').style.width = avance + '%';
+        clone.querySelector('[id="progressFill"]').style.backgroundColor = getStateColorHex(stateColor);
+        clone.querySelector('[id="progressText"]').textContent = avance.toFixed(1) + '%';
+        
+        // Info adicional en la tarjeta
+        const eleEje = clone.querySelector('[id="cardEje"]');
+        if (eleEje) eleEje.textContent = (meta.eje || 'N/A').substring(0, 20);
+        
+        const eleSecre = clone.querySelector('[id="cardSecre"]');
+        if (eleSecre) eleSecre.textContent = (meta.secretaria || 'N/A').substring(0, 15);
+
+        const eleFisico = clone.querySelector('[id="hoverFisico"]');
+        if (eleFisico) eleFisico.textContent = avance.toFixed(1) + '%';
+        
+        const eleFinanciero = clone.querySelector('[id="hoverFinanciero"]');
+        if (eleFinanciero) eleFinanciero.textContent = (meta.ejec_fin_pct || 0).toFixed(1) + '%';
+
+        const card = clone.querySelector('.seg-meta-card');
+        if (card) {
+          card.dataset.meta = JSON.stringify(meta);
+          card.style.animationDelay = (idx * 0.05) + 's';
+        }
+
+        grid.appendChild(clone);
+      } catch (e) {
+        console.error(`Error renderizando meta ${idx}:`, e, meta);
+      }
+    });
+  }
+
+  // ===============================
+  // 5. APPLY FILTERS
+  // ===============================
+  function aplicarFiltros() {
+    const texto = document.getElementById('filtro-texto').value.toLowerCase();
+    const estados = Array.from(document.querySelectorAll('.seg-filter-checks input:checked')).map(i => i.value);
+    const eje = document.getElementById('filtro-eje').value;
+    const ano = document.getElementById('filtro-ano').value;
+
+    // Seleccionar base según el filtro de año
+    let baseMetas;
+    if (ano === 'CONSOLIDADO' || ano === '') {
+      // Mostrar consolidado (94 metas)
+      baseMetas = METAS_CONSOLIDADO;
+    } else {
+      // Año específico (2024, 2025, etc.) - filtrar metas anuales
+      baseMetas = METAS_ANUALES.filter(m => String(m.ano) === String(ano));
+      console.log(`Filtrando año ${ano}: ${baseMetas.length} metas encontradas`);
+    }
+
+    // Aplicar filtros de búsqueda y estado
+    let filtradas = baseMetas.filter(meta => {
+      const matchTexto = !texto || 
+        meta.id_meta.toLowerCase().includes(texto) ||
+        meta.meta_producto.toLowerCase().includes(texto) ||
+        (meta.sector && meta.sector.toLowerCase().includes(texto));
+
+      // Comparar estados de forma más flexible
+      const matchEstado = estados.length === 0 || estados.some(e => meta.estado === e);
+      const matchEje = !eje || meta.eje === eje;
+      
+      return matchTexto && matchEstado && matchEje;
+    });
+
+    // Recalcular KPIs y gráfica con el conjunto filtrado
+    const kpisLocales = calcularKpisLocales(filtradas);
+    DISTRIB_ESTADOS = calcularDistribEstados(filtradas);
+
+    aplicarKPIs(kpisLocales);
+    renderMetas(filtradas);
+    renderChartMini();
+  }
+
+  function resetFiltros() {
+    document.getElementById('filtro-texto').value = '';
+    document.querySelectorAll('.seg-filter-checks input').forEach(i => i.checked = false);
+    document.getElementById('filtro-eje').value = '';
+    document.getElementById('filtro-ano').value = 'CONSOLIDADO';
+    aplicarFiltros();
+  }
+
+  // ===============================
+  // 6. DETAIL PANEL
+  // ===============================
+  function mostrarDetalle(metaStr) {
+    const meta = JSON.parse(metaStr);
+    const panel = document.getElementById('detailPanel');
+    const content = document.getElementById('detailContent');
+
+    const stateColor = getStateColor(meta.estado);
+    const stateEmoji = getStateEmoji(meta.estado);
+    const stateColorHex = getStateColorHex(stateColor);
+
+    content.innerHTML = `
+        <div class="seg-detail-header">
+            <div class="seg-detail-state" style="background: ${stateColorHex};">${stateEmoji} ${meta.estado}</div>
+            <h2>${meta.id_meta}</h2>
+            <p class="seg-detail-subtitle">${meta.meta_producto}</p>
+        </div>
+
+        <div class="seg-detail-grid">
+            <div class="seg-detail-section">
+                <h3>📋 Información Básica</h3>
+                <div class="seg-detail-item">
+                    <span class="seg-detail-label">Eje Estratégico:</span>
+                    <span class="seg-detail-value">${meta.eje || 'N/A'}</span>
+                </div>
+                <div class="seg-detail-item">
+                    <span class="seg-detail-label">Sector:</span>
+                    <span class="seg-detail-value">${meta.sector || 'N/A'}</span>
+                </div>
+                <div class="seg-detail-item">
+                    <span class="seg-detail-label">Secretaría:</span>
+                    <span class="seg-detail-value">${meta.secretaria || 'N/A'}</span>
+                </div>
+                <div class="seg-detail-item">
+                    <span class="seg-detail-label">BPIM:</span>
+                    <span class="seg-detail-value">${meta.bpim || 'N/A'}</span>
+                </div>
+                <div class="seg-detail-item">
+                    <span class="seg-detail-label">Año:</span>
+                    <span class="seg-detail-value">${meta.ano || 'N/A'}</span>
+                </div>
+            </div>
+
+            <div class="seg-detail-section">
+                <h3>📊 Avance Físico</h3>
+                <div class="seg-detail-progress">
+                    <div class="seg-progress-bar-lg">
+                        <div class="seg-progress-fill-lg" style="width: ${meta.avance_fisico_pct || 0}%; background: ${stateColorHex};"></div>
+                    </div>
+                    <div class="seg-progress-info">
+                        <strong>${(meta.avance_fisico_pct || 0).toFixed(1)}%</strong>
+                    </div>
+                </div>
+                <div class="seg-detail-item">
+                    <span class="seg-detail-label">Meta Programada:</span>
+                    <span class="seg-detail-value">${meta.meta_programada_ano || 'N/A'}</span>
+                </div>
+                <div class="seg-detail-item">
+                    <span class="seg-detail-label">Avance Ejecutado:</span>
+                    <span class="seg-detail-value">${meta.avance_ejecutado_ano || 0}</span>
+                </div>
+            </div>
+
+            <div class="seg-detail-section">
+                <h3>💰 Información Financiera</h3>
+                <div class="seg-detail-progress">
+                    <div class="seg-progress-bar-lg">
+                        <div class="seg-progress-fill-lg" style="width: ${meta.ejec_fin_pct || 0}%; background: #8b5cf6;"></div>
+                    </div>
+                    <div class="seg-progress-info">
+                        <strong>${(meta.ejec_fin_pct || 0).toFixed(1)}%</strong>
+                    </div>
+                </div>
+                <div class="seg-detail-item">
+                    <span class="seg-detail-label">Presupuesto Asignado:</span>
+                    <span class="seg-detail-value">$${(meta.presupuesto_asig || 0).toLocaleString()}</span>
+                </div>
+                <div class="seg-detail-item">
+                    <span class="seg-detail-label">Presupuesto Ejecutado:</span>
+                    <span class="seg-detail-value">$${(meta.presupuesto_ejec || 0).toLocaleString()}</span>
+                </div>
+            </div>
+
+            <div class="seg-detail-section">
+                <h3>📌 Datos Adicionales</h3>
+                <div class="seg-detail-item">
+                    <span class="seg-detail-label">Proyecto Asociado:</span>
+                    <span class="seg-detail-value">${meta.proyecto || 'No especificado'}</span>
+                </div>
+                <div class="seg-detail-item">
+                    <span class="seg-detail-label">Fuente de Financiación:</span>
+                    <span class="seg-detail-value">${meta.fuente || 'No especificado'}</span>
+                </div>
+                <div class="seg-detail-item">
+                    <span class="seg-detail-label">Fecha de Registro:</span>
+                    <span class="seg-detail-value">${meta.fecha_registro || 'N/A'}</span>
+                </div>
+            </div>
+        </div>
+    `;
+
+    panel.classList.add('seg-detail-open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function cerrarDetalle() {
+    const panel = document.getElementById('detailPanel');
+    panel.classList.remove('seg-detail-open');
+    document.body.style.overflow = 'auto';
+  }
+
+  // ===============================
+  // 7. HELPER FUNCTIONS
+  // ===============================
+  function getStateColor(estado) {
+    const estadoLower = (estado || '').toLowerCase();
+    if (estadoLower.includes('cumplid')) return 'cumplido';
+    if (estadoLower.includes('ejecuci') || estadoLower.includes('curso')) return 'encurso';
+    if (estadoLower.includes('riesgo')) return 'retraso';
+    if (estadoLower.includes('no inici')) return 'sinicio';
+    return 'sinicio';
+  }
+
+  function getStateColorHex(stateColor) {
+    const map = {
+      'cumplido': '#10b981',
+      'encurso': '#3b82f6',
+      'retraso': '#ef4444',
+      'sinicio': '#9ca3af'
+    };
+    return map[stateColor] || '#9ca3af';
+  }
+
+  function getStateEmoji(estado) {
+    const estadoLower = (estado || '').toLowerCase();
+    if (estadoLower.includes('cumplid')) return '✅';
+    if (estadoLower.includes('ejecuci') || estadoLower.includes('curso')) return '▶️';
+    if (estadoLower.includes('riesgo')) return '⚠️';
+    if (estadoLower.includes('no inici')) return '⭕';
+    return '⭕';
+  }
+
+  // ===============================
+  // 8. MINI CHART
+  // ===============================
+  function renderChartMini() {
+    const canvas = document.getElementById('chartMini');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const labels = Object.keys(DISTRIB_ESTADOS);
+    const data = Object.values(DISTRIB_ESTADOS);
+    const colors = ['#10b981', '#3b82f6', '#ef4444', '#9ca3af'];
+
+    if (!chartMini) {
+      chartMini = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: colors.slice(0, labels.length),
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: false, // tamaño fijo, evita crecimiento en scroll
+          animation: { duration: 0 },
+          plugins: {
+            legend: { 
+              position: 'bottom', 
+              labels: { font: { size: 10 }, padding: 8 } 
+            }
+          }
+        }
+      });
+    } else {
+      chartMini.data.labels = labels;
+      chartMini.data.datasets[0].data = data;
+      chartMini.data.datasets[0].backgroundColor = colors.slice(0, labels.length);
+      chartMini.update();
+    }
+  }
+
+  function cambiarVista(vista) {
+    currentView = vista;
+    document.getElementById('btnGridView').classList.toggle('active', vista === 'grid');
+    document.getElementById('btnListView').classList.toggle('active', vista === 'list');
+  }
+
+  // ===============================
+  // 9. INIT
+  // ===============================
+  document.addEventListener('DOMContentLoaded', initData);
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') cerrarDetalle();
+  });
+</script>
+
+{% endblock %}

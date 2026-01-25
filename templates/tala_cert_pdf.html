@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Certificación Tala #{{ s['consecutivo'] }}</title>
+  <style>
+    @page { size: A4; margin: 15mm; }
+    body { font-family: Arial, sans-serif; font-size: 12pt; color:#111; }
+    h1 { font-size: 18pt; margin: 0 0 10px 0; }
+    .muted { color:#555; }
+    .box { border:1px solid #333; padding:10px; margin:12px 0; }
+    .foot { margin-top:18mm; font-size:10pt; color:#444; }
+  </style>
+</head>
+<body>
+  <h1>Certificación de Autorización de Tala y Compensación</h1>
+  <div class="muted">Municipio de Supatá — Secretaría de Planeación y Obras Públicas</div>
+
+  <div class="box">
+    <strong>Expediente:</strong> {{ s['consecutivo'] }}<br>
+    <strong>Fecha de emisión:</strong> {{ fecha_emision }}<br>
+    <strong>Vence:</strong> {{ fecha_vence }} (plazo 10 días hábiles)
+  </div>
+
+  <p>
+    Con fundamento en el informe de visita ocular y el riesgo identificado, se
+    <strong>autoriza la tala</strong> del arbolado asociado a la solicitud:
+  </p>
+
+  <div class="box">
+    <strong>Solicitante:</strong> {{ s['solicitante'] }} ({{ s['doc_solicitante'] }})<br>
+    <strong>Dirección:</strong> {{ s['direccion'] }}{% if s['barrio_vereda'] %} — {{ s['barrio_vereda'] }}{% endif %}<br>
+    <strong>Motivo:</strong> {{ s['motivo'] }}<br>
+    <strong>Número de árboles a talar (según acta/inspección):</strong> {{ arboles_talar }}
+  </div>
+
+  <p>
+    En aplicación del criterio de compensación (ratio {{ '%.2f'|format(comp_ratio) }}:1),
+    el solicitante deberá <strong>compensar</strong> con la plantación de 
+    <strong>{{ arboles_comp }}</strong> árboles, en los sitios y condiciones que determine la autoridad municipal competente.
+    Esta compensación deberá ejecutarse <strong>a más tardar dentro de los 10 días hábiles</strong>
+    siguientes a la fecha de expedición de la presente certificación.
+  </p>
+
+  <p class="muted">
+    La presente no exime al responsable de cumplir con las demás obligaciones ambientales y urbanísticas aplicables.
+  </p>
+
+  <div class="foot">
+    <strong>Firma autorizada</strong><br>
+    Secretaría de Planeación y Obras Públicas — Municipio de Supatá
+  </div>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Informe de Uso del Suelo</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 2cm;
+    }
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 1em;
+    }
+    .metadata, .detalle {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5em;
+    }
+    .metadata th, .metadata td,
+    .detalle th, .detalle td {
+      border: 1px solid #333;
+      padding: 0.5em;
+      text-align: left;
+    }
+    .metadata th {
+      background-color: #f0f0f0;
+      width: 25%;
+    }
+    .detalle th {
+      background-color: #e0e0e0;
+    }
+    footer {
+      position: fixed;
+      bottom: 1cm;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 0.8em;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>Alcaldía Municipal</h1>
+  <h2>Informe de Uso del Suelo</h2>
+
+  <table class="metadata">
+    <tr>
+      <th>Cédula Catastral</th>
+      <td>{{ parcela.cedula_catastral or 'N/A' }}</td>
+    </tr>
+    <tr>
+      <th>Matrícula Inmobiliaria</th>
+      <td>{{ parcela.matricula or 'N/A' }}</td>
+    </tr>
+    <tr>
+      <th>Propietario</th>
+      <td>{{ parcela.propietario or 'N/A' }}</td>
+    </tr>
+    <tr>
+      <th>Coordenadas</th>
+      <td>Lat {{ parcela.lat }}, Lon {{ parcela.lon }}</td>
+    </tr>
+    <tr>
+      <th>Fecha de generación</th>
+      <td>{{ fecha.strftime('%Y-%m-%d') }}</td>
+    </tr>
+  </table>
+
+  <table class="detalle">
+    <thead>
+      <tr>
+        <th>Código de Uso</th>
+        <th>Descripción del Uso</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ parcela.uso.codigo if parcela.uso else '—' }}</td>
+        <td>{{ uso_nombre }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    <strong>Observaciones:</strong><br>
+    Este informe se genera con base en la capa de Usos del Suelo (EOT).  
+    Cualquier discrepancia deberá verificarse con el plano oficial de la Secretaría de Planeación.
+  </p>
+
+  <footer>
+    Alcaldía Municipal – Sistema de Información Geográfica &mdash; Página {{ page }}  
+  </footer>
+</body>
+</html>

@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<style>
+.reports-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.reports-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.reports-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ea580c, #fb923c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+}
+
+.report-builder {
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.88));
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: 0 12px 40px rgba(234, 88, 12, 0.1);
+  margin-bottom: 2rem;
+}
+
+.section-selector {
+  background: rgba(249, 168, 37, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.btn-generate {
+  background: linear-gradient(135deg, #ea580c, #fb923c);
+  color: white;
+  border: none;
+  padding: 1rem 2.5rem;
+  border-radius: 14px;
+  font-weight: 700;
+  box-shadow: 0 8px 24px rgba(234, 88, 12, 0.3);
+  font-size: 1.1rem;
+}
+
+.btn-generate:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(234, 88, 12, 0.4);
+  color: white;
+}
+
+.preview-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  margin-top: 2rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reports-container">
+  <div class="reports-header">
+    <h2><i class="bi bi-file-earmark-bar-graph-fill"></i> Generador de Informes</h2>
+    <p class="text-muted">Crea reportes ejecutivos profesionales en PDF</p>
+  </div>
+
+  <div class="report-builder">
+    <form method="POST">
+      <div class="mb-4">
+        <label class="form-label fw-bold">Título del Informe</label>
+        <input type="text" name="title" class="form-control form-control-lg" 
+               placeholder="Ej: Informe Mensual de Gestión" required>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-bold">Período</label>
+        <div class="row">
+          <div class="col-md-6">
+            <input type="date" name="start_date" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <input type="date" name="end_date" class="form-control" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-selector">
+        <label class="form-label fw-bold mb-3">Secciones a Incluir</label>
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" name="sections" value="solicitudes" checked>
+          <label class="form-check-label">Solicitudes</label>
+        </div>
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" name="sections" value="certificados" checked>
+          <label class="form-check-label">Certificados</label>
+        </div>
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" name="sections" value="participacion">
+          <label class="form-check-label">Participación Ciudadana</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="sections" value="graficos" checked>
+          <label class="form-check-label">Gráficos y Estadísticas</label>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="btn btn-generate">
+          <i class="bi bi-file-pdf-fill"></i> Generar Informe PDF
+        </button>
+      </div>
+    </form>
+  </div>
+
+  {% if generated %}
+  <div class="preview-card">
+    <div class="alert alert-success">
+      <h5><i class="bi bi-check-circle-fill"></i> Informe Generado Exitosamente</h5>
+      <p class="mb-0">Tu informe está listo para descargar.</p>
+    </div>
+    <div class="text-center mt-3">
+      <button class="btn btn-primary">
+        <i class="bi bi-download"></i> Descargar PDF
+      </button>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="mt-4 text-center">
+    <a href="{{ url_for('ia.index') }}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> Volver a IA Municipal
+    </a>
+  </div>
+</div>
+{% endblock %}

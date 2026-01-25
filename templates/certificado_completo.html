@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Certificado de Uso del Suelo y Croquis</title>
+    <style>
+        body { font-family: Arial, Helvetica, sans-serif; color: #111; margin: 24px; }
+        .header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+        .title { font-size: 18px; font-weight: 800; }
+        .subtitle { color: #555; font-size: 12px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .section { border: 1px solid #ddd; border-radius: 6px; padding: 12px; }
+        .section h3 { margin: 0 0 8px 0; font-size: 14px; }
+        .field { display: grid; grid-template-columns: 160px 1fr; margin: 4px 0; font-size: 12px; }
+        .field label { color: #444; }
+        .norma { font-size: 12px; line-height: 1.45; }
+        .croquis { border: 1px solid #ddd; border-radius: 6px; padding: 8px; }
+        .croquis img { width: 100%; height: auto; }
+        .footer { margin-top: 16px; font-size: 11px; color: #555; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        {% if escudo_path %}
+        <img src="{{ escudo_path }}" alt="Escudo" style="height:60px;"/>
+        {% endif %}
+        <div>
+            <div class="title">CERTIFICADO DE USO DEL SUELO + CROQUIS</div>
+            <div class="subtitle">Generado: {{ fecha_gen }} | Código: {{ cod_pred }}</div>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="section">
+            <h3>Datos del Predio</h3>
+            <div class="field"><label>Código Predial:</label><div>{{ cod_pred }}</div></div>
+            <div class="field"><label>Propietario:</label><div>{{ props.get('PROPIETARIO', 'N/A') }}</div></div>
+            <div class="field"><label>Dirección:</label><div>{{ props.get('DIRECCION', 'N/A') }}</div></div>
+            <div class="field"><label>Uso:</label><div>{{ props.get('Uso') or props.get('Subcategor') or props.get('Categoria') or 'N/A' }}</div></div>
+            <div class="field"><label>Destino Económico:</label><div>{{ props.get('DEST_ECO', 'N/A') }}</div></div>
+        </div>
+        <div class="section">
+            <h3>Croquis del Predio</h3>
+            {% if croquis_data %}
+            <div class="croquis">
+                <img src="{{ croquis_data }}" alt="Croquis del predio"/>
+            </div>
+            {% else %}
+            <div class="croquis">Croquis no disponible</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="section" style="margin-top:16px;">
+        <h3>Normatividad Aplicable</h3>
+        <div class="norma">{{ norma_html|safe }}</div>
+    </div>
+
+    <div class="footer">
+        Este documento consolida el formato oficial, la normativa aplicable al uso del suelo, y el croquis del predio seleccionado.
+    </div>
+</body>
+</html>

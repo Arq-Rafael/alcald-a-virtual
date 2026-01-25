@@ -1,0 +1,475 @@
+/* ============================================
+   iOS 26 MODERN DESIGN SYSTEM
+   Glassmorphism + Color Theory + Accessibility
+   ============================================ */
+
+:root {
+  /* Paleta Calmante - Teoría del Color */
+  --primary-calm: #0f766e;      /* Teal tranquilo (concentración) */
+  --secondary-calm: #5eead4;    /* Mint suave (accesibilidad) */
+  --accent-warm: #d4946f;       /* Beige cálido (humanidad) */
+  --accent-soft: #a8a9ad;       /* Gris neutro (equilibrio) */
+  --bg-light: #f7f7f9;          /* Casi blanco (sin fatiga) */
+  --bg-white: #ffffff;
+  --text-primary: #1a1a1a;
+  --text-secondary: #6b7280;
+  --border-color: rgba(15, 118, 110, 0.12);
+  --blur-strong: 16px;
+  --blur-medium: 10px;
+  --blur-light: 8px;
+}
+
+/* ============================================
+   DASHBOARD BACKGROUND & STRUCTURE
+   ============================================ */
+
+.dashboard-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Animated gradient matching login */
+  background: linear-gradient(-45deg,
+    #1b5e20,
+    #4caf50,
+    #f9a825,
+    #66bb6a,
+    #fdd835
+  );
+  background-size: 400% 400%;
+  background-position: 0% 50%;
+  animation: gradientBG 18s linear infinite;
+  z-index: -1;
+  opacity: 1;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 50% 75%; }
+  50% { background-position: 100% 50%; }
+  75% { background-position: 50% 25%; }
+  100% { background-position: 0% 50%; }
+}
+
+.dashboard-header {
+  animation: slideDown 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  opacity: 0;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dashboard-header h2 {
+  color: var(--primary-calm);
+  font-size: 1.8rem;
+  letter-spacing: -0.5px;
+  font-weight: 600;
+}
+
+.dashboard-header p {
+  color: var(--text-secondary);
+  font-weight: 400;
+  letter-spacing: 0.3px;
+}
+
+.badge {
+  background: linear-gradient(135deg, var(--primary-calm) 0%, var(--secondary-calm) 100%) !important;
+  box-shadow: 0 8px 24px rgba(15, 118, 110, 0.15) !important;
+  border-radius: 20px !important;
+  padding: 0.65rem 1.8rem !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.2px;
+  backdrop-filter: blur(var(--blur-light));
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  animation: badgeScale 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards;
+  opacity: 0;
+}
+
+@keyframes badgeScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ============================================
+   DASHBOARD GRID LAYOUT
+   ============================================ */
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.8rem;
+  padding: 2rem 0;
+  animation: fadeInGrid 0.8s ease-out 0.1s forwards;
+  opacity: 0;
+}
+
+@keyframes fadeInGrid {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 1400px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 1000px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   GLASS CARD - iOS STYLE
+   ============================================ */
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(var(--blur-strong));
+  -webkit-backdrop-filter: blur(var(--blur-strong));
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 2rem 1.8rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04),
+              0 2px 8px rgba(0, 0, 0, 0.02);
+  transition: all 0.35s cubic-bezier(0.23, 1, 0.320, 1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  animation: cardFadeIn 0.7s ease-out forwards;
+  opacity: 0;
+}
+
+.glass-card:nth-child(1) { animation-delay: 0.05s; }
+.glass-card:nth-child(2) { animation-delay: 0.10s; }
+.glass-card:nth-child(3) { animation-delay: 0.15s; }
+.glass-card:nth-child(4) { animation-delay: 0.20s; }
+.glass-card:nth-child(5) { animation-delay: 0.25s; }
+.glass-card:nth-child(6) { animation-delay: 0.30s; }
+.glass-card:nth-child(7) { animation-delay: 0.35s; }
+.glass-card:nth-child(8) { animation-delay: 0.40s; }
+.glass-card:nth-child(9) { animation-delay: 0.45s; }
+.glass-card:nth-child(10) { animation-delay: 0.50s; }
+.glass-card:nth-child(11) { animation-delay: 0.55s; }
+.glass-card:nth-child(12) { animation-delay: 0.60s; }
+.glass-card:nth-child(13) { animation-delay: 0.65s; }
+
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(94, 173, 212, 0.08), transparent);
+  border-radius: 50%;
+  pointer-events: none;
+  transition: all 0.6s ease-out;
+}
+
+.glass-card:hover::before {
+  top: -40%;
+  right: -40%;
+}
+
+/* Hover Effects - Softer */
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(15, 118, 110, 0.2);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.08),
+              0 4px 16px rgba(0, 0, 0, 0.04);
+  transform: translateY(-6px);
+}
+
+.glass-card:active {
+  transform: translateY(-2px);
+}
+
+/* ============================================
+   CARD ICON - Modern Design
+   ============================================ */
+
+.card-icon-wrapper {
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.15) 0%, rgba(94, 173, 212, 0.1) 100%);
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.08);
+  transition: all 0.35s cubic-bezier(0.23, 1, 0.320, 1);
+  position: relative;
+}
+
+.card-icon-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), transparent);
+  border-radius: 18px;
+  opacity: 0;
+  transition: opacity 0.35s ease-out;
+}
+
+.glass-card:hover .card-icon-wrapper {
+  transform: scale(1.08) rotateY(5deg);
+  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.15);
+}
+
+.glass-card:hover .card-icon-wrapper::after {
+  opacity: 1;
+  pointer-events: none; /* overlay shouldn't block icon */
+}
+
+/* Ensure icon stays visible on hover */
+.glass-card:hover .card-icon-wrapper,
+.glass-card:hover .card-icon-wrapper *,
+.glass-card:hover .card-icon-wrapper i,
+.glass-card:hover .card-icon-wrapper svg {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* Icon Colors with Harmony */
+.card-icon-wrapper.text-primary {
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.15) 0%, rgba(94, 173, 212, 0.1) 100%);
+  color: var(--primary-calm);
+}
+
+.card-icon-wrapper.text-success {
+  background: linear-gradient(135deg, rgba(74, 222, 128, 0.12) 0%, rgba(167, 243, 208, 0.08) 100%);
+  color: #16a34a;
+}
+
+.card-icon-wrapper.text-warning {
+  background: linear-gradient(135deg, rgba(251, 146, 60, 0.12) 0%, rgba(253, 186, 116, 0.08) 100%);
+  color: #d97706;
+}
+
+.card-icon-wrapper.text-info {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(147, 197, 253, 0.08) 100%);
+  color: #0284c7;
+}
+
+.card-icon-wrapper.text-danger {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(252, 165, 165, 0.08) 100%);
+  color: #dc2626;
+}
+
+.card-icon-wrapper.text-secondary {
+  background: linear-gradient(135deg, rgba(107, 114, 128, 0.12) 0%, rgba(209, 213, 219, 0.08) 100%);
+  color: #4b5563;
+}
+
+.card-icon-wrapper.text-dark {
+  background: linear-gradient(135deg, rgba(31, 41, 55, 0.12) 0%, rgba(107, 114, 128, 0.08) 100%);
+  color: #1f2937;
+}
+
+/* ============================================
+   CARD TEXT - Typography
+   ============================================ */
+
+.glass-card h5 {
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+  letter-spacing: -0.3px;
+  line-height: 1.4;
+}
+
+.glass-card p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+}
+
+/* ============================================
+   PREMIUM BUTTON - Modern Action
+   ============================================ */
+
+.btn-premium {
+  background: linear-gradient(135deg, var(--primary-calm) 0%, #1f7f7f 100%);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.35s cubic-bezier(0.23, 1, 0.320, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.btn-premium::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-premium:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-premium:hover {
+  background: linear-gradient(135deg, #0f766e 0%, #0f766e 100%);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(15, 118, 110, 0.35);
+}
+
+.btn-premium:active {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 118, 110, 0.25);
+}
+
+.btn-premium:focus {
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.1);
+}
+
+.btn-premium i {
+  font-size: 1rem;
+  transition: transform 0.35s ease-out;
+}
+
+.btn-premium:hover i {
+  transform: translateX(4px);
+}
+
+/* ============================================
+   RESPONSIVE - Mobile Optimization
+   ============================================ */
+
+@media (max-width: 768px) {
+  .dashboard-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .glass-card {
+    padding: 1.6rem 1.4rem;
+  }
+
+  .card-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    font-size: 1.8rem;
+  }
+
+  .btn-premium {
+    padding: 0.65rem 1.2rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-card,
+  .badge,
+  .btn-premium,
+  .card-icon-wrapper,
+  .dashboard-header {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-light: #0f1419;
+    --bg-white: #1a1f2e;
+    --text-primary: #f5f5f7;
+    --text-secondary: #a1a1a6;
+    --border-color: rgba(94, 173, 212, 0.15);
+  }
+
+  .dashboard-bg {
+    background: linear-gradient(135deg, #0f1419 0%, #1a2a2e 50%, #1f1810 100%);
+  }
+
+  .glass-card {
+    background: rgba(26, 31, 46, 0.7);
+  }
+
+  .glass-card:hover {
+    background: rgba(26, 31, 46, 0.85);
+  }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+  .dashboard-bg,
+  .btn-premium {
+    display: none;
+  }
+
+  .glass-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

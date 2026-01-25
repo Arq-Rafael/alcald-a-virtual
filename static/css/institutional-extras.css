@@ -1,0 +1,94 @@
+/* Additional Institutional Theme Enhancements */
+
+/* Animated Badges with Institutional Colors */
+.badge-institutional-green {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(27, 94, 32, 0.3);
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes badge-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.badge-institutional-yellow {
+  background: linear-gradient(135deg, var(--secondary-dark), var(--secondary));
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(249, 168, 37, 0.3);
+}
+
+/* Enhanced Form Controls with Institutional Colors */
+.form-control-glass:focus {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.15);
+}
+
+.form-select.form-control-glass:focus {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.15);
+}
+
+/* Loading Spinner with Institutional Colors */
+.spinner-institutional {
+  border: 4px solid rgba(76, 175, 80, 0.1);
+  border-top: 4px solid var(--primary-light);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Glowing Dividers */
+.divider-glow {
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    var(--primary-light), 
+    var(--secondary-light), 
+    var(--primary-light), 
+    transparent
+  );
+  margin: 2rem 0;
+  animation: glow-slide 3s ease-in-out infinite;
+}
+
+@keyframes glow-slide {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* Success/Warning/Error States with Institutional Colors */
+.alert-success-institutional {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(129, 199, 132, 0.1));
+  border-left: 4px solid var(--primary-light);
+  color: var(--primary-dark);
+}
+
+.alert-warning-institutional {
+  background: linear-gradient(135deg, rgba(249, 168, 37, 0.1), rgba(253, 216, 53, 0.1));
+  border-left: 4px solid var(--secondary);
+  color: var(--secondary-dark);
+}
+
+/* Hover Cards with Glow Effect */
+.card-glow:hover {
+  box-shadow: 
+    0 0 20px rgba(76, 175, 80, 0.3),
+    0 0 40px rgba(249, 168, 37, 0.2);
+  transform: translateY(-5px);
+  transition: all 0.3s ease;
+}

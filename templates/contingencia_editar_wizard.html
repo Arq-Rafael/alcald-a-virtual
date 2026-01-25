@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% block title %}Editar Plan de Contingencia{% endblock %}
+{% block content %}
+<div class="container" style="padding:20px 10px;">
+  <div style="display:flex; gap:20px; align-items:flex-start;">
+    <aside style="width:260px; background:#0f172a; color:#e2e8f0; border-radius:14px; padding:16px;">
+      <h3 style="margin:0 0 12px 0; font-size:16px;">Secciones oficiales</h3>
+      <ol style="list-style:none; padding:0; margin:0; display:grid; gap:8px;">
+        {% set secciones = [
+          ('introduccion','1. Introducción'),
+          ('objetivos','2. Objetivos y Alcance'),
+          ('normativo','3. Marco Normativo'),
+          ('organizacion','4. Organización y Roles'),
+          ('riesgos','5. Análisis de Riesgos'),
+          ('medidas','6. Medidas de Reducción'),
+          ('respuesta','7. Plan de Respuesta'),
+          ('actualizacion','8. Actualización y Mejora'),
+          ('anexos','9. Anexos Técnicos')
+        ] %}
+        {% for key,label in secciones %}
+        <li>
+          <a href="{{ url_for('contingencia_views.editar', plan_id=plan.id, seccion=key) }}" style="display:block; padding:10px 12px; border-radius:10px; text-decoration:none; color:#e2e8f0; background:{{ 'linear-gradient(135deg,#38bdf8,#0ea5e9)' if seccion_actual==key else '#1e293b' }}; border:1px solid #0ea5e9;">
+            {{ label }}
+          </a>
+        </li>
+        {% endfor %}
+      </ol>
+      <div style="margin-top:14px; font-size:12px; color:#cbd5e1;">
+        Plan: <strong>{{ plan.numero_plan }}</strong><br>
+        Evento: {{ plan.tipo_evento }}
+      </div>
+    </aside>
+
+    <main style="flex:1; background:#0b1120; color:#e2e8f0; border-radius:14px; padding:18px;">
+      <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div>
+          <h2 style="margin:0; font-size:20px;">{{ seccion_actual|replace('_',' ')|title }}</h2>
+          <p style="margin:4px 0 0 0; color:#94a3b8;">Usa el formato oficial. Botón de auto-completar carga datos de Supatá.</p>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button type="button" class="btn btn-primary" onclick="autocompletarSupata()">📍 Auto-completar Supatá</button>
+          <a class="btn btn-secondary" href="{{ url_for('contingencia_views.detalle', plan_id=plan.id) }}">Ver detalle</a>
+        </div>
+      </header>
+
+      <form id="form-seccion" onsubmit="guardarSeccion(event)">
+        {% if seccion_actual == 'introduccion' %}
+          <label>Descripción del evento</label>
+          <textarea name="descripcion" rows="4" class="form-control">{{ oficial.get('introduccion',{}).get('descripcion','') }}</textarea>
+          <label style="margin-top:10px;">Justificación</label>
+          <textarea name="justificacion" rows="3" class="form-control">{{ oficial.get('introduccion',{}).get('justificacion','') }}</textarea>
+          <label style="margin-top:10px;">Contexto normativo</label>
+          <textarea name="contexto" rows="3" class="form-control">{{ oficial.get('introduccion',{}).get('contexto','') }}</textarea>
+        {% elif seccion_actual == 'objetivos' %}
+          <label>Objetivo general</label>
+          <textarea name="objetivo_general" rows="3" class="form-control">{{ oficial.get('objetivos',{}).get('objetivo_general','') }}</textarea>
+          <label style="margin-top:10px;">Objetivos específicos (uno por línea)</label>
+          <textarea name="objetivos_especificos" rows="4" class="form-control">{{ '\n'.join(oficial.get('objetivos',{}).get('objetivos_especificos',[])) }}</textarea>
+          <label style="margin-top:10px;">Evento / Lugar / Aforo</label>
+          <textarea name="datos_evento" rows="3" class="form-control">{{ oficial.get('objetivos',{}).get('datos_evento','') }}</textarea>
+        {% elif seccion_actual == 'normativo' %}
+          <label>Marco normativo aplicable</label>
+          <textarea name="marco" rows="6" class="form-control">{{ oficial.get('normativo',{}).get('marco','') }}</textarea>
+          <small>Incluye Ley 1523/2012, Decreto 2157/2017, normas locales y EMRE.</small>
+        {% elif seccion_actual == 'organizacion' %}
+          <label>Organización interna y PMU</label>
+          <textarea name="organizacion" rows="4" class="form-control">{{ oficial.get('organizacion',{}).get('organizacion','') }}</textarea>
+          <label style="margin-top:10px;">Coordinadores y organismos de apoyo</label>
+          <textarea name="organismos" rows="4" class="form-control">{{ oficial.get('organizacion',{}).get('organismos','') }}</textarea>
+          <label style="margin-top:10px;">Directorio de emergencias</label>
+          <textarea name="directorio" rows="4" class="form-control">{{ oficial.get('organizacion',{}).get('directorio','') }}</textarea>
+        {% elif seccion_actual == 'riesgos' %}
+          <label>Descripción del escenario y características</label>
+          <textarea name="escenario" rows="3" class="form-control">{{ oficial.get('riesgos',{}).get('escenario','') }}</textarea>
+          <label style="margin-top:10px;">Amenazas (naturales / tecnológicas / antrópicas)</label>
+          <textarea name="amenazas" rows="4" class="form-control">{{ oficial.get('riesgos',{}).get('amenazas','') }}</textarea>
+          <label style="margin-top:10px;">Matriz de riesgos (nivel y medidas)</label>
+          <textarea name="matriz" rows="4" class="form-control">{{ oficial.get('riesgos',{}).get('matriz','') }}</textarea>
+        {% elif seccion_actual == 'medidas' %}
+          <label>Medidas de seguridad y protección</label>
+          <textarea name="medidas_seguridad" rows="3" class="form-control">{{ oficial.get('medidas',{}).get('medidas_seguridad','') }}</textarea>
+          <label style="margin-top:10px;">Adecuaciones del lugar y sanitarias</label>
+          <textarea name="adecuaciones" rows="3" class="form-control">{{ oficial.get('medidas',{}).get('adecuaciones','') }}</textarea>
+          <label style="margin-top:10px;">Capacitación / seguros</label>
+          <textarea name="capacitacion" rows="3" class="form-control">{{ oficial.get('medidas',{}).get('capacitacion','') }}</textarea>
+        {% elif seccion_actual == 'respuesta' %}
+          <label>Niveles de alerta y activación</label>
+          <textarea name="alertas" rows="3" class="form-control">{{ oficial.get('respuesta',{}).get('alertas','') }}</textarea>
+          <label style="margin-top:10px;">Estructura de comando y coordinación</label>
+          <textarea name="comando" rows="3" class="form-control">{{ oficial.get('respuesta',{}).get('comando','') }}</textarea>
+          <label style="margin-top:10px;">Procedimientos generales y protocolos específicos</label>
+          <textarea name="protocolos" rows="4" class="form-control">{{ oficial.get('respuesta',{}).get('protocolos','') }}</textarea>
+          <label style="margin-top:10px;">Evacuación, primeros auxilios, logística, comunicaciones</label>
+          <textarea name="apoyos" rows="3" class="form-control">{{ oficial.get('respuesta',{}).get('apoyos','') }}</textarea>
+        {% elif seccion_actual == 'actualizacion' %}
+          <label>Mecanismos de actualización y mejora</label>
+          <textarea name="mecanismos" rows="4" class="form-control">{{ oficial.get('actualizacion',{}).get('mecanismos','') }}</textarea>
+        {% elif seccion_actual == 'anexos' %}
+          <label>Listado de anexos técnicos (mapas, planos, directorios)</label>
+          <textarea name="anexos" rows="4" class="form-control">{{ oficial.get('anexos',{}).get('anexos','') }}</textarea>
+        {% endif %}
+
+        <div style="display:flex; gap:10px; margin-top:16px; justify-content:flex-end;">
+          <button type="button" class="btn btn-secondary" onclick="history.back()">← Volver</button>
+          <button type="submit" class="btn btn-primary">💾 Guardar sección</button>
+        </div>
+      </form>
+    </main>
+  </div>
+</div>
+
+<script>
+const datosMunicipio = {{ datos_municipio | tojson }};
+const planId = {{ plan.id }};
+const seccionActual = '{{ seccion_actual }}';
+
+function autocompletarSupata() {
+  const campo = document.querySelector('textarea[name="organismos"]');
+  if (campo) {
+    const txt = datosMunicipio.organismos_emergencia.map(o => `${o.nombre} - Tel: ${o.telefono}`).join('\n');
+    campo.value = txt;
+  }
+  const directorio = document.querySelector('textarea[name="directorio"]');
+  if (directorio) {
+    const txt = datosMunicipio.organismos_emergencia.map(o => `${o.nombre} (${o.tipo})`).join('\n');
+    directorio.value = txt;
+  }
+}
+
+async function guardarSeccion(e) {
+  e.preventDefault();
+  const form = document.getElementById('form-seccion');
+  const data = Object.fromEntries(new FormData(form).entries());
+  // Normaliza listas separadas por salto de línea
+  if (data.objetivos_especificos) {
+    data.objetivos_especificos = data.objetivos_especificos.split(/\n+/).filter(Boolean);
+  }
+
+  const resp = await fetch(`/api/contingencia/${planId}/seccion/${seccionActual}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  const out = await resp.json();
+  if (out.success) {
+    alert('Sección guardada');
+  } else {
+    alert('Error guardando sección: ' + (out.error || 'desconocido'));
+  }
+}
+</script>
+{% endblock %}

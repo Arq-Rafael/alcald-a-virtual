@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bg-animated"></div>
+
+<div class="container-fluid fade-in-up" style="max-width: 1400px; padding-top: 20px;">
+    
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-5 glass-header p-4 rounded-4">
+        <div class="d-flex align-items-center">
+            <div class="icon-square bg-primary-gradient text-white me-3 shadow-lg">
+                <i class="bi bi-inbox-fill" style="font-size: 1.5rem;"></i>
+            </div>
+            <div>
+                <h2 class="fw-bold mb-0 text-dark">Radicación de Oficios</h2>
+                <p class="text-secondary mb-0">Gestión de correspondencia oficial</p>
+            </div>
+        </div>
+        {% if can_radicar %}
+        <a href="{{ url_for('participacion.radicar') }}" class="btn btn-primary-ios btn-lg shadow-lg">
+            <i class="bi bi-plus-circle me-2"></i> Radicar Nuevo
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="stats-card stats-card-green p-4 rounded-4 h-100 text-center">
+                <span class="d-block text-white text-uppercase fs-7 fw-bold mb-2 opacity-90">Total Radicados</span>
+                <h3 class="fw-bold display-5 text-white mb-0">{{ radicados|length }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+             <div class="stats-card stats-card-yellow p-4 rounded-4 h-100 text-center">
+                <span class="d-block text-white text-uppercase fs-7 fw-bold mb-2 opacity-90">Pendientes</span>
+                <h3 class="fw-bold display-5 text-white mb-0">
+                    {{ radicados | selectattr("estado", "equalto", "PENDIENTE") | list | length }}
+                </h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+             <div class="stats-card stats-card-success p-4 rounded-4 h-100 text-center">
+                <span class="d-block text-white text-uppercase fs-7 fw-bold mb-2 opacity-90">Respondidos</span>
+                <h3 class="fw-bold display-5 text-white mb-0">
+                    {{ radicados | selectattr("estado", "equalto", "RESPONDIDO") | list | length }}
+                </h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+             <div class="stats-card stats-card-gradient p-4 rounded-4 h-100 text-center">
+                <span class="d-block text-white text-uppercase fs-7 fw-bold mb-2 opacity-90">En Trámite</span>
+                <h3 class="fw-bold display-5 text-white mb-0">
+                    {{ radicados | selectattr("estado", "equalto", "EN_TRAMITE") | list | length }}
+                </h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- List -->
+    <div class="glass-card p-0 rounded-4 overflow-hidden shadow-lg">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0 table-hover table-ios">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-3 text-secondary text-uppercase fs-7 fw-bold">Radicado</th>
+                        <th class="py-3 text-secondary text-uppercase fs-7 fw-bold">Fecha</th>
+                        <th class="py-3 text-secondary text-uppercase fs-7 fw-bold">Remitente</th>
+                        <th class="py-3 text-secondary text-uppercase fs-7 fw-bold">Asunto</th>
+                         <th class="py-3 text-secondary text-uppercase fs-7 fw-bold">Asignado</th>
+                        <th class="py-3 text-secondary text-uppercase fs-7 fw-bold">Estado</th>
+                        <th class="pe-4 py-3 text-end text-secondary text-uppercase fs-7 fw-bold">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rad in radicados %}
+                    <tr class="cursor-pointer" onclick="window.location='{{ url_for('participacion.ver', id=rad.id) }}'">
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-circle bg-light text-primary me-2">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                </div>
+                                <span class="fw-bold text-dark">{{ rad.numero_radicado }}</span>
+                            </div>
+                        </td>
+                        <td class="text-secondary">{{ rad.fecha_radicacion.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            <div class="fw-bold text-dark">{{ rad.remitente_nombre }}</div>
+                            <small class="text-muted">{{ rad.remitente_entidad }}</small>
+                        </td>
+                        <td class="text-truncate" style="max-width: 250px;">{{ rad.asunto }}</td>
+                        <td>
+                             <span class="badge bg-light text-dark border rounded-pill px-3 py-2">
+                                <i class="bi bi-person-circle me-1"></i> {{ rad.asignado_a }}
+                             </span>
+                        </td>
+                        <td>
+                            {% if rad.estado == 'PENDIENTE' %}
+                            <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill px-3">Pendiente</span>
+                            {% elif rad.estado == 'RESPONDIDO' %}
+                            <span class="badge bg-success-subtle text-success-emphasis rounded-pill px-3">Respondido</span>
+                            {% else %}
+                            <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill px-3">{{ rad.estado }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4" onclick="event.stopPropagation()">
+                            <a href="{{ url_for('participacion.ver', id=rad.id) }}" class="btn btn-sm btn-light-ios rounded-circle shadow-sm" title="Ver Detalles">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                             {% if session.get('role') == 'admin' %}
+                            <form action="{{ url_for('participacion.eliminar', id=rad.id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Eliminar este radicado?');">
+                                <button type="submit" class="btn btn-sm btn-white text-danger rounded-circle shadow-sm ms-1">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox display-4 d-block mb-3 opacity-25"></i>
+                            No hay radicados registrados para mostrar.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Inline styles specific to this view -->
+    <style>
+    /* Institutional Theme - Animated Gradient Background */
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    .bg-animated {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(-45deg, #1b5e20, #4caf50, #7cb342, #66bb6a, #fdd835, #f9a825);
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+        z-index: -1;
+    }
+    
+    .glass-header {
+        background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+        backdrop-filter: blur(30px) saturate(180%);
+        -webkit-backdrop-filter: blur(30px) saturate(180%);
+        border: 1.5px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+    
+    .glass-card {
+        background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+        backdrop-filter: blur(30px) saturate(180%);
+        -webkit-backdrop-filter: blur(30px) saturate(180%);
+        border: 1.5px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+    }
+    
+    .btn-primary-ios {
+        background: linear-gradient(135deg, #7cb342, #689f38);
+        border: none;
+        color: white;
+        border-radius: 50px;
+        padding: 12px 28px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(124, 179, 66, 0.3);
+    }
+    
+    .btn-primary-ios:hover {
+        background: linear-gradient(135deg, #689f38, #558b2f);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(124, 179, 66, 0.4);
+        color: white;
+    }
+    
+    .icon-square {
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #7cb342, #689f38);
+        box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
+    }
+    
+    .table-ios tbody tr {
+        transition: all 0.2s ease;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .table-ios tbody tr:last-child {
+        border-bottom: none;
+    }
+    
+    .table-ios tbody tr:hover {
+        background: rgba(124, 179, 66, 0.08);
+        transform: translateX(3px);
+    }
+    
+    .cursor-pointer {
+        cursor: pointer;
+    }
+    
+    .fs-7 {
+        font-size: 0.85rem;
+    }
+    
+    .badge {
+        font-weight: 500;
+        letter-spacing: 0.3px;
+    }
+    
+    .btn-light-ios {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(124, 179, 66, 0.2);
+        transition: all 0.2s ease;
+    }
+    
+    .btn-light-ios:hover {
+        background: white;
+        border-color: #7cb342;
+        transform: scale(1.05);
+    }
+    
+    .icon-circle {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Stats Cards with Gradient Transitions */
+    .stats-card {
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1.5px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .stats-card:hover::before {
+        opacity: 1;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+    }
+    
+    .stats-card-green {
+        background: linear-gradient(135deg, #2e7d32, #43a047);
+    }
+    
+    .stats-card-yellow {
+        background: linear-gradient(135deg, #f9a825, #fbc02d);
+    }
+    
+    .stats-card-success {
+        background: linear-gradient(135deg, #7cb342, #8bc34a);
+    }
+    
+    .stats-card-gradient {
+        background: linear-gradient(135deg, #689f38, #f9a825);
+    }
+    </style>
+{% endblock %}

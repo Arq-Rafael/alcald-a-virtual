@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-4">
+  <div class="glass-panel p-5">
+    <div class="mb-4">
+      <h2 class="fw-bold mb-1" style="background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+        <i class="bi bi-file-earmark-plus me-2"></i>Nueva Licencia Urbanística
+      </h2>
+      <p class="text-muted mb-0">Complete la información del trámite</p>
+    </div>
+
+    <form method="post" class="row g-4" id="formLicencia" novalidate>
+      
+      <!-- Sección 1: Identificación -->
+      <div class="col-12">
+        <h5 class="fw-bold text-primary mb-3">
+          <i class="bi bi-card-heading me-2"></i>Identificación del Trámite
+        </h5>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label form-label-premium">Tipo de trámite <span class="text-danger">*</span></label>
+        <select name="tipo" id="tipo" class="form-select form-control-glass" required>
+          <option value="">-- Selecciona un tipo --</option>
+          <option value="Licencia de Parcelación">Licencia de Parcelación</option>
+          <option value="Licencia de Urbanización">Licencia de Urbanización</option>
+          <option value="Licencia de Subdivisión">Licencia de Subdivisión</option>
+          <option value="Licencia de Construcción" selected>Licencia de Construcción</option>
+          <option value="Reconocimiento de la existencia de una edificacion">Reconocimiento de edificación</option>
+          <option value="Otras actuaciones">Otras actuaciones</option>
+          <option value="Revalidación">Revalidación</option>
+        </select>
+        <small class="text-danger d-none" id="tipoError">Campo requerido</small>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label form-label-premium">Objeto del trámite</label>
+        <select name="objeto" id="objeto" class="form-select form-control-glass">
+          <option value="">(N/A)</option>
+          <option value="Prórroga">Prórroga</option>
+          <option value="Modificación de licencia vigente">Modificación de licencia vigente</option>
+          <option value="Revalidación">Revalidación</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label form-label-premium">Modalidad <span class="text-danger">*</span></label>
+        <select name="modalidad" id="modalidad" class="form-select form-control-glass" required>
+          <!-- Se llena dinámicamente -->
+        </select>
+      </div>
+
+      <!-- Sección 2: Información del Predio -->
+      <div class="col-12 mt-4">
+        <h5 class="fw-bold text-primary mb-3">
+          <i class="bi bi-geo-alt me-2"></i>Información del Predio
+        </h5>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label form-label-premium">Dirección <span class="text-danger">*</span></label>
+        <input name="direccion" id="direccion" class="form-control form-control-glass" required placeholder="Ej: Calle 10 # 5-20">
+        <small class="text-danger d-none" id="direccionError">La dirección es requerida</small>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label form-label-premium">Cédula catastral</label>
+        <input name="chip" class="form-control form-control-glass" placeholder="Identificación catastral">
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label form-label-premium">Matrícula Inmobiliaria</label>
+        <input name="matricula" class="form-control form-control-glass">
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label form-label-premium">Clasificación del suelo</label>
+        <select name="clasificacion_suelo" class="form-select form-control-glass">
+          <option value="">(No especifica)</option>
+          <option>Urbano</option>
+          <option>Rural</option>
+          <option>De expansión</option>
+        </select>
+      </div>
+
+      <!-- Sección 3: Uso y Áreas -->
+      <div class="col-12 mt-4">
+        <h5 class="fw-bold text-primary mb-3">
+          <i class="bi bi-rulers me-2"></i>Uso y Áreas
+        </h5>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label form-label-premium">Uso</label>
+        <select name="uso" id="uso" class="form-select form-control-glass">
+          <option>Vivienda</option>
+          <option>Comercio y/o Servicios</option>
+          <option>Institucional</option>
+          <option>Industrial</option>
+          <option>Otro</option>
+        </select>
+      </div>
+
+      <div class="col-md-4 d-none" id="uso_otro_wrap">
+        <label class="form-label form-label-premium">¿Cuál?</label>
+        <input name="uso_otro" id="uso_otro" class="form-control form-control-glass" placeholder="Describe el uso">
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label form-label-premium">Área construida (m²)</label>
+        <input name="area_const" type="number" inputmode="decimal" step="0.01" min="0" class="form-control form-control-glass">
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label form-label-premium">Área lote (m²)</label>
+        <input name="area_lote" type="number" inputmode="decimal" step="0.01" min="0" class="form-control form-control-glass">
+      </div>
+
+      <!-- Sección 4: Solicitante y Profesionales -->
+      <div class="col-12 mt-4">
+        <h5 class="fw-bold text-primary mb-3">
+          <i class="bi bi-person-badge me-2"></i>Solicitante y Profesionales
+        </h5>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label form-label-premium">Solicitante <span class="text-danger">*</span></label>
+        <input name="solicitante" id="solicitante" class="form-control form-control-glass" required placeholder="Nombre completo">
+        <small class="text-danger d-none" id="solicitanteError">El solicitante es requerido</small>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label form-label-premium">Tipo doc</label>
+        <select name="tipo_doc_solicitante" class="form-select form-control-glass">
+          <option>CC</option>
+          <option>NIT</option>
+          <option>CE</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label form-label-premium">Documento</label>
+        <input name="doc_solicitante" id="doc_solicitante" class="form-control form-control-glass">
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label form-label-premium">Responsable técnico</label>
+        <input name="responsable" class="form-control form-control-glass">
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label form-label-premium">Matrícula profesional</label>
+        <input name="matricula_prof" class="form-control form-control-glass">
+      </div>
+
+      <!-- Sección 5: Información Adicional -->
+      <div class="col-12 mt-4">
+        <h5 class="fw-bold text-primary mb-3">
+          <i class="bi bi-info-circle me-2"></i>Información Adicional
+        </h5>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label form-label-premium">Tipo de vivienda</label>
+        <select name="tipo_vivienda" class="form-select form-control-glass">
+          <option value="">N/A</option>
+          <option>VIP</option>
+          <option>VIS</option>
+          <option>No VIS</option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label form-label-premium">Bien de Interés Cultural</label>
+        <select name="bic" class="form-select form-control-glass">
+          <option>No</option>
+          <option>Sí</option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label form-label-premium">Valor ($)</label>
+        <input name="valor" type="number" inputmode="decimal" step="0.01" min="0" class="form-control form-control-glass">
+      </div>
+
+      <div class="col-12">
+        <label class="form-label form-label-premium">Observaciones</label>
+        <textarea name="observaciones" class="form-control form-control-glass" rows="3" placeholder="Información adicional relevante..."></textarea>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="col-12 text-end mt-5 d-flex flex-wrap gap-2 justify-content-end">
+        <a class="action-btn-form btn-outline" href="{{ url_for('solicitudes.licencias_list') }}">
+          <i class="bi bi-x-circle me-2"></i>Cancelar
+        </a>
+        <button type="submit" class="action-btn-form btn-primary" id="btnSubmitLicencia">
+          <i class="bi bi-check-circle me-2"></i>Radicar Licencia
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Modalidades según FUN
+  const MODS = {
+    "Licencia de Parcelación": ["Parcelación"],
+    "Licencia de Urbanización": ["Desarrollo", "Saneamiento", "Reurbanización"],
+    "Licencia de Subdivisión": ["Subdivisión Rural", "Subdivisión Urbana", "Reloteo"],
+    "Licencia de Construcción": [
+      "Obra nueva", "Ampliación", "Adecuación", "Modificación",
+      "Restauración", "Reforzamiento estructural", "Demolición",
+      "Reconstrucción", "Cerramiento"
+    ],
+    "Reconocimiento de la existencia de una edificación": ["(N/A)"],
+    "Otras actuaciones": [
+      "Intervención y ocupación del espacio público",
+      "Ajuste de áreas y linderos",
+      "Aprobación de piscinas"
+    ],
+    "Revalidación": ["(N/A)"]
+  };
+
+  function fillModalidades() {
+    const tipo = document.getElementById('tipo').value;
+    const sel = document.getElementById('modalidad');
+    const arr = MODS[tipo] || ["(N/A)"];
+    sel.innerHTML = "";
+    arr.forEach(v => {
+      const opt = document.createElement('option');
+      opt.textContent = v;
+      opt.value = (v === "(N/A)") ? "" : v;
+      sel.appendChild(opt);
+    });
+    sel.disabled = (arr.length === 1 && arr[0] === "(N/A)");
+  }
+
+  document.getElementById('tipo').addEventListener('change', fillModalidades);
+  fillModalidades();
+
+  // Mostrar campo "Otro" en uso
+  const usoSel = document.getElementById('uso');
+  const usoWrap = document.getElementById('uso_otro_wrap');
+  usoSel.addEventListener('change', () => {
+    if (usoSel.value === 'Otro') usoWrap.classList.remove('d-none');
+    else {
+      usoWrap.classList.add('d-none');
+      document.getElementById('uso_otro').value = "";
+    }
+  });
+</script>
+
+<style>
+.action-btn-form {
+  padding: 10px 28px;
+  border-radius: 14px;
+  border: none;
+  font-weight: 600;
+  font-size: 0.96rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+}
+.action-btn-form.btn-primary {
+  background: linear-gradient(135deg, #7cb342, #9ccc65);
+  color: #fff;
+  box-shadow: 0 8px 16px rgba(122, 179, 66, 0.3);
+}
+.action-btn-form.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(122, 179, 66, 0.4);
+  background: linear-gradient(135deg, #8bc34a, #aed581);
+}
+.action-btn-form.btn-outline {
+  background: transparent;
+  color: #7cb342;
+  border: 2px solid rgba(122, 179, 66, 0.3);
+}
+.action-btn-form.btn-outline:hover {
+  background: rgba(122, 179, 66, 0.08);
+  border-color: #7cb342;
+  transform: translateY(-1px);
+}
+</style>
+{% endblock %}

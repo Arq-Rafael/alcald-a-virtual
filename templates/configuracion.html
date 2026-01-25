@@ -1,0 +1,651 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+  }
+  .stat-card.danger {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  }
+  .stat-card.success {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  }
+  .stat-card.warning {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    color: #333;
+  }
+  .stat-card h5 {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  .stat-card .number {
+    font-size: 2rem;
+    font-weight: bold;
+  }
+  .panel-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .panel-section h4 {
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .user-row {
+    background: #f8f9fa;
+    border-left: 4px solid #667eea;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .user-row:hover {
+    background: #f0f1ff;
+    box-shadow: 0 2px 12px rgba(102, 126, 234, 0.15);
+  }
+  .user-info {
+    flex: 1;
+  }
+  .user-info .user-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #333;
+  }
+  .user-info .user-meta {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.25rem;
+  }
+  .user-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .user-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+  .badge-admin {
+    background: #667eea;
+    color: white;
+  }
+  .badge-user {
+    background: #e0e7ff;
+    color: #667eea;
+  }
+  .badge-active {
+    background: #d1fae5;
+    color: #059669;
+  }
+  .badge-blocked {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+  .form-section {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid #667eea;
+  }
+  .btn-sm-custom {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+  }
+  .navbar-breadcrumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+  }
+</style>
+
+<div class="container-fluid p-4">
+  
+  <!-- Header con Breadcrumb -->
+  <div class="navbar-breadcrumb">
+    <h2 class="mb-0">
+      <i class="bi bi-gear-fill"></i> Panel de Administración
+    </h2>
+    <small>Gestión completa del sistema</small>
+  </div>
+
+  <!-- Estadísticas -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="stat-card">
+        <h5><i class="bi bi-people-fill"></i> Total Usuarios</h5>
+        <div class="number">{{ stats.total }}</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card success">
+        <h5><i class="bi bi-check-circle-fill"></i> Activos</h5>
+        <div class="number">{{ stats.activos }}</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card warning">
+        <h5><i class="bi bi-dash-circle-fill"></i> Inactivos</h5>
+        <div class="number">{{ stats.inactivos }}</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card danger">
+        <h5><i class="bi bi-shield-lock-fill"></i> Administradores</h5>
+        <div class="number">{{ stats.admins }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 1: CREAR USUARIO MANUAL -->
+  <div class="panel-section">
+    <h4><i class="bi bi-person-plus-fill"></i> Crear Nuevo Usuario</h4>
+    
+    <form method="POST" class="form-section">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label"><strong>Usuario</strong></label>
+          <input type="text" name="new_usuario" class="form-control" placeholder="ej: juan.perez" required>
+          <small class="text-muted">Nombre de usuario único</small>
+        </div>
+        
+        <div class="col-md-4">
+          <label class="form-label"><strong>Email</strong></label>
+          <input type="email" name="new_email" class="form-control" placeholder="usuario@alcaldia.gov">
+          <small class="text-muted">Para 2FA y notificaciones</small>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label"><strong>Contraseña</strong></label>
+          <input type="password" name="new_clave" class="form-control" placeholder="••••••••" required>
+          <small class="text-muted">Mín 12 caracteres, símbolos, números</small>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label"><strong>Secretaría</strong></label>
+          <input type="text" name="new_secretaria" class="form-control" placeholder="ej: Planeación">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label"><strong>Rol</strong></label>
+          <select name="new_role" class="form-select">
+            <option value="user">Usuario Normal</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <button type="submit" name="add_user" class="btn btn-primary w-100">
+            <i class="bi bi-plus-circle"></i> Crear Usuario
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- SECCIÓN 2: LISTA DE USUARIOS -->
+  <div class="panel-section">
+    <h4><i class="bi bi-table"></i> Usuarios Registrados</h4>
+    
+    {% if usuarios_dict %}
+      {% for u in usuarios_dict %}
+      <div class="user-row">
+        <div class="user-info">
+          <div class="user-name">{{ u.usuario }}</div>
+          <div class="user-meta">
+            <span class="user-badge" 
+              {% if u.role == 'admin' %}
+                class="user-badge badge-admin"
+              {% else %}
+                class="user-badge badge-user"
+              {% endif %}>
+              {{ u.role | upper }}
+            </span>
+            <span class="user-badge"
+              {% if u.activo %}
+                class="user-badge badge-active"
+              {% else %}
+                class="user-badge badge-blocked"
+              {% endif %}>
+              {{ 'Activo' if u.activo else 'Bloqueado' }}
+            </span>
+            {% if u.email %}
+            <span class="user-badge badge-user" title="2FA por correo">
+              2FA
+            </span>
+            {% endif %}
+            {% if u.email %}
+            <span style="color: #666; margin-left: 0.5rem;">
+              <i class="bi bi-envelope"></i> {{ u.email }}
+            </span>
+            {% endif %}
+            {% if u.secretaria %}
+            <span style="color: #666; margin-left: 0.5rem;">
+              <i class="bi bi-building"></i> {{ u.secretaria }}
+            </span>
+            {% endif %}
+            <div class="mt-2" style="font-size: 0.8rem; color: #999;">
+              Creado: {{ u.creado_en }} | Último acceso: {{ u.ultimo_acceso }}
+            </div>
+          </div>
+        </div>
+        <div class="user-actions">
+          <!-- Cambiar Contraseña -->
+          <form method="POST" style="display:inline;">
+            <input type="hidden" name="user_id" value="{{ u.id }}">
+            <input type="hidden" name="change_password_value" id="pwd_{{ u.id }}">
+            <button type="button" class="btn btn-sm btn-outline-warning btn-sm-custom" 
+              onclick="promptPassword('{{ u.id }}', '{{ u.usuario }}', 'change_password')">
+              <i class="bi bi-key"></i> Contraseña
+            </button>
+          </form>
+
+          <!-- Cambiar Rol -->
+          <form method="POST" style="display:inline;">
+            <input type="hidden" name="user_id" value="{{ u.id }}">
+            <select name="change_role_value" class="form-select form-select-sm" style="width:auto; display:inline-block;" onchange="this.form.submit()">
+              <option>Cambiar rol...</option>
+              <option value="user">Usuario</option>
+              <option value="admin">Admin</option>
+            </select>
+          </form>
+
+          <!-- Bloquear/Desbloquear -->
+          <form method="POST" style="display:inline;">
+            <input type="hidden" name="user_id" value="{{ u.id }}">
+            <button type="submit" name="toggle_block" 
+              class="btn btn-sm {% if u.bloqueado %}btn-outline-success{% else %}btn-outline-danger{% endif %} btn-sm-custom">
+              <i class="bi {% if u.bloqueado %}bi-unlock{% else %}bi-lock{% endif %}"></i>
+              {{ 'Desbloquear' if u.bloqueado else 'Bloquear' }}
+            </button>
+          </form>
+
+          <!-- Eliminar -->
+          <form method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar usuario {{ u.usuario }}?');">
+            <input type="hidden" name="delete_user" value="{{ u.usuario }}">
+            <button type="submit" class="btn btn-sm btn-outline-danger btn-sm-custom">
+              <i class="bi bi-trash"></i> Eliminar
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> No hay usuarios registrados
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- SECCIÓN 3: IMPORTAR DESDE EXCEL -->
+  <div class="panel-section">
+    <h4><i class="bi bi-file-earmark-excel"></i> Importar Usuarios desde Excel</h4>
+    
+    <form method="POST" enctype="multipart/form-data" class="form-section">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-6">
+          <label class="form-label"><strong>Archivo Excel (.xlsx/.xls)</strong></label>
+          <input type="file" name="excel_file" accept=".xlsx,.xls" class="form-control" required>
+          <small class="text-muted">
+            Columnas requeridas: usuario, clave, email, secretaria, role
+          </small>
+        </div>
+        <div class="col-md-6">
+          <button type="submit" name="import_excel" class="btn btn-primary w-100">
+            <i class="bi bi-upload"></i> Importar Usuarios
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <div class="alert alert-info">
+      <strong>Formato esperado del Excel:</strong>
+      <table class="table table-sm mt-2">
+        <thead>
+          <tr>
+            <th>usuario</th>
+            <th>clave</th>
+            <th>email</th>
+            <th>secretaria</th>
+            <th>role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>juan.perez</td>
+            <td>MiClave2024!</td>
+            <td>juan@alcaldia.gov</td>
+            <td>Planeación</td>
+            <td>user</td>
+          </tr>
+          <tr>
+            <td>maria.gomez</td>
+            <td>OtraClave2024!</td>
+            <td>maria@alcaldia.gov</td>
+            <td>General</td>
+            <td>admin</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 4: BACKUPS -->
+  <div class="panel-section">
+    <h4><i class="bi bi-cloud-download"></i> Sistema de Backups</h4>
+    
+    <form method="POST" class="form-section">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label"><strong>Tipo de Backup</strong></label>
+          <select class="form-select" name="backup_tipo">
+            <option value="database">💾 Base de Datos (BD solamente)</option>
+            <option value="archivos">📁 Archivos (uploads + documentos)</option>
+            <option value="completo" selected>📦 Completo (BD + Archivos)</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <button type="submit" name="do_backup" class="btn btn-success w-100">
+            <i class="bi bi-arrow-down-circle"></i> Crear Backup
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <div class="alert alert-warning">
+      <strong><i class="bi bi-info-circle"></i> Información de Backups:</strong>
+      <ul class="mt-2 mb-0">
+        <li>Los backups se guardan en la carpeta <code>/backups/</code></li>
+        <li>Se conservan los últimos 30 días</li>
+        <li>Formato: ZIP con timestamp</li>
+        <li>Los backups automáticos se crean diariamente a las 2:00 AM</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 5: SEGURIDAD -->
+  <div class="panel-section">
+    <h4><i class="bi bi-shield-lock"></i> Configuración de Seguridad</h4>
+    
+    <div class="row">
+      <div class="col-md-6">
+        <div class="alert alert-info">
+          <strong>Requisitos de Contraseña:</strong>
+          <ul class="mt-2 mb-0">
+            <li>✓ Mínimo 12 caracteres</li>
+            <li>✓ Mayúsculas y minúsculas</li>
+            <li>✓ Números (0-9)</li>
+            <li>✓ Símbolos especiales (!@#$%)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="alert alert-warning">
+          <strong>Políticas de Bloqueo:</strong>
+          <ul class="mt-2 mb-0">
+            <li>🔒 5 intentos fallidos = bloqueo</li>
+            <li>⏱️ Duración del bloqueo: 30 minutos</li>
+            <li>📧 2FA por email (se activa si el usuario tiene correo)</li>
+            <li>🌐 Acceso solo desde IP permitidas (si hay whitelist activa)</li>
+            <li>📝 Auditoría de todos los accesos y acciones</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 6: ACTUALIZAR MI CORREO (ADMIN ACTUAL) -->
+  <div class="panel-section">
+    <h4><i class="bi bi-envelope-check"></i> Actualizar mi correo</h4>
+    <form method="POST" class="form-section">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-6">
+          <label class="form-label"><strong>Correo actual</strong></label>
+          <input type="email" class="form-control" value="{{ my_email or '' }}" disabled>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label"><strong>Nuevo correo</strong></label>
+          <input type="email" name="my_email" class="form-control" placeholder="admin@alcaldia.gov" required>
+          <small class="text-muted">Solo tú puedes cambiar tu correo. Se activará 2FA con este email.</small>
+        </div>
+        <div class="col-12">
+          <button type="submit" name="update_my_email" class="btn btn-primary">
+            <i class="bi bi-save"></i> Guardar correo y activar 2FA
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- SECCIÓN 7: GESTIÓN DE CHAT -->
+  <div class="panel-section">
+    <h4><i class="bi bi-chat-dots"></i> Gestión de Chat Municipal</h4>
+    
+    <div class="row g-3 mb-4">
+      <div class="col-md-12">
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle"></i> <strong>Administra las conversaciones del chat municipal.</strong>
+          Puedes limpiar conversaciones individuales o eliminar todo el historial.
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <button class="btn btn-primary w-100" onclick="loadConversations()">
+          <i class="bi bi-arrow-clockwise"></i> Cargar Conversaciones
+        </button>
+      </div>
+      <div class="col-md-6">
+        <button class="btn btn-danger w-100" onclick="deleteAllMessages()">
+          <i class="bi bi-trash"></i> Eliminar Todos los Mensajes
+        </button>
+      </div>
+    </div>
+
+    <div id="conversationsContainer">
+      <div class="alert alert-secondary">
+        <i class="bi bi-chat-left-text"></i> Haz clic en "Cargar Conversaciones" para ver el listado.
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 8: AUDITORÍA Y ALERTAS -->
+  <div class="panel-section">
+    <h4><i class="bi bi-activity"></i> Auditoría Reciente</h4>
+    {% if auditoria %}
+    <div class="table-responsive">
+      <table class="table table-sm align-middle">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Usuario</th>
+            <th>Acción</th>
+            <th>Detalle</th>
+            <th>IP</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in auditoria %}
+          <tr>
+            <td>{{ log.timestamp.strftime('%d/%m %H:%M') }}</td>
+            <td>{{ log.usuario_nombre }}</td>
+            <td>{{ log.accion }}</td>
+            <td>{{ log.detalles or '-' }}</td>
+            <td>{{ log.ip_address or '-' }}</td>
+            <td>
+              <span class="badge {% if log.exitoso %}bg-success{% else %}bg-danger{% endif %}">
+                {{ 'OK' if log.exitoso else 'Error' }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <div class="alert alert-info mb-0">Sin registros recientes</div>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+function promptPassword(userId, username, action) {
+  const newPassword = prompt(`Ingresa nueva contraseña para ${username}:`);
+  if (newPassword && newPassword.trim() !== '') {
+    document.getElementById('pwd_' + userId).value = newPassword;
+    document.querySelector(`input[value="${userId}"]`).closest('form').submit();
+  }
+}
+
+// ===== GESTIÓN DE CHAT =====
+async function loadConversations() {
+  const container = document.getElementById('conversationsContainer');
+  container.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Cargando conversaciones...</p></div>';
+  
+  try {
+    const response = await fetch('/api/chat/conversations');
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Error al cargar conversaciones');
+    }
+    
+    if (data.length === 0) {
+      container.innerHTML = `
+        <div class="alert alert-warning">
+          <i class="bi bi-chat-left-text"></i> No hay conversaciones registradas.
+        </div>
+      `;
+      return;
+    }
+    
+    let html = '<div class="table-responsive"><table class="table table-hover align-middle">';
+    html += '<thead><tr><th>Usuario 1</th><th>Usuario 2</th><th>Mensajes</th><th>Último mensaje</th><th>Acciones</th></tr></thead><tbody>';
+    
+    data.forEach(conv => {
+      const lastMsg = new Date(conv.last_message).toLocaleString('es-CO', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
+      html += `
+        <tr>
+          <td><strong>${conv.user1}</strong></td>
+          <td><strong>${conv.user2}</strong></td>
+          <td><span class="badge bg-primary">${conv.message_count}</span></td>
+          <td><small>${lastMsg}</small></td>
+          <td>
+            <button class="btn btn-sm btn-outline-danger" onclick="deleteConversation('${conv.user1}', '${conv.user2}', ${conv.message_count})">
+              <i class="bi bi-trash"></i> Eliminar
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+    
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+    
+  } catch (error) {
+    container.innerHTML = `
+      <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle"></i> <strong>Error:</strong> ${error.message}
+      </div>
+    `;
+  }
+}
+
+async function deleteConversation(user1, user2, messageCount) {
+  if (!confirm(`¿Eliminar conversación entre ${user1} y ${user2}? (${messageCount} mensajes)`)) {
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/chat/delete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        type: 'conversation',
+        user1: user1,
+        user2: user2
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Error al eliminar conversación');
+    }
+    
+    alert(`✅ Conversación eliminada exitosamente (${data.deleted_count} mensajes)`);
+    loadConversations(); // Recargar lista
+    
+  } catch (error) {
+    alert(`❌ Error: ${error.message}`);
+  }
+}
+
+async function deleteAllMessages() {
+  if (!confirm('⚠️ ¿ELIMINAR TODO EL HISTORIAL DE CHAT?\n\nEsta acción NO se puede deshacer.')) {
+    return;
+  }
+  
+  if (!confirm('🔴 CONFIRMACIÓN FINAL: ¿Estás completamente seguro?\n\nSe borrarán TODOS los mensajes del sistema.')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/chat/delete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        type: 'all'
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Error al eliminar mensajes');
+    }
+    
+    alert(`✅ Todos los mensajes han sido eliminados (${data.deleted_count} mensajes)`);
+    loadConversations(); // Recargar lista (mostrará vacío)
+    
+  } catch (error) {
+    alert(`❌ Error: ${error.message}`);
+  }
+}
+</script>
+
+{% endblock %}

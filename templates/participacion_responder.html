@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% block title %}Responder Radicado – {{ radicado.numero_radicado }}{% endblock %}
+
+{% block styles %}
+<link href="{{ url_for('static', filename='css/participacion-ios26.css') }}" rel="stylesheet" />
+<style>
+    .responder-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+    
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--primary-green);
+        text-decoration: none;
+        margin-bottom: 2rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    
+    .back-button:hover {
+        transform: translateX(-4px);
+    }
+    
+    .responder-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        border: 1px solid var(--glass-border);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--border-light);
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-group textarea {
+        width: 100%;
+        padding: 1rem;
+        border-radius: 12px;
+        border: 1px solid var(--border-light);
+        background: rgba(255, 255, 255, 0.8);
+        font-size: 0.9rem;
+        font-family: inherit;
+        resize: vertical;
+        min-height: 200px;
+        transition: all 0.2s ease;
+    }
+    
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary-green);
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 0 0 3px rgba(124, 179, 66, 0.1);
+    }
+    
+    .info-box {
+        background: rgba(124, 179, 66, 0.05);
+        border-left: 4px solid var(--primary-green);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    
+    .info-box strong {
+        color: var(--primary-green);
+    }
+    
+    .actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+    
+    .btn-responder {
+        padding: 0.875rem 2rem;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-responder-primary {
+        background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+        color: white;
+        box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
+    }
+    
+    .btn-responder-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(124, 179, 66, 0.4);
+    }
+    
+    .btn-responder-secondary {
+        background: rgba(124, 179, 66, 0.1);
+        color: var(--primary-green);
+        border: 1px solid rgba(124, 179, 66, 0.3);
+    }
+    
+    .btn-responder-secondary:hover {
+        background: rgba(124, 179, 66, 0.15);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="responder-container">
+    <a href="{{ url_for('participacion.ver', id=radicado.id) }}" class="back-button">
+        <i class="bi bi-arrow-left"></i> Volver a detalles
+    </a>
+
+    <!-- INFORMACIÓN DEL RADICADO -->
+    <div class="responder-card">
+        <div class="section-title">
+            <i class="bi bi-file-earmark me-2"></i>{{ radicado.numero_radicado }}
+        </div>
+        
+        <div class="info-box">
+            <strong>Asunto:</strong> {{ radicado.asunto }}<br>
+            <strong>Remitente:</strong> {{ radicado.remitente_nombre }}<br>
+            <strong>Tipo:</strong> {{ radicado.tipo }}<br>
+            <strong>Plazo restante:</strong> 
+            <span style="color: var(--primary-green); font-weight: 700;">
+                {% if radicado.dias_restantes is not none %}
+                    {{ radicado.dias_restantes }} días
+                {% else %}
+                    Respondido
+                {% endif %}
+            </span>
+        </div>
+    </div>
+
+    <!-- FORMULARIO DE RESPUESTA -->
+    <div class="responder-card">
+        <div class="section-title">
+            <i class="bi bi-reply-fill me-2"></i>Redactar Respuesta
+        </div>
+        
+        <form action="{{ url_for('participacion.responder', id=radicado.id) }}" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="respuesta">Texto de Respuesta *</label>
+                <textarea 
+                    id="respuesta" 
+                    name="respuesta_texto" 
+                    placeholder="Escribe la respuesta al radicado..."
+                    required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="adjuntos">Archivos Adjuntos (Opcional)</label>
+                <div class="file-upload-area" id="fileUploadArea" ondrop="handleFileDrop(event)" ondragover="handleFileDragOver(event)" ondragleave="handleFileDragLeave(event)">
+                    <div class="file-upload-icon">📎</div>
+                    <input type="file" id="adjuntos" name="adjuntos_respuesta" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" style="display: none;" onchange="handleFileSelect(event)">
+                    <div class="file-upload-text">
+                        <strong>Arrastra aquí o haz clic</strong> para seleccionar archivos
+                    </div>
+                    <div id="fileList" style="margin-top: 0.5rem; color: var(--text-secondary); font-weight: 600;"></div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <strong>ℹ️ Nota:</strong> Una vez respondas este radicado será marcado como "Respondido" y se actualizará el historial.
+            </div>
+
+            <div class="actions">
+                <button type="button" class="btn-responder btn-responder-secondary" onclick="history.back()">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+                <button type="submit" class="btn-responder btn-responder-primary">
+                    <i class="bi bi-check-circle"></i> Enviar Respuesta
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const fileUploadArea = document.getElementById('fileUploadArea');
+    const adjuntosInput = document.getElementById('adjuntos');
+    const fileList = document.getElementById('fileList');
+
+    fileUploadArea.addEventListener('click', () => adjuntosInput.click());
+
+    function handleFileDragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        fileUploadArea.classList.add('dragover');
+    }
+
+    function handleFileDragLeave(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        fileUploadArea.classList.remove('dragover');
+    }
+
+    function handleFileDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        fileUploadArea.classList.remove('dragover');
+        adjuntosInput.files = e.dataTransfer.files;
+        updateFileList();
+    }
+
+    function handleFileSelect(e) {
+        updateFileList();
+    }
+
+    function updateFileList() {
+        const files = adjuntosInput.files;
+        if (files.length > 0) {
+            fileList.innerHTML = `✓ ${files.length} archivo(s) seleccionado(s)`;
+        } else {
+            fileList.innerHTML = '';
+        }
+    }
+</script>
+
+{% endblock %}

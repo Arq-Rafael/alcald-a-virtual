@@ -1,0 +1,525 @@
+{% extends "base.html" %}
+{% block title %}Planes de Contingencia{% endblock %}
+
+{% block styles %}
+<style>
+  body {
+    background: linear-gradient(135deg, #f5f5f7 0%, #efefef 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+  }
+
+  .container-planes {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .header-planes {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    border-top: 4px solid #2d5016;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header-planes h1 {
+    font-size: 28px;
+    color: #1d1d1f;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .btn-nuevo-plan {
+    background: linear-gradient(135deg, #2d5016 0%, #5a8a3a 100%);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(45, 80, 22, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .btn-nuevo-plan:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(45, 80, 22, 0.3);
+  }
+
+  /* Tarjeta de Plan */
+  .plan-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border-left: 4px solid #2d5016;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .plan-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  }
+
+  .plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+
+  .plan-titulo {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1d1d1f;
+    margin: 0;
+  }
+
+  .plan-numero {
+    font-size: 13px;
+    color: #999;
+    font-weight: 500;
+  }
+
+  .plan-estado {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .estado-borrador {
+    background: #f0f0f0;
+    color: #666;
+  }
+
+  .estado-edicion {
+    background: #fff3cd;
+    color: #856404;
+  }
+
+  .estado-publicado {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .plan-metadata {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 12px;
+    font-size: 13px;
+  }
+
+  .metadata-item {
+    color: #666;
+  }
+
+  .metadata-item strong {
+    color: #1d1d1f;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .plan-progreso-container {
+    margin-bottom: 12px;
+  }
+
+  .progreso-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 6px;
+  }
+
+  .barra-progreso-small {
+    width: 100%;
+    height: 6px;
+    background: #e5e5e7;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .barra-relleno {
+    height: 100%;
+    background: linear-gradient(90deg, #2d5016 0%, #5a8a3a 100%);
+    border-radius: 3px;
+  }
+
+  .plan-acciones {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .btn-accion {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn-editar {
+    background: #f0f0f0;
+    color: #2d5016;
+    border: 1px solid #d0d0d0;
+  }
+
+  .btn-editar:hover {
+    background: #e8e8e8;
+  }
+
+  .btn-duplicar {
+    background: #7cb342;
+    color: white;
+  }
+
+  .btn-duplicar:hover {
+    background: #6aa037;
+  }
+
+  .btn-ver {
+    background: #2d5016;
+    color: white;
+  }
+
+  .btn-ver:hover {
+    background: #1f3811;
+  }
+
+  .btn-eliminar {
+    background: #ff3b30;
+    color: white;
+  }
+
+  .btn-eliminar:hover {
+    background: #d32f2c;
+  }
+
+  /* Estado vacío */
+  .estado-vacio {
+    background: white;
+    border-radius: 16px;
+    padding: 60px 20px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .estado-vacio-icono {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+
+  .estado-vacio h2 {
+    color: #1d1d1f;
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+
+  .estado-vacio p {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  /* Paginación */
+  .paginacion {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 30px;
+    flex-wrap: wrap;
+  }
+
+  .paginacion a,
+  .paginacion span {
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: white;
+    color: #2d5016;
+    text-decoration: none;
+    border: 1px solid #e5e5e7;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .paginacion a:hover {
+    background: #2d5016;
+    color: white;
+  }
+
+  .paginacion .active {
+    background: #2d5016;
+    color: white;
+    border-color: #2d5016;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .header-planes {
+      flex-direction: column;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .plan-header {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .plan-metadata {
+      grid-template-columns: 1fr;
+    }
+
+    .plan-acciones {
+      width: 100%;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-planes">
+  <!-- HEADER -->
+  <div class="header-planes">
+    <div>
+      <h1>📋 Planes de Contingencia</h1>
+      <p style="color: #666; font-size: 14px; margin: 8px 0 0 0;">Gestiona los planes de contingencia para eventos masivos - Supatá, Cundinamarca</p>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button onclick="cargarEjemplo()" class="btn-nuevo-plan" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); box-shadow: 0 4px 12px rgba(155, 89, 182, 0.2);">
+        📄 Cargar Ejemplo
+      </button>
+      <a href="{{ url_for('contingencia.crear_plan') }}" class="btn-nuevo-plan">
+        ✓ Crear Nuevo Plan
+      </a>
+    </div>
+  </div>
+
+  <!-- LISTA DE PLANES (dinámico con JavaScript) -->
+  <div id="listaPlanes"></div>
+
+  <!-- Estado Vacío (se muestra si no hay planes) -->
+  <div id="estadoVacio" class="estado-vacio" style="display: none;">
+    <div class="estado-vacio-icono">📋</div>
+    <h2>Sin Planes de Contingencia</h2>
+    <p>Todavía no hay planes de contingencia creados. Crea el primero ahora.</p>
+    <a href="{{ url_for('contingencia.crear_plan') }}" class="btn-nuevo-plan">
+      + Crear el Primer Plan
+    </a>
+  </div>
+</div>
+
+<script>
+  // Cargar planes desde localStorage
+  function cargarPlanes() {
+    const planes = JSON.parse(localStorage.getItem('planes_contingencia') || '[]');
+    const listaContainer = document.getElementById('listaPlanes');
+    const estadoVacio = document.getElementById('estadoVacio');
+    
+    if (planes.length === 0) {
+      listaContainer.innerHTML = '';
+      estadoVacio.style.display = 'block';
+      return;
+    }
+    
+    estadoVacio.style.display = 'none';
+    
+    listaContainer.innerHTML = planes.map(plan => `
+      <div class="plan-card">
+        <div class="plan-header">
+          <div>
+            <p class="plan-numero">${plan.numero_plan || 'N/A'}</p>
+            <h3 class="plan-titulo">${plan.nombre_plan || 'Sin nombre'}</h3>
+          </div>
+          <span class="plan-estado estado-borrador">
+            CREADO
+          </span>
+        </div>
+
+        <div class="plan-metadata">
+          <div class="metadata-item">
+            <strong>Municipio</strong>
+            ${plan.municipio || 'Supatá'}
+          </div>
+          <div class="metadata-item">
+            <strong>Tipo de Evento</strong>
+            ${plan.tipo_evento || 'No especificado'}
+          </div>
+          <div class="metadata-item">
+            <strong>Población</strong>
+            ${plan.poblacion_municipio || '6,428'} habitantes
+          </div>
+          <div class="metadata-item">
+            <strong>Creado</strong>
+            ${new Date(plan.fecha_creacion).toLocaleDateString('es-CO')}
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="plan-acciones">
+          <button class="btn-accion btn-ver" onclick="verPlanPDF(${plan.id})">
+            📄 Ver PDF
+          </button>
+          <button class="btn-accion btn-duplicar" onclick="duplicarPlan(${plan.id})">
+            📑 Duplicar
+          </button>
+          <button class="btn-accion btn-editar" onclick="editarPlan(${plan.id})">
+            ✏ Editar
+          </button>
+          {% if es_admin %}
+          <button class="btn-accion btn-eliminar" onclick="eliminarPlan(${plan.id})">
+            🗑 Eliminar
+          </button>
+          {% endif %}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function cargarEjemplo() {
+    const ejemplo = {
+      id: Date.now(),
+      numero_plan: 'PC-2026-001',
+      nombre_plan: 'Plan de Contingencia Eventos Masivos',
+      tipo_evento: 'Festival',
+      municipio: 'Supatá',
+      departamento: 'Cundinamarca',
+      poblacion_municipio: 6428,
+      fecha_creacion: new Date().toISOString(),
+      
+      // Introducción
+      introduccion_descripcion: 'Se realizará un evento masivo en el municipio de Supatá con aproximadamente 3000 asistentes. El evento incluye conciertos, actividades recreativas y vendedores autorizados. Duración: 8 horas continuas.',
+      introduccion_justificacion: 'De conformidad con la Ley 1523 de 2012 que establece el Sistema Nacional de Gestión del Riesgo de Desastres, todo evento que congregue más de 1000 personas requiere plan de contingencia para garantizar la seguridad de asistentes.',
+      introduccion_contexto: 'Supatá presenta condiciones climáticas variables, infraestructura básica y es un municipio con vías de acceso limitadas. El evento se realizará en la plaza principal del municipio.',
+      
+      // Objetivos y Alcance
+      objetivo_general: 'Proteger la vida, salud y bienes de los asistentes y personal del evento mediante estrategias de prevención, respuesta rápida y coordinación institucional ante posibles contingencias.',
+      alcance_evento: 'Festival cultural y recreativo con actividades musicales, gastronómicas y deportivas.',
+      alcance_ubicacion: 'Plaza Principal de Supatá, Cundinamarca',
+      alcance_duracion: '24 de agosto de 2026, 10:00 AM - 6:00 PM',
+      alcance_aforo: 3000,
+      
+      // Marco Normativo
+      marco_normativo: 'Ley 1523 de 2012 (Sistema Nacional de Gestión del Riesgo); Decreto 2157 de 2017 (Competencias y Funciones); Resolución 1401 de 2007 (Accidentes de Trabajo); Normas técnicas de seguridad y protección civil.',
+      
+      // Organización
+      coordinador_general: 'Ing. Juan Pérez - Secretaria de Gobierno (Tel: 311-2345678)',
+      pmu_ubicacion: 'Carpa de Comando en la esquina nororiental de la plaza',
+      organismos_apoyo: 'Cuerpo de Bomberos Supatá, Cruz Roja Colombiana, Policía Nacional, Hospital Municipal, Defensa Civil',
+      
+      // Amenazas
+      descripcion_escenario: 'Evento en plaza abierta, 3000 personas, clima variable (lluvia, vientos), sin infraestructura permanente de evacuación.',
+      amenazas_identificadas: 'Aglomeración de personas, accidentes por caídas, desorden público, incendios en estructuras temporales, electrocución, eventos climáticos extremos.',
+      vulnerabilidades: 'Infraestructura temporal, vías de acceso limitadas, personal no entrenado, falta de señalización clara, transporte de emergencia limitado.',
+      
+      // Medidas de Reducción
+      medidas_seguridad: 'Control de aforo máximo, válvulas de escape cada 500 personas, extintores cada 50 metros, botiquines de primeros auxilios, señalización clara de salidas.',
+      adecuacion_lugar: 'Instalación de vallas de contención, iluminación nocturna, superficies antideslizantes, acceso para personas con discapacidad, estacionamientos seguros.',
+      capacitacion_personal: 'Capacitación en primeros auxilios (80 personas), simulacro 48 horas antes, entrenamientos mensuales de evacuación.',
+      
+      // Respuesta y Evacuación
+      procedimiento_general: 'Alertan Primeros Auxilios → Activación de PMU → Evaluación de riesgo → Decisión (suspensión o continuidad) → Comunicación a público → Evacuación si es necesario.',
+      rutas_evacuacion: 'Ruta A (norte): Plaza → Carrera 5 → Calle Principal. Ruta B (sur): Plaza → Carrera 6 → Calle Hospital. Ruta C (este): Plaza → Parque infantil → Escuela.',
+      puntos_encuentro: 'Punto 1: Cancha municipal (capacidad 500 personas). Punto 2: Parque central (capacidad 1000 personas). Punto 3: Terreno baldío norte (capacidad 1500 personas).',
+      capacidad_rutas: 'Capacidad total de evacuación: 3000 personas en 12 minutos. Tiempo de alerta a respuesta: 5 minutos máximo.',
+      recursos_disponibles: '5 ambulancias, 3 bombas contraincendios, 100 chalecos reflectivos, 10 camillas, 50 extintores tipo ABC, 200 botiquines de primeros auxilios.',
+      
+      // Actualización
+      responsable_actualizacion: 'Secretaria de Gobierno Municipal',
+      frecuencia_actualizacion: 'Anual',
+      
+      // Observaciones
+      observaciones: 'Plan aprobado por Comité Municipal de Gestión del Riesgo. Requiere validación 30 días antes del evento. Coordinación obligatoria con todas las instituciones mencionadas.',
+      
+      // Anexos visuales (sin imágenes por ahora, solo estructura)
+      anexos_imagenes: []
+    };
+    
+    let planes = JSON.parse(localStorage.getItem('planes_contingencia') || '[]');
+    const existe = planes.find(p => p.numero_plan === ejemplo.numero_plan);
+    
+    if (existe) {
+      alert('El plan de ejemplo ya existe en la lista');
+      cargarPlanes();
+      return;
+    }
+    
+    planes.push(ejemplo);
+    localStorage.setItem('planes_contingencia', JSON.stringify(planes));
+    
+    alert('✓ Plan de ejemplo cargado correctamente');
+    cargarPlanes();
+  }
+
+  function verPlanPDF(planId) {
+    const planes = JSON.parse(localStorage.getItem('planes_contingencia') || '[]');
+    const plan = planes.find(p => p.id === planId);
+    
+    if (plan) {
+      window.location.href = `/gestion-riesgo/planes-contingencia-v2/${planId}`;
+    }
+  }
+
+  function editarPlan(planId) {
+    window.location.href = `/gestion-riesgo/planes-contingencia-v2/editar/${planId}`;
+  }
+
+  function duplicarPlan(planId) {
+    let planes = JSON.parse(localStorage.getItem('planes_contingencia') || '[]');
+    const original = planes.find(p => p.id === planId);
+
+    if (!original) {
+      alert('No se encontró el plan a duplicar');
+      return;
+    }
+
+    // Clonar profundamente
+    const copia = JSON.parse(JSON.stringify(original));
+    copia.id = Date.now();
+    copia.fecha_creacion = new Date().toISOString();
+
+    // Ajustar número y nombre para distinguir copia
+    const sufijo = ' (Copia)';
+    copia.nombre_plan = (copia.nombre_plan || 'Plan de Contingencia') + sufijo;
+    if (copia.numero_plan) {
+      copia.numero_plan = copia.numero_plan + ' - COPIA';
+    } else {
+      const rand = Math.floor(Math.random() * 900 + 100);
+      copia.numero_plan = `PC-${new Date().getFullYear()}-${rand}`;
+    }
+
+    planes.push(copia);
+    localStorage.setItem('planes_contingencia', JSON.stringify(planes));
+    cargarPlanes();
+    alert('✓ Plan duplicado. Edita la copia para ajustar datos.');
+  }
+
+  function eliminarPlan(planId) {
+    if (confirm('¿Estás seguro de eliminar este plan?')) {
+      let planes = JSON.parse(localStorage.getItem('planes_contingencia') || '[]');
+      planes = planes.filter(p => p.id !== planId);
+      localStorage.setItem('planes_contingencia', JSON.stringify(planes));
+      cargarPlanes();
+      alert('✓ Plan eliminado correctamente');
+    }
+  }
+
+  // Cargar al inicio
+  cargarPlanes();
+</script>
+{% endblock %}

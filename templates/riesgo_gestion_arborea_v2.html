@@ -1,0 +1,824 @@
+{% extends "base.html" %}
+{% block title %}Gestión Arbórea - Sistema de Radicación{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/gestion_riesgo.css') }}">
+<style>
+  .wizard-container { max-width: 1000px; margin: 20px auto; background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
+  .wizard-header { background: linear-gradient(135deg, #2d5016 0%, #7cb342 100%); color: white; padding: 30px; border-radius: 12px 12px 0 0; }
+  .wizard-header h1 { margin: 0; font-size: 28px; }
+  .wizard-steps { display: flex; justify-content: space-between; padding: 24px; border-bottom: 2px solid #f0f0f0; background: #fafafa; }
+  .wizard-step { flex: 1; text-align: center; position: relative; }
+  .wizard-step::after { content: ''; position: absolute; top: 20px; left: 50%; width: 100%; height: 2px; background: #ddd; z-index: -1; }
+  .wizard-step:last-child::after { display: none; }
+  .step-circle { width: 40px; height: 40px; border-radius: 50%; background: #ddd; color: #666; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 8px; transition: all 0.3s; }
+  .wizard-step.active .step-circle { background: #2d5016; color: white; transform: scale(1.1); }
+  .wizard-step.completed .step-circle { background: #7cb342; color: white; }
+  .wizard-body { padding: 40px; }
+  .form-section { display: none; }
+  .form-section.active { display: block; animation: slideIn 0.3s ease-in; }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .btn-primary-custom { background: #2d5016; color: white; border: none; padding: 12px 28px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+  .btn-primary-custom:hover { background: #7cb342; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .btn-secondary-custom { background: #6c757d; color: white; border: none; padding: 12px 28px; border-radius: 6px; font-weight: 600; cursor: pointer; margin-right: 10px; transition: all 0.3s; }
+  .btn-secondary-custom:hover { background: #5a6268; }
+  .btn-danger-custom { background: #dc3545; color: white; border: none; padding: 12px 28px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+  .btn-danger-custom:hover { background: #c82333; }
+  .alert { padding: 16px 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid; }
+  .alert-success { background: #d4edda; color: #155724; border-left-color: #28a745; }
+  .alert-error { background: #f8d7da; color: #721c24; border-left-color: #dc3545; }
+  .alert-info { background: #d1ecf1; color: #0c5460; border-left-color: #17a2b8; }
+  .alert-warning { background: #fff3cd; color: #856404; border-left-color: #ffc107; }
+  .radicado-badge { display: inline-block; background: #2d5016; color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold; font-size: 18px; margin: 12px 0; }
+  .estado-badge { display: inline-block; padding: 6px 12px; border-radius: 16px; font-weight: 600; font-size: 12px; }
+  .estado-radicada { background: #ffc107; color: #000; }
+  .estado-pendiente { background: #17a2b8; color: white; }
+  .estado-aprobada { background: #28a745; color: white; }
+  .estado-negada { background: #dc3545; color: white; }
+  .data-summary { background: #f8f9fa; border-left: 4px solid #2d5016; padding: 16px; margin: 16px 0; border-radius: 4px; }
+  .data-summary strong { color: #2d5016; }
+  .form-group-section { background: #f8f9fa; padding: 20px; margin: 20px 0; border-radius: 8px; border: 1px solid #e9ecef; }
+  .form-group-section h4 { margin-top: 0; color: #2d5016; font-size: 16px; }
+  .file-upload { border: 2px dashed #ddd; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s; }
+  .file-upload:hover { border-color: #2d5016; background: #f8f9fa; }
+  .file-upload.dragover { border-color: #2d5016; background: #e8f5e9; }
+  .uploaded-files { margin-top: 12px; }
+  .file-item { background: white; padding: 10px; margin: 6px 0; border-radius: 4px; border-left: 3px solid #7cb342; display: flex; justify-content: space-between; align-items: center; }
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #f3f3f3; border-top: 2px solid #2d5016; border-radius: 50%; animation: spin 1s linear infinite; margin-left: 8px; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  .btn-small { padding: 4px 8px; font-size: 12px; }
+  .table-sm td { padding: 8px; }
+  .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .autocomplete-list { position: absolute; background: white; border: 1px solid #ddd; border-radius: 4px; max-height: 200px; overflow-y: auto; z-index: 1000; width: calc(100% - 32px); margin-top: 4px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+  .autocomplete-item { padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0; }
+  .autocomplete-item:hover { background: #f8f9fa; }
+  .autocomplete-item small { color: #6c757d; font-style: italic; display: block; margin-top: 2px; }
+  .compensacion-result { background: #e8f5e9; padding: 20px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #7cb342; text-align: center; }
+  .compensacion-numero { font-size: 36px; font-weight: bold; color: #2d5016; }
+  .historial-container { margin-top: 40px; padding-top: 40px; border-top: 2px solid #f0f0f0; }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 2px solid #2d5016; background: white; border-radius: 50%; cursor: pointer; transition: all 0.3s ease; font-size: 18px; margin: 0 4px; position: relative; }
+  .icon-btn:hover { background: #2d5016; color: white; transform: scale(1.1); }
+  .icon-btn[data-title]::after { content: attr(data-title); position: absolute; background: #2d5016; color: white; padding: 6px 10px; border-radius: 4px; font-size: 11px; white-space: nowrap; bottom: 100%; left: 50%; transform: translateX(-50%); opacity: 0; pointer-events: none; transition: opacity 0.3s; margin-bottom: 8px; font-weight: 500; }
+  .icon-btn:hover[data-title]::after { opacity: 1; }
+  .icon-btn[data-title]::before { content: ''; position: absolute; background: #2d5016; width: 6px; height: 6px; bottom: 100%; left: 50%; transform: translateX(-50%) rotate(45deg); opacity: 0; pointer-events: none; transition: opacity 0.3s; margin-bottom: -2px; }
+  .icon-btn:hover[data-title]::before { opacity: 1; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wizard-container">
+  <!-- Header -->
+  <div class="wizard-header">
+    <h1>🌳 Gestión Arbórea - Sistema de Radicación</h1>
+    <p style="margin: 8px 0 0 0; opacity: 0.95;">Radicación → Visita Técnica → Dictamen CMGR → Compensación</p>
+  </div>
+
+  <!-- Steps indicator -->
+  <div class="wizard-steps">
+    <div class="wizard-step active" data-step="1">
+      <div class="step-circle">1</div>
+      <div class="step-label">Radicación</div>
+    </div>
+    <div class="wizard-step" data-step="2">
+      <div class="step-circle">2</div>
+      <div class="step-label">Visita Técnica</div>
+    </div>
+    <div class="wizard-step" data-step="3">
+      <div class="step-circle">3</div>
+      <div class="step-label">Dictamen CMGR</div>
+    </div>
+  </div>
+
+  <!-- Wizard body -->
+  <div class="wizard-body">
+    <div id="alerts-container"></div>
+
+    <!-- ============ FASE 1: RADICACIÓN ============ -->
+    <div class="form-section active" id="section-1">
+      <h3>📝 FASE 1: Radicación de Solicitud</h3>
+      <p class="text-muted">Registra los datos iniciales del solicitante y el árbol</p>
+
+      <form id="form-radicacion">
+        <div class="row g-3">
+          <!-- SOLICITANTE -->
+          <div class="col-md-6">
+            <label class="form-label">Nombre del solicitante *</label>
+            <input type="text" class="form-control" id="solicitante_nombre" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Documento de identidad *</label>
+            <input type="text" class="form-control" id="solicitante_documento" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Teléfono de contacto *</label>
+            <input type="tel" class="form-control" id="solicitante_contacto" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Correo electrónico</label>
+            <input type="email" class="form-control" id="solicitante_correo">
+          </div>
+
+          <!-- UBICACIÓN Y SOLICITUD -->
+          <div class="col-12">
+            <label class="form-label">Ubicación (dirección/vereda) *</label>
+            <input type="text" class="form-control" id="ubicacion_direccion" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Tipo de solicitud *</label>
+            <select class="form-select" id="tipo_solicitud" required>
+              <option value="Poda">Poda</option>
+              <option value="Tala">Tala</option>
+              <option value="Trasplante">Trasplante</option>
+              <option value="Emergencia">Emergencia</option>
+            </select>
+          </div>
+
+          <!-- ÁRBOL -->
+          <div class="col-md-6">
+            <label class="form-label">Especie del árbol *</label>
+            <div class="input-group">
+              <select class="form-select" id="arbol_especie_select" required>
+                <option value="">Cargando especies...</option>
+              </select>
+              <button type="button" class="btn btn-outline-secondary btn-small" id="toggle_especie_manual">Especie no listada</button>
+            </div>
+            <input type="text" class="form-control" id="arbol_especie_manual" placeholder="Ingrese especie manualmente" style="display:none; margin-top:8px;">
+            <small class="text-muted">Puedes seleccionar de la lista o escribir manualmente.</small>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">DAP (cm) *</label>
+            <input type="number" class="form-control" id="arbol_dap_cm" step="0.1" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Altura (m)</label>
+            <input type="number" class="form-control" id="arbol_altura_m" step="0.1">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Diámetro copa (m)</label>
+            <input type="number" class="form-control" id="arbol_copa_m" step="0.1">
+          </div>
+
+          <!-- MOTIVO -->
+          <div class="col-12">
+            <label class="form-label">Motivo de la solicitud *</label>
+            <textarea class="form-control" id="motivo_solicitud" rows="2" required></textarea>
+          </div>
+        </div>
+
+        <div style="margin-top: 28px; text-align: right;">
+          <button type="submit" class="btn-primary-custom" id="btn-guardar-radicado">
+            💾 Guardar y Radicar
+          </button>
+        </div>
+      </form>
+
+      <!-- Confirmación Fase 1 -->
+      <div id="radicado-confirmacion" style="display: none; margin-top: 24px;">
+        <div class="alert alert-success">
+          <strong>✅ ¡Radicado creado exitosamente!</strong>
+          <div class="radicado-badge" id="numero-radicado"></div>
+          <p style="margin: 10px 0 0 0;"><strong>Próximo paso:</strong> El técnico diligenciará el informe de visita técnica.</p>
+        </div>
+        <button class="btn-primary-custom" onclick="showSection(2)">Siguiente: Visita Técnica →</button>
+      </div>
+    </div>
+
+    <!-- ============ FASE 2: VISITA TÉCNICA + INFORME PDF ============ -->
+    <div class="form-section" id="section-2">
+      <h3>🔍 FASE 2: Visita Técnica e Informe</h3>
+      <p class="text-muted">El técnico registra hallazgos, toma fotos y genera PDF para aprobación del CMGR</p>
+
+      <!-- Resumen de datos Fase 1 -->
+      <div class="data-summary">
+        <strong>Radicado:</strong> <span id="radicado-numero-2" class="radicado-badge"></span><br>
+        <strong>Solicitante:</strong> <span id="solicitante-resumen"></span><br>
+        <strong>Árbol:</strong> <span id="arbol-resumen"></span> (DAP: <span id="dap-resumen"></span> cm)
+      </div>
+
+      <form id="form-visita">
+        <input type="hidden" id="radicado_id_visita">
+
+        <!-- DATOS DE VISITA -->
+        <div class="form-group-section">
+          <h4>📋 Datos de la Visita</h4>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Fecha de visita *</label>
+              <input type="date" class="form-control" id="visita_fecha" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Técnico responsable *</label>
+              <input type="text" class="form-control" id="visita_tecnico" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Estado fitosanitario</label>
+              <select class="form-select" id="arbol_fitosanitario">
+                <option>Buen estado</option>
+                <option>Estado regular</option>
+                <option>Mal estado</option>
+                <option>Seco/muerto</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Nivel de riesgo *</label>
+              <select class="form-select" id="visita_riesgo_final" required>
+                <option value="Bajo">Bajo</option>
+                <option value="Medio">Medio</option>
+                <option value="Alto">Alto</option>
+                <option value="Muy Alto">Muy Alto</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- INFORME TÉCNICO -->
+        <div class="form-group-section">
+          <h4>📄 Informe Técnico</h4>
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Descripción técnica y observaciones *</label>
+              <textarea class="form-control" id="visita_observaciones" rows="5" required placeholder="Describe: condición general, anomalías, recomendaciones..."></textarea>
+              <small class="text-muted">Mínimo 50 caracteres. Este texto se incluirá en el PDF.</small>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Diagnóstico y recomendaciones *</label>
+              <textarea class="form-control" id="diagnostico_recomendaciones" rows="3" required placeholder="¿Qué se recomienda? ¿Se recomienda aprobación?"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- FOTOGRAFÍAS -->
+        <div class="form-group-section">
+          <h4>📸 Fotografías de la Inspección</h4>
+          <div class="file-upload" id="file-upload-area">
+            <p>📷 Arrastra fotos aquí o haz clic para seleccionar</p>
+            <input type="file" id="file-input" multiple accept="image/*" style="display:none;">
+            <small class="text-muted">Máximo 5 MB por foto. Formatos: JPG, PNG</small>
+          </div>
+          <div class="uploaded-files" id="uploaded-files"></div>
+          <input type="hidden" id="archivos_visita">
+        </div>
+
+        <div style="margin-top: 28px; text-align: right;">
+          <button type="button" class="btn-secondary-custom" onclick="showSection(1)">← Anterior</button>
+          <button type="submit" class="btn-primary-custom" id="btn-guardar-visita">
+            💾 Guardar Visita e Informe
+          </button>
+        </div>
+      </form>
+
+      <!-- Confirmación Fase 2 -->
+      <div id="visita-confirmacion" style="display: none; margin-top: 24px;">
+        <div class="alert alert-info">
+          <strong>✅ Informe registrado - Pendiente aprobación del CMGR</strong>
+          <p style="margin: 10px 0 0 0;">
+            El informe está listo para ser revisado. El CMGR realizará el dictamen en la siguiente fase.
+          </p>
+        </div>
+        <div style="margin: 16px 0;">
+          <button class="btn-secondary-custom" onclick="descargarPDF()">
+            📥 Descargar Informe PDF
+          </button>
+          <button class="btn-primary-custom" onclick="showSection(3)">Siguiente: Dictamen CMGR →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ FASE 3: DICTAMEN Y COMPENSACIÓN ============ -->
+    <div class="form-section" id="section-3">
+      <h3>✅ FASE 3: Dictamen del CMGR y Compensación</h3>
+      <p class="text-muted">Basado en el informe técnico, se emite dictamen y se calcula la compensación</p>
+
+      <!-- Resumen de datos -->
+      <div class="data-summary">
+        <strong>Radicado:</strong> <span id="radicado-numero-3" class="radicado-badge"></span><br>
+        <strong>Solicitante:</strong> <span id="solicitante-resumen-3"></span><br>
+        <strong>Árbol:</strong> <span id="arbol-resumen-3"></span><br>
+        <strong>Estado actual:</strong> <span id="estado-resumen-3" class="estado-badge estado-pendiente">PENDIENTE APROBACIÓN</span>
+      </div>
+
+      <form id="form-permiso">
+        <input type="hidden" id="radicado_id_permiso">
+
+        <!-- DICTAMEN CMGR -->
+        <div class="form-group-section">
+          <h4>📋 Dictamen del CMGR</h4>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Decisión *</label>
+              <select class="form-select" id="dictamen_decision" required onchange="toggleCompensacion(); mostrarDiagnostico()">
+                <option value="">Seleccionar decisión...</option>
+                <option value="Aprobado">✅ APROBADO</option>
+                <option value="Negado">❌ NEGADO</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Integrantes del CMGR *</label>
+              <input type="text" class="form-control" id="permiso_firmante1" placeholder="Nombre y cargo" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Justificación del dictamen *</label>
+              <textarea class="form-control" id="permiso_obligaciones" rows="3" required placeholder="Explicar la decisión del CMGR..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- COMPENSACIÓN (solo si aprobado) -->
+        <div id="compensacion-section" style="display: none;">
+          <div class="form-group-section">
+            <h4>🌱 Compensación Ambiental</h4>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Vigencia del permiso (días)</label>
+                <input type="number" class="form-control" id="permiso_vigencia_dias" value="15" min="1" max="15">
+                <small class="text-muted">Máximo 15 días</small>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Coeficiente de compensación</label>
+                <input type="number" class="form-control" id="compensacion_coeficiente" value="1.5" step="0.1">
+              </div>
+              <div class="col-12">
+                <button type="button" class="btn-secondary-custom" onclick="calcularCompensacion()">🧮 Calcular Compensación</button>
+              </div>
+              <div class="col-12">
+                <div id="resultado-compensacion" class="compensacion-result" style="display: none;">
+                  <div style="font-size: 14px; color: #666; margin-bottom: 8px;">Árboles a compensar:</div>
+                  <div class="compensacion-numero" id="compensacion-arboles-display">0</div>
+                  <small id="calculo-detalles" class="text-muted"></small>
+                </div>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Especie recomendada para compensación</label>
+                <input type="text" class="form-control" id="compensacion_especie_recomendada">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Sitio y plazo de plantación</label>
+                <textarea class="form-control" id="compensacion_sitio" rows="2" placeholder="Lugar específico y fechas"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 28px; text-align: right;">
+          <button type="button" class="btn-secondary-custom" onclick="showSection(2)">← Anterior</button>
+          <button type="submit" class="btn-primary-custom" id="btn-emitir-permiso">
+            ✅ Emitir Dictamen
+          </button>
+        </div>
+      </form>
+
+      <!-- Confirmación Fase 3 -->
+      <div id="permiso-confirmacion" style="display: none; margin-top: 24px;">
+        <div class="alert alert-success">
+          <strong>✅ ¡Dictamen emitido exitosamente!</strong>
+          <p style="margin: 10px 0 0 0;">El expediente está completo y procesado.</p>
+        </div>
+        <div style="margin: 16px 0;">
+          <button class="btn-secondary-custom" onclick="descargarDictamenPDF()">📥 Descargar Permiso/Dictamen PDF</button>
+        </div>
+        <button class="btn-primary-custom" onclick="location.reload()">🔄 Nuevo Radicado</button>
+        <button class="btn-secondary-custom" onclick="verHistorial()">📋 Ver Historial</button>
+      </div>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div class="historial-container">
+      <h4>📋 Radicados Recientes</h4>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead>
+            <tr>
+              <th>Radicado</th>
+              <th>Solicitante</th>
+              <th>Especie</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="historial-tbody">
+            <tr>
+              <td colspan="5" class="text-center text-muted">Cargando...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let radicadoActual = null;
+let fotosActuales = [];
+
+// === NAVEGACIÓN WIZARD ===
+function showSection(step) {
+  document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+  
+  document.getElementById(`section-${step}`).classList.add('active');
+  document.querySelector(`[data-step="${step}"]`).classList.add('active');
+  
+  document.querySelector('.wizard-body').scrollIntoView({ behavior: 'smooth' });
+}
+
+// === ALERTAS ===
+function showAlert(message, type = 'success') {
+  const container = document.getElementById('alerts-container');
+  const alert = document.createElement('div');
+  alert.className = `alert alert-${type}`;
+  alert.innerHTML = message;
+  container.innerHTML = '';
+  container.appendChild(alert);
+  
+  setTimeout(() => alert.remove(), 6000);
+}
+
+// === ESPECIE: Selección o entrada manual ===
+document.getElementById('toggle_especie_manual').addEventListener('click', () => {
+  const manual = document.getElementById('arbol_especie_manual');
+  const select = document.getElementById('arbol_especie_select');
+  const btn = document.getElementById('toggle_especie_manual');
+  const willShow = manual.style.display === 'none' || manual.style.display === '';
+  manual.style.display = willShow ? 'block' : 'none';
+  if (willShow) { select.value = ''; btn.textContent = 'Usar lista de especies'; }
+  else { btn.textContent = 'Especie no listada'; }
+});
+
+// === FASE 1: RADICACIÓN ===
+document.getElementById('form-radicacion').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const btn = document.getElementById('btn-guardar-radicado');
+  btn.disabled = true;
+  btn.innerHTML = '💾 Guardando... <span class="spinner"></span>';
+  
+  const especieManual = document.getElementById('arbol_especie_manual').value.trim();
+  const especieSelect = document.getElementById('arbol_especie_select').value;
+  const especieFinal = especieManual || especieSelect;
+
+  const data = {
+    solicitante_nombre: document.getElementById('solicitante_nombre').value,
+    solicitante_documento: document.getElementById('solicitante_documento').value,
+    solicitante_contacto: document.getElementById('solicitante_contacto').value,
+    solicitante_correo: document.getElementById('solicitante_correo').value,
+    ubicacion_direccion: document.getElementById('ubicacion_direccion').value,
+    tipo_solicitud: document.getElementById('tipo_solicitud').value,
+    arbol_especie_comun: especieFinal,
+    arbol_dap_cm: parseFloat(document.getElementById('arbol_dap_cm').value),
+    arbol_altura_m: parseFloat(document.getElementById('arbol_altura_m').value) || null,
+    arbol_copa_m: parseFloat(document.getElementById('arbol_copa_m').value) || null,
+    motivo_solicitud: document.getElementById('motivo_solicitud').value,
+    usuario_creador: 'admin'
+  };
+  
+  try {
+    const resp = await fetch('/api/riesgo/arborea', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    
+    const result = await resp.json();
+    
+    if (resp.ok && result.success) {
+      radicadoActual = result;
+      document.getElementById('numero-radicado').textContent = result.numero_radicado;
+      document.getElementById('radicado-confirmacion').style.display = 'block';
+      document.getElementById('form-radicacion').style.display = 'none';
+      document.querySelector('[data-step="1"]').classList.add('completed');
+      
+      showAlert(`✅ Radicado <strong>${result.numero_radicado}</strong> creado exitosamente`, 'success');
+      cargarHistorial();
+    } else {
+      showAlert(`❌ Error: ${result.error || 'No se pudo crear el radicado'}`, 'error');
+    }
+  } catch (err) {
+    showAlert(`❌ Error: ${err.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '💾 Guardar y Radicar';
+  }
+});
+
+// === PREPARAR FASE 2 ===
+function mostrarDatos2() {
+  document.getElementById('radicado-numero-2').textContent = radicadoActual.numero_radicado;
+  document.getElementById('solicitante-resumen').textContent = radicadoActual.solicitante_nombre;
+  document.getElementById('arbol-resumen').textContent = radicadoActual.arbol_especie_comun;
+  document.getElementById('dap-resumen').textContent = radicadoActual.arbol_dap_cm;
+  document.getElementById('radicado_id_visita').value = radicadoActual.id;
+  document.getElementById('visita_fecha').valueAsDate = new Date();
+}
+
+// === SUBIDA DE FOTOS ===
+const fileUploadArea = document.getElementById('file-upload-area');
+const fileInput = document.getElementById('file-input');
+
+fileUploadArea.addEventListener('click', () => fileInput.click());
+
+fileUploadArea.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  fileUploadArea.classList.add('dragover');
+});
+
+fileUploadArea.addEventListener('dragleave', () => {
+  fileUploadArea.classList.remove('dragover');
+});
+
+fileUploadArea.addEventListener('drop', (e) => {
+  e.preventDefault();
+  fileUploadArea.classList.remove('dragover');
+  const files = e.dataTransfer.files;
+  manejarArchivos(files);
+});
+
+fileInput.addEventListener('change', () => {
+  manejarArchivos(fileInput.files);
+});
+
+function manejarArchivos(files) {
+  for (let file of files) {
+    if (file.size > 5 * 1024 * 1024) {
+      showAlert(`❌ ${file.name} es muy grande (máx 5 MB)`, 'error');
+      continue;
+    }
+    fotosActuales.push(file);
+  }
+  mostrarFotos();
+}
+
+function mostrarFotos() {
+  const container = document.getElementById('uploaded-files');
+  container.innerHTML = fotosActuales.map((f, i) => `
+    <div class="file-item">
+      <span>📷 ${f.name}</span>
+      <button type="button" class="btn btn-sm btn-danger-custom" onclick="eliminarFoto(${i})">Eliminar</button>
+    </div>
+  `).join('');
+}
+
+function eliminarFoto(i) {
+  fotosActuales.splice(i, 1);
+  mostrarFotos();
+}
+
+// === FASE 2: VISITA ===
+document.getElementById('form-visita').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  if (!radicadoActual) {
+    showAlert('❌ Primero debes crear un radicado', 'error');
+    return;
+  }
+  
+  const btn = document.getElementById('btn-guardar-visita');
+  btn.disabled = true;
+  btn.innerHTML = '💾 Guardando... <span class="spinner"></span>';
+  
+  const data = {
+    visita_fecha: document.getElementById('visita_fecha').value,
+    visita_tecnico: document.getElementById('visita_tecnico').value,
+    arbol_fitosanitario: document.getElementById('arbol_fitosanitario').value,
+    visita_riesgo_final: document.getElementById('visita_riesgo_final').value,
+    visita_observaciones: document.getElementById('visita_observaciones').value,
+    diagnostico_recomendaciones: document.getElementById('diagnostico_recomendaciones').value
+  };
+  
+  try {
+    const resp = await fetch(`/api/riesgo/arborea/${radicadoActual.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    
+    const result = await resp.json();
+    
+    if (resp.ok && result.success) {
+      radicadoActual.estado = 'Pendiente';
+      document.getElementById('visita-confirmacion').style.display = 'block';
+      document.getElementById('form-visita').style.display = 'none';
+      document.querySelector('[data-step="2"]').classList.add('completed');
+      showAlert('✅ Visita técnica registrada - Pendiente aprobación del CMGR', 'info');
+    } else {
+      showAlert(`❌ Error: ${result.error}`, 'error');
+    }
+  } catch (err) {
+    showAlert(`❌ Error: ${err.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '💾 Guardar Visita e Informe';
+  }
+});
+
+// === PREPARAR FASE 3 ===
+function prepararFase3() {
+  document.getElementById('radicado-numero-3').textContent = radicadoActual.numero_radicado;
+  document.getElementById('solicitante-resumen-3').textContent = radicadoActual.solicitante_nombre;
+  document.getElementById('arbol-resumen-3').textContent = radicadoActual.arbol_especie_comun;
+  document.getElementById('radicado_id_permiso').value = radicadoActual.id;
+}
+
+function toggleCompensacion() {
+  const decision = document.getElementById('dictamen_decision').value;
+  const section = document.getElementById('compensacion-section');
+  section.style.display = (decision === 'Aprobado') ? 'block' : 'none';
+}
+
+function mostrarDiagnostico() {
+  // Mostrar diagnóstico de Fase 2
+  const decision = document.getElementById('dictamen_decision').value;
+  if (decision) {
+    console.log('Decisión:', decision);
+  }
+}
+
+async function calcularCompensacion() {
+  const dap = parseFloat(document.getElementById('arbol_dap_cm').value) || radicadoActual.arbol_dap_cm || 0;
+  const coef = parseFloat(document.getElementById('compensacion_coeficiente').value) || 1.5;
+  
+  try {
+    const resp = await fetch('/api/riesgo/calcular-compensacion', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dap_cm: dap, coeficiente: coef })
+    });
+    
+    const result = await resp.json();
+    
+    if (result.success) {
+      document.getElementById('compensacion-arboles-display').textContent = result.arboles_plantar;
+      document.getElementById('calculo-detalles').textContent = `(${dap}/10) × ${coef} = ${result.arboles_plantar} árboles`;
+      document.getElementById('resultado-compensacion').style.display = 'block';
+    }
+  } catch (err) {
+    console.error('Error:', err);
+  }
+}
+
+// === FASE 3: PERMISO ===
+document.getElementById('form-permiso').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  if (!radicadoActual) {
+    showAlert('❌ Primero debes completar las fases anteriores', 'error');
+    return;
+  }
+  
+  const btn = document.getElementById('btn-emitir-permiso');
+  btn.disabled = true;
+  btn.innerHTML = '✅ Emitiendo... <span class="spinner"></span>';
+  
+  const data = {
+    dictamen_decision: document.getElementById('dictamen_decision').value,
+    permiso_vigencia_dias: parseInt(document.getElementById('permiso_vigencia_dias').value) || 15,
+    compensacion_coeficiente: parseFloat(document.getElementById('compensacion_coeficiente').value),
+    compensacion_metodo: 'Automático',
+    compensacion_especie_recomendada: document.getElementById('compensacion_especie_recomendada').value,
+    compensacion_sitio: document.getElementById('compensacion_sitio').value,
+    permiso_obligaciones: document.getElementById('permiso_obligaciones').value,
+    permiso_firmante1: document.getElementById('permiso_firmante1').value
+  };
+  
+  try {
+    const resp = await fetch(`/api/riesgo/arborea/${radicadoActual.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    
+    const result = await resp.json();
+    
+    if (resp.ok && result.success) {
+      document.getElementById('permiso-confirmacion').style.display = 'block';
+      document.getElementById('form-permiso').style.display = 'none';
+      document.querySelector('[data-step="3"]').classList.add('completed');
+      showAlert('✅ Dictamen emitido exitosamente', 'success');
+      cargarHistorial();
+      // Actualizar estado visual
+      const decision = document.getElementById('dictamen_decision').value;
+      const estadoBadge = document.getElementById('estado-resumen-3');
+      if (decision === 'Aprobado') {
+        estadoBadge.textContent = 'APROBADA';
+        estadoBadge.className = 'estado-badge estado-aprobada';
+        radicadoActual.estado = 'Aprobada';
+      } else if (decision === 'Negado') {
+        estadoBadge.textContent = 'NEGADA';
+        estadoBadge.className = 'estado-badge estado-negada';
+        radicadoActual.estado = 'Negada';
+      }
+    } else {
+      showAlert(`❌ Error: ${result.error}`, 'error');
+    }
+  } catch (err) {
+    showAlert(`❌ Error: ${err.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '✅ Emitir Dictamen';
+  }
+});
+
+// === HISTORIAL ===
+async function cargarHistorial() {
+  try {
+    const resp = await fetch('/api/riesgo/arborea?per_page=10');
+    const data = await resp.json();
+    const tbody = document.getElementById('historial-tbody');
+    
+    if (data.radicados && data.radicados.length > 0) {
+      tbody.innerHTML = data.radicados.map(r => {
+        const canDelete = r.estado === 'Radicada'; // Solo permite eliminar radicados nuevos
+        const hasInforme = r.estado === 'Visitada' || r.estado === 'Aprobada' || r.estado === 'Negada';
+        const hasPermiso = r.estado === 'Aprobada' || r.estado === 'Negada';
+        
+        return `
+          <tr>
+            <td><strong>${r.numero_radicado}</strong></td>
+            <td>${r.solicitante_nombre}</td>
+            <td>${r.arbol_especie_comun}</td>
+            <td><span class="badge badge-${r.estado.toLowerCase()}">${r.estado}</span></td>
+            <td style="text-align: center; white-space: nowrap;">
+              ${hasInforme ? `<button class="icon-btn" data-title="Descargar Informe" onclick="descargarPDF(${r.id})" title="Informe PDF">📄</button>` : ''}
+              ${hasPermiso ? `<button class="icon-btn" data-title="Descargar Permiso" onclick="descargarPermisoPDF(${r.id})" title="Permiso PDF">📋</button>` : ''}
+              ${canDelete ? `<button class="icon-btn" data-title="Eliminar" onclick="confirmarEliminar(${r.id}, '${r.numero_radicado}')" title="Eliminar">🗑️</button>` : ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    } else {
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Sin registros</td></tr>';
+    }
+  } catch (err) {
+    console.error('Error:', err);
+  }
+}
+
+function descargarPDF(id) {
+  window.open(`/api/riesgo/arborea/${id}/pdf/informe`, '_blank');
+}
+
+function descargarPermisoPDF(id) {
+  window.open(`/api/riesgo/arborea/${id}/pdf/dictamen`, '_blank');
+}
+
+async function confirmarEliminar(id, numeroRadicado) {
+  if (confirm(`¿Estás seguro de que deseas eliminar el radicado ${numeroRadicado}? Esta acción no se puede deshacer.`)) {
+    try {
+      const resp = await fetch(`/api/riesgo/arborea/${id}`, {
+        method: 'DELETE',
+        headers: { 'X-Usuario-Actual': 'admin', 'Content-Type': 'application/json' }
+      });
+      const result = await resp.json();
+      
+      if (resp.ok && result.success) {
+        showAlert('✅ Radicado eliminado exitosamente', 'success');
+        cargarHistorial();
+      } else {
+        showAlert(`❌ Error: ${result.mensaje || result.error}`, 'error');
+      }
+    } catch (err) {
+      showAlert(`❌ Error: ${err.message}`, 'error');
+    }
+  }
+}
+
+function verDetalle(id) {
+  // Abrir PDF adecuado según estado (si tiene dictamen, abrir dictamen; si no, informe)
+  window.open(`/api/riesgo/arborea/${id}/pdf/informe`, '_blank');
+}
+
+function verHistorial() {
+  document.querySelector('.historial-container').scrollIntoView({ behavior: 'smooth' });
+}
+
+// === INICIALIZACIÓN ===
+document.addEventListener('DOMContentLoaded', () => {
+  cargarHistorial();
+  cargarEspecies();
+  
+  // Observe section changes
+  const observer = new MutationObserver((mutations) => {
+    if (document.getElementById('section-2').classList.contains('active') && radicadoActual) {
+      mostrarDatos2();
+    }
+    if (document.getElementById('section-3').classList.contains('active') && radicadoActual) {
+      prepararFase3();
+    }
+  });
+  
+  observer.observe(document.getElementById('section-2'), { attributes: true, attributeFilter: ['class'] });
+  observer.observe(document.getElementById('section-3'), { attributes: true, attributeFilter: ['class'] });
+});
+
+async function cargarEspecies() {
+  try {
+    const resp = await fetch('/api/riesgo/especies?per_page=500');
+    const data = await resp.json();
+    const sel = document.getElementById('arbol_especie_select');
+    sel.innerHTML = '<option value="">Seleccione especie...</option>' +
+      (data.especies || []).map(e => `<option value="${e.nombre_comun}">${e.nombre_comun} (${e.nombre_cientifico})</option>`).join('');
+  } catch (err) {
+    console.error('Error cargando especies', err);
+  }
+}
+</script>
+{% endblock %}

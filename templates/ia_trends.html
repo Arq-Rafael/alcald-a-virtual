@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<style>
+.trends-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.trends-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.trends-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+}
+
+.trend-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.88));
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 12px 40px rgba(124, 58, 237, 0.1);
+  margin-bottom: 2rem;
+  transition: all 0.3s ease;
+}
+
+.trend-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 60px rgba(124, 58, 237, 0.15);
+}
+
+.trend-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: white;
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.3);
+  margin-bottom: 1rem;
+}
+
+.trend-up {
+  color: #22c55e;
+  font-size: 2.5rem;
+}
+
+.trend-down {
+  color: #ef4444;
+  font-size: 2.5rem;
+}
+
+.trend-percentage {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0.5rem 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="trends-container">
+  <div class="trends-header">
+    <h2><i class="bi bi-graph-down-arrow"></i> Predicción de Tendencias</h2>
+    <p class="text-muted">Análisis predictivo basado en datos históricos municipales</p>
+  </div>
+
+  <div class="row">
+    {% if trends %}
+      {% for key, data in trends.items() %}
+      <div class="col-md-4">
+        <div class="trend-card">
+          <div class="trend-icon">
+            <i class="bi bi-{{ 'graph-up' if data.trend == 'up' else 'graph-down' }}"></i>
+          </div>
+          <h5>{{ key|title }}</h5>
+          <div class="trend-percentage {% if data.trend == 'up' %}text-success{% else %}text-danger{% endif %}">
+            {% if data.trend == 'up' %}+{% endif %}{{ data.percentage }}%
+            <i class="bi bi-arrow-{{ 'up' if data.trend == 'up' else 'down' }}-circle-fill trend-{{ data.trend }}"></i>
+          </div>
+          <p class="text-muted mb-0">Tendencia {{ 'ascendente' if data.trend == 'up' else 'descendente' }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="col-12">
+        <div class="alert alert-info text-center">
+          <i class="bi bi-info-circle"></i> Cargando datos de tendencias...
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="mt-5">
+    <div class="trend-card">
+      <h5><i class="bi bi-lightbulb-fill text-warning"></i> Recomendaciones Inteligentes</h5>
+      <ul class="mb-0">
+        <li>Incrementar recursos en áreas con tendencia ascendente</li>
+        <li>Revisar procesos en áreas con tendencia descendente</li>
+        <li>Analizar factores externos que afectan las tendencias</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="mt-4 text-center">
+    <a href="{{ url_for('ia.index') }}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> Volver a IA Municipal
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Concepto de Uso del Suelo</title>
+  <style>
+    :root {
+      --verde-barra:  #4f8a3a;
+      --verde-pastel: #e6f4ea;
+      --verde-oscuro: #4f8a3a;
+      --gris-claro:   #f5f5f5;
+      --gris-medio:   #dddddd;
+      --texto:        #333333;
+    }
+    @page {
+      margin-top: 20mm;
+      margin-bottom: 10mm;
+      margin-left: 15mm;
+      margin-right: 15mm;
+    }
+    body {
+      margin: 0;
+      padding: 70px 1.5cm 2cm;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--texto);
+    }
+
+    /* ——— Franja verde con QR ——— */
+    .top-bar {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 70px; background: var(--verde-barra); z-index: 1000;
+    }
+    .top-bar img {
+      height: 100px; float: right; margin: 5px 20px;
+    }
+
+    /* ——— Cabecera ——— */
+    .header { text-align: center; margin-bottom: 20px; }
+    .header img {
+      width:120px; height:120px; object-fit:contain; margin-bottom:8px;
+    }
+    .header h2 { margin:0; font-size:20pt; color:var(--verde-oscuro); }
+    .header p  { margin:4px 0 0; font-size:12pt; font-weight:500; }
+
+    h1 {
+      text-align: center; font-size:22pt; margin:15px 0 25px; font-weight:600;
+    }
+
+    /* ——— Info inicial ——— */
+    .info-table {
+      width:100%; border-collapse:collapse;
+      background: var(--verde-pastel); border-radius:6px; margin-bottom:30px;
+    }
+    .info-table th,
+    .info-table td {
+      padding:8px 12px; vertical-align:top; font-size:12pt;
+    }
+    .info-table th {
+      width:140px; text-align:left; font-weight:bold; color:var(--verde-oscuro);
+    }
+    .info-table td {
+      text-align: justify;
+      text-justify: inter-word;
+      white-space: pre-wrap;
+    }
+
+    /* ——— Título sección ——— */
+    .section-title {
+      text-align:center; font-size:14pt;
+      margin:30px 0 10px; color:var(--verde-oscuro); font-weight:bold;
+    }
+
+    /* ——— Tabla de normatividad ——— */
+    .norm-table {
+      width:100%; border-collapse:collapse; font-size:11pt;
+      margin-bottom:80px;
+    }
+    .norm-table tr { page-break-inside:avoid; }
+    .norm-table th,
+    .norm-table td {
+      padding:12px 14px; border:1px solid var(--gris-medio);
+      vertical-align:top; text-align:justify; white-space:pre-wrap;
+      line-height:1.4; text-justify:inter-word;
+    }
+    .norm-table th {
+      background:var(--gris-claro); color:var(--verde-oscuro);
+      text-align:left; font-weight:bold;
+    }
+    .norm-table tr:nth-child(even) td { background:#fff; }
+    .norm-table tr:nth-child(odd)  td { background:#fdfdfd; }
+
+    /* ——— Firma y pie ——— */
+    .firma { margin-top:120px; font-size:12pt; text-align:left; }
+    .firma-linea { margin-bottom:8px; }
+    .footer {
+      position:fixed; bottom:0.2cm; width:100%; text-align:center;
+      font-size:9pt; color:var(--texto);
+      border-top:1px solid var(--gris-medio); padding-top:5px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <img src="{{ qr_src }}" alt="QR de Solicitud">
+  </div>
+
+  <div class="header">
+    <img src="{{ logo_path }}" alt="Escudo del Municipio">
+    <h2>Alcaldía Municipal de Supatá</h2>
+    <p>Supatá (Cundinamarca)</p>
+  </div>
+
+  <h1>CONCEPTO DE USO DEL SUELO</h1>
+
+  <table class="info-table">
+    <tr><th>Cédula Catastral:</th><td>{{ cc }}</td></tr>
+    <tr><th>Matrícula:</th><td>{{ matricula }}</td></tr>
+    <tr><th>Dirección:</th><td>{{ direccion }}</td></tr>
+    <tr><th>Barrio / Vereda:</th><td>{{ barrio }}</td></tr>
+    <tr><th>Uso POT/EOT:</th><td>{{ uso }}</td></tr>
+  </table>
+
+  <div class="section-title">Normatividad Aplicada</div>
+
+  <table class="norm-table">
+    <tr><th style="width:20%;">Norma General</th><td>{{ norma_general }}</td></tr>
+    <tr><th>Descripción</th><td>{{ descripcion }}</td></tr>
+    <tr><th>Uso Principal</th><td>{{ uso_principal }}</td></tr>
+    <tr><th>Usos Compatibles</th><td>{{ usos_compatibles }}</td></tr>
+    <tr><th>Usos Condicionados</th><td>{{ usos_condicionados }}</td></tr>
+    <tr><th>Usos Prohibidos</th><td>{{ usos_prohibidos }}</td></tr>
+
+    <!-- Negrita en títulos “•” sin romper el resto -->
+    <tr>
+      <th>Directrices y Condicionamientos</th>
+      <td>
+        {{ directrices
+            |trim
+            |replace('•', '<strong>•')
+            |replace(':', ':</strong>')
+            |safe
+        }}
+      </td>
+    </tr>
+
+    <tr><th>Conclusiones</th><td>{{ conclusiones }}</td></tr>
+    <tr><th>Fuente / URL</th>
+      <td>{% if fuente_url %}<a href="{{ fuente_url }}">{{ fuente_url }}</a>{% endif %}</td>
+    </tr>
+    <tr><th>Vigente</th><td>{{ vigente }}</td></tr>
+  </table>
+
+  <div class="firma">
+    <div class="firma-linea">______________________________</div>
+    Secretaría de Planeación y Obras Públicas<br>
+    Alcaldía Municipal de Supatá
+  </div>
+
+  <div class="footer">
+    © Alcaldía Virtual – Todos los derechos reservados
+  </div>
+
+</body>
+</html>

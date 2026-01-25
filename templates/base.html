@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}Alcaldía Virtual Premium{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <!-- Select2 -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+
+  <!-- Estilos Legado (para compatibilidad de pages específicas) -->
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet" />
+  
+  <!-- Premium Glassmorphism Styles -->
+  <link href="{{ url_for('static', filename='css/premium.css') }}" rel="stylesheet" />
+  
+  <!-- Institutional Theme Enhancements -->
+  <link href="{{ url_for('static', filename='css/institutional-extras.css') }}" rel="stylesheet" />
+  
+  <!-- Mejoras de Botones y Controles -->
+  <link href="{{ url_for('static', filename='css/buttons-improvements.css') }}" rel="stylesheet" />
+  
+  <!-- Dashboard Modern Styles (Legacy) -->
+  <link href="{{ url_for('static', filename='css/dashboard-modern.css') }}" rel="stylesheet" />
+
+  <!-- Dashboard iOS 26 Modern Design -->
+  <link href="{{ url_for('static', filename='css/dashboard-ios-modern.css') }}" rel="stylesheet" />
+  
+  <!-- Sidebar iOS 26 Design -->
+  <link href="{{ url_for('static', filename='css/sidebar-ios26.css') }}" rel="stylesheet" />
+  
+  <!-- Chat Bubble iMessage Style -->
+  <link href="{{ url_for('static', filename='css/chat-bubble.css') }}" rel="stylesheet" />
+
+  <!-- Estilos del módulo Participación (se cargan al final para prioridad) -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/participacion.css') }}">
+
+  <!-- Splash Screen & Screen Saver Styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/splash-screen.css') }}">
+
+  {% block styles %}{% endblock %}
+
+  <!-- Preferencias de usuario dinámicas -->
+  <style>
+    {% if user_preferences %}
+    :root {
+        --font-size-base: {% if user_preferences.tamano_fuente == 'small' %}12px{% elif user_preferences.tamano_fuente == 'large' %}16px{% elif user_preferences.tamano_fuente == 'extra-large' %}18px{% else %}14px{% endif %};
+        --font-size-h1: {% if user_preferences.tamano_fuente == 'small' %}24px{% elif user_preferences.tamano_fuente == 'large' %}32px{% elif user_preferences.tamano_fuente == 'extra-large' %}36px{% else %}28px{% endif %};
+        --font-size-h2: {% if user_preferences.tamano_fuente == 'small' %}20px{% elif user_preferences.tamano_fuente == 'large' %}28px{% elif user_preferences.tamano_fuente == 'extra-large' %}32px{% else %}24px{% endif %};
+        --font-size-h3: {% if user_preferences.tamano_fuente == 'small' %}18px{% elif user_preferences.tamano_fuente == 'large' %}24px{% elif user_preferences.tamano_fuente == 'extra-large' %}28px{% else %}20px{% endif %};
+        --font-size-h4: {% if user_preferences.tamano_fuente == 'small' %}16px{% elif user_preferences.tamano_fuente == 'large' %}20px{% elif user_preferences.tamano_fuente == 'extra-large' %}24px{% else %}18px{% endif %};
+        --font-size-h5: {% if user_preferences.tamano_fuente == 'small' %}14px{% elif user_preferences.tamano_fuente == 'large' %}18px{% elif user_preferences.tamano_fuente == 'extra-large' %}20px{% else %}16px{% endif %};
+        --line-height: {% if user_preferences.tamano_fuente == 'small' %}1.4{% elif user_preferences.tamano_fuente == 'large' %}1.8{% elif user_preferences.tamano_fuente == 'extra-large' %}2.0{% else %}1.6{% endif %};
+
+        {% if user_preferences.tema == 'dark' %}
+        --bg-primary: #1f2937;
+        --bg-secondary: #111827;
+        --text-primary: #f9fafb;
+        --text-secondary: #d1d5db;
+        --border-color: #374151;
+        {% else %}
+        --bg-primary: #ffffff;
+        --bg-secondary: #f9fafb;
+        --text-primary: #1f2937;
+        --text-secondary: #6b7280;
+        --border-color: #e5e7eb;
+        {% endif %}
+
+        {% if user_preferences.tipo_fuente == 'arial' %}
+        --font-family: 'Arial', Helvetica, sans-serif;
+        {% elif user_preferences.tipo_fuente == 'roboto' %}
+        --font-family: 'Roboto', sans-serif;
+        {% elif user_preferences.tipo_fuente == 'opensans' %}
+        --font-family: 'Open Sans', sans-serif;
+        {% else %}
+        --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        {% endif %}
+    }
+
+    html, body {
+        font-family: var(--font-family);
+        font-size: var(--font-size-base);
+        line-height: var(--line-height);
+        color: var(--text-primary);
+        background-color: var(--bg-primary);
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    h1 { font-size: var(--font-size-h1); }
+    h2 { font-size: var(--font-size-h2); }
+    h3 { font-size: var(--font-size-h3); }
+    h4 { font-size: var(--font-size-h4); }
+    h5 { font-size: var(--font-size-h5); }
+
+    .form-control {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        border-color: var(--border-color);
+    }
+
+    .card {
+        background-color: var(--bg-primary);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+
+    .table {
+        color: var(--text-primary);
+        border-color: var(--border-color);
+    }
+
+    .table thead {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+    {% endif %}
+  </style>
+
+  <style>
+    /* Animated Gradient Background - Restored from premium.css */
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      25% { background-position: 50% 75%; }
+      50% { background-position: 100% 50%; }
+      75% { background-position: 50% 25%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    body {
+      background: linear-gradient(-45deg,
+        #1b5e20,      /* Dark Green */
+        #4caf50,      /* Fresh Green */
+        #f9a825,      /* Ochre */
+        #66bb6a,      /* Light Green */
+        #fdd835       /* Bright Yellow */
+      ) !important;
+      background-size: 400% 400% !important;
+      background-position: 0% 50% !important;
+      animation: gradientBG 15s ease infinite !important;
+      min-height: 100vh !important;
+    }
+    
+    main {
+      background: transparent !important;
+    }
+    
+    /* iOS 26 Notification System - Modern Glassmorphism */
+    .notification-toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+      -webkit-backdrop-filter: blur(30px) saturate(180%);
+      backdrop-filter: blur(30px) saturate(180%);
+      border-radius: 20px;
+      border: 1.5px solid rgba(255,255,255,0.5);
+      padding: 1.25rem 1.75rem;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 
+                  0 4px 12px rgba(0, 0, 0, 0.08),
+                  inset 0 1px 0 rgba(255,255,255,0.8);
+      max-width: 380px;
+      min-width: 320px;
+      z-index: 1100;
+      animation: slideInBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: all 0.3s ease;
+    }
+    .notification-toast:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15), 
+                  0 6px 16px rgba(0, 0, 0, 0.1);
+    }
+    @keyframes slideInBounce {
+      0% { opacity: 0; transform: translateY(120px) scale(0.9); }
+      60% { opacity: 1; transform: translateY(-8px) scale(1.02); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes slideOut {
+      to { opacity: 0; transform: translateY(120px) scale(0.95); }
+    }
+    .notification-toast.show { animation: slideInBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+    .notification-header { 
+      display: flex; 
+      align-items: center; 
+      gap: 0.9rem; 
+      margin-bottom: 0.85rem; 
+    }
+    .notification-icon {
+      width: 46px; 
+      height: 46px; 
+      border-radius: 14px;
+      background: linear-gradient(135deg, #7cb342 0%, #558b2f 100%);
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      color: #fff; 
+      font-size: 1.4rem;
+      box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3),
+                  inset 0 -2px 4px rgba(0,0,0,0.1),
+                  inset 0 1px 2px rgba(255,255,255,0.3);
+      transition: transform 0.2s ease;
+    }
+    .notification-icon.warning {
+      background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+      box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+    }
+    .notification-icon.error {
+      background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+      box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+    }
+    .notification-toast:hover .notification-icon {
+      transform: scale(1.05) rotate(-3deg);
+    }
+    .notification-title { 
+      font-weight: 700; 
+      color: #1a1a1a; 
+      font-size: 1rem;
+      letter-spacing: -0.01em;
+    }
+    .notification-text { 
+      font-size: 0.9rem; 
+      color: #4a5568; 
+      line-height: 1.5;
+      font-weight: 400;
+    }
+    .notification-toast .btn {
+      font-size: 0.85rem;
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .notification-toast .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .notification-toast .btn-success {
+      background: linear-gradient(135deg, #7cb342, #689f38);
+    }
+    .notification-toast .btn-outline-secondary {
+      background: rgba(255,255,255,0.8);
+      border: 1.5px solid #d1d5db;
+      color: #4b5563;
+    }
+    .notification-toast .btn-outline-danger {
+      background: rgba(255,255,255,0.8);
+      border: 1.5px solid #fca5a5;
+      color: #dc2626;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ========== SCREEN SAVER (Solo para usuarios autenticados) ========== -->
+  {% if session.user %}
+  <div id="screenSaver" class="hidden">
+    <canvas id="screenSaverCanvas" class="splash-canvas"></canvas>
+    <div class="splash-container">
+      <!-- Anillos HUD -->
+      <div class="hud-circle circle-1"></div>
+      <div class="hud-circle circle-2"></div>
+      <div class="hud-circle circle-3"></div>
+      
+      <!-- Logo -->
+      <div class="splash-logo-wrapper">
+        <img src="{{ url_for('static', filename='imagenes/logo_new.png') }}" alt="Alcaldía Virtual Supatá" class="splash-logo">
+        <div class="cyber-lines"></div>
+      </div>
+    </div>
+    <div class="screensaver-message">Toque la pantalla para continuar</div>
+  </div>
+  {% endif %}
+
+  <!-- Mobile Toggle Button (Visible only on mobile) -->
+  <div class="d-lg-none p-3 d-flex justify-content-between align-items-center bg-white shadow-sm sticky-top">
+     <span class="fw-bold text-primary">Alcaldía Virtual</span>
+     <button class="btn btn-sm btn-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
+       <i class="bi bi-list fs-4"></i>
+     </button>
+  </div>
+
+  <!-- Sidebar Navigation -->
+  {% if session.user %}
+  <nav class="sidebar d-none d-lg-block">
+    <div class="sidebar-header">
+      <div class="logo-ios-modern">
+        <i class="bi bi-buildings-fill"></i>
+      </div>
+      <a href="{{ url_for('main.dashboard') }}" class="sidebar-brand">Alcaldía Virtual</a>
+    </div>
+
+    <div class="d-flex flex-column gap-1">
+      <a class="nav-link {% if request.endpoint=='main.dashboard' %}active{% endif %}" href="{{ url_for('main.dashboard') }}">
+        <i class="bi bi-speedometer2"></i> Inicio
+      </a>
+      
+      {% if can('solicitudes') %}
+      <a class="nav-link" href="{{ url_for('solicitudes.index') }}">
+        <i class="bi bi-file-earmark-text"></i> Solicitudes
+      </a>
+      {% endif %}
+
+      {% if can('certificados') %}
+      <a class="nav-link" href="{{ url_for('certificados.index') }}">
+        <i class="bi bi-patch-check"></i> Certificados
+      </a>
+      {% endif %}
+      
+      {% if can('participacion') %}
+      <a class="nav-link" href="{{ url_for('participacion.index') }}">
+        <i class="bi bi-people"></i> Participación
+      </a>
+      {% endif %}
+      
+      {% if can('usos_suelo') %}
+      <a class="nav-link" href="{{ url_for('usos_suelo.index') }}">
+        <i class="bi bi-geo-alt"></i> Usos del Suelo
+      </a>
+      {% endif %}
+      
+      {% if can('ia') %}
+      <a class="nav-link" href="{{ url_for('ia.index') }}">
+        <i class="bi bi-cpu"></i> IA Municipal
+      </a>
+      {% endif %}
+
+      {% if can('seguimiento') %}
+       <a class="nav-link" href="{{ url_for('seguimiento.index') }}">
+         <i class="bi bi-bar-chart"></i> Seguimiento
+       </a>
+       {% endif %}
+       {% if can('configuracion') %}
+       <a class="nav-link" href="{{ url_for('configuracion.index') }}">
+         <i class="bi bi-gear"></i> Configuración
+       </a>
+       {% endif %}
+    </div>
+
+    
+    <div class="user-profile mt-auto">
+        <button id="avatarQuickButton" type="button" class="border-0 bg-transparent p-0 position-relative" title="Perfil rápido" style="display:flex; align-items:center;">
+          {% if current_user_foto %}
+          <img id="avatarThumb" src="/{{ current_user_foto }}" alt="Foto" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 2px solid #e5e7eb;">
+          {% else %}
+          <div id="avatarThumb" class="avatar-wave d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+            <i class="bi bi-person-fill"></i>
+          </div>
+          {% endif %}
+        </button>
+        <div class="d-flex flex-column" style="overflow:hidden;">
+            <span class="fw-bold text-truncate" style="font-size: 0.9rem;">{{ session.user }}</span>
+            <span class="text-muted small">{{ session.user_role }}</span>
+        </div>
+        <a href="{{ url_for('auth.logout') }}" class="ms-auto text-danger" title="Salir">
+            <i class="bi bi-box-arrow-right"></i>
+        </a>
+    </div>
+  </nav>
+  
+  <!-- Offcanvas for Mobile -->
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title fw-bold text-primary">Menú</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+       <!-- Same links as desktop sidebar (simplified) -->
+       <div class="d-flex flex-column gap-2">
+         <a class="nav-link" href="{{ url_for('main.dashboard') }}"><i class="bi bi-speedometer2"></i> Inicio</a>
+         <a class="nav-link text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right"></i> Salir</a>
+       </div>
+    </div>
+  </div>
+  </div>
+  {% endif %}
+
+  <main class="main-content">
+    <!-- Flash Messages -->
+    <div class="mb-4">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      {% for cat, msg in messages %}
+      <div class="alert alert-{{ cat }} alert-dismissible fade show glass-panel" role="alert">
+        {{ msg }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
+    </div>
+
+    {% block content %}{% endblock %}
+  </main>
+  <!-- Global notifications container -->
+  <div id="notificationsContainer"></div>
+
+  <!-- iOS26 Floating Profile Panel -->
+  {% if session.user %}
+  <div id="profileQuickPanel" style="display:none; position:fixed; inset:0; z-index:1200;">
+    <div id="profileQuickBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,0.3); backdrop-filter:blur(8px);"></div>
+    <div id="profileQuickCard" style="position:absolute; width:420px; max-width:95vw; border-radius:24px; padding:1.75rem; z-index:1210; background:linear-gradient(135deg, rgba(255,255,255,0.92), rgba(248,250,252,0.88)); -webkit-backdrop-filter: blur(40px) saturate(200%); backdrop-filter: blur(40px) saturate(200%); border: 1.5px solid rgba(255,255,255,0.7); box-shadow: 0 20px 60px rgba(0,0,0,0.12), 0 6px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 2px rgba(0,0,0,0.04);">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="d-flex align-items-center gap-2">
+          <div style="width:40px; height:40px; border-radius:14px; background:linear-gradient(135deg, #7cb342, #9ccc65); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; box-shadow:0 4px 12px rgba(124,179,66,0.3);"><i class="bi bi-person-fill"></i></div>
+          <div class="fw-bold" style="font-size:1.1rem;">Personaliza tu Avatar</div>
+        </div>
+        <button id="profileQuickClose" type="button" class="btn btn-sm btn-outline-secondary">Cerrar</button>
+      </div>
+      <div class="mb-3" style="border-top:1px solid rgba(124,179,66,0.2); padding-top:1rem;"></div>
+      <div class="d-flex flex-column gap-3">
+        <!-- Avatar Preview -->
+        <div style="text-align:center;">
+          <div class="fw-semibold mb-2" style="font-size:0.95rem; color:#1a1a1a;">Tu Avatar Actual</div>
+          <div style="display:flex; align-items:center; justify-content:center; padding:1rem;">
+            {% if current_user_foto %}
+            <img id="avatarPreview" src="/{{ current_user_foto }}" alt="Foto" style="width:100px; height:100px; object-fit:cover; border-radius:50%; border:3px solid #7cb342; box-shadow: 0 8px 24px rgba(124,179,66,0.3);">
+            {% else %}
+            <div id="avatarPreview" class="avatar-wave" style="width:100px; height:100px; border-radius:50%; border:3px solid rgba(124,179,66,0.3); display:flex; align-items:center; justify-content:center; color:white; font-size:2.5rem;">
+              <i class="bi bi-person-fill"></i>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Upload Photo Form -->
+        <div>
+          <form id="formSubirFoto" enctype="multipart/form-data" class="w-100">
+            <label style="display:block; font-size:0.85rem; color:#6b7280; margin-bottom:0.5rem; font-weight:600;">📸 Subir foto personal</label>
+            <input type="file" name="foto" accept="image/png,image/jpeg" class="form-control form-control-sm mb-2" style="font-size:0.85rem;">
+            <button type="submit" class="btn btn-sm btn-success w-100"><i class="bi bi-upload"></i> Guardar foto</button>
+          </form>
+        </div>
+
+        <!-- Avatares Predefinidos -->
+        <div>
+          <div class="fw-semibold mb-2" style="font-size:0.95rem; color:#1a1a1a; display:flex; align-items:center; gap:0.5rem;">🎨 Avatares Alternativos</div>
+          <div id="avatarCollections" style="max-height:280px; overflow-y:auto; padding-right:0.5rem;">
+            <!-- Se llena dinámicamente -->
+          </div>
+        </div>
+
+        <!-- Tema oscuro -->
+        <div style="padding-top:1rem; border-top:1px solid rgba(124,179,66,0.2);">
+          <div class="fw-semibold mb-2" style="font-size:0.95rem; color:#1a1a1a;">Preferencias Visuales</div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="toggleTema" {% if user_preferences and user_preferences.tema=='dark' %}checked{% endif %}>
+            <label class="form-check-label" for="toggleTema" style="font-size:0.9rem;">🌙 Modo oscuro</label>
+          </div>
+        </div>
+
+        <button type="button" id="btnIrPerfil" class="btn btn-outline-secondary w-100" style="margin-top:1rem;"><i class="bi bi-gear"></i> Ir a Perfil Completo</button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Premium Glassmorphism Avatar Gallery */
+    .avatar-gallery {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin: 0.75rem 0;
+    }
+    .avatar-item {
+      cursor: pointer;
+      border-radius: 12px;
+      padding: 0.5rem;
+      background: #fff;
+      border: 2px solid #e5e7eb;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 70px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .avatar-item:hover {
+      border-color: #7cb342;
+      transform: scale(1.08);
+      box-shadow: 0 4px 12px rgba(124,179,66,0.25);
+    }
+    .avatar-item.selected {
+      border-color: #7cb342;
+      background: linear-gradient(135deg, rgba(124, 179, 66, 0.1), rgba(156, 204, 101, 0.08));
+      box-shadow: 0 0 0 3px rgba(124,179,66,0.15), 0 4px 12px rgba(124,179,66,0.2);
+    }
+    .avatar-item img, .avatar-item svg {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .avatar-wave {
+      background: linear-gradient(135deg, #1b5e20, #4caf50);
+      color: #fff;
+      border-radius: 50%;
+      position: relative;
+      overflow: visible;
+    }
+    .avatar-wave::before, .avatar-wave::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      border: 2px solid rgba(124, 179, 66, 0.5);
+      animation: ripple 2.8s ease-out infinite;
+    }
+    .avatar-wave::after {
+      border-color: rgba(124, 179, 66, 0.25);
+      animation-delay: 1.2s;
+    }
+    @keyframes ripple {
+      0% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+      70% { opacity: 0.15; transform: translate(-50%, -50%) scale(1.8); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(2.1); }
+    }
+  </style>
+  {% endif %}
+
+  <!-- JS Libraries -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
+  <script>
+    $(document).ready(function () {
+      $('.select2').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: 'Seleccione...',
+        allowClear: true
+      });
+    });
+  </script>
+  <style>
+    /* Ripple/Wave avatar animation for default state */
+    .avatar-wave {
+      background: linear-gradient(135deg, #1b5e20, #4caf50);
+      color: #fff;
+      border-radius: 50%;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(27, 94, 32, 0.2);
+      overflow: visible;
+    }
+    .avatar-wave::before, .avatar-wave::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      border: 2px solid rgba(124, 179, 66, 0.6);
+      animation: ripple 2.8s ease-out infinite;
+    }
+    .avatar-wave::after {
+      border-color: rgba(124, 179, 66, 0.35);
+      animation-delay: 1.2s;
+    }
+    @keyframes ripple {
+      0% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+      70% { opacity: 0.15; transform: translate(-50%, -50%) scale(1.8); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(2.1); }
+    }
+  </style>
+
+  <!-- Quick Profile Panel Logic -->
+  {% if session.user %}
+  <script>
+    (function(){
+      const btn = document.getElementById('avatarQuickButton');
+      const panel = document.getElementById('profileQuickPanel');
+      const closeBtn = document.getElementById('profileQuickClose');
+      const backdrop = document.getElementById('profileQuickBackdrop');
+      const formFoto = document.getElementById('formSubirFoto');
+      const avatarPreview = document.getElementById('avatarPreview');
+      const toggleTema = document.getElementById('toggleTema');
+
+      if (!btn || !panel) return;
+
+      function openPanel(){
+        panel.style.display = 'block';
+        // Position card centered on screen
+        const card = document.getElementById('profileQuickCard');
+        const rect = btn.getBoundingClientRect();
+        // Temporarily show card to measure height
+        card.style.visibility = 'hidden';
+        card.style.left = '0px';
+        card.style.top = '0px';
+        const cardRect = card.getBoundingClientRect();
+        const spacing = 12;
+        
+        // Center horizontally
+        let left = (window.innerWidth - cardRect.width) / 2;
+        
+        // Position vertically: prefer above avatar, fallback below
+        let top = rect.top - cardRect.height - spacing;
+        if (top < 20) {
+          top = Math.max(20, rect.bottom + spacing);
+        }
+        
+        // Ensure not going off screen horizontally
+        if (left < 10) left = 10;
+        if (left + cardRect.width > window.innerWidth - 10) {
+          left = window.innerWidth - cardRect.width - 10;
+        }
+        
+        // Keep within viewport vertically
+        if (top + cardRect.height > window.innerHeight - 20) {
+          top = window.innerHeight - cardRect.height - 20;
+        }
+        
+        card.style.top = `${top}px`;
+        card.style.left = `${left}px`;
+        card.style.visibility = 'visible';
+      }
+      function closePanel(){ panel.style.display = 'none'; }
+      btn.addEventListener('click', openPanel);
+      closeBtn && closeBtn.addEventListener('click', closePanel);
+      backdrop && backdrop.addEventListener('click', closePanel);
+
+      // Ir a página de perfil completa
+      const btnIrPerfil = document.getElementById('btnIrPerfil');
+      btnIrPerfil && btnIrPerfil.addEventListener('click', function(){ window.location.href = '{{ url_for("perfil.perfil") }}'; });
+
+      // Subir foto vía fetch
+      if (formFoto) {
+        formFoto.addEventListener('submit', async function(e){
+          e.preventDefault();
+          const fd = new FormData(formFoto);
+          try {
+            const res = await fetch('{{ url_for("perfil.perfil") }}', {
+              method: 'POST',
+              body: fd,
+              headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            let data = null;
+            try { data = await res.json(); } catch {}
+            if (data && data.success && data.foto_perfil) {
+              const newSrc = '/' + data.foto_perfil + `?t=${Date.now()}`;
+              if (avatarPreview && avatarPreview.tagName === 'IMG') {
+                avatarPreview.src = newSrc;
+              }
+              const thumb = document.getElementById('avatarThumb');
+              if (thumb) {
+                if (thumb.tagName === 'IMG') {
+                  thumb.src = newSrc;
+                } else {
+                  // Replace default icon with image
+                  const img = document.createElement('img');
+                  img.id = 'avatarThumb';
+                  img.src = newSrc;
+                  img.alt = 'Foto';
+                  img.style.width = '40px';
+                  img.style.height = '40px';
+                  img.style.objectFit = 'cover';
+                  img.style.borderRadius = '50%';
+                  img.style.border = '2px solid #e5e7eb';
+                  thumb.parentNode.replaceChild(img, thumb);
+                }
+              }
+              window.showNotification && window.showNotification('Foto subida', 'Tu foto fue actualizada.', 'success');
+            } else {
+              window.showNotification && window.showNotification('Guardado', 'Tu foto fue cargada. Si no ves cambios, recarga.', 'info');
+            }
+          } catch(err) {
+            console.error('Error subiendo foto', err);
+            window.showNotification && window.showNotification('Error', 'No fue posible subir la foto.', 'error');
+          }
+        });
+      }
+
+      // Toggle de tema: guarda y aplica CSS dinámico sin recargar
+      if (toggleTema) {
+        toggleTema.addEventListener('change', async function(){
+          const tema = toggleTema.checked ? 'dark' : 'light';
+          const fd = new FormData();
+          fd.append('accion', 'guardar_prefs');
+          fd.append('tema', tema);
+          fd.append('tamano_fuente', '{{ user_preferences and user_preferences.tamano_fuente or "medium" }}');
+          fd.append('tipo_fuente', '{{ user_preferences and user_preferences.tipo_fuente or "system" }}');
+          fd.append('idioma', '{{ user_preferences and user_preferences.idioma or "es" }}');
+          fd.append('notificaciones', '{{ (user_preferences and user_preferences.notificaciones) and "on" or "" }}');
+          try {
+            const saveRes = await fetch('{{ url_for("perfil.perfil") }}', { method: 'POST', body: fd, redirect: 'follow' });
+            // Cargar CSS dinámico
+            const cssRes = await fetch('{{ url_for("api_prefs.get_preferences_css") }}', { cache: 'no-store' });
+            if (cssRes.ok) {
+              const css = await cssRes.text();
+              let styleTag = document.getElementById('dynamicPrefs');
+              if (!styleTag) {
+                styleTag = document.createElement('style');
+                styleTag.id = 'dynamicPrefs';
+                document.head.appendChild(styleTag);
+              }
+              styleTag.textContent = css;
+              window.showNotification && window.showNotification('Tema actualizado', 'Preferencia aplicada: ' + (tema==='dark'?'Oscuro':'Claro'), 'success');
+            } else {
+              window.showNotification && window.showNotification('Guardado', 'Tema guardado. Recarga para ver cambios.', 'info');
+            }
+          } catch(err) {
+            console.error('Error guardando tema', err);
+            window.showNotification && window.showNotification('Error', 'No fue posible cambiar el tema.', 'error');
+          }
+        });
+      }
+
+      // Cargar y mostrar colecciones de avatares
+      let currentAvatarStyle = '{{ user_preferences.get("avatar_style", "siluetas") if user_preferences else "siluetas" }}';
+      let currentAvatarCollection = '{{ user_preferences.get("avatar_collection", "") if user_preferences else "" }}';
+      
+      async function loadAvatarCollections(){
+        try {
+          const res = await fetch('{{ url_for("avatares.list_collections") }}');
+          const collections = await res.json();
+          const container = document.getElementById('avatarCollections');
+          if (!container) return;
+          container.innerHTML = '';
+          
+          for (const [key, collection] of Object.entries(collections)) {
+            const div = document.createElement('div');
+            div.className = 'mb-3';
+            div.innerHTML = `<div style="font-size:0.8rem; font-weight:600; color:#7cb342; margin-bottom:0.75rem;">${collection.name}</div>`;
+            
+            const gallery = document.createElement('div');
+            gallery.className = 'avatar-gallery';
+            
+            collection.avatars.forEach(avatar => {
+              const item = document.createElement('div');
+              item.className = 'avatar-item';
+              if (currentAvatarCollection === avatar.id) item.classList.add('selected');
+              
+              const img = document.createElement('img');
+              img.src = `{{ url_for("avatares.avatar_dinamico", usuario=session.user) }}?style=${key}&collection=${avatar.id}`;
+              img.alt = avatar.id;
+              item.appendChild(img);
+              
+              item.addEventListener('click', async function(){
+                document.querySelectorAll('.avatar-item').forEach(e => e.classList.remove('selected'));
+                item.classList.add('selected');
+                currentAvatarStyle = key;
+                currentAvatarCollection = avatar.id;
+                
+                // Actualizar preview
+                const preview = document.getElementById('avatarPreview');
+                if (preview && preview.tagName === 'IMG') {
+                  preview.remove();
+                }
+                const newImg = document.createElement('img');
+                newImg.id = 'avatarPreview';
+                newImg.src = `{{ url_for("avatares.avatar_dinamico", usuario=session.user) }}?style=${key}&collection=${avatar.id}`;
+                newImg.style.cssText = 'width:100px; height:100px; object-fit:cover; border-radius:50%; border:3px solid #7cb342; box-shadow: 0 8px 24px rgba(124,179,66,0.3);';
+                
+                const thumb = document.getElementById('avatarThumb');
+                if (thumb && thumb.tagName === 'IMG') {
+                  thumb.src = newImg.src;
+                } else if (thumb) {
+                  thumb.parentNode.replaceChild(newImg, thumb);
+                }
+                
+                // Guardar preferencia
+                const fd = new FormData();
+                fd.append('accion', 'guardar_prefs');
+                fd.append('avatar_style', key);
+                fd.append('avatar_collection', avatar.id);
+                fd.append('tema', '{{ user_preferences.get("tema", "light") if user_preferences else "light" }}');
+                fd.append('tamano_fuente', '{{ user_preferences.get("tamano_fuente", "medium") if user_preferences else "medium" }}');
+                fd.append('tipo_fuente', '{{ user_preferences.get("tipo_fuente", "system") if user_preferences else "system" }}');
+                fd.append('idioma', '{{ user_preferences.get("idioma", "es") if user_preferences else "es" }}');
+                await fetch('{{ url_for("perfil.perfil") }}', { method: 'POST', body: fd });
+              });
+              gallery.appendChild(item);
+            });
+            div.appendChild(gallery);
+            container.appendChild(div);
+          }
+        } catch(e) { console.error('Error cargando avatares:', e); }
+      }
+      loadAvatarCollections();
+    })();
+  </script>
+  {% endif %}
+
+  <!-- Global calendar reminders across all modules -->
+  <script>
+    (function initGlobalReminders(){
+      if (window.AV_GLOBAL_NOTIFS) return; // avoid double init on nested pages
+      window.AV_GLOBAL_NOTIFS = true;
+      
+      console.log('🔔 Sistema de notificaciones inicializado');
+
+      // Sound: iPhone-like short notification - Enhanced for background play
+      window.reproducirSonidoNotificacion = function(tipo = 'success') {
+        console.log('🔊 Reproduciendo sonido:', tipo);
+        try {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (!AudioCtx) return;
+          const audioContext = new AudioCtx();
+          const t0 = audioContext.currentTime;
+          if (tipo === 'error') {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(400, t0);
+            gain.gain.setValueAtTime(0.45, t0); gain.gain.exponentialRampToValueAtTime(0.01, t0 + 0.5);
+            osc.connect(gain); gain.connect(audioContext.destination);
+            osc.start(t0); osc.stop(t0 + 0.5);
+          } else {
+            // Success: Triple beep más fuerte (estilo iPhone)
+            const frequencies = [
+              { freq: 1000, start: 0, duration: 0.15 },
+              { freq: 1200, start: 0.1, duration: 0.2 },
+              { freq: 1400, start: 0.25, duration: 0.15 }
+            ];
+            
+            frequencies.forEach(note => {
+              const osc = audioContext.createOscillator();
+              const gain = audioContext.createGain();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(note.freq, t0 + note.start);
+              gain.gain.setValueAtTime(0.40, t0 + note.start); // Volumen más alto (0.40)
+              gain.gain.exponentialRampToValueAtTime(0.01, t0 + note.start + note.duration);
+              osc.connect(gain);
+              gain.connect(audioContext.destination);
+              osc.start(t0 + note.start);
+              osc.stop(t0 + note.start + note.duration);
+            });
+          }
+        } catch (e) { console.error('Error reproduciendo sonido:', e); }
+      }
+
+      // Mostrar burbuja de chat (nuevo mensaje) - 100% seguro con DOM puro
+      window.showChatNotification = function(fromUser, previewText, timestamp){
+        console.log('🎨 showChatNotification llamada con:', {
+          fromUser: fromUser,
+          previewText: previewText,
+          timestamp: timestamp,
+          types: {
+            fromUser: typeof fromUser,
+            previewText: typeof previewText,
+            timestamp: typeof timestamp
+          }
+        });
+
+        try {
+          const container = document.getElementById('notificationsContainer');
+          if (!container) {
+            console.error('❌ Container de notificaciones no encontrado');
+            return;
+          }
+
+          // Sanitizar y validar inputs
+          const cleanFrom = String(fromUser || 'Desconocido').trim();
+          const cleanMessage = String(previewText || '').trim().slice(0, 120);
+          
+          if (!cleanMessage) {
+            console.warn('⚠️ Mensaje vacío - no se mostrará notificación');
+            return;
+          }
+
+          console.log('✅ Creando notificación:', {
+            from: cleanFrom,
+            message: cleanMessage
+          });
+
+          // Crear elementos DOM de forma segura
+          const n = document.createElement('div');
+          n.className = 'notification-toast show';
+
+          // Header
+          const header = document.createElement('div');
+          header.className = 'notification-header';
+
+          // Icono
+          const iconWrapper = document.createElement('div');
+          iconWrapper.className = 'notification-icon';
+          const iconElement = document.createElement('i');
+          iconElement.className = 'bi bi-chat-left-dots-fill';
+          iconWrapper.appendChild(iconElement);
+
+          // Título - usando textContent para evitar XSS
+          const titleElement = document.createElement('div');
+          titleElement.className = 'notification-title';
+          titleElement.textContent = `Nuevo mensaje de ${cleanFrom}`;
+
+          header.appendChild(iconWrapper);
+          header.appendChild(titleElement);
+
+          // Mensaje - usando textContent
+          const messageElement = document.createElement('div');
+          messageElement.className = 'notification-text';
+          messageElement.textContent = cleanMessage;
+
+          // Botones de acción
+          const actionsDiv = document.createElement('div');
+          actionsDiv.style.cssText = 'display:flex; gap:0.6rem; margin-top:0.8rem;';
+
+          // Botón Responder
+          const replyButton = document.createElement('a');
+          replyButton.href = '{{ url_for("ia.internal") }}?open=' + encodeURIComponent(cleanFrom);
+          replyButton.className = 'btn btn-sm btn-success';
+          const replyIcon = document.createElement('i');
+          replyIcon.className = 'bi bi-reply-fill';
+          replyButton.appendChild(replyIcon);
+          replyButton.appendChild(document.createTextNode(' Responder'));
+
+          // Botón Ignorar
+          const ignoreButton = document.createElement('button');
+          ignoreButton.type = 'button';
+          ignoreButton.className = 'btn btn-sm btn-outline-secondary';
+          ignoreButton.textContent = 'Ignorar';
+          ignoreButton.onclick = function() {
+            n.style.animation = 'slideOut 0.4s forwards';
+            setTimeout(() => n.remove(), 400);
+          };
+
+          actionsDiv.appendChild(replyButton);
+          actionsDiv.appendChild(ignoreButton);
+
+          // Ensamblar todo
+          n.appendChild(header);
+          n.appendChild(messageElement);
+          n.appendChild(actionsDiv);
+
+          // Agregar al DOM
+          container.appendChild(n);
+          
+          // Sonido y auto-cierre
+          reproducirSonidoNotificacion('success');
+          setTimeout(() => {
+            n.style.animation = 'slideOut 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards';
+            setTimeout(() => n.remove(), 400);
+          }, 9000);
+
+          console.log('✅ Notificación mostrada exitosamente');
+        } catch(e) {
+          console.error('❌ Error mostrando burbuja chat:', e);
+        }
+      }
+
+      // Sistema de notificaciones de chat - Solo para usuarios autenticados
+      {% if session.user %}
+      
+      // Función global para verificar mensajes (puede llamarse manualmente)
+      window.checkChatNotifications = async function(){
+        try {
+          // Verificar autenticación ANTES de hacer cualquier llamada
+          const currentUser = '{{ session.user }}';
+          if (!currentUser || currentUser.trim() === '') {
+            console.log('⚠️ No hay usuario autenticado - notificaciones deshabilitadas');
+            return;
+          }
+
+          console.log('🔔 Verificando nuevos mensajes para:', currentUser);
+          
+          const res = await fetch('{{ url_for("ia.get_last_incoming_message") }}', { 
+            cache: 'no-store',
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+          
+          if (!res.ok) {
+            console.warn('⚠️ Error al verificar mensajes:', res.status);
+            return;
+          }
+          
+          const data = await res.json();
+          console.log('📦 Datos recibidos del backend:', data);
+          
+          if (!data || !data.message) {
+            console.log('ℹ️ No hay mensajes nuevos');
+            return;
+          }
+          
+          const msg = data.message;
+          console.log('📨 Mensaje a procesar:', {
+            from: msg.from,
+            to: msg.to,
+            messagePreview: (msg.message || '').substring(0, 50),
+            timestamp: msg.timestamp
+          });
+          
+          // Normalizar nombres para comparación (case-insensitive)
+          const normalizedCurrentUser = currentUser.toLowerCase().trim();
+          const normalizedMsgTo = (msg.to || '').toLowerCase().trim();
+          const normalizedMsgFrom = (msg.from || '').toLowerCase().trim();
+          
+          // Validación 1: El mensaje DEBE ser para el usuario actual (case-insensitive)
+          if (normalizedMsgTo !== normalizedCurrentUser) {
+            console.log('⚠️ Mensaje no es para este usuario - ignorado', { 
+              expected: currentUser,
+              expectedNormalized: normalizedCurrentUser,
+              received: msg.to,
+              receivedNormalized: normalizedMsgTo
+            });
+            return;
+          }
+          
+          // Validación 2: NO notificar si el remitente es el mismo usuario
+          if (normalizedMsgFrom === normalizedCurrentUser) {
+            console.log('⚠️ El remitente es el usuario actual - ignorado');
+            return;
+          }
+          
+          // Validación 3: Verificar tipos de datos
+          if (typeof msg.from !== 'string' || typeof msg.message !== 'string') {
+            console.warn('⚠️ Datos de mensaje inválidos - tipos incorrectos', {
+              fromType: typeof msg.from,
+              messageType: typeof msg.message
+            });
+            return;
+          }
+
+          // Validación 4: El mensaje no debe estar vacío ni ser código
+          const cleanMessage = String(msg.message).trim();
+          if (!cleanMessage || cleanMessage.length === 0) {
+            console.warn('⚠️ Mensaje vacío - ignorado');
+            return;
+          }
+
+          // Sistema de deduplicación mejorado (solo notifica una vez por timestamp)
+          const dedupeKey = `av_chat_notif_${normalizedCurrentUser}_from_${normalizedMsgFrom}`;
+          const lastNotifiedTs = localStorage.getItem(dedupeKey);
+          
+          console.log('🔍 Verificando dedupe:', {
+            key: dedupeKey,
+            lastNotified: lastNotifiedTs,
+            currentTimestamp: msg.timestamp,
+            shouldNotify: msg.timestamp !== lastNotifiedTs
+          });
+          
+          if (msg.timestamp && msg.timestamp !== lastNotifiedTs) {
+            console.log('✅ MOSTRANDO NOTIFICACIÓN:', {
+              from: msg.from,
+              message: cleanMessage,
+              timestamp: msg.timestamp
+            });
+            localStorage.setItem(dedupeKey, msg.timestamp);
+            showChatNotification(msg.from, cleanMessage, msg.timestamp);
+          } else {
+            console.log('ℹ️ Mensaje ya fue notificado anteriormente', {
+              stored: lastNotifiedTs,
+              current: msg.timestamp
+            });
+          }
+        } catch(e) { 
+          console.error('❌ Error en sistema de notificaciones:', e); 
+        }
+      };
+
+      // Ejecutar al cargar la página
+      checkChatNotifications();
+      
+      // MODO DEBUG: Botón temporal para probar notificaciones
+      window.testChatNotification = function() {
+        console.log('🧪 TEST: Mostrando notificación de prueba');
+        showChatNotification('admin', 'Este es un mensaje de prueba', new Date().toISOString());
+      };
+      
+      console.log('💡 TIP: Usa testChatNotification() para probar la notificación');
+      console.log('💡 TIP: Usa localStorage.clear() para limpiar historial de notificaciones');
+      
+      {% else %}
+      console.log('ℹ️ Sistema de notificaciones de chat deshabilitado (no autenticado)');
+      {% endif %}
+
+      // Detectar módulo actual y destacar en sidebar
+      document.addEventListener('DOMContentLoaded', function() {
+        const currentPage = window.location.pathname;
+        const sidebarLinks = document.querySelectorAll('.sidebar a[href], [data-nav-link]');
+        
+        sidebarLinks.forEach(link => {
+          const href = link.getAttribute('href') || link.getAttribute('data-href') || '';
+          if (currentPage.includes(href.split('/').filter(x=>x)[0])) {
+            link.style.backgroundColor = 'rgba(124, 179, 66, 0.2)';
+            link.style.borderRadius = '10px';
+            link.style.color = '#7cb342';
+            link.style.fontWeight = '600';
+          }
+        });
+        
+        // Aplicar fondo animado al body
+        document.body.classList.add('app-body');
+      });
+      
+      // Mejorar sonido de notificación para escucharse en background
+      window.showNotification = function(title, text, type = 'info', actions = null) {
+        console.log('📢 Mostrando notificación:', title, text);
+        const container = document.getElementById('notificationsContainer');
+        if (!container) { console.error('❌ Container de notificaciones no encontrado'); return; }
+        const n = document.createElement('div');
+        n.className = 'notification-toast show';
+        
+        // Iconos iOS 26 modernos
+        let iconClass, iconType;
+        if (type === 'success') { iconClass = 'bi-check-circle-fill'; iconType = ''; }
+        else if (type === 'error') { iconClass = 'bi-exclamation-triangle-fill'; iconType = 'error'; }
+        else if (type === 'warning') { iconClass = 'bi-clock-fill'; iconType = 'warning'; }
+        else { iconClass = 'bi-bell-fill'; iconType = ''; }
+        
+        let inner = `
+          <div class="notification-header">
+            <div class="notification-icon ${iconType}"><i class="bi ${iconClass}"></i></div>
+            <div class="notification-title">${title}</div>
+          </div>
+          <div class="notification-text">${text}</div>
+        `;
+        if (actions && actions.eventId) {
+          const calendarBase = '{{ url_for("solicitudes.calendario") }}';
+          inner += `
+            <div style="display:flex; gap:0.6rem; margin-top:1rem; flex-wrap:wrap;">
+              <button type="button" class="btn btn-sm btn-success" data-ev="${actions.eventId}" onclick="(function(id){ window.location.href='${calendarBase}?open_event='+id })(this.getAttribute('data-ev'))">
+                <i class="bi bi-eye-fill"></i> Ver
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" data-ev="${actions.eventId}" onclick="(function(id){ window.AV_snoozeEvent && AV_snoozeEvent(id,5); })(this.getAttribute('data-ev'))">
+                <i class="bi bi-clock"></i> +5 min
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-danger" data-ev="${actions.eventId}" onclick="(function(id){ window.AV_completeEvent && AV_completeEvent(id); })(this.getAttribute('data-ev'))">
+                <i class="bi bi-check-circle"></i> Hecho
+              </button>
+            </div>`;
+        }
+        n.innerHTML = inner;
+        container.appendChild(n);
+        
+        // Duración aumentada a 8 segundos para mejor legibilidad
+        setTimeout(() => { 
+          n.style.animation = 'slideOut 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards'; 
+          setTimeout(() => n.remove(), 400); 
+        }, 8000);
+      }
+
+      // Simple localStorage-based dedupe (notify once per event instance)
+      function wasNotified(key){
+        try {
+          const raw = localStorage.getItem('av_notified_events') || '{}';
+          const db = JSON.parse(raw);
+          return !!db[key];
+        } catch { return false; }
+      }
+      function markNotified(key){
+        try {
+          const raw = localStorage.getItem('av_notified_events') || '{}';
+          const db = JSON.parse(raw);
+          db[key] = Date.now();
+          // Limpiar automáticamente entradas >24 horas
+          const now = Date.now();
+          const oneDay = 24*60*60*1000;
+          for (const k of Object.keys(db)) { 
+            if (now - db[k] > oneDay) {
+              console.log('  🧹 Limpiando notificación antigua:', k);
+              delete db[k];
+            }
+          }
+          localStorage.setItem('av_notified_events', JSON.stringify(db));
+        } catch {}
+      }
+
+      async function tickReminders(){
+        console.log('⏰ Verificando recordatorios...');
+        try {
+          const res = await fetch('{{ url_for("solicitudes.obtener_proximos_eventos") }}', { cache: 'no-store' });
+          if (!res.ok) { console.error('❌ Error en fetch:', res.status); return; }
+          const eventos = await res.json();
+          console.log(`📅 ${eventos.length} eventos encontrados`);
+          const now = new Date();
+          const hoyInicio = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+          
+          eventos.forEach(ev => {
+            const start = new Date(ev.fecha_inicio);
+            const minsLeft = (start - now) / 60000;
+            const esHoy = start >= hoyInicio && start < new Date(hoyInicio.getTime() + 24*60*60*1000);
+            
+            console.log(`  📋 "${ev.titulo}" - Faltan ${Math.round(minsLeft)} min, hoy: ${esHoy}`);
+            
+            // CASO 1: Evento de HOY que ya pasó → Notificar UNA VEZ por sesión
+            if (esHoy && minsLeft < -5) {
+              const sessionKey = `session-past-${ev.id}`;
+              if (!window[sessionKey]) {
+                console.log('  ✅ EVENTO PASADO - Notificando:', ev.titulo);
+                reproducirSonidoNotificacion('success');
+                showNotification('📋 Evento Pendiente', `El evento "${ev.titulo}" de hoy está pendiente de completar.`, 'warning', { eventId: ev.id });
+                window[sessionKey] = true;
+              }
+            }
+            // CASO 2: Evento futuro → Notificaciones en puntos específicos
+            else if (minsLeft > 0) {
+              let notifyPoint = null;
+              let message = '';
+              
+              // Notificación a los 30 minutos
+              if (minsLeft <= 30 && minsLeft > 29) { 
+                notifyPoint = 'remind-30min';
+                message = `Tu evento "${ev.titulo}" comienza en 30 minutos.`;
+              }
+              // Notificación a los 15 minutos
+              else if (minsLeft <= 15 && minsLeft > 14) { 
+                notifyPoint = 'remind-15min';
+                message = `Tu evento "${ev.titulo}" comienza en 15 minutos.`;
+              }
+              // Notificación a los 5 minutos
+              else if (minsLeft <= 5 && minsLeft > 4) { 
+                notifyPoint = 'remind-5min';
+                message = `Tu evento "${ev.titulo}" comienza en 5 minutos.`;
+              }
+              // Notificaciones cada minuto de 4 a 1 minutos
+              else if (minsLeft <= 4 && minsLeft > 3) { 
+                notifyPoint = 'remind-4min';
+                message = `Tu evento "${ev.titulo}" comienza en 4 minutos. ¡Prepárate!`;
+              }
+              else if (minsLeft <= 3 && minsLeft > 2) { 
+                notifyPoint = 'remind-3min';
+                message = `Tu evento "${ev.titulo}" comienza en 3 minutos. ¡Prepárate!`;
+              }
+              else if (minsLeft <= 2 && minsLeft > 1) { 
+                notifyPoint = 'remind-2min';
+                message = `Tu evento "${ev.titulo}" comienza en 2 minutos. ¡Prepárate!`;
+              }
+              else if (minsLeft <= 1 && minsLeft > 0) { 
+                notifyPoint = 'remind-1min';
+                message = `¡Tu evento "${ev.titulo}" comienza en 1 minuto!`;
+              }
+              
+              if (notifyPoint) {
+                const key = `ev-${ev.id}-${notifyPoint}`;
+                if (!wasNotified(key)) {
+                  console.log(`  ✅ Notificación: ${notifyPoint}`, ev.titulo);
+                  reproducirSonidoNotificacion('success');
+                  showNotification('⏰ Recordatorio', message, 'info', { eventId: ev.id });
+                  markNotified(key);
+                }
+              }
+            }
+          });
+        } catch(e) { console.error('❌ Error en tickReminders:', e); }
+      }
+
+      // First check shortly after load, then every minute
+      console.log('⏲️ Programando verificación inicial en 3 segundos...');
+      setTimeout(tickReminders, 3000);
+      setInterval(tickReminders, 60000);
+
+      // Actions: snooze and complete
+      window.AV_snoozeEvent = async function(id, minutes=5){
+        try {
+          const form = new FormData(); form.append('minutos', minutes);
+          const res = await fetch(`/evento/${id}/posponer`, { method: 'POST', body: form });
+          const data = await res.json();
+          if (data && data.success){ showNotification('⏳ Pospuesto', `Evento movido ${minutes} minutos.`, 'success'); }
+          else { showNotification('Error', data?.error || 'No se pudo posponer el evento', 'error'); }
+        } catch { showNotification('Error', 'No se pudo posponer el evento', 'error'); }
+      }
+
+      window.AV_completeEvent = async function(id){
+        try {
+          const res = await fetch(`/evento/${id}/completar`, { method: 'POST' });
+          const data = await res.json();
+          if (data && data.success){ showNotification('✅ Completado', 'El evento fue marcado como completado.', 'success'); }
+          else { showNotification('Error', data?.error || 'No se pudo completar el evento', 'error'); }
+        } catch { showNotification('Error', 'No se pudo completar el evento', 'error'); }
+      }
+    })();
+  </script>
+
+  <!-- Chat Bubble Script -->
+  {% if session.user %}
+  <script src="{{ url_for('static', filename='js/chat-bubble.js') }}"></script>
+  {% endif %}
+
+  <!-- Splash Screen & Screen Saver Script -->
+  <script src="{{ url_for('static', filename='js/splash-screen.js') }}"></script>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

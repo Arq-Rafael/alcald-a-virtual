@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-1">Contrato {{ contrato.numero_proceso or contrato.id }}</h2>
+    <div class="text-muted">{{ contrato.entidad_nombre or 'Entidad no disponible' }}</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="/contratacion">Volver</a>
+    {% if contrato.url_secop %}
+    <a class="btn btn-primary" href="{{ contrato.url_secop }}" target="_blank" rel="noopener">Ver en SECOP</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">Datos generales</div>
+      <div class="card-body">
+        <div class="row mb-2">
+          <div class="col-sm-4 text-muted">Plataforma</div>
+          <div class="col-sm-8">{{ contrato.plataforma or '—' }}</div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-sm-4 text-muted">Estado</div>
+          <div class="col-sm-8"><span class="badge bg-secondary">{{ contrato.estado or 'Sin estado' }}</span></div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-sm-4 text-muted">Tipo de proceso</div>
+          <div class="col-sm-8">{{ contrato.tipo_proceso or '—' }}</div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-sm-4 text-muted">Objeto</div>
+          <div class="col-sm-8">{{ contrato.objeto_contrato or '—' }}</div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-sm-4 text-muted">Cuantía</div>
+          <div class="col-sm-8">{{ fmt_money(contrato.cuantia) }}</div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-sm-4 text-muted">Entidad</div>
+          <div class="col-sm-8">{{ contrato.entidad_nombre or '—' }}{% if contrato.entidad_departamento %} ({{ contrato.entidad_departamento }}){% endif %}</div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-sm-4 text-muted">Fechas</div>
+          <div class="col-sm-8">
+            Publicación: {{ contrato.fecha_publicacion or '—' }}<br>
+            Cierre: {{ contrato.fecha_cierre or '—' }}<br>
+            Adjudicación: {{ contrato.fecha_adjudicacion or '—' }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-header">Proponentes</div>
+      <div class="card-body">
+        {% if proponentes %}
+          <ul class="list-group list-group-flush">
+            {% for p in proponentes %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-semibold">{{ p.get('nombre','') }}</div>
+                <div class="text-muted small">{{ p.get('nit','') }}</div>
+              </div>
+              <div>{{ fmt_money(p.get('valor_propuesta')) }}</div>
+            </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="text-muted">Sin proponentes cargados.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-header">Modificaciones</div>
+      <div class="card-body">
+        {% if modificaciones %}
+          <ul class="list-group list-group-flush">
+            {% for m in modificaciones %}
+            <li class="list-group-item">
+              <div class="fw-semibold">{{ m.get('tipo','') }}</div>
+              <div class="text-muted small">{{ m.get('fecha','') }}</div>
+              <div>{{ fmt_money(m.get('valor')) }}</div>
+            </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="text-muted">Sin modificaciones registradas.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card mb-3">
+      <div class="card-header">Documentos</div>
+      <div class="card-body">
+        {% if docs %}
+          <ul class="list-group list-group-flush">
+            {% for d in docs %}
+            <li class="list-group-item">
+              <div class="fw-semibold">{{ d.get('nombre') or d.get('tipo') or 'Documento' }}</div>
+              {% if d.get('fecha') %}<div class="text-muted small">{{ d.get('fecha') }}</div>{% endif %}
+              {% if d.get('url') %}<a href="{{ d.get('url') }}" target="_blank" rel="noopener">Abrir</a>{% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="text-muted">Sin documentos cargados.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Datos completos</div>
+      <div class="card-body">
+        <pre class="small mb-0" style="white-space: pre-wrap;">{{ datos_completos | tojson(indent=2) }}</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

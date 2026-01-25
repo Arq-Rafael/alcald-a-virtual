@@ -1,0 +1,185 @@
+:root{
+  --ios-accent: #4caf50;
+  --ios-accent-2: #7cb342;
+  /* ====== Layout & Cards ====== */
+  .card { border-radius: 14px; border: 1px solid #e7e7e7; box-shadow: 0 2px 10px rgba(0,0,0,.03); }
+  .card-header {
+    font-weight: 600;
+    background: linear-gradient(180deg,#fafafa,#f3f3f3);
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  /* ====== Forms ====== */
+  .form-label { font-weight: 600; color: #2a2a2a; }
+  .form-control, .form-select { border-radius: 10px; }
+  .form-control:focus, .form-select:focus {
+    border-color: #2ea44f55; box-shadow: 0 0 0 .2rem rgba(46,164,79,.15);
+  }
+  .btn { border-radius: 10px; }
+  .btn-group .btn { border-radius: 8px !important; }
+
+  /* ====== Table ====== */
+  .table { margin: 0; }
+  .table thead th { font-weight: 700; color:#333; border-bottom-width: 1px; }
+  .table-hover tbody tr:hover { background: #fafcff; }
+  .table-sm > :not(caption) > * > * { padding: .55rem .6rem; }
+
+  /* ====== Badges (estado + semáforo) ====== */
+  .badge { font-weight: 600; border-radius: 20px; padding: .35rem .6rem; font-size: .74rem; letter-spacing: .2px; }
+  .badge.bg-success { background-color: #16a34a !important; }
+  .badge.bg-secondary { background-color: #6b7280 !important; }
+  .badge.bg-info { background-color: #0ea5e9 !important; }
+  .badge.bg-warning { background-color: #f59e0b !important; color: #111 !important; }
+  .badge.bg-danger { background-color: #ef4444 !important; }
+
+  /* Puntito semáforo cuando uses sólo color */
+  .badge-dot { display:inline-block; width: .75rem; height: .75rem; border-radius: 50%; vertical-align: middle; }
+  .badge-dot.success { background:#16a34a; }
+  .badge-dot.warning { background:#f59e0b; }
+  .badge-dot.danger  { background:#ef4444; }
+
+  /* ====== Actions column ====== */
+  td.text-end .btn-group .btn { padding: .32rem .5rem; }
+  td.text-end .btn-outline-secondary { border-color: #d8dde6; color:#334155; }
+  td.text-end .btn-outline-secondary:hover { background:#f5f7fb; }
+
+  /* ====== Alerts ====== */
+  .alert { border-radius: 12px; }
+
+  /* ====== Utilities ====== */
+  .table .muted { color:#6b7280; font-size:.85rem; }
+  .nowrap { white-space: nowrap; }
+
+  /* ====== Responsive tweaks ====== */
+  @media (max-width: 1200px) {
+    .table thead th:nth-child(4),
+    .table thead th:nth-child(5),
+    .table tbody td:nth-child(4),
+    .table tbody td:nth-child(5) { display:none; } /* Oculta Ingreso/Vence en pantallas medianas */
+  }
+
+  @media (max-width: 768px) {
+    .btn-group { display:flex; flex-wrap: wrap; gap: .35rem; }
+    td.text-end { text-align: left !important; }
+    .card { border-radius: 10px; }
+  }
+
+  /* ====== Fancy focus visible for a11y ====== */
+  :focus-visible { outline: 3px solid rgba(14,165,233,.4); outline-offset: 2px; border-radius: 6px; }
+
+  /* ====== Micro-animaciones ====== */
+  .btn, .badge { transition: all .12s ease-in-out; }
+.badge.bg-secondary{ background: #e6eef1; color:#0f1720; }
+
+/* Attachment chip */
+.attachment-chip{ display:inline-flex; align-items:center; gap:.5rem; padding:.5rem .75rem; background:rgba(255,255,255,0.9); border-radius:12px; border:1px solid rgba(15,23,32,0.04); color:var(--ios-foreground); }
+.attachment-chip:hover{ transform: translateY(-3px); box-shadow: var(--shadow-1); }
+
+/* Avatar */
+.avatar-circle{ width:44px; height:44px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:1.05rem; color:#fff; background:linear-gradient(135deg,var(--ios-accent-2),var(--ios-accent)); }
+
+/* Inputs */
+.form-control-ios, .form-select, textarea.form-control{ background: rgba(255,255,255,0.8); border:1px solid rgba(15,23,32,0.04); border-radius:12px; padding:10px; transition: box-shadow .18s ease, border-color .18s ease; }
+.form-control-ios:focus, .form-select:focus{ outline:none; box-shadow: 0 6px 20px rgba(76,175,80,0.12); border-color: var(--ios-accent-2); }
+
+/* Buttons small adjustments */
+.btn-success{ background: linear-gradient(135deg,var(--ios-accent-2),var(--ios-accent)); border:none; }
+.btn-white{ background:rgba(255,255,255,0.96); border:1px solid rgba(15,23,32,0.04); }
+
+/* Utility tweaks */
+.cursor-pointer{ cursor:pointer; }
+.fs-7{ font-size:.85rem; }
+.fs-8{ font-size:.75rem; }
+
+/* Responsive adjustments */
+@media (max-width: 992px){ .table-ios thead th:nth-child(4), .table-ios thead th:nth-child(5), .table-ios tbody td:nth-child(4), .table-ios tbody td:nth-child(5){ display:none; } }
+
+/* reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce){ *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; } }
+
+/* ====== Enhancements specific to `radicar_nuevo` view ====== */
+/* Targeting the container used in radicar_nuevo.html to avoid global side-effects */
+.container.fade-in-up > .glass-card {
+  background: rgba(20, 25, 23, 0.82); /* deeper, desaturated dark glass */
+  color: #e6efe6;
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 18px 40px rgba(4,10,6,0.55), inset 0 1px 0 rgba(255,255,255,0.02);
+}
+
+.container.fade-in-up .icon-square-lg {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(124,179,66,1), rgba(88,142,34,1));
+  box-shadow: 0 8px 20px rgba(44, 62, 44, 0.45);
+}
+
+.container.fade-in-up .glass-card h2,
+.container.fade-in-up .glass-card p,
+.container.fade-in-up .glass-card label {
+  color: #e6efe6;
+}
+
+/* Inputs: keep them light against the dark card for contrast */
+.container.fade-in-up .form-control-ios,
+.container.fade-in-up .form-select {
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(15,23,20,0.06);
+  color: #1f2937;
+  padding: 12px 14px;
+}
+.container.fade-in-up .form-control-ios::placeholder { color: #8b8f8b; }
+
+/* Upload zone */
+.container.fade-in-up .upload-zone {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px dashed rgba(255,255,255,0.06);
+  padding: 28px;
+  border-radius: 12px;
+  transition: all 0.18s ease;
+}
+.container.fade-in-up .upload-zone:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 36px rgba(4,10,6,0.48);
+}
+.container.fade-in-up .upload-zone.dragover {
+  background: linear-gradient(90deg, rgba(124,179,66,0.06), rgba(124,179,66,0.03));
+  border-color: rgba(124,179,66,0.35);
+}
+
+.container.fade-in-up .file-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem .8rem;
+  background: rgba(255,255,255,0.95);
+  border-radius: 12px;
+  color: #0f1720;
+  font-weight: 600;
+  box-shadow: 0 6px 18px rgba(2,6,4,0.25);
+}
+
+/* Primary button stronger contrast on dark card */
+.container.fade-in-up .btn-primary-ios {
+  background: linear-gradient(135deg,#7cb342,#558b2f);
+  box-shadow: 0 10px 30px rgba(92, 140, 56, 0.28);
+}
+.container.fade-in-up .btn-primary-ios:hover { transform: translateY(-3px); }
+
+/* Small responsive tweak to keep spacing neat on mobile */
+@media (max-width: 576px) {
+  .container.fade-in-up .upload-zone { padding: 18px; }
+  .container.fade-in-up .icon-square-lg { width: 56px; height: 56px; }
+}
+
+/* accessibility: focus visible for interactive elements inside this view */
+.container.fade-in-up .form-control-ios:focus,
+.container.fade-in-up .form-select:focus,
+.container.fade-in-up .btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 6px rgba(124,179,66,0.09);
+}
+

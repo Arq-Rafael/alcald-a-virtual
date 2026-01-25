@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="mb-3">Gestión del Riesgo</h1>
+
+<form class="row g-2 mb-3" method="get">
+  <div class="col-auto">
+    <select name="estado" class="form-select">
+      <option value="">Todos los estados</option>
+      {% for e in ['Abierto','En respuesta','Cerrado'] %}
+      <option value="{{e}}" {% if request.args.get('estado')==e %}selected{% endif %}>{{e}}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <input type="text" class="form-control" name="q" placeholder="Buscar tipo/dirección/sector/descr./reportado por"
+           value="{{request.args.get('q','')}}">
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-primary">Filtrar</button>
+    <a class="btn btn-secondary" href="{{ url_for('riesgo_list') }}">Limpiar</a>
+    <a class="btn btn-success" href="{{ url_for('riesgo_nuevo') }}">+ Nuevo incidente</a>
+  </div>
+</form>
+
+<table class="table table-hover table-sm align-middle">
+  <thead class="table-light">
+    <tr>
+      <th>#</th>
+      <th>Tipo</th>
+      <th>Alerta</th>
+      <th>Dirección / Sector</th>
+      <th>Reportado</th>
+      <th>Estado</th>
+      <th>Hrs restantes</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rows %}
+    <tr>
+      <td><strong>{{ r['consecutivo'] }}</strong></td>
+      <td>{{ r['tipo'] }}</td>
+      <td><span class="badge bg-{{ 'danger' if r['nivel']=='Rojo' else ('warning' if r['nivel']=='Amarillo' else 'success') }}">{{ r['nivel'] }}</span></td>
+      <td>{{ r['direccion'] }}{% if r['sector'] %} — {{ r['sector'] }}{% endif %}</td>
+      <td>{{ r['fecha_reporte'] }}</td>
+      <td><span class="badge bg-info">{{ r['estado'] }}</span></td>
+      <td><span class="badge bg-{{ r['semaforo'] }}">{{ r['hrs_restantes'] if r['hrs_restantes'] is not none else '—' }}</span></td>
+      <td class="text-end">
+        <a class="btn btn-sm btn-outline-primary" href="{{ url_for('riesgo_detalle', incidente_id=r['id']) }}">Abrir</a>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="8" class="text-center text-muted">Sin resultados</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container" style="max-width:1000px; margin-top:2rem;">
+  <div style="display:flex; align-items:center; gap:1rem; margin-bottom:2rem;">
+    <div style="width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg, #7cb342, #9ccc65); display:flex; align-items:center; justify-content:center; color:white; font-size:1.8rem; box-shadow:0 4px 12px rgba(124,179,66,0.3);"><i class="bi bi-person-circle"></i></div>
+    <div>
+      <h1 style="margin:0; font-size:2rem;">Mi Perfil</h1>
+      <p style="margin:0.5rem 0 0; color:#6b7280; font-size:0.9rem;">Personaliza tu experiencia en Alcaldía Virtual</p>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Avatar Section -->
+    <div class="col-lg-5">
+      <div style="background:linear-gradient(135deg, rgba(255,255,255,0.92), rgba(248,250,252,0.88)); -webkit-backdrop-filter: blur(40px); backdrop-filter: blur(40px); border: 1px solid rgba(255,255,255,0.6); border-radius:24px; padding:2rem; box-shadow: 0 20px 60px rgba(0,0,0,0.08);">
+        <h3 style="font-size:1.2rem; margin-bottom:1.5rem; font-weight:600;">🎨 Tu Avatar</h3>
+        
+        <!-- Avatar Preview -->
+        <div style="text-align:center; margin-bottom:2rem;">
+          {% if usuario.foto_perfil %}
+          <div class="avatar-container">
+            <img src="/{{ usuario.foto_perfil }}" alt="Foto" class="avatar-image">
+          </div>
+          <p style="margin:1rem 0 0; font-size:0.85rem; color:#7cb342; font-weight:600;">Foto personal</p>
+          {% else %}
+          <div class="avatar-container">
+            <div style="width:100%; height:100%; border-radius:50%; background:linear-gradient(135deg, #1b5e20, #4caf50); display:flex; align-items:center; justify-content:center; color:white; font-size:3rem;">
+              <i class="bi bi-person-fill"></i>
+            </div>
+          </div>
+          <p style="margin:1rem 0 0; font-size:0.85rem; color:#7cb342; font-weight:600;">Avatar predefinido</p>
+          {% endif %}
+        </div>
+
+        <!-- Upload Form -->
+        <form id="formSubirFotoPerfil" method="post" enctype="multipart/form-data" class="mb-3">
+          <input type="hidden" name="accion" value="subir_foto">
+          <div class="mb-3">
+            <label style="display:block; font-size:0.85rem; color:#6b7280; margin-bottom:0.5rem; font-weight:600;">Subir nueva foto</label>
+            <input type="file" name="foto" accept="image/png,image/jpeg" class="form-control" style="border-radius:12px;" required>
+          </div>
+          <button type="submit" class="btn btn-success w-100" style="border-radius:12px; font-weight:600;"><i class="bi bi-upload"></i> Guardar foto</button>
+        </form>
+
+        <div style="padding-top:1.5rem; border-top:1px solid rgba(124,179,66,0.2);">
+          <a href="#" onclick="document.getElementById('avatarQuickButton').click(); return false;" class="btn btn-outline-secondary w-100" style="border-radius:12px; font-weight:600;"><i class="bi bi-palette"></i> Ver avatares</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preferences Section -->
+    <div class="col-lg-7">
+      <div style="background:linear-gradient(135deg, rgba(255,255,255,0.92), rgba(248,250,252,0.88)); -webkit-backdrop-filter: blur(40px); backdrop-filter: blur(40px); border: 1px solid rgba(255,255,255,0.6); border-radius:24px; padding:2rem; box-shadow: 0 20px 60px rgba(0,0,0,0.08);">
+        <h3 style="font-size:1.2rem; margin-bottom:1.5rem; font-weight:600;">⚙️ Preferencias</h3>
+        
+        <form method="post">
+          <input type="hidden" name="accion" value="guardar_prefs">
+          
+          <!-- Visual Preferences Grid -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label" style="font-weight:600; font-size:0.9rem;">🌙 Tema</label>
+              <select name="tema" class="form-select" style="border-radius:12px;">
+                <option value="light" {% if preferencias.tema == 'light' %}selected{% endif %}>☀️ Claro</option>
+                <option value="dark" {% if preferencias.tema == 'dark' %}selected{% endif %}>🌙 Oscuro</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" style="font-weight:600; font-size:0.9rem;">📏 Tamaño de fuente</label>
+              <select name="tamano_fuente" class="form-select" style="border-radius:12px;">
+                <option value="small" {% if preferencias.tamano_fuente == 'small' %}selected{% endif %}>A Pequeño</option>
+                <option value="medium" {% if preferencias.tamano_fuente == 'medium' %}selected{% endif %}>A Mediano</option>
+                <option value="large" {% if preferencias.tamano_fuente == 'large' %}selected{% endif %}>A Grande</option>
+                <option value="extra-large" {% if preferencias.tamano_fuente == 'extra-large' %}selected{% endif %}>A Muy grande</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" style="font-weight:600; font-size:0.9rem;">🔤 Tipo de fuente</label>
+              <select name="tipo_fuente" class="form-select" style="border-radius:12px;">
+                <option value="system" {% if preferencias.tipo_fuente == 'system' %}selected{% endif %}>Sistema (Predeterminado)</option>
+                <option value="arial" {% if preferencias.tipo_fuente == 'arial' %}selected{% endif %}>Arial</option>
+                <option value="roboto" {% if preferencias.tipo_fuente == 'roboto' %}selected{% endif %}>Roboto</option>
+                <option value="opensans" {% if preferencias.tipo_fuente == 'opensans' %}selected{% endif %}>Open Sans</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" style="font-weight:600; font-size:0.9rem;">🌐 Idioma</label>
+              <select name="idioma" class="form-select" style="border-radius:12px;">
+                <option value="es" {% if preferencias.idioma == 'es' %}selected{% endif %}>Español</option>
+                <option value="en" {% if preferencias.idioma == 'en' %}selected{% endif %}>English</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Notifications -->
+          <div style="padding:1.5rem; background:linear-gradient(135deg, rgba(124,179,66,0.08), rgba(156,204,101,0.06)); border-radius:16px; margin-bottom:2rem;">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="notificaciones" id="notif" {% if preferencias.notificaciones %}checked{% endif %} style="width:1.25rem; height:1.25rem; cursor:pointer;">
+              <label class="form-check-label" for="notif" style="cursor:pointer; font-weight:500;">🔔 Recibir notificaciones del sistema</label>
+            </div>
+            <p style="margin:0.75rem 0 0 2rem; font-size:0.85rem; color:#6b7280;">Mantente informado sobre actualizaciones y recordatorios importantes</p>
+          </div>
+
+          <button type="submit" class="btn btn-success w-100" style="border-radius:12px; font-weight:600; padding:0.75rem;">💾 Guardar preferencias</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Avatar Gallery Section -->
+  <div style="margin-top:3rem;">
+    <div style="background:linear-gradient(135deg, rgba(255,255,255,0.92), rgba(248,250,252,0.88)); -webkit-backdrop-filter: blur(40px); backdrop-filter: blur(40px); border: 1px solid rgba(255,255,255,0.6); border-radius:24px; padding:2.5rem; box-shadow: 0 20px 60px rgba(0,0,0,0.08);">
+      <h3 style="font-size:1.2rem; margin-bottom:2rem; font-weight:600;">🎭 Avatares Alternativos</h3>
+      <p style="color:#6b7280; font-size:0.95rem; margin-bottom:2rem;">Elige un avatar predefinido o sube tu propia foto. Sin necesidad de datos personales.</p>
+      
+      <div id="profileAvatarGallery" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap:1.5rem; margin-bottom:2rem;">
+        <!-- Loaded dynamically via JS -->
+        <div style="text-align:center; color:#9ca3af; padding:2rem;">
+          <p>Cargando avatares...</p>
+        </div>
+      </div>
+
+      <form method="post" id="avatarForm" style="display:none;">
+        <input type="hidden" name="accion" value="guardar_prefs">
+        <input type="hidden" name="avatar_style" id="avatar_style_hidden">
+        <input type="hidden" name="avatar_collection" id="avatar_collection_hidden">
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer Info -->
+  <div style="margin-top:3rem; text-align:center; color:#9ca3af; font-size:0.9rem;">
+    <p style="margin:0;">Los cambios se guardan automáticamente. Todos tus datos están protegidos.</p>
+  </div>
+</div>
+
+<style>
+  /* Avatar Container with Ring Animation */
+  .avatar-container {
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 1rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+    border: 4px solid #7cb342;
+    box-shadow: 0 12px 36px rgba(124,179,66,0.3);
+    position: relative;
+    z-index: 3;
+    background: white;
+  }
+
+  /* Animated rings around avatar */
+  .avatar-container::before,
+  .avatar-container::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(124,179,66,0.4);
+    animation: pulse-ring 2s ease-in-out infinite;
+  }
+
+  .avatar-container::before {
+    width: 160px;
+    height: 160px;
+    animation-delay: 0s;
+  }
+
+  .avatar-container::after {
+    width: 180px;
+    height: 180px;
+    border-color: rgba(124,179,66,0.2);
+    animation-delay: 0.5s;
+  }
+
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1.1);
+      opacity: 0;
+    }
+  }
+
+  .profile-avatar-item {
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    background: linear-gradient(135deg, #f8f9fa, #fff);
+  }
+
+  .profile-avatar-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(124,179,66,0.15);
+  }
+
+  .profile-avatar-item.selected {
+    border-color: #7cb342;
+    box-shadow: 0 0 0 3px rgba(124,179,66,0.2), 0 12px 28px rgba(124,179,66,0.15);
+  }
+
+  .profile-avatar-item img,
+  .profile-avatar-item svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .profile-avatar-checkmark {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    background: #7cb342;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .profile-avatar-item.selected .profile-avatar-checkmark {
+    opacity: 1;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Cargar galería de avatares
+    loadProfileAvatarGallery();
+    
+    // Manejar formulario de upload de foto
+    const formUpload = document.getElementById('formSubirFotoPerfil');
+    if (formUpload) {
+      formUpload.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(formUpload);
+        
+        try {
+          const response = await fetch('{{ url_for("perfil.perfil") }}', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+          });
+          
+          if (response.ok) {
+            try {
+              const data = await response.json();
+              if (data.success && data.foto_perfil) {
+                // Recargar la página para mostrar la nueva foto
+                window.location.reload();
+              }
+            } catch (e) {
+              // Si no es JSON, recargar de todas formas
+              window.location.reload();
+            }
+          } else {
+            alert('Error al subir la foto');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error al subir la foto');
+        }
+      });
+    }
+  });
+
+  async function loadProfileAvatarGallery() {
+    try {
+      const response = await fetch('{{ url_for("avatares.list_collections") }}');
+      const collections = await response.json();
+      const gallery = document.getElementById('profileAvatarGallery');
+      gallery.innerHTML = '';
+
+      for (const [key, collection] of Object.entries(collections)) {
+        const label = document.createElement('div');
+        label.style.cssText = 'grid-column: 1 / -1; margin-top: 1rem; margin-bottom: 0.5rem;';
+        label.innerHTML = `<h5 style="margin: 0; font-weight: 600; color: #6b7280; font-size: 0.9rem;">${collection.name}</h5>`;
+        gallery.appendChild(label);
+
+        for (const avatar of collection.avatars) {
+          const item = document.createElement('div');
+          item.className = 'profile-avatar-item';
+          item.style.minHeight = '120px';
+          item.innerHTML = `
+            <img src="{{ url_for('avatares.avatar_dinamico', usuario=session.user) }}?style=${key}&collection=${avatar.id}" alt="${avatar.id}">
+            <div class="profile-avatar-checkmark">✓</div>
+          `;
+          
+          item.addEventListener('click', async function() {
+            document.querySelectorAll('.profile-avatar-item').forEach(el => el.classList.remove('selected'));
+            item.classList.add('selected');
+            
+            document.getElementById('avatar_style_hidden').value = key;
+            document.getElementById('avatar_collection_hidden').value = avatar.id;
+            
+            const form = document.getElementById('avatarForm');
+            const formData = new FormData(form);
+            
+            try {
+              const saveResponse = await fetch('{{ url_for("perfil.perfil") }}', {
+                method: 'POST',
+                body: formData
+              });
+              if (saveResponse.ok) {
+                console.log('Avatar guardado exitosamente');
+              }
+            } catch (error) {
+              console.error('Error guardando avatar:', error);
+            }
+          });
+          
+          gallery.appendChild(item);
+        }
+      }
+    } catch (error) {
+      console.error('Error cargando galería de avatares:', error);
+      document.getElementById('profileAvatarGallery').innerHTML = '<p style="color: #ef4444;">Error al cargar avatares</p>';
+    }
+  }
+</script>
+{% endblock %}

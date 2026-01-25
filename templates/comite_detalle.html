@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <h1>Acta N° {{ a['numero_acta'] or a['consecutivo'] }}</h1>
+
+  <div class="d-flex gap-2">
+    {% if is_admin() %}
+    <form action="{{ url_for('comite_eliminar', acta_id=a['id']) }}" method="post"
+      onsubmit="return confirm('¿Eliminar esta acta?');" class="d-inline">
+      <button class="btn btn-outline-danger">Eliminar</button>
+    </form>
+    {% endif %}
+    <a href="{{ url_for('comite_list') }}" class="btn btn-secondary">Volver</a>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card mb-3">
+      <div class="card-header">Acta</div>
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-sm-3">Fecha</dt>
+          <dd class="col-sm-9">{{ a['fecha'] }}</dd>
+
+          <dt class="col-sm-3">Lugar</dt>
+          <dd class="col-sm-9">{{ a['lugar'] }}</dd>
+
+          <dt class="col-sm-3">Asistentes</dt>
+          <dd class="col-sm-9">{{ a['asistentes'] }}</dd>
+
+          <dt class="col-sm-3">Orden del día</dt>
+          <dd class="col-sm-9" style="white-space:pre-wrap">{{ a['orden_dia'] }}</dd>
+
+          <dt class="col-sm-3">Decisiones</dt>
+          <dd class="col-sm-9" style="white-space:pre-wrap">{{ a['decisiones'] }}</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header">Tareas / Acuerdos</div>
+      <div class="card-body">
+        <form class="row g-2 mb-3" method="post" action="{{ url_for('comite_tarea_nueva', acta_id=a['id']) }}">
+          <div class="col-md-6">
+            <input name="descripcion" class="form-control" placeholder="Descripción" required>
+          </div>
+          <div class="col-md-3">
+            <input name="responsable" class="form-control" placeholder="Responsable" required>
+          </div>
+          <div class="col-md-3">
+            <input name="fecha_maxima" type="date" class="form-control" required>
+          </div>
+          <div class="col-12">
+            <button class="btn btn-outline-success">+ Agregar tarea</button>
+          </div>
+        </form>
+
+        <ul class="list-group">
+          {% for t in tareas %}
+          <li class="list-group-item">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <strong>{{ t.descripcion }}</strong> — {{ t.responsable }} |
+                Vence: {{ t.fecha_maxima }} |
+                <span class="badge bg-{{ t.color }}">{{ t.dias_restantes }} días</span>
+                <div class="small text-muted">Estado: {{ t.estado }}</div>
+              </div>
+              <form class="d-flex gap-2" method="post" action="{{ url_for('comite_tarea_actualizar', tarea_id=t.id) }}"
+                enctype="multipart/form-data">
+                <select name="estado" class="form-select form-select-sm" style="width:160px">
+                  {% for e in ['Abierta','En curso','Cerrada'] %}
+                  <option value="{{ e }}" {% if t.estado==e %}selected{% endif %}>{{ e }}</option>
+                  {% endfor %}
+                </select>
+                <input type="file" name="evidencia" class="form-control form-control-sm" style="width:220px">
+                <button class="btn btn-sm btn-primary">Guardar</button>
+              </form>
+            </div>
+          </li>
+          {% else %}
+          <li class="list-group-item text-muted">Sin tareas</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">Acta firmada</div>
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+          <input type="file" name="acta" class="form-control mb-2" accept="application/pdf,image/*">
+          <button class="btn btn-primary w-100">Subir/Actualizar acta</button>
+        </form>
+        {% if a['acta_path'] %}
+        <a class="btn btn-outline-secondary w-100 mt-2"
+          href="{{ url_for('comite_descargar_acta', acta_id=a['id']) }}">Descargar acta</a>
+        {% else %}
+        <div class="text-muted small mt-2">Sin archivo de acta.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2>Acta Comité de Gestión del Riesgo</h2>
+
+<form method="post" action="{{ url_for('comite_guardar', acta_id=a['id']) }}" class="mb-3">
+  <div class="row g-3">
+    <div class="col-md-3">
+      <label class="form-label">Fecha</label>
+      <input class="form-control" value="{{ a['fecha'] }}" disabled>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Número de acta</label>
+      {% if is_admin() %}
+      <input name="numero_acta" class="form-control" value="{{ a['numero_acta'] or a['consecutivo'] }}">
+      <div class="form-text">Solo admin puede modificar.</div>
+      {% else %}
+      <input class="form-control" value="{{ a['numero_acta'] or a['consecutivo'] }}" disabled>
+      {% endif %}
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Tema</label>
+      <input name="tema" class="form-control" value="{{ a['tema'] or '' }}">
+    </div>
+
+    <div class="col-12">
+      <label class="form-label">Acuerdos</label>
+      <textarea name="acuerdos" class="form-control" rows="3">{{ a['acuerdos'] or '' }}</textarea>
+    </div>
+
+    <div class="col-12">
+      <label class="form-label">Tareas</label>
+      <textarea name="tareas" class="form-control" rows="3">{{ a['tareas'] or '' }}</textarea>
+    </div>
+
+    <div class="col-12">
+      <label class="form-label">Transcripción (editable)</label>
+      <textarea name="transcripcion" class="form-control" rows="10">{{ a['transcripcion'] or '' }}</textarea>
+      <div class="form-text">Si subes un audio/video y hay IA, se llena automáticamente.</div>
+    </div>
+
+    <div class="col-12 d-flex gap-2">
+      <button class="btn btn-success">Guardar</button>
+      <a class="btn btn-secondary" href="{{ url_for('comite_pdf', acta_id=a['id']) }}">Generar PDF</a>
+      {% if a['acta_pdf'] %}
+      <a class="btn btn-outline-primary" href="{{ url_for('comite_pdf', acta_id=a['id']) }}">Descargar última
+        versión</a>
+      {% endif %}
+    </div>
+  </div>
+</form>
+
+<hr>
+
+<h5>Grabaciones</h5>
+<form method="post" action="{{ url_for('comite_subir_media', acta_id=a['id']) }}" enctype="multipart/form-data"
+  class="mb-3">
+  <div class="input-group">
+    <input type="file" name="media" class="form-control" accept="audio/*,video/*" required>
+    <button class="btn btn-primary">Subir y (si es posible) transcribir</button>
+  </div>
+  <div class="form-text">Formatos: MP3/WAV/M4A/AAC/OGG o MP4/MOV/MKV.</div>
+</form>
+
+{% if a['archivo_video'] %}
+<video controls style="max-width:100%; border-radius:8px;">
+  <source src="{{ '/'+ a['archivo_video']|replace('\\','/') }}" type="video/mp4">
+</video>
+{% endif %}
+
+{% if a['archivo_audio'] %}
+<audio controls style="width:100%;">
+  <source src="{{ '/'+ a['archivo_audio']|replace('\\','/') }}" type="audio/mpeg">
+</audio>
+{% endif %}
+
+{% endblock %}

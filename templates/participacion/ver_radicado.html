@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">Radicado {{ radicado.numero_radicado }}</h4>
+                    <p class="text-muted">{{ radicado.fecha_radicacion.strftime('%d/%m/%Y') }} · {{ radicado.remitente_nombre }}</p>
+                    <hr>
+                    <h6>Asunto</h6>
+                    <p>{{ radicado.asunto }}</p>
+                    <h6>Detalle</h6>
+                    <p>{{ radicado.detalle }}</p>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5>Historial</h5>
+                    <ul class="list-group list-group-flush">
+                        {% for h in historial %}
+                        <li class="list-group-item">
+                            <strong>{{ h.usuario }}</strong> - {{ h.fecha.strftime('%d/%m/%Y %H:%M') }}
+                            <div>{{ h.comentario }}</div>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item text-muted">No hay historial</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h6>Datos</h6>
+                    <p><strong>Remitente:</strong> {{ radicado.remitente_nombre }}</p>
+                    <p><strong>Entidad:</strong> {{ radicado.remitente_entidad }}</p>
+                    <p><strong>Estado:</strong> {{ radicado.estado }}</p>
+                </div>
+            </div>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <a href="{{ url_for('participacion.responder', id=radicado.id) }}" class="btn btn-primary">Responder</a>
+                    <a href="{{ url_for('participacion.descargar', id=radicado.id) }}" class="btn btn-outline-secondary ms-2">Descargar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

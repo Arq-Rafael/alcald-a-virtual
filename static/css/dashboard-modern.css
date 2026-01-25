@@ -1,0 +1,394 @@
+/* ============================================================
+   DASHBOARD PREMIUM - REDISEÑO MODERNO Y ELEVADO v2.0
+   ============================================================ */
+
+/* Variables de color mejoradas */
+:root {
+  --gradient-primary: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+  --gradient-secondary: linear-gradient(135deg, #f57c00 0%, #fb8c00 100%);
+  --gradient-accent: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%);
+  --gradient-purple: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+  --gradient-danger: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  --shadow-elevated: 0 20px 50px rgba(0, 0, 0, 0.15);
+  --shadow-hover: 0 30px 70px rgba(0, 0, 0, 0.25);
+}
+
+/* Dashboard Grid Mejorado */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  animation: fadeInGrid 0.8s ease-out;
+}
+
+@keyframes fadeInGrid {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Glass Card Rediseñado - ELEVADO */
+.glass-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(27, 94, 32, 0.1);
+  border-radius: 28px;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-elevated);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: cardSlideIn 0.6s ease-out backwards;
+}
+
+.glass-card:nth-child(1) { animation-delay: 0.1s; }
+.glass-card:nth-child(2) { animation-delay: 0.15s; }
+.glass-card:nth-child(3) { animation-delay: 0.2s; }
+.glass-card:nth-child(4) { animation-delay: 0.25s; }
+.glass-card:nth-child(5) { animation-delay: 0.3s; }
+.glass-card:nth-child(6) { animation-delay: 0.35s; }
+.glass-card:nth-child(7) { animation-delay: 0.4s; }
+.glass-card:nth-child(8) { animation-delay: 0.45s; }
+.glass-card:nth-child(9) { animation-delay: 0.5s; }
+.glass-card:nth-child(10) { animation-delay: 0.55s; }
+
+@keyframes cardSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Efecto Shine en Hover */
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: rotate(45deg);
+  opacity: 0;
+  transition: opacity 0.6s;
+  pointer-events: none;
+}
+
+.glass-card:hover::before {
+  opacity: 1;
+  animation: shine 0.6s ease;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+/* Hover Effect Elevado */
+.glass-card:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: var(--shadow-hover);
+  border-color: rgba(27, 94, 32, 0.3);
+}
+
+/* Icon Wrapper Mejorado */
+.card-icon-wrapper {
+  width: 70px;
+  height: 70px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  transition: all 0.4s ease;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  animation: iconPop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) backwards;
+}
+
+.card-icon-wrapper:nth-child(1) { animation-delay: 0.1s; }
+
+@keyframes iconPop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.glass-card:hover .card-icon-wrapper {
+  transform: scale(1.15) rotate(10deg);
+}
+
+/* Estilos específicos por color */
+.card-icon-wrapper.text-primary {
+  background: var(--gradient-primary);
+  color: white;
+}
+
+.card-icon-wrapper.text-success {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: white;
+}
+
+.card-icon-wrapper.text-warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+  color: white;
+}
+
+.card-icon-wrapper.text-info {
+  background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+  color: white;
+}
+
+.card-icon-wrapper.text-danger {
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  color: white;
+}
+
+.card-icon-wrapper.text-white {
+  background: var(--gradient-purple);
+  color: white;
+}
+
+/* Títulos */
+.glass-card h5 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-dark, #1f2937);
+  margin: 0.5rem 0;
+  transition: color 0.3s ease;
+}
+
+.glass-card:hover h5 {
+  color: var(--primary, #1b5e20);
+}
+
+/* Descripción */
+.glass-card > p {
+  font-size: 0.95rem;
+  color: var(--text-muted, #6b7280);
+  line-height: 1.5;
+  margin: 0.5rem 0;
+  flex-grow: 1;
+}
+
+/* Botones Rediseñados */
+.glass-card .btn {
+  margin-top: auto;
+  padding: 0.85rem 1.5rem;
+  font-weight: 700;
+  border-radius: 14px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.9rem;
+}
+
+/* Botón Premium con gradiente dinámico */
+.glass-card .btn-premium {
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  box-shadow: 0 8px 20px rgba(27, 94, 32, 0.3);
+}
+
+.glass-card .btn-premium::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0));
+  transition: left 0.4s ease-out;
+  pointer-events: none;
+}
+
+.glass-card .btn-premium:hover::before {
+  left: 100%;
+}
+
+.glass-card .btn-premium:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(27, 94, 32, 0.4);
+  background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+  color: white;
+}
+
+.glass-card .btn-premium:active {
+  transform: translateY(-1px);
+}
+
+/* Icono del botón */
+.glass-card .btn i {
+  transition: transform 0.3s ease;
+  font-size: 1.1rem;
+}
+
+.glass-card .btn:hover i {
+  transform: translateX(4px);
+}
+
+/* Efecto ripple mejorado */
+.glass-card .btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.glass-card .btn:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Respuesta para móviles */
+@media (max-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .glass-card {
+    padding: 1.5rem;
+  }
+  
+  .card-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+  
+  .glass-card {
+    padding: 1.5rem;
+  }
+  
+  .glass-card:hover {
+    transform: translateY(-8px) scale(1.01);
+  }
+  
+  .card-icon-wrapper {
+    width: 55px;
+    height: 55px;
+    font-size: 1.6rem;
+  }
+}
+
+/* Fondo elegante del dashboard */
+.dashboard-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(27, 94, 32, 0.05) 0%, 
+    rgba(245, 158, 11, 0.03) 50%, 
+    rgba(6, 182, 212, 0.02) 100%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Encabezado mejorado */
+.dashboard-header {
+  animation: slideDown 0.6s ease-out;
+  margin-bottom: 3rem;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dashboard-header h2 {
+  background: linear-gradient(135deg, var(--primary, #1b5e20) 0%, var(--secondary, #f57c00) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.dashboard-header .badge {
+  background: var(--gradient-primary);
+  padding: 0.6rem 1.5rem;
+  font-weight: 700;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  animation: badgeScale 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.3s backwards;
+}
+
+@keyframes badgeScale {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Estado de la página */
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

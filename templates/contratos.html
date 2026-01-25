@@ -1,0 +1,713 @@
+{% extends "base.html" %}
+{% block title %}Gestión de Contratos - SECOP{% endblock %}
+
+{% block styles %}
+<style>
+  .contratos-wrapper {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: calc(100vh - 60px);
+    padding: 30px 20px;
+  }
+
+  .contratos-container {
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  /* Hero */
+  .contratos-hero {
+    background: linear-gradient(135deg, #0d47a1 0%, #1976d2 100%);
+    color: white;
+    padding: 40px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  }
+
+  .contratos-hero h1 {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+
+  .contratos-hero p {
+    font-size: 1rem;
+    opacity: 0.95;
+  }
+
+  /* Formulario de importación */
+  .import-section {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+  }
+
+  .import-section h3 {
+    color: #0d47a1;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+  }
+
+  .import-form {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .import-form input[type="text"] {
+    flex: 1;
+    min-width: 300px;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+  }
+
+  .import-form input[type="text"]:focus {
+    outline: none;
+    border-color: #1976d2;
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+  }
+
+  .btn-import {
+    background: #1976d2;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+  }
+
+  .btn-import:hover {
+    background: #0d47a1;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(13, 71, 161, 0.3);
+  }
+
+  .btn-import:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+
+  .import-hint {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 10px;
+  }
+
+  /* Estadísticas */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  .stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: transform 0.3s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0d47a1;
+    margin-bottom: 5px;
+  }
+
+  .stat-label {
+    font-size: 0.9rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Filtros */
+  .filters-section {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filters-section select,
+  .filters-section input {
+    padding: 10px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    min-width: 150px;
+  }
+
+  /* Tabla de contratos */
+  .contratos-table-wrapper {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+
+  .contratos-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .contratos-table thead {
+    background: linear-gradient(135deg, #0d47a1 0%, #1976d2 100%);
+    color: white;
+  }
+
+  .contratos-table th {
+    padding: 15px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .contratos-table tbody tr {
+    border-bottom: 1px solid #e9ecef;
+    transition: background 0.2s ease;
+  }
+
+  .contratos-table tbody tr:hover {
+    background: #f8f9fa;
+  }
+
+  .contratos-table td {
+    padding: 15px 12px;
+    font-size: 0.9rem;
+    vertical-align: middle;
+  }
+
+  .badge-plataforma {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .badge-secop-i {
+    background: #e3f2fd;
+    color: #0d47a1;
+  }
+
+  .badge-secop-ii {
+    background: #f3e5f5;
+    color: #6a1b9a;
+  }
+
+  .badge-estado {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .badge-publicado { background: #e3f2fd; color: #0d47a1; }
+  .badge-adjudicado { background: #c8e6c9; color: #2e7d32; }
+  .badge-ejecucion { background: #fff9c4; color: #f57f17; }
+  .badge-liquidado { background: #f5f5f5; color: #616161; }
+  .badge-desierto { background: #ffccbc; color: #d84315; }
+
+  .btn-accion {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-right: 5px;
+  }
+
+  .btn-ver {
+    background: #e3f2fd;
+    color: #0d47a1;
+  }
+
+  .btn-ver:hover {
+    background: #0d47a1;
+    color: white;
+  }
+
+  .btn-sincronizar {
+    background: #fff9c4;
+    color: #f57f17;
+  }
+
+  .btn-sincronizar:hover {
+    background: #f57f17;
+    color: white;
+  }
+
+  .btn-eliminar {
+    background: #ffccbc;
+    color: #d84315;
+  }
+
+  .btn-eliminar:hover {
+    background: #d84315;
+    color: white;
+  }
+
+  .alert {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: none;
+    animation: slideDown 0.3s ease;
+  }
+
+  .alert.show {
+    display: block;
+  }
+
+  .alert-success {
+    background: #c8e6c9;
+    color: #2e7d32;
+    border-left: 4px solid #2e7d32;
+  }
+
+  .alert-error {
+    background: #ffccbc;
+    color: #d84315;
+    border-left: 4px solid #d84315;
+  }
+
+  .alert-info {
+    background: #e3f2fd;
+    color: #0d47a1;
+    border-left: 4px solid #0d47a1;
+  }
+
+  @keyframes slideDown {
+    from {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+  }
+
+  .spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #1976d2;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+  }
+
+  .empty-state i {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.3;
+  }
+
+  .valor-cuantia {
+    font-weight: 600;
+    color: #2e7d32;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="contratos-wrapper">
+  <div class="contratos-container">
+    
+    <!-- Hero -->
+    <div class="contratos-hero">
+      <h1>📋 Gestión de Contratos SECOP</h1>
+      <p>Importa y gestiona contratos desde SECOP I y SECOP II. Seguimiento automatizado de procesos contractuales.</p>
+    </div>
+
+    <!-- Alerta -->
+    <div id="alertMessage" class="alert"></div>
+
+    <!-- Formulario de importación -->
+    <div class="import-section">
+      <h3>🔗 Importar Contrato desde SECOP</h3>
+      <form class="import-form" onsubmit="importarContrato(event)">
+        <div style="flex: 1; min-width: 300px;">
+          <input 
+            type="text" 
+            id="urlContrato" 
+            name="url" 
+            placeholder="Pega aquí la URL del contrato (SECOP I o SECOP II)"
+            required
+          >
+          <div class="import-hint">
+            <strong>SECOP I:</strong> https://www.contratos.gov.co/consultas/detalleProceso.do?numConstancia=...<br>
+            <strong>SECOP II:</strong> https://community.secop.gov.co/Public/Tendering/OpportunityDetail/Index?noticeUID=CO1.NTC...
+          </div>
+        </div>
+        <button type="submit" class="btn-import" id="btnImportar">
+          <i class="bi bi-download"></i> Importar Contrato
+        </button>
+      </form>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <div class="stat-value" id="statTotal">0</div>
+        <div class="stat-label">Total Contratos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statSecopI">0</div>
+        <div class="stat-label">SECOP I</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statSecopII">0</div>
+        <div class="stat-label">SECOP II</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statCuantia">$0</div>
+        <div class="stat-label">Cuantía Total</div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters-section">
+      <select id="filtroPlataforma" onchange="aplicarFiltros()">
+        <option value="">Todas las plataformas</option>
+        <option value="SECOP_I">SECOP I</option>
+        <option value="SECOP_II">SECOP II</option>
+      </select>
+
+      <select id="filtroEstado" onchange="aplicarFiltros()">
+        <option value="">Todos los estados</option>
+        <option value="Publicado">Publicado</option>
+        <option value="Adjudicado">Adjudicado</option>
+        <option value="Ejecución">Ejecución</option>
+        <option value="Liquidado">Liquidado</option>
+        <option value="Desierto">Desierto</option>
+      </select>
+
+      <input 
+        type="text" 
+        id="filtroSearch" 
+        placeholder="Buscar por número, objeto, entidad..."
+        onkeyup="aplicarFiltros()"
+      >
+    </div>
+
+    <!-- Tabla de contratos -->
+    <div class="contratos-table-wrapper">
+      <table class="contratos-table">
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Plataforma</th>
+            <th>Entidad</th>
+            <th>Objeto</th>
+            <th>Cuantía</th>
+            <th>Estado</th>
+            <th>Fecha Pub.</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="contratosTableBody">
+          <tr>
+            <td colspan="8">
+              <div class="loading">
+                <div class="spinner"></div>
+                Cargando contratos...
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ===== VARIABLES GLOBALES =====
+let contratosData = [];
+
+// ===== INICIALIZACIÓN =====
+document.addEventListener('DOMContentLoaded', function() {
+  cargarEstadisticas();
+  cargarContratos();
+});
+
+// ===== ESTADÍSTICAS =====
+async function cargarEstadisticas() {
+  try {
+    const response = await fetch('/api/contratos/estadisticas');
+    const stats = await response.json();
+    
+    document.getElementById('statTotal').textContent = stats.total_contratos || 0;
+    const porPlataforma = stats.por_plataforma || {};
+    document.getElementById('statSecopI').textContent = porPlataforma.SECOP_I || 0;
+    document.getElementById('statSecopII').textContent = porPlataforma.SECOP_II || 0;
+    
+    const cuantia = stats.cuantia_total || 0;
+    document.getElementById('statCuantia').textContent = formatearMoneda(cuantia);
+  } catch (error) {
+    console.error('Error cargando estadísticas:', error);
+    // Valores por defecto en caso de error
+    document.getElementById('statTotal').textContent = '0';
+    document.getElementById('statSecopI').textContent = '0';
+    document.getElementById('statSecopII').textContent = '0';
+    document.getElementById('statCuantia').textContent = '$0';
+  }
+}
+
+// ===== IMPORTACIÓN =====
+async function importarContrato(event) {
+  event.preventDefault();
+  
+  const url = document.getElementById('urlContrato').value.trim();
+  const btnImportar = document.getElementById('btnImportar');
+  
+  if (!url) {
+    mostrarAlerta('Debe ingresar una URL', 'error');
+    return;
+  }
+  
+  btnImportar.disabled = true;
+  btnImportar.innerHTML = '<i class="bi bi-hourglass-split"></i> Importando...';
+  mostrarAlerta('Importando contrato desde SECOP...', 'info');
+  
+  try {
+    const response = await fetch('/api/contratos/importar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: url, usuario: '{{ session.user }}' })
+    });
+    
+    const resultado = await response.json();
+    
+    if (resultado.success) {
+      mostrarAlerta(`✓ ${resultado.mensaje}`, 'success');
+      document.getElementById('urlContrato').value = '';
+      cargarEstadisticas();
+      cargarContratos();
+    } else {
+      mostrarAlerta(`Error: ${resultado.error}`, 'error');
+    }
+  } catch (error) {
+    console.error('Error importando contrato:', error);
+    mostrarAlerta('Error de conexión al importar contrato', 'error');
+  } finally {
+    btnImportar.disabled = false;
+    btnImportar.innerHTML = '<i class="bi bi-download"></i> Importar Contrato';
+  }
+}
+
+// ===== LISTADO DE CONTRATOS =====
+async function cargarContratos() {
+  try {
+    const plataforma = document.getElementById('filtroPlataforma')?.value || '';
+    const estado = document.getElementById('filtroEstado')?.value || '';
+    const search = document.getElementById('filtroSearch')?.value || '';
+    
+    const params = new URLSearchParams();
+    if (plataforma) params.append('plataforma', plataforma);
+    if (estado) params.append('estado', estado);
+    if (search) params.append('search', search);
+    params.append('per_page', 50);
+    
+    const response = await fetch(`/api/contratos?${params.toString()}`);
+    const resultado = await response.json();
+    
+    // Validación defensiva
+    if (!resultado) {
+      throw new Error('Respuesta vacía del servidor');
+    }
+    
+    contratosData = resultado.contratos || [];
+    renderizarContratos(contratosData);
+  } catch (error) {
+    console.error('Error cargando contratos:', error);
+    document.getElementById('contratosTableBody').innerHTML = `
+      <tr><td colspan="8" style="text-align: center; padding: 40px; color: #d32f2f;">
+        Error al cargar contratos: ${error.message || 'Error desconocido'}
+      </td></tr>
+    `;
+  }
+}
+
+function renderizarContratos(contratos) {
+  const tbody = document.getElementById('contratosTableBody');
+  
+  // Validación defensiva: si no hay contratos o es nulo/undefined
+  if (!contratos || !Array.isArray(contratos) || contratos.length === 0) {
+    tbody.innerHTML = `
+      <tr><td colspan="8">
+        <div class="empty-state">
+          <i class="bi bi-inbox"></i>
+          <p>No hay contratos registrados aún.<br>Importa tu primer contrato desde SECOP.</p>
+        </div>
+      </td></tr>
+    `;
+    return;
+  }
+  
+  tbody.innerHTML = '';
+  
+  contratos.forEach(contrato => {
+    // Validación defensiva de campos que pueden ser null
+    const estado = contrato.estado || 'Sin estado';
+    const plataforma = contrato.plataforma || 'SECOP_I';
+    const estadoClass = estado.toLowerCase().replace(/\s/g, '_');
+    const plataformaClass = plataforma === 'SECOP_I' ? 'secop-i' : 'secop-ii';
+    const plataformaDisplay = plataforma.replace('_', ' ');
+    
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><strong>${contrato.numero_proceso || 'N/A'}</strong></td>
+      <td><span class="badge-plataforma badge-${plataformaClass}">${plataformaDisplay}</span></td>
+      <td>${contrato.entidad_nombre || '-'}</td>
+      <td title="${contrato.objeto_contrato || ''}">${truncarTexto(contrato.objeto_contrato, 60)}</td>
+      <td class="valor-cuantia">${formatearMoneda(contrato.cuantia || 0)}</td>
+      <td><span class="badge-estado badge-${estadoClass}">${estado}</span></td>
+      <td>${formatearFecha(contrato.fecha_publicacion)}</td>
+      <td>
+        <button class="btn-accion btn-ver" onclick="verContrato(${contrato.id})" title="Ver detalles">
+          <i class="bi bi-eye"></i>
+        </button>
+        <button class="btn-accion btn-sincronizar" onclick="sincronizarContrato(${contrato.id})" title="Re-sincronizar">
+          <i class="bi bi-arrow-repeat"></i>
+        </button>
+        <button class="btn-accion btn-eliminar" onclick="eliminarContrato(${contrato.id})" title="Eliminar">
+          <i class="bi bi-trash"></i>
+        </button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+// ===== ACCIONES =====
+async function sincronizarContrato(id) {
+  if (!confirm('¿Re-sincronizar este contrato con SECOP?')) return;
+  
+  mostrarAlerta('Sincronizando contrato...', 'info');
+  
+  try {
+    const response = await fetch(`/api/contratos/${id}/sincronizar`, { method: 'POST' });
+    const resultado = await response.json();
+    
+    if (resultado.success) {
+      mostrarAlerta('✓ Contrato sincronizado exitosamente', 'success');
+      cargarContratos();
+      cargarEstadisticas();
+    } else {
+      mostrarAlerta(`Error: ${resultado.error}`, 'error');
+    }
+  } catch (error) {
+    console.error('Error sincronizando:', error);
+    mostrarAlerta('Error de conexión', 'error');
+  }
+}
+
+async function eliminarContrato(id) {
+  if (!confirm('¿Está seguro de eliminar este contrato?')) return;
+  
+  try {
+    const response = await fetch(`/api/contratos/${id}`, { method: 'DELETE' });
+    const resultado = await response.json();
+    
+    if (resultado.success) {
+      mostrarAlerta('Contrato eliminado exitosamente', 'success');
+      cargarContratos();
+      cargarEstadisticas();
+    } else {
+      mostrarAlerta('Error al eliminar contrato', 'error');
+    }
+  } catch (error) {
+    console.error('Error eliminando:', error);
+    mostrarAlerta('Error de conexión', 'error');
+  }
+}
+
+function verContrato(id) {
+  window.location.href = `/contratos/${id}`;
+}
+
+function aplicarFiltros() {
+  cargarContratos();
+}
+
+// ===== UTILIDADES =====
+function mostrarAlerta(mensaje, tipo) {
+  const alert = document.getElementById('alertMessage');
+  alert.className = `alert show alert-${tipo}`;
+  alert.textContent = mensaje;
+  
+  if (tipo === 'success') {
+    setTimeout(() => {
+      alert.classList.remove('show');
+    }, 5000);
+  }
+}
+
+function formatearMoneda(valor) {
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0
+  }).format(valor);
+}
+
+function formatearFecha(fecha) {
+  if (!fecha) return '-';
+  const date = new Date(fecha);
+  return date.toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function truncarTexto(texto, max) {
+  if (!texto) return '-';
+  return texto.length > max ? texto.substring(0, max) + '...' : texto;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-5">
+  <h2>Buscar en Documentos</h2>
+
+  <!-- Subir & Indexar -->
+  <form method="POST" action="{{ url_for('docs') }}" enctype="multipart/form-data">
+    <div class="mb-3">
+      <label for="docs" class="form-label">Subir documentos PDF</label>
+      <input
+        class="form-control"
+        type="file"
+        id="docs"
+        name="docs"
+        accept="application/pdf"
+        multiple
+      >
+    </div>
+    <button class="btn btn-success">Subir & Indexar</button>
+  </form>
+
+  <!-- Listado de ya indexados -->
+  {% if docs_list %}
+    <hr>
+    <h5>PDF ya indexados:</h5>
+    <ul class="list-group mb-4">
+      {% for fn in docs_list %}
+        <li class="list-group-item">{{ fn }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <!-- Formulario de Búsqueda -->
+  <form method="POST" action="{{ url_for('docs_search') }}">
+    <div class="input-group mb-3">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Escribe tu búsqueda…"
+        name="query"
+      >
+      <button class="btn btn-primary">Buscar</button>
+    </div>
+  </form>
+
+  <!-- Resultados -->
+  {% if results is not none %}
+    <h5>Resultados de búsqueda</h5>
+    {% if results %}
+      <ul class="list-group">
+        {% for r in results %}
+          <li class="list-group-item">
+            <strong>{{ r.filename }}</strong><br>
+            …{{ r.snippet }}…
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="alert alert-warning">🔍 No se encontraron coincidencias.</div>
+    {% endif %}
+  {% endif %}
+
+</div>
+{% endblock %}
