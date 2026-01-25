@@ -34,7 +34,7 @@ def login():
             flash('Usuario o clave inválidos', 'danger')
             return render_template('login.html')
 
-        print(f"✅ [LOGIN DEBUG] Usuario encontrado: {user.usuario}, Hash: {user.password_hash}")
+        print(f"✅ [LOGIN DEBUG] Usuario encontrado: {user.usuario}, Hash: {user.clave_hash}")
 
         # Restricción por IP (whitelist opcional)
         allowed_ips = current_app.config.get('ALLOWED_IPS', [])
