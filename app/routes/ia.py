@@ -334,7 +334,7 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
     c = canvas.Canvas(overlay_buffer, pagesize=letter)
     w, h = letter
     margin = 85  # Márgenes mejorados para mejor distribución
-    y_position = h - 180  # Comenzar después del encabezado
+    y_position = h - 140  # Comenzar más arriba para reducir espacio en blanco
     
     # ============================================
     # ESTILOS PROFESIONALES MEJORADOS
@@ -404,19 +404,19 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
     # ============================================
     # INFORMACIÓN GENERAL DEL OFICIO
     # ============================================
-    y_position -= 10
+    y_position -= 5  # Reducido de 10
     
     c.setFont('Helvetica-Bold', 12)
     c.setFillColor(colors.black)
     oficio_line = f"Oficio No.: {data.get('numero', '')}        Fecha: {data.get('fecha', '')}"
     c.drawString(margin, y_position, oficio_line)
-    y_position -= 24
+    y_position -= 18  # Reducido de 24
     
     # Línea separadora
     c.setStrokeColor(colors.black)
     c.setLineWidth(1.0)
     c.line(margin, y_position, w - margin, y_position)
-    y_position -= 30
+    y_position -= 20  # Reducido de 30
     
     # ============================================
     # DESTINATARIO
@@ -438,9 +438,9 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
             w_dest, h_dest = p_dest.wrap(w - 2*margin, 100)
             
             p_dest.drawOn(c, margin, y_position - h_dest)
-            y_position -= (h_dest + 4)
+            y_position -= (h_dest + 2) # Reducido de 4
     
-    y_position -= 15
+    y_position -= 10 # Reducido de 15
     
     # ============================================
     # ASUNTO Y REFERENCIA
@@ -449,7 +449,7 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
     p_asunto = Paragraph(asunto_text, style_title)
     w_asunto, h_asunto = p_asunto.wrap(w - 2*margin, 100)
     p_asunto.drawOn(c, margin, y_position - h_asunto)
-    y_position -= (h_asunto + 16)
+    y_position -= (h_asunto + 8) # Reducido de 16
     
     if data.get('referencia'):
         ref_text = f"<b>REFERENCIA:</b>&nbsp;&nbsp;{data.get('referencia', '')}"
