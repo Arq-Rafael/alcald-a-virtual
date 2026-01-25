@@ -59,10 +59,11 @@ class Usuario(db.Model):
     # Activo/Inactivo
     activo = db.Column(db.Boolean, default=True)
     
-    def __init__(self, usuario, clave, role='user', email=None, **kwargs):
+    def __init__(self, usuario, clave=None, role='user', email=None, **kwargs):
         """Inicializa usuario con contraseña hasheada"""
         self.usuario = usuario
-        self.set_password(clave)
+        if clave:
+            self.set_password(clave)
         self.role = role
         self.email = email
         
