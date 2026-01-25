@@ -484,10 +484,10 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
                 w_body, h_body = p_body.wrap(w - 2*margin, 500)
                 
                 # Verificar sí cabe en la página actual
-                # AUMENTADO margen inferior a 180 para evitar tocar el footer branding
+                # Margen inferior calibrado para evitar footer
                 if y_position - h_body < 180:
                     c.showPage()
-                    y_position = h - 140 # Reiniciar arriba
+                    y_position = h - 160 # REINICIO PÁGINA 2+: Más abajo para librar el encabezado
                 
                 p_body.drawOn(c, margin, y_position - h_body)
                 y_position -= (h_body + 8)
@@ -515,7 +515,7 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
                 # Verificar espacio
                 if y_position - img_height < 180:
                     c.showPage()
-                    y_position = h - 140
+                    y_position = h - 160
                 
                 # Centrar imagen
                 x_offset = (w - img_width) / 2
@@ -534,7 +534,7 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
     # Asegurar espacio para firma
     if y_position < 220: # Más espacio para la firma
         c.showPage()
-        y_position = h - 140
+        y_position = h - 160
     
     y_position -= 40
     
@@ -591,7 +591,7 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
                 # Verificar espacio antes de dibujar - AUMENTADO
                 if y_position - h_anexo < 160:  # Margen inferior seguridad aumentado
                     c.showPage()
-                    y_position = h - 140
+                    y_position = h - 160
                     # Repetir encabezado ANEXOS si salto de página (opcional, pero util)
                     c.setFont('Helvetica-Bold', 12)
                     c.drawString(margin, y_position, 'ANEXOS (Continuación):')
