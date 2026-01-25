@@ -126,6 +126,7 @@ class EmailService:
             bool: True si se envió correctamente
         """
         try:
+            import socket
             # Configuración del servidor SMTP (ajustar según tu proveedor)
             smtp_server = current_app.config.get('SMTP_SERVER', 'smtp.gmail.com')
             smtp_port = current_app.config.get('SMTP_PORT', 587)
@@ -183,15 +184,24 @@ class EmailService:
             parte_html = MIMEText(html, 'html')
             msg.attach(parte_html)
             
-            # Enviar
-            with smtplib.SMTP(smtp_server, smtp_port) as server:
-                server.starttls()
-                server.login(smtp_user, smtp_password)
-                server.send_message(msg)
+            # Enviar con timeout de 5 segundos
+            original_timeout = socket.getdefaulttimeout()
+            try:
+                socket.setdefaulttimeout(5)
+                with smtplib.SMTP(smtp_server, smtp_port, timeout=5) as server:
+                    server.starttls()
+                    server.login(smtp_user, smtp_password)
+                    server.send_message(msg)
+            finally:
+                socket.setdefaulttimeout(original_timeout)
             
             print(f"✓ Código de verificación enviado a {email}")
             return True
             
+        except socket.timeout:
+            print(f"❌ SMTP timeout: No se pudo conectar al servidor de correo")
+            print(f"  Código de verificación para {email}: {codigo}")
+            return False
         except Exception as e:
             print(f"❌ Error al enviar correo: {e}")
             print(f"  Código de verificación para {email}: {codigo}")
@@ -229,19 +239,26 @@ class EmailService:
 
             msg.attach(MIMEText(html, 'html'))
 
-            with smtplib.SMTP(smtp_server, smtp_port) as server:
-                server.starttls()
-                server.login(smtp_user, smtp_password)
-                server.send_message(msg)
+            import socket
+            original_timeout = socket.getdefaulttimeout()
+            try:
+                socket.setdefaulttimeout(5)
+                with smtplib.SMTP(smtp_server, smtp_port, timeout=5) as server:
+                    server.starttls()
+                    server.login(smtp_user, smtp_password)
+                    server.send_message(msg)
+            finally:
+                socket.setdefaulttimeout(original_timeout)
 
             return True
-        except Exception:
+        except (socket.timeout, Exception):
             return False
 
     @staticmethod
     def enviar_alerta_nuevo_usuario(email_admin, nombre_usuario, creador):
         """Alerta al admin que se creó un usuario"""
         try:
+            import socket
             smtp_server = current_app.config.get('SMTP_SERVER', 'smtp.gmail.com')
             smtp_port = current_app.config.get('SMTP_PORT', 587)
             smtp_user = current_app.config.get('SMTP_USER', '')
@@ -270,19 +287,25 @@ class EmailService:
 
             msg.attach(MIMEText(html, 'html'))
 
-            with smtplib.SMTP(smtp_server, smtp_port) as server:
-                server.starttls()
-                server.login(smtp_user, smtp_password)
-                server.send_message(msg)
+            original_timeout = socket.getdefaulttimeout()
+            try:
+                socket.setdefaulttimeout(5)
+                with smtplib.SMTP(smtp_server, smtp_port, timeout=5) as server:
+                    server.starttls()
+                    server.login(smtp_user, smtp_password)
+                    server.send_message(msg)
+            finally:
+                socket.setdefaulttimeout(original_timeout)
 
             return True
-        except Exception:
+        except (socket.timeout, Exception):
             return False
 
     @staticmethod
     def enviar_alerta_bloqueo(email, nombre_usuario, ip_address=None):
         """Notifica que la cuenta fue bloqueada por intentos fallidos"""
         try:
+            import socket
             smtp_server = current_app.config.get('SMTP_SERVER', 'smtp.gmail.com')
             smtp_port = current_app.config.get('SMTP_PORT', 587)
             smtp_user = current_app.config.get('SMTP_USER', '')
@@ -313,17 +336,25 @@ class EmailService:
 
             msg.attach(MIMEText(html, 'html'))
 
-            with smtplib.SMTP(smtp_server, smtp_port) as server:
-                server.starttls()
-                server.login(smtp_user, smtp_password)
-                server.send_message(msg)
+            original_timeout = socket.getdefaulttimeout()
+            try:
+                socket.setdefaulttimeout(5)
+                with smtplib.SMTP(smtp_server, smtp_port, timeout=5) as server:
+                    server.starttls()
+                    server.login(smtp_user, smtp_password)
+                    server.send_message(msg)
+            finally:
+                socket.setdefaulttimeout(original_timeout)
 
             return True
-        except Exception:
+        except (socket.timeout, Exception):
             return False
+
+    @staticmethod
     def enviar_notificacion_cambio_clave(email, nombre_usuario, ip_address=None):
         """Notifica cambio de contraseña"""
         try:
+            import socket
             smtp_server = current_app.config.get('SMTP_SERVER', 'smtp.gmail.com')
             smtp_port = current_app.config.get('SMTP_PORT', 587)
             smtp_user = current_app.config.get('SMTP_USER', '')
@@ -356,13 +387,18 @@ class EmailService:
             
             msg.attach(MIMEText(html, 'html'))
             
-            with smtplib.SMTP(smtp_server, smtp_port) as server:
-                server.starttls()
-                server.login(smtp_user, smtp_password)
-                server.send_message(msg)
+            original_timeout = socket.getdefaulttimeout()
+            try:
+                socket.setdefaulttimeout(5)
+                with smtplib.SMTP(smtp_server, smtp_port, timeout=5) as server:
+                    server.starttls()
+                    server.login(smtp_user, smtp_password)
+                    server.send_message(msg)
+            finally:
+                socket.setdefaulttimeout(original_timeout)
             
             return True
-        except:
+        except (socket.timeout, Exception):
             return False
 
 
@@ -370,6 +406,7 @@ class EmailService:
     def enviar_enlace_recuperacion(email, nombre_usuario, token):
         """Envía enlace para recuperar contraseña"""
         try:
+            import socket
             smtp_server = current_app.config.get('SMTP_SERVER', 'smtp.gmail.com')
             smtp_port = int(current_app.config.get('SMTP_PORT', 587))
             smtp_user = current_app.config.get('SMTP_USER', '')
@@ -433,13 +470,18 @@ class EmailService:
             
             msg.attach(MIMEText(html, 'html'))
             
-            with smtplib.SMTP(smtp_server, smtp_port) as server:
-                server.starttls()
-                server.login(smtp_user, smtp_password)
-                server.send_message(msg)
+            original_timeout = socket.getdefaulttimeout()
+            try:
+                socket.setdefaulttimeout(5)
+                with smtplib.SMTP(smtp_server, smtp_port, timeout=5) as server:
+                    server.starttls()
+                    server.login(smtp_user, smtp_password)
+                    server.send_message(msg)
+            finally:
+                socket.setdefaulttimeout(original_timeout)
             
             return True
-        except Exception as e:
+        except (socket.timeout, Exception) as e:
             print(f"❌ Error al enviar enlace de recuperación: {e}")
             return False
     
@@ -447,6 +489,7 @@ class EmailService:
     def enviar_alerta_expiracion_clave(email, nombre_usuario, dias_restantes):
         """Notifica al usuario que su contraseña está por expirar"""
         try:
+            import socket
             smtp_server = current_app.config.get('SMTP_SERVER', 'smtp.gmail.com')
             smtp_port = int(current_app.config.get('SMTP_PORT', 587))
             smtp_user = current_app.config.get('SMTP_USER', '')
@@ -493,13 +536,18 @@ class EmailService:
             
             msg.attach(MIMEText(html, 'html'))
             
-            with smtplib.SMTP(smtp_server, smtp_port) as server:
-                server.starttls()
-                server.login(smtp_user, smtp_password)
-                server.send_message(msg)
+            original_timeout = socket.getdefaulttimeout()
+            try:
+                socket.setdefaulttimeout(5)
+                with smtplib.SMTP(smtp_server, smtp_port, timeout=5) as server:
+                    server.starttls()
+                    server.login(smtp_user, smtp_password)
+                    server.send_message(msg)
+            finally:
+                socket.setdefaulttimeout(original_timeout)
             
             return True
-        except:
+        except (socket.timeout, Exception):
             return False
 
 

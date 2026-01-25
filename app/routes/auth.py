@@ -63,11 +63,25 @@ def login():
         if user.requiere_2fa and user.email and user.necesita_2fa_nuevamente():
             codigo = user.generar_codigo_verificacion()
             db.session.commit()
-            EmailService.enviar_codigo_verificacion(user.email, codigo, user.usuario)
-            session['pending_user_id'] = user.id
-            dias_restantes = 30 - (datetime.utcnow() - user.email_ultimo_verificado).days if user.email_ultimo_verificado else 0
-            flash('Se envió un código de verificación a tu correo. Ingrésalo para continuar.', 'info')
-            return redirect(url_for('auth.verificacion'))
+            
+            # Intentar enviar código de verificación con timeout
+            try:
+                import socket
+                socket.setdefaulttimeout(5)  # 5 segundo timeout para SMTP
+                email_sent = EmailService.enviar_codigo_verificacion(user.email, codigo, user.usuario)
+                socket.setdefaulttimeout(None)  # Restaurar timeout
+                
+                if email_sent:
+                    session['pending_user_id'] = user.id
+                    flash('Se envió un código de verificación a tu correo. Ingrésalo para continuar.', 'info')
+                    return redirect(url_for('auth.verificacion'))
+                else:
+                    # Si falla el envío de email, permitir acceso directo con advertencia
+                    flash('⚠️ No se pudo enviar el código. Acceso permitido.', 'warning')
+            except Exception as e:
+                # Si hay timeout o error SMTP, permitir acceso directo
+                print(f"⚠️ SMTP Error en login: {e}")
+                flash('⚠️ Error en verificación de email. Acceso permitido.', 'warning')
 
         # Acceso directo sin 2FA - Crear sesión y registrar
         user.registrar_acceso_exitoso()
