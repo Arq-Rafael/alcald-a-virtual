@@ -5,6 +5,8 @@
 **Error:** "Error en la respuesta del servidor" al generar certificados en lote  
 **Status:** ✅ **COMPLETAMENTE RESUELTO**
 
+> Nota de alcance: este módulo genera certificados del Banco de Programas y Proyectos alineados con el Plan de Desarrollo (no es un certificado de usos del suelo).
+
 ---
 
 ## 📋 Cambios Realizados
@@ -13,7 +15,7 @@
 
 1. **Archivo: `app/routes/certificados.py`**
    - ✅ Removidas 3 funciones inexistentes que causaban `NameError`
-   - ✅ Simplificada sección de normatividad (líneas 210-215)
+   - ✅ Se eliminó la sección de normatividad (no aplica a BPIM)
    - ✅ Refactorizado endpoint `/generar_lote` (líneas 665-730)
    - ✅ Todos los retornos ahora usan `jsonify()` - JSON válido
    - ✅ Agregado logging completo: `logger.info()` y `logger.error()`
@@ -151,6 +153,6 @@ Si necesitas generar más certificados o modificar algo:
 
 1. **Agregar más solicitudes:** Edita `datos/solicitudes.csv`
 2. **Cambiar formato de PDF:** Edita template en `datos/FORMATO.pdf`
-3. **Personalizar normatividad:** Implementa `find_normatividad_file_for_uso()`
+3. **(No aplica) Normatividad urbana:** No se requiere para certificados BPIM / Plan de Desarrollo.
 
 ¡El módulo está listo para usar! 🚀

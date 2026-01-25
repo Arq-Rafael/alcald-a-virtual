@@ -37,9 +37,9 @@ Verás una tabla con **3 solicitudes de prueba** (creadas automáticamente):
 
 | Municipio | NIT | Secretaría | Objeto | Estado |
 |-----------|-----|-----------|--------|--------|
-| Zipaquirá | 890123456-7 | Ambiente | Certificado de Uso del Suelo... | nuevo |
-| Cajicá | 890234567-8 | Planeación | Certificado de Uso del Suelo... | nuevo |
-| Ubaté | 890345678-9 | Hacienda | Certificado de Uso del Suelo... | nuevo |
+| Zipaquirá | 890123456-7 | Planeación | BPIM: Modernización de alumbrado público | nuevo |
+| Cajicá | 890234567-8 | Planeación | BPIM: Mejoramiento de vías terciarias | nuevo |
+| Ubaté | 890345678-9 | Hacienda   | BPIM: Adecuación de infraestructura educativa | nuevo |
 
 ### Paso 3: Seleccionar certificados para generar
 

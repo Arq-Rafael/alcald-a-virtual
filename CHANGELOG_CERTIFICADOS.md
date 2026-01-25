@@ -22,7 +22,7 @@
 
 ### 1. Archivo: `app/routes/certificados.py`
 
-#### Cambio 1.1: Simplificar sección de normatividad (líneas 204-220)
+#### Cambio 1.1: Eliminar sección de normatividad (líneas 204-220)
 
 **Antes:**
 ```python
@@ -46,19 +46,14 @@ else:
 
 **Después:**
 ```python
-# Línea 210-215: Solo usa datos disponibles, sin funciones externas
-uso_text = data.get('uso', '')
-
-section4_data = [[Paragraph('<b>NORMATIVIDAD APLICABLE</b>', style_section_title), '']]
-if uso_text:
-    section4_data.append([Paragraph('<b>Uso del suelo:</b>', style_label), Paragraph(str(uso_text), style_value)])
-section4_data.append([Paragraph('<b>Normatividad:</b>', style_label), Paragraph('Consultar EOT y normativa municipal aplicable', style_value)])
+# Línea 210-215: Se elimina la sección de normatividad porque no aplica a BPIM
+# (los certificados son del Banco de Programas y Proyectos / Plan de Desarrollo).
 ```
 
 **Impacto:**
 - ✅ Elimina `NameError` durante generación de PDF
 - ✅ Certificados se generan sin excepciones
-- ✅ Endpoint puede retornar respuesta JSON válida
+- ✅ Claridad de alcance: sin uso del suelo ni EOT (solo BPIM)
 
 ---
 

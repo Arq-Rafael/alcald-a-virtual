@@ -12,22 +12,26 @@ data = {
     'municipio': ['Zipaquirá', 'Cajicá', 'Ubaté'],
     'nit': ['890123456-7', '890234567-8', '890345678-9'],
     'fecha': [datetime.now().strftime('%Y-%m-%d')] * 3,
-    'secretaria': ['Ambiente', 'Planeación', 'Hacienda'],
+    'secretaria': ['Planeación', 'Planeación', 'Hacienda'],
     'objeto': [
-        'Certificado de Uso del Suelo para proyecto residencial',
-        'Certificado de Uso del Suelo para proyecto comercial',
-        'Certificado de Uso del Suelo para proyecto industrial'
+        'Certificado del Banco de Programas y Proyectos: Modernización de alumbrado público',
+        'Certificado del Banco de Programas y Proyectos: Mejoramiento de vías terciarias',
+        'Certificado del Banco de Programas y Proyectos: Adecuación de infraestructura educativa'
     ],
     'justificacion': [
-        'Proyecto de vivienda de interés social',
-        'Centro comercial en zona urbana',
-        'Planta de procesamiento de alimentos'
+        'Proyecto priorizado del Plan de Desarrollo Municipal para eficiencia energética',
+        'Intervención vial alineada con el plan de movilidad rural',
+        'Adecuación de sedes educativas según metas de calidad y cobertura'
     ],
-    'valor': ['150000000', '250000000', '500000000'],
-    'meta_producto': ['Viviendas construidas: 100', 'Empleos generados: 50', 'Empleos generados: 150'],
-    'eje': ['Desarrollo social', 'Reactivación económica', 'Reactivación económica'],
-    'sector': ['Vivienda', 'Comercio', 'Industria'],
-    'codigo_bpim': ['3001', '3002', '3003'],
+    'valor': ['75000000', '180000000', '220000000'],
+    'meta_producto': [
+        'Puntos de luz LED instalados: 350',
+        'Kilómetros de vía mejorada: 12',
+        'Aulas intervenidas: 18'
+    ],
+    'eje': ['Gobierno y gestión', 'Competitividad y desarrollo', 'Bienestar social'],
+    'sector': ['Servicios públicos', 'Transporte', 'Educación'],
+    'codigo_bpim': ['BPIM-001', 'BPIM-002', 'BPIM-003'],
     'estado': ['nuevo', 'nuevo', 'nuevo']
 }
 

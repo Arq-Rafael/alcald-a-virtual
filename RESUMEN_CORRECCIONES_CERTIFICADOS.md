@@ -65,12 +65,8 @@ section4_data.append([...norm_text...])  # Causaba NameError
 
 **Después:**
 ```python
-# Simplificado: muestra uso y referencia genérica
-uso_text = data.get('uso', '')
-section4_data = [[Paragraph('<b>NORMATIVIDAD APLICABLE</b>', style_section_title), '']]
-if uso_text:
-    section4_data.append([Paragraph('<b>Uso del suelo:</b>', style_label), Paragraph(str(uso_text), style_value)])
-section4_data.append([Paragraph('<b>Normatividad:</b>', style_label), Paragraph('Consultar EOT y normativa municipal aplicable', style_value)])
+# Se elimina la sección de normatividad porque no aplica a BPIM
+# (solo certificados del Banco de Programas y Proyectos / Plan de Desarrollo).
 ```
 
 ### 3. Frontend - Manejador de Respuesta (certificados_modern.html, líneas 580-620)
@@ -188,7 +184,7 @@ INFO  CSV actualizado: 3 certificados marcados como generados
 | Archivo | Líneas | Cambio |
 |---------|--------|--------|
 | `app/routes/certificados.py` | 665-730 | Endpoint `/generar_lote` refactorizado |
-| `app/routes/certificados.py` | 210-215 | Sección normatividad simplificada |
+| `app/routes/certificados.py` | 210-215 | Sección de normatividad eliminada (no aplica a BPIM) |
 | `templates/certificados_modern.html` | 580-620 | Manejador fetch actualizado |
 | `test_batch_generation.py` | NUEVO | Script de prueba |
 | `CERTIFICADOS_LOTE_CORRECCIONES.md` | NUEVO | Guía de correcciones |
@@ -260,10 +256,8 @@ Frontend: Recarga tabla
    - Crear endpoint que comprima múltiples PDFs
    - Usar librería `zipfile` de Python
 
-3. **Búsqueda de Normatividad**
-   - Implementar `find_normatividad_file_for_uso()`
-   - Búsqueda en `/datos/eot/` según uso del suelo
-   - Extraer texto con `python-docx`
+3. **(No aplica) Normatividad de usos de suelo**
+        - El módulo se limita a certificados BPIM / Plan de Desarrollo, sin normatividad urbana.
 
 4. **Soporte para Plantillas**
    - Permitir elegir estilo de certificado

@@ -6,7 +6,7 @@ import logging
 import datetime
 import pandas as pd
 import glob
-from flask import Blueprint, render_template, request, flash, redirect, url_for, send_file, current_app, session
+from flask import Blueprint, render_template, request, flash, redirect, url_for, send_file, current_app, session, jsonify
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors

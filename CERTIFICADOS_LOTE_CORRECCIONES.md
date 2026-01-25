@@ -18,10 +18,10 @@
      - ❌ `find_normatividad_file_for_uso()`
      - ❌ `extract_text_from_docx()`
      - ❌ `_infer_uso_from_row()`
-   - **Solución**: Simplificada la sección de Normatividad aplicable
-     - Muestra uso del suelo si está disponible
-     - Muestra referencia a EOT y normativa municipal (genérica)
-     - Ya no intenta cargar archivos DOCX automáticamente
+    - **Solución**: Se eliminó la sección de Normatividad (no aplica a BPIM)
+       - No se muestra uso del suelo
+       - Sin referencias a EOT ni normativas urbanísticas
+       - Sin carga de archivos DOCX
 
 ### 3. **Frontend - Manejador de Respuesta Mejorado**
    - **Archivo**: `templates/certificados_modern.html` (líneas 580-620)
@@ -89,11 +89,9 @@ Si deseas mejorar más la funcionalidad:
    - Crear endpoint que comprima múltiples PDFs
    - Opción "Descargar seleccionados como ZIP"
 
-3. **Mejorar búsqueda de normatividad**:
-   - Crear funciones:
-     - `find_normatividad_file_for_uso()` - Buscar en `/datos/eot/`
-     - `extract_text_from_docx()` - Extraer texto de DOCX
-   - Integrar en `generate_pdf_certificate()`
+3. **(Ya no aplica) Búsqueda de normatividad**:
+    - El módulo se limita a certificados del Banco de Programas y Proyectos (Plan de Desarrollo);
+       no se requiere normatividad de usos del suelo.
 
 4. **Agregar soporte para plantillas personalizadas**:
    - Permitir diferentes estilos de certificados
