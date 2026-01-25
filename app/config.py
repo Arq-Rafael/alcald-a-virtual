@@ -47,7 +47,7 @@ class Config:
     SMTP_SERVER = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
     SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
     SMTP_USER = os.environ.get('SMTP_USER', 'alcaldiavirtual2026@gmail.com')
-    SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', 'qzxk hovx uxzx cxia')
+    SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', 'fvgq rsac jnjh zfcn')
     
     # Opción 2: Usar Outlook/Hotmail (descomenta si usas Outlook)
     # SMTP_SERVER = 'smtp-mail.outlook.com'
