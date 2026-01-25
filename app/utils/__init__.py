@@ -90,7 +90,7 @@ def load_plan_desarrollo():
     try:
         # Get BASE_DIR from Flask config - this is set in app/config.py
         base_dir = str(current_app.config['BASE_DIR'])
-        path = os.path.join(base_dir, 'datos', 'plan_desarrollo.xlsx')
+        path = os.path.join(base_dir, 'datos', 'plan_desarrollo', 'plan_desarrollo.xlsx')
         
         if not os.path.exists(path):
             print(f"⚠️ Plan file not found at: {path}. Using fallback data.")
