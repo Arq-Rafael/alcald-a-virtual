@@ -333,7 +333,9 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
     c = canvas.Canvas(overlay_buffer, pagesize=letter)
     w, h = letter
     margin = 85  # Márgenes mejorados para mejor distribución
-    y_position = h - 180  # Margen superior SEGURO para respetar encabezado del template
+    header_margin = 180  # Margen superior seguro para encabezado
+    footer_margin = 180  # Margen inferior seguro para pie de página
+    y_position = h - header_margin
     
     # ============================================
     # ESTILOS PROFESIONALES MEJORADOS
@@ -467,7 +469,7 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
     # ============================================
     # CUERPO DEL OFICIO CON FORMATO PROFESIONAL
     # ============================================
-    min_bottom_margin = 120  # Margen inferior seguro para evitar sobreposición con pie de página
+    min_bottom_margin = footer_margin  # Margen inferior seguro para evitar sobreposición con pie de página
     cuerpo = data.get('cuerpo', '')
     if cuerpo:
         paragraphs = cuerpo.split('\n')
@@ -481,9 +483,10 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
                 else:
                     p_body = Paragraph(stripped, style_body)
                 w_body, h_body = p_body.wrap(w - 2*margin, 500)
+                # Si no hay suficiente espacio, salto de página y reinicio y_position
                 if y_position - h_body < min_bottom_margin:
                     c.showPage()
-                    y_position = h - 180
+                    y_position = h - header_margin
                 p_body.drawOn(c, margin, y_position - h_body)
                 y_position -= (h_body + 8)
     
@@ -498,27 +501,22 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
                 # Decodificar base64
                 if img_data.startswith('data:image'):
                     img_data = img_data.split(',')[1]
-                
                 img_bytes = base64.b64decode(img_data)
                 img_buffer = io.BytesIO(img_bytes)
                 img = ImageReader(img_buffer)
-                
                 # Calcular dimensiones (max 400px de ancho)
                 img_width = 300
                 img_height = 200
-                
                 # Verificar espacio
-                if y_position - img_height < 160:
+                if y_position - img_height < min_bottom_margin:
                     c.showPage()
-                    y_position = h - 180
-                
+                    y_position = h - header_margin
                 # Centrar imagen
                 x_offset = (w - img_width) / 2
                 c.drawImage(img, x_offset, y_position - img_height, 
                            width=img_width, height=img_height, 
                            preserveAspectRatio=True, mask='auto')
                 y_position -= (img_height + 15)
-                
             except Exception as e:
                 print(f"Error al insertar imagen: {e}")
                 continue
@@ -527,9 +525,9 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
     # FIRMA
     # ============================================
     # Asegurar espacio para firma
-    if y_position < 220: # Más espacio para la firma
+    if y_position < footer_margin + 40: # Más espacio para la firma
         c.showPage()
-        y_position = h - 180
+        y_position = h - header_margin
     
     y_position -= 40
     
@@ -573,25 +571,19 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
         y_position -= 16
         c.setFont('Helvetica', 12)
         c.setFillColor(colors.black)
-        
         anexos_lines = data.get('anexos', '').split('\n')
         for anexo in anexos_lines:
             if anexo.strip():
-                # Usar Paragraph para wrapping de anexos largos
-                # Estilo con sangría para viñeta
                 anexo_text = f"• {anexo.strip()}"
                 p_anexo = Paragraph(anexo_text, style_value)
                 w_anexo, h_anexo = p_anexo.wrap(w - 2*margin - 25, 200)
-                
-                # Verificar espacio antes de dibujar - AUMENTADO
-                if y_position - h_anexo < 160:  # Margen inferior seguridad aumentado
+                # Verificar espacio antes de dibujar
+                if y_position - h_anexo < min_bottom_margin:
                     c.showPage()
-                    y_position = h - 180
-                    # Repetir encabezado ANEXOS si salto de página (opcional, pero util)
+                    y_position = h - header_margin
                     c.setFont('Helvetica-Bold', 12)
                     c.drawString(margin, y_position, 'ANEXOS (Continuación):')
                     y_position -= 20
-                
                 p_anexo.drawOn(c, margin + 25, y_position - h_anexo)
                 y_position -= (h_anexo + 6)
     
