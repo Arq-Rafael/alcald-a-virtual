@@ -10,4 +10,6 @@ python-docx>=0.8
 playwright>=1.40
 gunicorn>=21.0
 requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
 
