@@ -19,41 +19,28 @@ def login():
     if request.method == 'POST':
         u = request.form.get('usuario','').strip()
         p = request.form.get('clave','').strip()
-        
-        print(f"🔒 [LOGIN DEBUG] Intento de login: Usuario='{u}', Clave='{p}' (len={len(p)})")
 
         # Buscar usuario en base de datos
         user = Usuario.query.filter(Usuario.usuario == u).first()
-        
+
         if not user:
-            print(f"❌ [LOGIN DEBUG] Usuario '{u}' no encontrado en BD")
-            # Listar usuarios existentes para debug
-            usuarios_existentes = [ur.usuario for ur in Usuario.query.all()]
-            print(f"📋 [LOGIN DEBUG] Usuarios disponibles en BD: {usuarios_existentes}")
-            
             flash('Usuario o clave inválidos', 'danger')
             return render_template('login.html')
-
-        print(f"✅ [LOGIN DEBUG] Usuario encontrado: {user.usuario}, Hash: {user.clave_hash}")
 
         # Restricción por IP (whitelist opcional)
         allowed_ips = current_app.config.get('ALLOWED_IPS', [])
         if allowed_ips and request.remote_addr not in allowed_ips:
-            print(f"🚫 [LOGIN DEBUG] IP bloqueada: {request.remote_addr}")
             flash('Acceso no permitido desde esta red. Contacta al administrador.', 'danger')
             return render_template('login.html')
 
         # Verificar si puede acceder (bloqueo temporal, activo, etc.)
         puede, motivo = user.puede_acceder()
         if not puede:
-            print(f"🚫 [LOGIN DEBUG] Acceso denegado: {motivo}")
             flash(motivo, 'danger')
             return render_template('login.html')
 
         # Verificar contraseña
-        print(f"🔒 [LOGIN DEBUG] Verificando contraseña...")
         if not user.check_password(p):
-            print(f"❌ [LOGIN DEBUG] Contraseña incorrecta para '{u}'")
             user.registrar_acceso_fallido()
             db.session.commit()
 
@@ -63,8 +50,6 @@ def login():
 
             flash('Usuario o clave inválidos', 'danger')
             return render_template('login.html')
-            
-        print(f"✅ [LOGIN DEBUG] Contraseña CORRECTA. Iniciando sesión...")
 
         # Verificar si la contraseña ha expirado (más de 90 días)
         if user.clave_expirada() or user.requiere_cambio_clave:
