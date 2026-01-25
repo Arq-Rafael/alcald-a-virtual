@@ -3,6 +3,7 @@ import os
 import io
 import copy
 import logging
+import datetime
 import pandas as pd
 import glob
 from flask import Blueprint, render_template, request, flash, redirect, url_for, send_file, current_app, session
@@ -721,8 +722,21 @@ def generar_lote_certificados():
         if generados > 0:
             df.to_csv(solicitudes_path, index=False, encoding='utf-8')
 
-        # Retornar ZIP con los generados
+        # Retornar descarga directa cuando es un solo certificado; ZIP solo si son varios
         if generados > 0:
+            if len(indices_int) == 1:
+                idx = indices_int[0]
+                fname = f"certificado_{idx}.pdf"
+                fpath = os.path.join(output_dir, fname)
+                if os.path.exists(fpath):
+                    return send_file(
+                        fpath,
+                        as_attachment=True,
+                        download_name=fname,
+                        mimetype='application/pdf'
+                    )
+
+            # Si hay varios seleccionados, mantener ZIP como fallback
             import zipfile
             from io import BytesIO
 
