@@ -121,7 +121,7 @@ def create_app(config_class=Config):
                 print("⚠️ [RAILWAY LOG] Creando usuario admin por defecto...")
                 admin = Usuario(
                     usuario='admin',
-                    password_hash=generate_password_hash('admin123'),
+                    clave='admin123',
                     nombre='Administrador',
                     apellidos='Sistema',
                     role='admin',
@@ -136,7 +136,7 @@ def create_app(config_class=Config):
                 ]
                 for u, p, n, a, r in demos:
                     if not Usuario.query.filter_by(usuario=u).first():
-                        nuevo = Usuario(usuario=u, password_hash=generate_password_hash(p), nombre=n, apellidos=a, role=r, email=f'{u}@supata.gov.co')
+                        nuevo = Usuario(usuario=u, clave=p, nombre=n, apellidos=a, role=r, email=f'{u}@supata.gov.co')
                         db.session.add(nuevo)
                 
                 db.session.commit()

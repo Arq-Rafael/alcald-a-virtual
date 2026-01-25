@@ -15,7 +15,7 @@ def crear_admin():
         if not admin:
             admin = Usuario(
                 usuario='admin',
-                password_hash=generate_password_hash('admin123'),
+                clave='admin123',
                 nombre='Administrador',
                 apellidos='Sistema',
                 role='admin',
