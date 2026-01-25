@@ -187,21 +187,12 @@ def generate_pdf_certificate(data: dict) -> io.BytesIO:
     # ============================================
     # SECCIÓN 4: Normatividad aplicable (según Uso del suelo)
     # ============================================
-    uso_text = data.get('uso') or ''
-    if not uso_text and data.get('row_for_infer'):
-        uso_text = _infer_uso_from_row(data.get('row_for_infer'))
-
-    norm_file = find_normatividad_file_for_uso(uso_text) if uso_text else None
-    norm_text = extract_text_from_docx(norm_file, max_chars=1200) if norm_file else None
-
+    uso_text = data.get('uso', '')
+    
     section4_data = [[Paragraph('<b>NORMATIVIDAD APLICABLE</b>', style_section_title), '']]
     if uso_text:
         section4_data.append([Paragraph('<b>Uso del suelo:</b>', style_label), Paragraph(str(uso_text), style_value)])
-    if norm_text:
-        section4_data.append([Paragraph('<b>Resumen normatividad:</b>', style_label), Paragraph(str(norm_text), style_value)])
-        section4_data.append([Paragraph('<b>Fuente:</b>', style_label), Paragraph(Path(norm_file).name, style_value)])
-    else:
-        section4_data.append([Paragraph('<b>Fuente:</b>', style_label), Paragraph('No se encontró normativa automatizada para el uso indicado.', style_value)])
+    section4_data.append([Paragraph('<b>Normatividad:</b>', style_label), Paragraph('Consultar EOT y normativa municipal aplicable', style_value)])
 
     table4 = Table(section4_data, colWidths=[120, w - 2*margin - 120])
     table4.setStyle(TableStyle([
@@ -666,7 +657,7 @@ def generar_lote_certificados():
         # Obtener IDs a generar
         indices = request.form.getlist('indices[]')
         if not indices:
-            return {'success': False, 'error': 'No hay solicitudes seleccionadas'}, 400
+            return jsonify({'success': False, 'error': 'No hay solicitudes seleccionadas'}), 400
 
         # Leer CSV una sola vez y asegurar columna estado
         df = pd.read_csv(solicitudes_path, encoding='utf-8')
@@ -677,11 +668,15 @@ def generar_lote_certificados():
         generados = 0
         errores = []
         indices_int = []
+        
         for idx_str in indices:
             try:
                 indices_int.append(int(idx_str))
             except ValueError:
                 errores.append(f'ID inválido: {idx_str}')
+
+        if not indices_int:
+            return jsonify({'success': False, 'error': 'No hay IDs válidos para generar'}), 400
 
         subset = df[df['id'].isin(indices_int)]
 
@@ -691,22 +686,25 @@ def generar_lote_certificados():
                 row_series = subset.loc[subset['id'] == idx]
                 if row_series.empty:
                     errores.append(f'Solicitud {idx} no encontrada')
+                    logger.warning(f"Solicitud {idx} no encontrada")
                     continue
 
                 row = row_series.iloc[0].to_dict()
+                
+                logger.info(f"Generando certificado para solicitud {idx}")
 
                 pdf_buf = generate_pdf_certificate({
-                    'municipio': row.get('municipio'),
-                    'nit': row.get('nit'),
-                    'fecha': row.get('fecha'),
-                    'secretaria': row.get('secretaria'),
-                    'objeto': row.get('objeto'),
-                    'justificacion': row.get('justificacion'),
-                    'valor': row.get('valor'),
-                    'meta_producto': row.get('meta_producto'),
-                    'eje': row.get('eje'),
-                    'sector': row.get('sector'),
-                    'codigo_bpim': row.get('codigo_bpim'),
+                    'municipio': row.get('municipio', ''),
+                    'nit': row.get('nit', ''),
+                    'fecha': row.get('fecha', ''),
+                    'secretaria': row.get('secretaria', ''),
+                    'objeto': row.get('objeto', ''),
+                    'justificacion': row.get('justificacion', ''),
+                    'valor': row.get('valor', ''),
+                    'meta_producto': row.get('meta_producto', ''),
+                    'eje': row.get('eje', ''),
+                    'sector': row.get('sector', ''),
+                    'codigo_bpim': row.get('codigo_bpim', ''),
                 })
 
                 outfile = os.path.join(output_dir, f"certificado_{idx}.pdf")
@@ -715,25 +713,30 @@ def generar_lote_certificados():
 
                 df.loc[df['id'] == idx, 'estado'] = 'generado'
                 generados += 1
+                logger.info(f"Certificado {idx} generado exitosamente")
+                
             except Exception as e:
-                errores.append(f'Error en solicitud {idx}: {str(e)}')
+                msg_error = f'Error en solicitud {idx}: {str(e)}'
+                errores.append(msg_error)
+                logger.error(msg_error, exc_info=True)
 
         # Guardar CSV una sola vez al final
         if generados > 0:
             df.to_csv(solicitudes_path, index=False, encoding='utf-8')
+            logger.info(f"CSV actualizado: {generados} certificados marcados como generados")
 
         # Retornar respuesta JSON - Los PDFs se generaron y están listos para descargar individualmente
         return jsonify({
             'success': True,
             'generados': generados,
             'errores': errores,
-            'total': len(indices),
+            'total': len(indices_int),
             'mensaje': f'Se generaron {generados} certificados correctamente. Descárgalos de forma individual.'
         })
 
     except Exception as e:
-        logger.error(f"Error generando lote: {e}", exc_info=True)
-        return {'success': False, 'error': str(e)}, 500
+        logger.error(f"Error en generar_lote: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @certificados_bp.route('/generar_certificado', methods=['POST'])

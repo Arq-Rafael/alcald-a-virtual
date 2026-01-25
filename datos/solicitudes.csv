@@ -1,1 +1,4 @@
 municipio,nit,fecha,secretaria,objeto,justificacion,valor,meta_producto,eje,sector,codigo_bpim,estado
+Zipaquirá,890123456-7,2026-01-25,Ambiente,Certificado de Uso del Suelo para proyecto residencial,Proyecto de vivienda de interés social,150000000,Viviendas construidas: 100,Desarrollo social,Vivienda,3001,nuevo
+Cajicá,890234567-8,2026-01-25,Planeación,Certificado de Uso del Suelo para proyecto comercial,Centro comercial en zona urbana,250000000,Empleos generados: 50,Reactivación económica,Comercio,3002,nuevo
+Ubaté,890345678-9,2026-01-25,Hacienda,Certificado de Uso del Suelo para proyecto industrial,Planta de procesamiento de alimentos,500000000,Empleos generados: 150,Reactivación económica,Industria,3003,nuevo

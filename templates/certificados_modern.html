@@ -582,56 +582,38 @@ $(document).ready(function() {
       formData.append('indices[]', id);
     });
     
-    // Generar en lote (una sola solicitud)
-    // Generar en lote (una sola solicitud) - FIX: Manejar BLOB (ZIP)
+    // Generar en lote
     fetch('{{ url_for("certificados.generar_lote") }}', {
       method: 'POST',
       body: formData
     })
     .then(response => {
-        if (response.ok) {
-            // Verificar si es ZIP o JSON
-            const contentType = response.headers.get("content-type");
-            if (contentType && contentType.indexOf("application/json") !== -1) {
-                return response.json().then(data => {
-                     // Es JSON (probablemente error o sin generados)
-                     if (!data.success) throw new Error(data.error);
-                     return data;
-                });
-            } else {
-                // Es un archivo (ZIP), descargar
-                return response.blob().then(blob => {
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.style.display = 'none';
-                    a.href = url;
-                    // Nombre por defecto si no viene en header
-                    a.download = 'certificados.zip'; 
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    
-                    // Simular respuesta de éxito para UI
-                    return { success: true, generados: ids.length, total: ids.length, errores: [] };
-                });
-            }
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-        throw new Error('Error en la respuesta del servidor');
+        return response.json();
     })
     .then(data => {
-      if (data.success) {
-        btn.html(`<i class="bi bi-check-circle me-2"></i>✅ Descargando...`);
-        if (data.errores && data.errores.length > 0) {
-          console.warn('Errores:', data.errores);
-          setTimeout(() => alert('⚠️ Se generaron algunos, pero hubo errores:\n' + data.errores.join('\n')), 500);
+        if (!data.success) {
+            throw new Error(data.error || data.mensaje || 'Error desconocido');
         }
-        setTimeout(() => location.reload(), 2000);
-      }
+        
+        btn.html(`<i class="bi bi-check-circle me-2"></i>✅ Éxito`);
+        
+        // Mostrar alerta con el resultado
+        let mensaje = `✅ Se generaron ${data.generados} de ${data.total} certificados correctamente.`;
+        if (data.errores && data.errores.length > 0) {
+            mensaje += `\n\n⚠️ Errores encontrados:\n- ${data.errores.join('\n- ')}`;
+        }
+        alert(mensaje);
+        
+        // Recargar tabla después de 1.5 segundos
+        setTimeout(() => location.reload(), 1500);
     })
     .catch(err => {
-      console.error('Error:', err);
-      btn.html(originalHtml).prop('disabled', false);
-      alert('❌ Error al generar certificados:\n' + err.message);
+        console.error('Error completo:', err);
+        btn.html(originalHtml).prop('disabled', false);
+        alert('❌ Error al generar certificados:\n' + err.message);
     });
   });
 
