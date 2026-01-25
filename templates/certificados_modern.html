@@ -600,15 +600,31 @@ $(document).ready(function() {
         
         btn.html(`<i class="bi bi-check-circle me-2"></i>✅ Éxito`);
         
+        // Iniciar descargas de cada PDF generado
+        if (Array.isArray(data.download_urls)) {
+          data.download_urls.forEach((url, i) => {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            setTimeout(() => {
+              a.click();
+              document.body.removeChild(a);
+            }, i * 150);
+          });
+        }
+
         // Mostrar alerta con el resultado
         let mensaje = `✅ Se generaron ${data.generados} de ${data.total} certificados correctamente.`;
         if (data.errores && data.errores.length > 0) {
-            mensaje += `\n\n⚠️ Errores encontrados:\n- ${data.errores.join('\n- ')}`;
+          mensaje += `\n\n⚠️ Errores encontrados:\n- ${data.errores.join('\n- ')}`;
         }
+        mensaje += `\n\n📂 Los PDFs se descargan como archivos individuales (carpeta Descargas del navegador).`;
         alert(mensaje);
         
-        // Recargar tabla después de 1.5 segundos
-        setTimeout(() => location.reload(), 1500);
+        // Recargar tabla después de 2 segundos
+        setTimeout(() => location.reload(), 2000);
     })
     .catch(err => {
         console.error('Error completo:', err);

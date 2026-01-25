@@ -6,7 +6,7 @@ import logging
 import datetime
 import pandas as pd
 import glob
-from flask import Blueprint, render_template, request, flash, redirect, url_for, send_file, current_app, session, jsonify
+from flask import Blueprint, render_template, request, flash, redirect, url_for, send_file, current_app, session, jsonify, abort
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
@@ -668,6 +668,7 @@ def generar_lote_certificados():
         generados = 0
         errores = []
         indices_int = []
+        download_urls = []
         
         for idx_str in indices:
             try:
@@ -713,6 +714,7 @@ def generar_lote_certificados():
 
                 df.loc[df['id'] == idx, 'estado'] = 'generado'
                 generados += 1
+                download_urls.append(url_for('certificados.descargar_certificado', idx=idx, _external=True))
                 logger.info(f"Certificado {idx} generado exitosamente")
                 
             except Exception as e:
@@ -731,7 +733,8 @@ def generar_lote_certificados():
             'generados': generados,
             'errores': errores,
             'total': len(indices_int),
-            'mensaje': f'Se generaron {generados} certificados correctamente. Descárgalos de forma individual.'
+            'mensaje': f'Se generaron {generados} certificados correctamente. Descárgalos de forma individual.',
+            'download_urls': download_urls
         })
 
     except Exception as e:
@@ -784,3 +787,17 @@ def generar_certificado():
         download_name=f"certificado_{idx}.pdf",
         mimetype='application/pdf'
     )
+
+
+@certificados_bp.route('/certificados/descargar/<int:idx>', methods=['GET'])
+def descargar_certificado(idx: int):
+    """Descarga un certificado ya generado desde el disco (carpeta de salida)."""
+    output_dir = current_app.config['CERTIFICADOS_OUTPUT_DIR']
+    if not os.path.exists(output_dir):
+        abort(404)
+
+    file_path = os.path.join(output_dir, f"certificado_{idx}.pdf")
+    if not os.path.exists(file_path):
+        abort(404)
+
+    return send_file(file_path, as_attachment=True, download_name=f"certificado_{idx}.pdf", mimetype='application/pdf')
