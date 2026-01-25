@@ -722,46 +722,14 @@ def generar_lote_certificados():
         if generados > 0:
             df.to_csv(solicitudes_path, index=False, encoding='utf-8')
 
-        # Retornar descarga directa cuando es un solo certificado; ZIP solo si son varios
-        if generados > 0:
-            if len(indices_int) == 1:
-                idx = indices_int[0]
-                fname = f"certificado_{idx}.pdf"
-                fpath = os.path.join(output_dir, fname)
-                if os.path.exists(fpath):
-                    return send_file(
-                        fpath,
-                        as_attachment=True,
-                        download_name=fname,
-                        mimetype='application/pdf'
-                    )
-
-            # Si hay varios seleccionados, mantener ZIP como fallback
-            import zipfile
-            from io import BytesIO
-
-            memory_file = BytesIO()
-            with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zf:
-                for idx in indices_int:
-                    fname = f"certificado_{idx}.pdf"
-                    fpath = os.path.join(output_dir, fname)
-                    if os.path.exists(fpath):
-                        zf.write(fpath, fname)
-
-            memory_file.seek(0)
-            return send_file(
-                memory_file,
-                as_attachment=True,
-                download_name=f"certificados_lote_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.zip",
-                mimetype='application/zip'
-            )
-
-        return {
+        # Retornar respuesta JSON - Los PDFs se generaron y están listos para descargar individualmente
+        return jsonify({
             'success': True,
             'generados': generados,
             'errores': errores,
-            'total': len(indices)
-        }
+            'total': len(indices),
+            'mensaje': f'Se generaron {generados} certificados correctamente. Descárgalos de forma individual.'
+        })
 
     except Exception as e:
         logger.error(f"Error generando lote: {e}", exc_info=True)
