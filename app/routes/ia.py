@@ -1,4 +1,3 @@
-
 import os
 import datetime
 import csv
@@ -468,6 +467,7 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
     # ============================================
     # CUERPO DEL OFICIO CON FORMATO PROFESIONAL
     # ============================================
+    min_bottom_margin = 120  # Margen inferior seguro para evitar sobreposición con pie de página
     cuerpo = data.get('cuerpo', '')
     if cuerpo:
         paragraphs = cuerpo.split('\n')
@@ -476,19 +476,14 @@ def generate_oficio_pdf(data: dict) -> io.BytesIO:
                 stripped = parrafo.strip()
                 bullet_markers = ('•', '-', '*', '·')
                 if stripped.startswith(bullet_markers):
-                    # Limpiar marcador y usar estilo de viñeta para mejor alineación
                     texto_viñeta = stripped.lstrip('•*-·').strip()
                     p_body = Paragraph(texto_viñeta, style_bullet, bulletText='•')
                 else:
                     p_body = Paragraph(stripped, style_body)
                 w_body, h_body = p_body.wrap(w - 2*margin, 500)
-                
-                # Verificar sí cabe en la página actual
-                # Margen inferior calibrado para evitar footer
-                if y_position - h_body < 160:
+                if y_position - h_body < min_bottom_margin:
                     c.showPage()
-                    y_position = h - 180 # REINICIO: Mismo margen superior en TODAS las páginas
-                
+                    y_position = h - 180
                 p_body.drawOn(c, margin, y_position - h_body)
                 y_position -= (h_body + 8)
     
