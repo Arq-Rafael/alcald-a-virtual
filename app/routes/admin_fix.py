@@ -9,12 +9,12 @@ admin_fix_bp = Blueprint('admin_fix', __name__)
 def crear_admin():
     try:
         # Verificar si existe
-        admin = Usuario.query.filter_by(username='admin').first()
+        admin = Usuario.query.filter_by(usuario='admin').first()
         msg = ""
         
         if not admin:
             admin = Usuario(
-                username='admin',
+                usuario='admin',
                 password_hash=generate_password_hash('admin123'),
                 nombre='Administrador',
                 apellidos='Sistema',

@@ -116,11 +116,11 @@ def create_app(config_class=Config):
             from .models.usuario import Usuario
             from werkzeug.security import generate_password_hash
             
-            admin = Usuario.query.filter_by(username='admin').first()
+            admin = Usuario.query.filter_by(usuario='admin').first()
             if not admin:
                 print("⚠️ [RAILWAY LOG] Creando usuario admin por defecto...")
                 admin = Usuario(
-                    username='admin',
+                    usuario='admin',
                     password_hash=generate_password_hash('admin123'),
                     nombre='Administrador',
                     apellidos='Sistema',
@@ -135,8 +135,8 @@ def create_app(config_class=Config):
                     ('gobierno', 'gobierno123', 'Gobierno', 'Municipal', 'gobierno')
                 ]
                 for u, p, n, a, r in demos:
-                    if not Usuario.query.filter_by(username=u).first():
-                        nuevo = Usuario(username=u, password_hash=generate_password_hash(p), nombre=n, apellidos=a, role=r, email=f'{u}@supata.gov.co')
+                    if not Usuario.query.filter_by(usuario=u).first():
+                        nuevo = Usuario(usuario=u, password_hash=generate_password_hash(p), nombre=n, apellidos=a, role=r, email=f'{u}@supata.gov.co')
                         db.session.add(nuevo)
                 
                 db.session.commit()
