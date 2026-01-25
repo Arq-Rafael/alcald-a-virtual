@@ -723,7 +723,28 @@ def generar_lote_certificados():
                 writer.writerows(rows)
                 f.flush()
                 os.fsync(f.fileno())
-        
+                
+        # --- NUEVO: Retornar ZIP ---
+        if generados > 0:
+            import zipfile
+            from io import BytesIO
+            
+            memory_file = BytesIO()
+            with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zf:
+                for idx_str in indices:
+                    fname = f"certificado_{idx_str}.pdf"
+                    fpath = os.path.join(output_dir, fname)
+                    if os.path.exists(fpath):
+                        zf.write(fpath, fname)
+                        
+            memory_file.seek(0)
+            return send_file(
+                memory_file,
+                as_attachment=True,
+                download_name=f"certificados_lote_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.zip",
+                mimetype='application/zip'
+            )
+            
         return {
             'success': True,
             'generados': generados,
@@ -732,6 +753,7 @@ def generar_lote_certificados():
         }
     
     except Exception as e:
+        print(f"Error generando lote: {e}")
         return {'success': False, 'error': str(e)}, 500
 
 

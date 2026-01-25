@@ -583,21 +583,49 @@ $(document).ready(function() {
     });
     
     // Generar en lote (una sola solicitud)
+    // Generar en lote (una sola solicitud) - FIX: Manejar BLOB (ZIP)
     fetch('{{ url_for("certificados.generar_lote") }}', {
       method: 'POST',
       body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        if (response.ok) {
+            // Verificar si es ZIP o JSON
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                return response.json().then(data => {
+                     // Es JSON (probablemente error o sin generados)
+                     if (!data.success) throw new Error(data.error);
+                     return data;
+                });
+            } else {
+                // Es un archivo (ZIP), descargar
+                return response.blob().then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    // Nombre por defecto si no viene en header
+                    a.download = 'certificados.zip'; 
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    
+                    // Simular respuesta de éxito para UI
+                    return { success: true, generados: ids.length, total: ids.length, errores: [] };
+                });
+            }
+        }
+        throw new Error('Error en la respuesta del servidor');
+    })
     .then(data => {
       if (data.success) {
-        btn.html(`<i class="bi bi-check-circle me-2"></i>✅ Generados: ${data.generados}/${data.total}`);
-        if (data.errores.length > 0) {
+        btn.html(`<i class="bi bi-check-circle me-2"></i>✅ Descargando...`);
+        if (data.errores && data.errores.length > 0) {
           console.warn('Errores:', data.errores);
-          setTimeout(() => alert('⚠️ ' + data.errores.join('\n')), 500);
+          setTimeout(() => alert('⚠️ Se generaron algunos, pero hubo errores:\n' + data.errores.join('\n')), 500);
         }
-        setTimeout(() => location.reload(), 1500);
-      } else {
-        throw new Error(data.error || 'Error desconocido');
+        setTimeout(() => location.reload(), 2000);
       }
     })
     .catch(err => {
