@@ -56,10 +56,15 @@ def admin_required(f):
     return decorated_function
 
 # --- SQLite Helpers ---
+# --- SQLite Helpers ---
 def get_sqlite():
-    # Assumes data.db is in the project root (parent of app/)
-    # Adjusted to ensure path correct
-    db_path = os.path.join(current_app.root_path, '..', 'data.db') 
+    # Detectar entorno Railway para usar /tmp
+    db_name = "data.db"
+    if os.environ.get('RAILWAY_ENVIRONMENT'):
+        db_path = os.path.join('/tmp', db_name)
+    else:
+        db_path = os.path.join(current_app.root_path, '..', db_name)
+        
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
@@ -85,7 +90,7 @@ def load_plan_desarrollo():
     try:
         # Get BASE_DIR from Flask config - this is set in app/config.py
         base_dir = str(current_app.config['BASE_DIR'])
-        path = os.path.join(base_dir, 'datos', 'plan_desarrollo', 'plan_desarrollo.xlsx')
+        path = os.path.join(base_dir, 'datos', 'plan_desarrollo.xlsx')
         
         if not os.path.exists(path):
             print(f"Plan file not found at: {path}")
