@@ -102,7 +102,27 @@ def load_plan_desarrollo():
         
         # Rename columns to standard keys if needed
         # Expected keys: 'meta de producto', 'eje', 'sector', 'codigo bpim'
+        rename_map = {}
+        for col in df.columns:
+            if 'meta' in col and 'producto' in col:
+                rename_map[col] = 'meta de producto'
+            elif 'meta' in col:
+                rename_map[col] = 'meta de producto'
+            elif 'bpim' in col or 'bpin' in col:
+                rename_map[col] = 'codigo bpim'
+            elif 'eje' in col:
+                rename_map[col] = 'eje'
+            elif 'sector' in col:
+                rename_map[col] = 'sector'
         
+        if rename_map:
+            df = df.rename(columns=rename_map)
+            
+        # Ensure 'meta de producto' exists
+        if 'meta de producto' not in df.columns:
+            # Fallback: use first string column or create empty
+            df['meta de producto'] = "Meta desconocida"
+            
         # Fill NaNs
         df = df.fillna('')
         
