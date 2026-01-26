@@ -131,19 +131,19 @@ def create_app(config_class=Config):
                     nombre='Administrador',
                     apellidos='Sistema',
                     role='admin',
-                    email='admin@supata.gov.co'
+                    email=None  # SIN EMAIL POR DEFECTO
                 )
                 admin.set_password(admin_password)
                 db.session.add(admin)
                 
-                # Crear usuarios demo
+                # Crear usuarios demo SIN EMAILS
                 demo_users = [
                     ('planeacion', os.environ.get('PLANEACION_PASSWORD', 'planeacion123'), 'Planeación', 'Municipal', 'planeacion'),
                     ('gobierno', os.environ.get('GOBIERNO_PASSWORD', 'gobierno123'), 'Gobierno', 'Municipal', 'gobierno')
                 ]
                 for u, p, n, a, r in demo_users:
                     if not Usuario.query.filter_by(usuario=u).first():
-                        nuevo = Usuario(usuario=u, nombre=n, apellidos=a, role=r, email=f'{u}@supata.gov.co')
+                        nuevo = Usuario(usuario=u, nombre=n, apellidos=a, role=r, email=None)  # SIN EMAIL
                         nuevo.set_password(p)
                         db.session.add(nuevo)
                 

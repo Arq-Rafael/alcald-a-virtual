@@ -212,14 +212,20 @@ class EmailService:
     
     @staticmethod
     def enviar_notificacion_registro(email, nombre_usuario):
-        """Notifica creación de cuenta al usuario"""
+        """Notifica creación de cuenta al usuario con logging detallado"""
+        print(f"\n📧 Intentando enviar notificación de registro a {email}...")
+        
         try:
-            smtp_server = current_app.config.get('SMTP_SERVER', 'smtp.gmail.com')
-            smtp_port = current_app.config.get('SMTP_PORT', 587)
-            smtp_user = current_app.config.get('SMTP_USER', '')
-            smtp_password = current_app.config.get('SMTP_PASSWORD', '')
+            smtp_server = current_app.config.get('SMTP_SERVER')
+            smtp_port = current_app.config.get('SMTP_PORT')
+            smtp_user = current_app.config.get('SMTP_USER')
+            smtp_password = current_app.config.get('SMTP_PASSWORD')
+
+            print(f"   Server: {smtp_server}:{smtp_port}")
+            print(f"   User: {smtp_user}")
 
             if not smtp_user or not smtp_password:
+                print("   ❌ Configuración SMTP incompleta")
                 return False
 
             msg = MIMEMultipart('alternative')
@@ -241,20 +247,23 @@ class EmailService:
             """
 
             msg.attach(MIMEText(html, 'html'))
+            print("   ✅ Mensaje creado")
 
-            import socket
-            original_timeout = socket.getdefaulttimeout()
-            try:
-                socket.setdefaulttimeout(5)
-                with smtplib.SMTP(smtp_server, smtp_port, timeout=5) as server:
-                    server.starttls()
-                    server.login(smtp_user, smtp_password)
-                    server.send_message(msg)
-            finally:
-                socket.setdefaulttimeout(original_timeout)
+            print("   ⏳ Conectando...")
+            with smtplib.SMTP(smtp_server, int(smtp_port), timeout=10) as server:
+                print("   ✅ Conectado")
+                server.starttls()
+                print("   ✅ TLS activado")
+                server.login(smtp_user, smtp_password)
+                print("   ✅ Autenticado")
+                server.send_message(msg)
+                print("   ✅ Mensaje enviado")
 
+            print(f"✅ ÉXITO: Notificación enviada a {email}\n")
             return True
-        except (socket.timeout, Exception):
+            
+        except Exception as e:
+            print(f"❌ ERROR: {type(e).__name__}: {str(e)}\n")
             return False
 
     @staticmethod
