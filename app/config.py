@@ -40,13 +40,13 @@ class Config:
     # Feature Flags / Permissions
     ALWAYS_ADMIN = True # Dev mode
     
-    # ===== CONFIGURACIÓN DE CORREO SMTP (Brevo recomendado en Railway) =====
+    # ===== CONFIGURACIÓN DE CORREO SMTP =====
     # Usa variables de entorno en Railway: SMTP_SERVER, SMTP_PORT, SMTP_USER, SMTP_PASSWORD.
-    # Valores por defecto apuntan a Brevo para evitar bloqueos SMTP típicos de Gmail en Railway.
-    SMTP_SERVER = os.environ.get('SMTP_SERVER', 'smtp-relay.brevo.com')
+    # Valores por defecto configurados para Gmail.
+    SMTP_SERVER = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
     SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
-    SMTP_USER = os.environ.get('SMTP_USER', '')
-    SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
+    SMTP_USER = os.environ.get('SMTP_USER', 'alcaldiavirtual2026@gmail.com')
+    SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', 'fvgqrsacjnjhzfcn')
     
     # Email del administrador para recibir alertas
     ADMIN_ALERT_EMAIL = os.environ.get('ADMIN_ALERT_EMAIL', 'alcaldiavirtual2026@gmail.com')
