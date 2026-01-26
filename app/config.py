@@ -40,20 +40,13 @@ class Config:
     # Feature Flags / Permissions
     ALWAYS_ADMIN = True # Dev mode
     
-    # ===== CONFIGURACIÓN DE CORREO SMTP =====
-    # Para que funcionen las notificaciones por correo, configura estos valores:
-    
-    # Opción 1: Usar Gmail (más común)
-    SMTP_SERVER = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
+    # ===== CONFIGURACIÓN DE CORREO SMTP (Brevo recomendado en Railway) =====
+    # Usa variables de entorno en Railway: SMTP_SERVER, SMTP_PORT, SMTP_USER, SMTP_PASSWORD.
+    # Valores por defecto apuntan a Brevo para evitar bloqueos SMTP típicos de Gmail en Railway.
+    SMTP_SERVER = os.environ.get('SMTP_SERVER', 'smtp-relay.brevo.com')
     SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
-    SMTP_USER = os.environ.get('SMTP_USER', 'alcaldiavirtual2026@gmail.com')
-    SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', 'fvgqrsacjnjhzfcn')
-    
-    # Opción 2: Usar Outlook/Hotmail (descomenta si usas Outlook)
-    # SMTP_SERVER = 'smtp-mail.outlook.com'
-    # SMTP_PORT = 587
-    # SMTP_USER = 'tu_correo@outlook.com'
-    # SMTP_PASSWORD = 'tu_contraseña'
+    SMTP_USER = os.environ.get('SMTP_USER', '')
+    SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
     
     # Email del administrador para recibir alertas
     ADMIN_ALERT_EMAIL = os.environ.get('ADMIN_ALERT_EMAIL', 'alcaldiavirtual2026@gmail.com')
