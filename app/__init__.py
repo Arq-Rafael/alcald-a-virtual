@@ -119,15 +119,13 @@ def create_app(config_class=Config):
             db.create_all()
             # Crear usuario admin si no existe
             from .models.usuario import Usuario
-            from werkzeug.security import generate_password_hash
             
+            # Verificar si ya existe admin - evitar duplicados
             admin = Usuario.query.filter_by(usuario='admin').first()
             if not admin:
                 logging.warning("[RAILWAY LOG] Creando usuario admin por defecto...")
-                admin_password = os.environ.get('ADMIN_PASSWORD', None)
-                if not admin_password:
-                    logging.warning('ADMIN_PASSWORD no está definida en variables de entorno. Usando valor inseguro por defecto.')
-                    admin_password = 'admin123'
+                admin_password = os.environ.get('ADMIN_PASSWORD', 'admin123')
+                
                 admin = Usuario(
                     usuario='admin',
                     nombre='Administrador',
@@ -145,14 +143,16 @@ def create_app(config_class=Config):
                 ]
                 for u, p, n, a, r in demo_users:
                     if not Usuario.query.filter_by(usuario=u).first():
-                        if p in ['planeacion123', 'gobierno123']:
-                            logging.warning(f'Contraseña demo para {u} no definida en variables de entorno. Usando valor inseguro por defecto.')
                         nuevo = Usuario(usuario=u, nombre=n, apellidos=a, role=r, email=f'{u}@supata.gov.co')
                         nuevo.set_password(p)
                         db.session.add(nuevo)
                 
-                db.session.commit()
-                logging.info("[RAILWAY LOG] Usuarios creados correctamente")
+                try:
+                    db.session.commit()
+                    logging.info("[RAILWAY LOG] Usuarios creados correctamente")
+                except Exception as commit_error:
+                    logging.warning(f"[RAILWAY] Algunos usuarios ya existían: {commit_error}")
+                    db.session.rollback()
                 
             # Sembrar metas
             from .utils.seeds import seed_metas
