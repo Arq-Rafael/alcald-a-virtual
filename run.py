@@ -1,9 +1,13 @@
 from app import create_app
 import os
-from dotenv import load_dotenv
 
-# Cargar variables de entorno desde .env (solo en local)
-load_dotenv()
+# Cargar variables de entorno desde .env solo en local
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    # En Railway, dotenv no está disponible (no es necesario)
+    pass
 
 print("🚀 [RAILWAY] Iniciando aplicación desde run.py...")
 app = create_app()
