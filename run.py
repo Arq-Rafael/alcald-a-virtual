@@ -1,5 +1,9 @@
 from app import create_app
 import os
+from dotenv import load_dotenv
+
+# Cargar variables de entorno desde .env (solo en local)
+load_dotenv()
 
 print("🚀 [RAILWAY] Iniciando aplicación desde run.py...")
 app = create_app()
