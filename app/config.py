@@ -46,7 +46,7 @@ class Config:
     SMTP_SERVER = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
     SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
     SMTP_USER = os.environ.get('SMTP_USER', 'alcaldiavirtual2026@gmail.com')
-    SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', 'fvgqrsacjnjhzfcn')
+    SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', 'pizqichhygxbnchf')
     
     # Email del administrador para recibir alertas
     ADMIN_ALERT_EMAIL = os.environ.get('ADMIN_ALERT_EMAIL', 'alcaldiavirtual2026@gmail.com')
