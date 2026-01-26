@@ -116,6 +116,7 @@ class EmailService:
     def enviar_codigo_verificacion(email, codigo, nombre_usuario='Usuario'):
         """
         Envía código de verificación por correo
+        Función ROBUSTA que maneja errores gracefully
         
         Args:
             email: Correo del destinatario
@@ -123,88 +124,90 @@ class EmailService:
             nombre_usuario: Nombre del usuario
         
         Returns:
-            bool: True si se envió correctamente
+            bool: True si se envió correctamente, False en caso contrario
         """
+        print(f"\n📧 Intentando enviar código a {email}...")
+        
         try:
-            import socket
-            # Configuración del servidor SMTP (ajustar según tu proveedor)
-            smtp_server = current_app.config.get('SMTP_SERVER', 'smtp.gmail.com')
-            smtp_port = current_app.config.get('SMTP_PORT', 587)
-            smtp_user = current_app.config.get('SMTP_USER', '')
-            smtp_password = current_app.config.get('SMTP_PASSWORD', '')
+            # 1️⃣ VERIFICAR CONFIGURACIÓN
+            smtp_server = current_app.config.get('SMTP_SERVER')
+            smtp_port = current_app.config.get('SMTP_PORT')
+            smtp_user = current_app.config.get('SMTP_USER')
+            smtp_password = current_app.config.get('SMTP_PASSWORD')
             
-            if not smtp_user or not smtp_password:
-                print("⚠ Configuración de correo no establecida")
-                print(f"  Código de verificación para {email}: {codigo}")
+            print(f"   Server: {smtp_server}:{smtp_port}")
+            print(f"   User: {smtp_user}")
+            
+            if not smtp_server or not smtp_port or not smtp_user or not smtp_password:
+                print("   ❌ Configuración SMTP incompleta")
                 return False
             
-            # Crear mensaje
+            # 2️⃣ CREAR MENSAJE
             msg = MIMEMultipart('alternative')
             msg['Subject'] = 'Código de Verificación - Alcaldía Virtual'
             msg['From'] = smtp_user
             msg['To'] = email
             
-            # Cuerpo del mensaje en HTML
             html = f"""
             <html>
-            <head>
-                <style>
-                    body {{ font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px; }}
-                    .container {{ background: white; border-radius: 12px; padding: 30px; max-width: 500px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }}
-                    .header {{ text-align: center; color: #7cb342; margin-bottom: 20px; }}
-                    .code-box {{ background: #f0f9ff; border: 2px solid #7cb342; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0; }}
-                    .code {{ font-size: 32px; font-weight: bold; color: #7cb342; letter-spacing: 8px; }}
-                    .footer {{ text-align: center; color: #666; font-size: 12px; margin-top: 20px; }}
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <div class="header">
-                        <h2>🔐 Código de Verificación</h2>
-                    </div>
+            <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
+                <div style="background: white; border-radius: 12px; padding: 30px; max-width: 500px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <h2 style="text-align: center; color: #7cb342;">🔐 Código de Verificación</h2>
+                    
                     <p>Hola <strong>{nombre_usuario}</strong>,</p>
-                    <p>Has solicitado acceder a la plataforma de Alcaldía Virtual. Utiliza el siguiente código de verificación:</p>
+                    <p>Tu código de verificación es:</p>
                     
-                    <div class="code-box">
-                        <div class="code">{codigo}</div>
+                    <div style="background: #f0f9ff; border: 2px solid #7cb342; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
+                        <div style="font-size: 36px; font-weight: bold; color: #7cb342; letter-spacing: 10px;">{codigo}</div>
                     </div>
                     
-                    <p><strong>Este código expira en 10 minutos.</strong></p>
+                    <p><strong>⏱️ Este código expira en 10 minutos.</strong></p>
                     <p>Si no solicitaste este código, ignora este mensaje.</p>
                     
-                    <div class="footer">
-                        <p>Alcaldía Municipal - Sistema de Gestión Virtual</p>
-                        <p>Este es un correo automático, por favor no responder.</p>
-                    </div>
+                    <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+                    <p style="text-align: center; color: #666; font-size: 12px;">
+                        Alcaldía Municipal - Sistema de Gestión Virtual<br>
+                        Este es un correo automático, por favor no responder.
+                    </p>
                 </div>
             </body>
             </html>
             """
             
-            parte_html = MIMEText(html, 'html')
-            msg.attach(parte_html)
+            msg.attach(MIMEText(html, 'html'))
+            print("   ✅ Mensaje creado")
             
-            # Enviar con timeout de 5 segundos
-            original_timeout = socket.getdefaulttimeout()
-            try:
-                socket.setdefaulttimeout(5)
-                with smtplib.SMTP(smtp_server, smtp_port, timeout=5) as server:
-                    server.starttls()
-                    server.login(smtp_user, smtp_password)
-                    server.send_message(msg)
-            finally:
-                socket.setdefaulttimeout(original_timeout)
+            # 3️⃣ CONECTAR Y ENVIAR
+            print("   ⏳ Conectando a SMTP...")
+            with smtplib.SMTP(smtp_server, int(smtp_port), timeout=10) as server:
+                print("   ✅ Conectado")
+                
+                print("   ⏳ Iniciando TLS...")
+                server.starttls()
+                print("   ✅ TLS activado")
+                
+                print("   ⏳ Autenticando...")
+                server.login(smtp_user, smtp_password)
+                print("   ✅ Autenticado")
+                
+                print("   ⏳ Enviando mensaje...")
+                server.send_message(msg)
+                print("   ✅ Mensaje enviado")
             
-            print(f"✓ Código de verificación enviado a {email}")
+            print(f"✅ ÉXITO: Código enviado a {email}\n")
             return True
             
-        except socket.timeout:
-            print(f"❌ SMTP timeout: No se pudo conectar al servidor de correo")
-            print(f"  Código de verificación para {email}: {codigo}")
+        except smtplib.SMTPAuthenticationError as e:
+            print(f"❌ ERROR AUTENTICACIÓN: {str(e)}")
+            print(f"   Verifica usuario y contraseña SMTP")
             return False
+            
+        except smtplib.SMTPException as e:
+            print(f"❌ ERROR SMTP: {str(e)}")
+            return False
+            
         except Exception as e:
-            print(f"❌ Error al enviar correo: {e}")
-            print(f"  Código de verificación para {email}: {codigo}")
+            print(f"❌ ERROR: {type(e).__name__}: {str(e)}")
             return False
     
     @staticmethod

@@ -57,33 +57,33 @@ def login():
             session['pending_user_id'] = user.id
             return redirect(url_for('auth.cambiar_clave_forzado'))
 
-        # Contraseña correcta
+        # Contraseña correcta ✅
         # Si requiere 2FA y tiene email configurado, enviar código y pedir verificación
-        # PERO: solo si nunca ha sido verificado o hace más de 30 días
-        if user.requiere_2fa and user.email and user.necesita_2fa_nuevamente():
+        if user.requiere_2fa and user.email:
             codigo = user.generar_codigo_verificacion()
             db.session.commit()
             
-            # Intentar enviar código de verificación con timeout
+            # Intentar enviar código de verificación
             try:
-                import socket
-                socket.setdefaulttimeout(5)  # 5 segundo timeout para SMTP
                 email_sent = EmailService.enviar_codigo_verificacion(user.email, codigo, user.usuario)
-                socket.setdefaulttimeout(None)  # Restaurar timeout
                 
                 if email_sent:
+                    # Email enviado exitosamente
                     session['pending_user_id'] = user.id
-                    flash('Se envió un código de verificación a tu correo. Ingrésalo para continuar.', 'info')
+                    flash('✅ Se envió un código de verificación a tu correo. Ingrésalo para continuar.', 'info')
                     return redirect(url_for('auth.verificacion'))
                 else:
-                    # Si falla el envío de email, permitir acceso directo con advertencia
-                    flash('⚠️ No se pudo enviar el código. Acceso permitido.', 'warning')
+                    # Email fallo pero permitir continuar sin 2FA
+                    print(f"⚠️ No se pudo enviar email a {user.email}")
+                    flash('⚠️ No se pudo enviar el código. Continúa sin verificación.', 'warning')
+                    # Continuar al final para crear sesión
             except Exception as e:
-                # Si hay timeout o error SMTP, permitir acceso directo
-                print(f"⚠️ SMTP Error en login: {e}")
-                flash('⚠️ Error en verificación de email. Acceso permitido.', 'warning')
+                # Error en SMTP pero permitir acceso
+                print(f"❌ Error SMTP: {str(e)}")
+                flash('⚠️ Error en servidor de correo. Continúa sin verificación.', 'warning')
+                # Continuar al final para crear sesión
 
-        # Acceso directo sin 2FA - Crear sesión y registrar
+        # === CREAR SESIÓN Y ACCESO ===
         user.registrar_acceso_exitoso()
         token = user.generar_token_sesion()
         
