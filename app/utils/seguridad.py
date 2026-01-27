@@ -8,6 +8,7 @@ import secrets
 import string
 from datetime import datetime, timedelta
 from flask import current_app
+from .email_api import send_email_sendgrid
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -134,6 +135,8 @@ class EmailService:
             smtp_port = current_app.config.get('SMTP_PORT')
             smtp_user = current_app.config.get('SMTP_USER')
             smtp_password = current_app.config.get('SMTP_PASSWORD')
+            sg_api_key = current_app.config.get('SENDGRID_API_KEY')
+            email_provider = current_app.config.get('EMAIL_PROVIDER', 'auto')
             
             print(f"   Server: {smtp_server}:{smtp_port}")
             print(f"   User: {smtp_user}")
@@ -176,21 +179,26 @@ class EmailService:
             
             msg.attach(MIMEText(html, 'html'))
             print("   ✅ Mensaje creado")
-            
-            # 3️⃣ CONECTAR Y ENVIAR
+
+            # 3️⃣ ENVIAR por API si está configurado o si SMTP falla
+            html_body = html
+            if sg_api_key and (email_provider == 'sendgrid' or email_provider == 'auto'):
+                print("   ⏳ Enviando vía SendGrid API...")
+                sent = send_email_sendgrid(sg_api_key, smtp_user, email, 'Código de Verificación - Alcaldía Virtual', html_body)
+                if sent:
+                    print("   ✅ Mensaje enviado (API)")
+                    print(f"✅ ÉXITO: Código enviado a {email}\n")
+                    return True
+                else:
+                    print("   ⚠️ Falló API, intentando SMTP...")
+
             print("   ⏳ Conectando a SMTP...")
             with smtplib.SMTP(smtp_server, int(smtp_port), timeout=10) as server:
                 print("   ✅ Conectado")
-                
-                print("   ⏳ Iniciando TLS...")
                 server.starttls()
                 print("   ✅ TLS activado")
-                
-                print("   ⏳ Autenticando...")
                 server.login(smtp_user, smtp_password)
                 print("   ✅ Autenticado")
-                
-                print("   ⏳ Enviando mensaje...")
                 server.send_message(msg)
                 print("   ✅ Mensaje enviado")
             
@@ -207,6 +215,13 @@ class EmailService:
             return False
             
         except Exception as e:
+            # Si hay API y estamos en auto, intentar por API como fallback final
+            if sg_api_key and email_provider == 'auto':
+                ok = send_email_sendgrid(sg_api_key, smtp_user, email, 'Código de Verificación - Alcaldía Virtual', html)
+                if ok:
+                    print("   ✅ Mensaje enviado (fallback API)")
+                    print(f"✅ ÉXITO: Código enviado a {email}\n")
+                    return True
             print(f"❌ ERROR: {type(e).__name__}: {str(e)}")
             return False
     
@@ -220,6 +235,8 @@ class EmailService:
             smtp_port = current_app.config.get('SMTP_PORT')
             smtp_user = current_app.config.get('SMTP_USER')
             smtp_password = current_app.config.get('SMTP_PASSWORD')
+            sg_api_key = current_app.config.get('SENDGRID_API_KEY')
+            email_provider = current_app.config.get('EMAIL_PROVIDER', 'auto')
 
             print(f"   Server: {smtp_server}:{smtp_port}")
             print(f"   User: {smtp_user}")
@@ -249,6 +266,15 @@ class EmailService:
             msg.attach(MIMEText(html, 'html'))
             print("   ✅ Mensaje creado")
 
+            if sg_api_key and (email_provider == 'sendgrid' or email_provider == 'auto'):
+                print("   ⏳ Enviando vía SendGrid API...")
+                if send_email_sendgrid(sg_api_key, smtp_user, email, 'Bienvenido - Tu cuenta ha sido creada', html):
+                    print("   ✅ Mensaje enviado (API)")
+                    print(f"✅ ÉXITO: Notificación enviada a {email}\n")
+                    return True
+                else:
+                    print("   ⚠️ Falló API, intentando SMTP...")
+
             print("   ⏳ Conectando...")
             with smtplib.SMTP(smtp_server, int(smtp_port), timeout=10) as server:
                 print("   ✅ Conectado")
@@ -263,6 +289,12 @@ class EmailService:
             return True
             
         except Exception as e:
+            # Fallback API
+            if sg_api_key and email_provider == 'auto':
+                if send_email_sendgrid(sg_api_key, smtp_user, email, 'Bienvenido - Tu cuenta ha sido creada', html):
+                    print("   ✅ Mensaje enviado (fallback API)")
+                    print(f"✅ ÉXITO: Notificación enviada a {email}\n")
+                    return True
             print(f"❌ ERROR: {type(e).__name__}: {str(e)}\n")
             return False
 

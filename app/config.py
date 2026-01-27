@@ -48,6 +48,10 @@ class Config:
     SMTP_USER = os.environ.get('SMTP_USER', 'planeacion@supata-cundinamarca.gov.co')
     SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
     
+    # Alternativa sin SMTP: SendGrid API (HTTPS)
+    SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY', '')
+    EMAIL_PROVIDER = os.environ.get('EMAIL_PROVIDER', 'auto')  # 'smtp' | 'sendgrid' | 'auto'
+    
     # Email del administrador para recibir alertas
     ADMIN_ALERT_EMAIL = os.environ.get('ADMIN_ALERT_EMAIL', 'planeacion@supata-cundinamarca.gov.co')
     
