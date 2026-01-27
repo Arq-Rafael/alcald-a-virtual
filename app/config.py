@@ -42,14 +42,14 @@ class Config:
     
     # ===== CONFIGURACIÓN DE CORREO SMTP =====
     # Usa variables de entorno en Railway: SMTP_SERVER, SMTP_PORT, SMTP_USER, SMTP_PASSWORD.
-    # Valores por defecto configurados para Gmail.
+    # Valores por defecto configurados para Google Workspace institucional.
     SMTP_SERVER = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
     SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
-    SMTP_USER = os.environ.get('SMTP_USER', 'alcaldiavirtual2026@gmail.com')
-    SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', 'pizqichhygxbnchf')
+    SMTP_USER = os.environ.get('SMTP_USER', 'planeacion@supata-cundinamarca.gov.co')
+    SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
     
     # Email del administrador para recibir alertas
-    ADMIN_ALERT_EMAIL = os.environ.get('ADMIN_ALERT_EMAIL', 'alcaldiavirtual2026@gmail.com')
+    ADMIN_ALERT_EMAIL = os.environ.get('ADMIN_ALERT_EMAIL', 'planeacion@supata-cundinamarca.gov.co')
     
     # Restricción de IPs (opcional - dejar vacío para permitir todas)
     ALLOWED_IPS = []  # Ejemplo: ['192.168.1.100', '10.0.0.50']
