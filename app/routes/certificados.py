@@ -2,6 +2,7 @@
 import os
 import io
 import copy
+import base64
 import logging
 import datetime
 import pandas as pd
@@ -50,7 +51,7 @@ def generate_pdf_certificate(data: dict) -> io.BytesIO:
     
     # El formato oficial ya tiene el encabezado, solo agregamos título del documento
     c.setFont('Helvetica-Bold', 20)
-    c.setFillColor(colors.HexColor('#1b5e20'))
+    c.setFillColor(colors.HexColor('#000000'))
     c.drawCentredString(w/2, h - 140, 'CERTIFICADO DE SOLICITUD')
     
     # ============================================
@@ -86,7 +87,7 @@ def generate_pdf_certificate(data: dict) -> io.BytesIO:
         fontSize=10,
         textColor=colors.HexColor('#2d5016'),
         leading=14,
-        alignment=0
+        alignment=4
     )
     
     # --- Función auxiliar para dibujar tablas con división automática ---
@@ -183,32 +184,6 @@ def generate_pdf_certificate(data: dict) -> io.BytesIO:
     
     # Dibujar tabla 1 con división automática
     y_position = draw_table_with_split(table1, y_position)
-
-    # ============================================
-    # SECCIÓN 4: Normatividad aplicable (según Uso del suelo)
-    # ============================================
-    uso_text = data.get('uso', '')
-    
-    section4_data = [[Paragraph('<b>NORMATIVIDAD APLICABLE</b>', style_section_title), '']]
-    if uso_text:
-        section4_data.append([Paragraph('<b>Uso del suelo:</b>', style_label), Paragraph(str(uso_text), style_value)])
-    section4_data.append([Paragraph('<b>Normatividad:</b>', style_label), Paragraph('Consultar EOT y normativa municipal aplicable', style_value)])
-
-    table4 = Table(section4_data, colWidths=[120, w - 2*margin - 120])
-    table4.setStyle(TableStyle([
-        ('SPAN', (0,0), (-1,0)),
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#e8f5e9')),
-        ('BACKGROUND', (0,1), (-1,-1), colors.white),
-        ('LINEBELOW', (0,0), (-1,0), 2, colors.HexColor('#7cb342')),
-        ('VALIGN', (0,0), (-1,-1), 'TOP'),
-        ('LEFTPADDING', (0,0), (-1,-1), 12),
-        ('RIGHTPADDING', (0,0), (-1,-1), 12),
-        ('TOPPADDING', (0,0), (0,0), 8),
-        ('BOTTOMPADDING', (0,0), (0,0), 8),
-        ('TOPPADDING', (0,1), (-1,-1), 6),
-        ('BOTTOMPADDING', (0,1), (-1,-1), 6),
-    ]))
-    y_position = draw_table_with_split(table4, y_position)
 
     # ============================================
     # SECCIÓN 5: Croquis del plano seleccionado (si se proporciona)
@@ -369,197 +344,6 @@ def generate_pdf_certificate(data: dict) -> io.BytesIO:
             template_page.merge_page(overlay_page)
             output.add_page(template_page)
 
-        final_buffer = io.BytesIO()
-        output.write(final_buffer)
-        final_buffer.seek(0)
-        return final_buffer
-    except Exception as e:
-        logger.warning(f"Error al combinar con formato oficial: {e}")
-        overlay_buffer.seek(0)
-        return overlay_buffer
-    
-    # ============================================
-    # INFORMACIÓN GENERAL (Cards separados)
-    # ============================================
-    y_position = h - header_height - 40
-    
-    styles = getSampleStyleSheet()
-    
-    # Estilos mejorados
-    style_section_title = ParagraphStyle(
-        'section_title',
-        parent=styles['Normal'],
-        fontName='Helvetica-Bold',
-        fontSize=12,
-        textColor=colors.HexColor('#558b2f'),
-        spaceAfter=10,
-        spaceBefore=5
-    )
-    
-    style_label = ParagraphStyle(
-        'label',
-        parent=styles['Normal'],
-        fontName='Helvetica-Bold',
-        fontSize=10,
-        textColor=colors.HexColor('#558b2f'),
-        leading=14
-    )
-    
-    style_value = ParagraphStyle(
-        'value',
-        parent=styles['Normal'],
-        fontName='Helvetica',
-        fontSize=10,
-        textColor=colors.HexColor('#2d5016'),
-        leading=14,
-        alignment=0
-    )
-    
-    # ============================================
-    # SECCIÓN 1: Información General
-    # ============================================
-    section1_data = [
-        [Paragraph('<b>INFORMACIÓN GENERAL</b>', style_section_title), '']
-    ]
-    
-    for label, key in [('Municipio', 'municipio'), ('NIT', 'nit'), ('Fecha', 'fecha')]:
-        val = data.get(key, '')
-        section1_data.append([
-            Paragraph(f'<b>{label}:</b>', style_label),
-            Paragraph(str(val), style_value)
-        ])
-    
-    table1 = Table(section1_data, colWidths=[120, w - 2*margin - 120])
-    table1.setStyle(TableStyle([
-        ('SPAN', (0,0), (-1,0)),
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#e8f5e9')),
-        ('BACKGROUND', (0,1), (-1,-1), colors.white),
-        ('LINEBELOW', (0,0), (-1,0), 2, colors.HexColor('#7cb342')),
-        ('LINEABOVE', (0,1), (-1,-1), 0.5, colors.HexColor('#e0e0e0')),
-        ('VALIGN', (0,0), (-1,-1), 'TOP'),
-        ('LEFTPADDING', (0,0), (-1,-1), 12),
-        ('RIGHTPADDING', (0,0), (-1,-1), 12),
-        ('TOPPADDING', (0,0), (0,0), 8),
-        ('BOTTOMPADDING', (0,0), (0,0), 8),
-        ('TOPPADDING', (0,1), (-1,-1), 6),
-        ('BOTTOMPADDING', (0,1), (-1,-1), 6),
-    ]))
-    
-    w1, h1 = table1.wrap(w - 2*margin, y_position)
-    table1.drawOn(c, margin, y_position - h1)
-    y_position -= (h1 + 15)
-    
-    # ============================================
-    # SECCIÓN 2: Detalles de la Solicitud
-    # ============================================
-    section2_data = [
-        [Paragraph('<b>DETALLES DE LA SOLICITUD</b>', style_section_title), '']
-    ]
-    
-    for label, key in [('Secretaría', 'secretaria'), ('Valor', 'valor')]:
-        val = data.get(key, '')
-        section2_data.append([
-            Paragraph(f'<b>{label}:</b>', style_label),
-            Paragraph(str(val), style_value)
-        ])
-    
-    # Objeto y Justificación con más espacio
-    objeto_val = data.get('objeto', '')
-    section2_data.append([
-        Paragraph('<b>Objeto:</b>', style_label),
-        Paragraph(str(objeto_val), style_value)
-    ])
-    
-    justif_val = data.get('justificacion', '')
-    section2_data.append([
-        Paragraph('<b>Justificación:</b>', style_label),
-        Paragraph(str(justif_val), style_value)
-    ])
-    
-    table2 = Table(section2_data, colWidths=[120, w - 2*margin - 120])
-    table2.setStyle(TableStyle([
-        ('SPAN', (0,0), (-1,0)),
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#e8f5e9')),
-        ('BACKGROUND', (0,1), (-1,-1), colors.white),
-        ('LINEBELOW', (0,0), (-1,0), 2, colors.HexColor('#7cb342')),
-        ('LINEABOVE', (0,1), (-1,-1), 0.5, colors.HexColor('#e0e0e0')),
-        ('VALIGN', (0,0), (-1,-1), 'TOP'),
-        ('LEFTPADDING', (0,0), (-1,-1), 12),
-        ('RIGHTPADDING', (0,0), (-1,-1), 12),
-        ('TOPPADDING', (0,0), (0,0), 8),
-        ('BOTTOMPADDING', (0,0), (0,0), 8),
-        ('TOPPADDING', (0,1), (-1,-1), 6),
-        ('BOTTOMPADDING', (0,1), (-1,-1), 6),
-    ]))
-    
-    w2, h2 = table2.wrap(w - 2*margin, y_position)
-    table2.drawOn(c, margin, y_position - h2)
-    y_position -= (h2 + 15)
-    
-    # ============================================
-    # SECCIÓN 3: Plan de Desarrollo
-    # ============================================
-    section3_data = [
-        [Paragraph('<b>PLAN DE DESARROLLO MUNICIPAL</b>', style_section_title), '']
-    ]
-    
-    for label, key in [
-        ('Meta Producto', 'meta_producto'),
-        ('Eje', 'eje'),
-        ('Sector', 'sector'),
-        ('Código BPIM', 'codigo_bpim')
-    ]:
-        val = data.get(key, '')
-        section3_data.append([
-            Paragraph(f'<b>{label}:</b>', style_label),
-            Paragraph(str(val), style_value)
-        ])
-    
-    table3 = Table(section3_data, colWidths=[120, w - 2*margin - 120])
-    table3.setStyle(TableStyle([
-        ('SPAN', (0,0), (-1,0)),
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#e8f5e9')),
-        ('BACKGROUND', (0,1), (-1,-1), colors.white),
-        ('LINEBELOW', (0,0), (-1,0), 2, colors.HexColor('#7cb342')),
-        ('VALIGN', (0,0), (-1,-1), 'TOP'),
-        ('LEFTPADDING', (0,0), (-1,-1), 12),
-        ('RIGHTPADDING', (0,0), (-1,-1), 12),
-        ('TOPPADDING', (0,0), (0,0), 8),
-        ('BOTTOMPADDING', (0,0), (0,0), 8),
-        ('TOPPADDING', (0,1), (-1,-1), 6),
-        ('BOTTOMPADDING', (0,1), (-1,-1), 6),
-    ]))
-    
-    # Dibujar tabla 3 con división automática
-    y_position = draw_table_with_split(table3, y_position)
-    
-    # Footer
-    footer_y = 60
-    c.setStrokeColor(colors.HexColor('#7cb342'))
-    c.setLineWidth(2)
-    c.line(margin, footer_y + 25, w - margin, footer_y + 25)
-    
-    c.setFont('Helvetica-Bold', 9)
-    c.setFillColor(colors.HexColor('#558b2f'))
-    c.drawCentredString(w/2, footer_y + 5, 'Firmado digitalmente por: Secretaría de Planeación y Obras Públicas')
-    
-    c.showPage()
-    c.save()
-    overlay_buffer.seek(0)
-    
-    # Combinar con el formato oficial
-    try:
-        template_pdf = PdfReader(formato_path)
-        overlay_pdf = PdfReader(overlay_buffer)
-        output = PdfWriter()
-        
-        # Aplicar el formato oficial a cada página del overlay
-        for page_num in range(len(overlay_pdf.pages)):
-            template_page = PdfReader(formato_path).pages[0]
-            overlay_page = overlay_pdf.pages[page_num]
-            template_page.merge_page(overlay_page)
-            output.add_page(template_page)
-        
         final_buffer = io.BytesIO()
         output.write(final_buffer)
         final_buffer.seek(0)
