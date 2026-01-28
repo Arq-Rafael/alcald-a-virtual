@@ -12,10 +12,15 @@ from .email_api import send_email_sendgrid
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import pyotp
-import qrcode
-from io import BytesIO
-import base64
+
+try:
+    import pyotp
+    import qrcode
+    from io import BytesIO
+    import base64
+    TOTP_AVAILABLE = True
+except ImportError:
+    TOTP_AVAILABLE = False
 
 class PasswordValidator:
     """Validador de fortaleza de contraseñas"""
@@ -628,6 +633,12 @@ class TOTPHelper:
     """Helpers para TOTP (Time-based One-Time Password)"""
     
     @staticmethod
+    def _verificar_disponible():
+        """Verifica que pyotp esté disponible"""
+        if not TOTP_AVAILABLE:
+            raise RuntimeError("pyotp no está instalado. Instala con: pip install pyotp qrcode")
+    
+    @staticmethod
     def generar_secreto(nombre_usuario, issuer='Alcaldía Virtual'):
         """
         Genera un nuevo secreto TOTP para un usuario.
@@ -639,6 +650,7 @@ class TOTPHelper:
         Returns:
             str: Secreto TOTP (base32)
         """
+        TOTPHelper._verificar_disponible()
         return pyotp.random_base32()
     
     @staticmethod
