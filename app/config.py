@@ -61,7 +61,7 @@ class Config:
     EMAIL_PROVIDER = os.environ.get('EMAIL_PROVIDER', 'auto')  # 'smtp' | 'sendgrid' | 'auto'
     
     # Email del administrador para recibir alertas
-    ADMIN_ALERT_EMAIL = os.environ.get('ADMIN_ALERT_EMAIL', 'planeacion@supata-cundinamarca.gov.co')
+    ADMIN_ALERT_EMAIL = os.environ.get('ADMIN_ALERT_EMAIL', 'alcaldiavirtual2026@gmail.com')
     
     # Restricción de IPs (opcional - dejar vacío para permitir todas)
     ALLOWED_IPS = []  # Ejemplo: ['192.168.1.100', '10.0.0.50']

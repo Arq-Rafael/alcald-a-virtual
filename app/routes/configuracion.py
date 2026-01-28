@@ -126,7 +126,13 @@ def configuracion():
                 if nuevo_e:
                     correo_ok = EmailService.enviar_notificacion_registro(nuevo_e, nuevo_u)
                 if admin_alert:
-                    alerta_ok = EmailService.enviar_alerta_nuevo_usuario(admin_alert, nuevo_u, session.get('user'))
+                    # Enviar notificación mejorada al admin
+                    alerta_ok = EmailService.enviar_notificacion_admin_usuario(
+                        admin_alert, 
+                        'nuevo_usuario', 
+                        nuevo_u,
+                        {'email': nuevo_e, 'ip': request.remote_addr}
+                    )
                 if nuevo_e and not correo_ok:
                     flash('Correo de bienvenida no enviado. Verifica SMTP_SERVER/USER/PASSWORD.', 'warning')
                 if admin_alert and not alerta_ok:
@@ -210,11 +216,21 @@ def configuracion():
                 db.session.add(auditoria)
                 db.session.commit()
 
-                # Notificar cambio de clave
+                # Notificar cambio de clave al usuario
                 if user.email:
                     ok_mail = EmailService.enviar_notificacion_cambio_clave(user.email, user.usuario, request.remote_addr)
                     if not ok_mail:
                         flash('Aviso: no se pudo enviar correo de cambio de contraseña. Verifica SMTP.', 'warning')
+                
+                # Notificar cambio de clave al admin
+                admin_alert = current_app.config.get('ADMIN_ALERT_EMAIL')
+                if admin_alert:
+                    EmailService.enviar_notificacion_admin_usuario(
+                        admin_alert,
+                        'cambio_clave',
+                        user.usuario,
+                        {'ip': request.remote_addr}
+                    )
                 
                 flash(f"✅ Contraseña de '{user.usuario}' actualizada", 'success')
             except Exception as e:

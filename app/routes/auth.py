@@ -58,31 +58,8 @@ def login():
             return redirect(url_for('auth.cambiar_clave_forzado'))
 
         # Contraseña correcta ✅
-        # Si requiere 2FA y tiene email configurado, enviar código y pedir verificación
-        if user.requiere_2fa and user.email:
-            codigo = user.generar_codigo_verificacion()
-            db.session.commit()
-            
-            # Intentar enviar código de verificación
-            try:
-                email_sent = EmailService.enviar_codigo_verificacion(user.email, codigo, user.usuario)
-                
-                if email_sent:
-                    # Email enviado exitosamente
-                    session['pending_user_id'] = user.id
-                    flash('✅ Se envió un código de verificación a tu correo. Ingrésalo para continuar.', 'info')
-                    return redirect(url_for('auth.verificacion'))
-                else:
-                    # Email fallo pero permitir continuar sin 2FA
-                    print(f"⚠️ No se pudo enviar email a {user.email}")
-                    flash('⚠️ No se pudo enviar el código. Continúa sin verificación.', 'warning')
-                    # Continuar al final para crear sesión
-            except Exception as e:
-                # Error en SMTP pero permitir acceso
-                print(f"❌ Error SMTP: {str(e)}")
-                flash('⚠️ Error en servidor de correo. Continúa sin verificación.', 'warning')
-                # Continuar al final para crear sesión
-
+        # 2FA desactivado - acceso directo
+        
         # === CREAR SESIÓN Y ACCESO ===
         user.registrar_acceso_exitoso()
         token = user.generar_token_sesion()

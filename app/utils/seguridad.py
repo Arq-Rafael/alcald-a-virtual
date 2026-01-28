@@ -6,6 +6,7 @@ Funciones para 2FA, verificación por correo, validación de contraseñas, etc.
 import re
 import secrets
 import string
+import socket
 from datetime import datetime, timedelta
 from flask import current_app
 from .email_api import send_email_sendgrid
@@ -735,3 +736,91 @@ class TOTPHelper:
         """
         totp = pyotp.TOTP(secreto)
         return totp.now()
+
+    @staticmethod
+    def enviar_notificacion_admin_usuario(email_admin, tipo_evento, nombre_usuario, detalles_extra=None):
+        """
+        Envía notificación al admin sobre eventos de usuarios.
+        
+        Args:
+            email_admin: Email del administrador
+            tipo_evento: 'nuevo_usuario' | 'cambio_clave'
+            nombre_usuario: Nombre del usuario
+            detalles_extra: Dict con info adicional (ip, email, etc)
+        
+        Returns:
+            bool: True si se envió, False si falló
+        """
+        try:
+            if not email_admin or not nombre_usuario:
+                return False
+            
+            from datetime import datetime
+            from flask import current_app
+            
+            # Construir mensaje
+            if tipo_evento == 'nuevo_usuario':
+                asunto = f"🆕 Nuevo usuario creado: {nombre_usuario}"
+                html = f"""
+                <html>
+                    <body style="font-family: Arial; background-color: #f5f5f5; padding: 20px;">
+                        <div style="background-color: white; padding: 20px; border-radius: 5px; max-width: 600px;">
+                            <h2 style="color: #1e7e34;">🆕 Nuevo Usuario Registrado</h2>
+                            <p>Se ha creado un nuevo usuario en la Alcaldía Virtual:</p>
+                            <ul style="background-color: #f9f9f9; padding: 15px; border-left: 4px solid #1e7e34;">
+                                <li><strong>Usuario:</strong> {nombre_usuario}</li>
+                                <li><strong>Email:</strong> {detalles_extra.get('email', 'N/A') if detalles_extra else 'N/A'}</li>
+                                <li><strong>Fecha:</strong> {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}</li>
+                                <li><strong>IP:</strong> {detalles_extra.get('ip', 'N/A') if detalles_extra else 'N/A'}</li>
+                            </ul>
+                            <p style="color: #666; font-size: 12px;">
+                                Este es un mensaje automático de la Alcaldía Virtual.
+                            </p>
+                        </div>
+                    </body>
+                </html>
+                """
+            elif tipo_evento == 'cambio_clave':
+                asunto = f"🔐 Cambio de contraseña: {nombre_usuario}"
+                html = f"""
+                <html>
+                    <body style="font-family: Arial; background-color: #f5f5f5; padding: 20px;">
+                        <div style="background-color: white; padding: 20px; border-radius: 5px; max-width: 600px;">
+                            <h2 style="color: #ff9800;">🔐 Cambio de Contraseña</h2>
+                            <p>Se ha cambiado la contraseña del usuario:</p>
+                            <ul style="background-color: #f9f9f9; padding: 15px; border-left: 4px solid #ff9800;">
+                                <li><strong>Usuario:</strong> {nombre_usuario}</li>
+                                <li><strong>Fecha:</strong> {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}</li>
+                                <li><strong>IP:</strong> {detalles_extra.get('ip', 'N/A') if detalles_extra else 'N/A'}</li>
+                            </ul>
+                            <p style="color: #999; font-size: 11px;">
+                                Si no autorizaste este cambio, comunícate con el administrador.
+                            </p>
+                        </div>
+                    </body>
+                </html>
+                """
+            else:
+                return False
+            
+            # Obtener config
+            smtp_server = current_app.config.get('SMTP_SERVER', 'smtp.gmail.com')
+            smtp_port = current_app.config.get('SMTP_PORT', 587)
+            smtp_user = current_app.config.get('SMTP_USER', '')
+            smtp_password = current_app.config.get('SMTP_PASSWORD', '')
+            
+            # Enviar
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] = asunto
+            msg['From'] = smtp_user
+            msg['To'] = email_admin
+            msg.attach(MIMEText(html, 'html'))
+            
+            with smtplib.SMTP(smtp_server, int(smtp_port), timeout=10) as server:
+                server.starttls()
+                server.login(smtp_user, smtp_password)
+                server.send_message(msg)
+            
+            return True
+        except (smtplib.SMTPException, socket.timeout, Exception):
+            return False
