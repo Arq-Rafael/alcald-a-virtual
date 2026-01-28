@@ -1,0 +1,56 @@
+📋 CHECKLIST - POSTGRESQL EN RAILWAY
+=====================================
+
+ANTES DE EMPEZAR:
+☐ Tienes acceso a https://railway.app
+☐ Puedes ver tu proyecto en el dashboard
+☐ La app está corriendo en Railway
+
+PASO POR PASO:
+
+1️⃣ CREAR POSTGRESQL
+  ☐ Hice clic en "+ New"
+  ☐ Seleccioné "Database" → "PostgreSQL"
+  ☐ Esperé a que esté ✅ (aparece en el dashboard)
+
+2️⃣ COPIAR DATABASE_URL
+  ☐ Entré al servicio PostgreSQL
+  ☐ Fui a "Variables"
+  ☐ Copié el valor de DATABASE_URL
+  ☐ Lo guardé en un bloc de notas temporalmente
+
+3️⃣ AGREGAR A LA APP
+  ☐ Volví al dashboard
+  ☐ Seleccioné mi app "web"
+  ☐ Entré a "Variables"
+  ☐ Agregué nueva variable:
+    ☐ Name: DATABASE_URL
+    ☐ Value: (lo que copié del paso anterior)
+  ☐ Hice clic en "Add" / "Save"
+
+4️⃣ REDEPLOY
+  ☐ La app comenzó a redeployar automáticamente
+  ☐ Esperé a que el color sea ✅ verde
+  ☐ Tomó aproximadamente 2-3 minutos
+
+5️⃣ PRUEBA
+  ☐ Abrí la app en el navegador
+  ☐ Creé un usuario nuevo (ejemplo: test_user_27_enero)
+  ☐ Anoté el nombre exactamente
+
+6️⃣ VERIFICACIÓN FINAL
+  ☐ En Railway, hice otro redeploy de la app (botón Deploy)
+  ☐ Esperé a que termine
+  ☐ Volví a la app y busqué ese usuario
+  ☐ ¡ESTÁ AHÍ! ✅ PostgreSQL funciona
+
+RESULTADO:
+✅ App está corriendo
+✅ PostgreSQL está conectado
+✅ Los datos persisten entre deployments
+✅ Puedo actualizar el código sin perder nada
+
+¿Algo falló? Anota el error aquí:
+_________________________________________
+_________________________________________
+_________________________________________
