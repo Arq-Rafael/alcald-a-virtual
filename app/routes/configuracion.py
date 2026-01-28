@@ -122,21 +122,7 @@ def configuracion():
                 # Notificaciones
                 admin_alert = current_app.config.get('ADMIN_ALERT_EMAIL')
                 correo_ok = True
-                alerta_ok = True
-                if nuevo_e:
-                    correo_ok = EmailService.enviar_notificacion_registro(nuevo_e, nuevo_u)
-                if admin_alert:
-                    # Enviar notificación mejorada al admin
-                    alerta_ok = EmailService.enviar_notificacion_admin_usuario(
-                        admin_alert, 
-                        'nuevo_usuario', 
-                        nuevo_u,
-                        {'email': nuevo_e, 'ip': request.remote_addr}
-                    )
-                if nuevo_e and not correo_ok:
-                    flash('Correo de bienvenida no enviado. Verifica SMTP_SERVER/USER/PASSWORD.', 'warning')
-                if admin_alert and not alerta_ok:
-                    flash('Alerta a administrador no enviada. Revisa configuración SMTP o ADMIN_ALERT_EMAIL.', 'warning')
+                # Notificaciones por correo desactivadas (SMTP bloqueado en Railway)
                 
                 flash(f"✅ Usuario '{nuevo_u}' creado exitosamente", 'success')
             except Exception as e:
@@ -222,15 +208,7 @@ def configuracion():
                     if not ok_mail:
                         flash('Aviso: no se pudo enviar correo de cambio de contraseña. Verifica SMTP.', 'warning')
                 
-                # Notificar cambio de clave al admin
-                admin_alert = current_app.config.get('ADMIN_ALERT_EMAIL')
-                if admin_alert:
-                    EmailService.enviar_notificacion_admin_usuario(
-                        admin_alert,
-                        'cambio_clave',
-                        user.usuario,
-                        {'ip': request.remote_addr}
-                    )
+                # Notificaciones por correo desactivadas (SMTP bloqueado en Railway)
                 
                 flash(f"✅ Contraseña de '{user.usuario}' actualizada", 'success')
             except Exception as e:
