@@ -14,15 +14,23 @@ class Config:
     UPLOADS_DIR = BASE_DIR / "uploads"
     DOCUMENTOS_DIR = BASE_DIR / "documentos_generados"
     
-    # Database
-    # Database - Usar /tmp en Railway para garantizar escritura
-    DB_NAME = "data.db"
-    if os.environ.get('RAILWAY_ENVIRONMENT'):
-        DB_PATH = os.path.join('/tmp', DB_NAME)
+    # Database Configuration
+    # En Railway: usa PostgreSQL si DATABASE_URL está definida
+    # En local: usa SQLite
+    DATABASE_URL = os.environ.get('DATABASE_URL')
+    
+    if DATABASE_URL:
+        # Railway con PostgreSQL
+        SQLALCHEMY_DATABASE_URI = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
     else:
-        DB_PATH = os.path.join(BASE_DIR, DB_NAME)
-        
-    SQLALCHEMY_DATABASE_URI = f'sqlite:///{DB_PATH}'
+        # Local con SQLite
+        DB_NAME = "data.db"
+        if os.environ.get('RAILWAY_ENVIRONMENT'):
+            DB_PATH = os.path.join('/tmp', DB_NAME)
+        else:
+            DB_PATH = os.path.join(BASE_DIR, DB_NAME)
+        SQLALCHEMY_DATABASE_URI = f'sqlite:///{DB_PATH}'
+    
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # External/Shared Paths - Migrated to local per user request
