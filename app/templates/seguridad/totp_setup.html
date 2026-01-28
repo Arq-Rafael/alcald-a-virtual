@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Configurar Autenticador - Alcaldía Virtual{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3>🔐 Configurar Autenticador</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Escanea este código QR con tu aplicación de autenticador.</p>
+                    
+                    <!-- QR Code -->
+                    <div class="text-center mb-4">
+                        <img src="{{ qr_data_url }}" alt="QR Code" style="width: 250px; height: 250px; border: 2px solid #ddd; padding: 10px;">
+                    </div>
+                    
+                    <p class="small text-muted text-center mb-4">
+                        No puedes escanear? Ingresa manualmente en tu autenticador
+                    </p>
+                    
+                    <!-- Verification Code Input -->
+                    <form id="totpForm">
+                        <div class="form-group">
+                            <label for="codigo">Código de 6 dígitos:</label>
+                            <input 
+                                type="text" 
+                                id="codigo" 
+                                class="form-control form-control-lg text-center" 
+                                maxlength="6" 
+                                placeholder="000000"
+                                inputmode="numeric"
+                                required
+                            >
+                            <small class="form-text text-muted">
+                                Ingresa el código que ves en tu autenticador
+                            </small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success btn-block btn-lg">
+                            ✅ Verificar y Activar
+                        </button>
+                    </form>
+                    
+                    <hr>
+                    
+                    <!-- Apps recomendadas -->
+                    <div class="alert alert-info mt-4">
+                        <strong>📱 Apps recomendadas:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Google Authenticator</li>
+                            <li>Microsoft Authenticator</li>
+                            <li>Authy</li>
+                            <li>LastPass Authenticator</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Solo permitir números
+document.getElementById('codigo').addEventListener('input', function(e) {
+    this.value = this.value.replace(/[^0-9]/g, '');
+});
+
+// Auto-focus en el input
+document.getElementById('codigo').focus();
+
+// Submit del formulario
+document.getElementById('totpForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const codigo = document.getElementById('codigo').value;
+    const btn = e.target.querySelector('button');
+    
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Verificando...';
+    
+    try {
+        const response = await fetch('/seguridad/totp/verify-setup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ codigo })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('✅ ' + data.message);
+            window.location.href = data.redirect || '/';
+        } else {
+            alert('❌ ' + data.error);
+            document.getElementById('codigo').value = '';
+            document.getElementById('codigo').focus();
+            btn.disabled = false;
+            btn.innerHTML = '✅ Verificar y Activar';
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+        btn.disabled = false;
+        btn.innerHTML = '✅ Verificar y Activar';
+    }
+});
+</script>
+
+<style>
+#codigo {
+    font-size: 28px;
+    letter-spacing: 8px;
+    font-weight: bold;
+}
+</style>
+{% endblock %}

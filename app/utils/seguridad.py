@@ -12,6 +12,10 @@ from .email_api import send_email_sendgrid
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import pyotp
+import qrcode
+from io import BytesIO
+import base64
 
 class PasswordValidator:
     """Validador de fortaleza de contraseñas"""
@@ -616,3 +620,106 @@ def sanitizar_entrada(texto):
     
     # Limitar longitud
     return texto[:500].strip()
+
+
+# ===== TOTP / AUTENTICADOR (Seguridad sin email) =====
+
+class TOTPHelper:
+    """Helpers para TOTP (Time-based One-Time Password)"""
+    
+    @staticmethod
+    def generar_secreto(nombre_usuario, issuer='Alcaldía Virtual'):
+        """
+        Genera un nuevo secreto TOTP para un usuario.
+        
+        Args:
+            nombre_usuario: Nombre/email del usuario
+            issuer: Nombre de la aplicación
+        
+        Returns:
+            str: Secreto TOTP (base32)
+        """
+        return pyotp.random_base32()
+    
+    @staticmethod
+    def obtener_totp(secreto, nombre_usuario, issuer='Alcaldía Virtual'):
+        """
+        Obtiene el objeto TOTP configurado con un secreto.
+        
+        Args:
+            secreto: Secreto base32
+            nombre_usuario: Email o usuario
+            issuer: Nombre de la aplicación
+        
+        Returns:
+            pyotp.TOTP: Objeto TOTP
+        """
+        return pyotp.TOTP(secreto, name=nombre_usuario, issuer=issuer)
+    
+    @staticmethod
+    def generar_qr_base64(secreto, nombre_usuario, issuer='Alcaldía Virtual'):
+        """
+        Genera un código QR como string base64.
+        
+        Args:
+            secreto: Secreto base32
+            nombre_usuario: Email o usuario
+            issuer: Nombre de la aplicación
+        
+        Returns:
+            str: URL del QR en formato data:image/png;base64,...
+        """
+        totp = TOTPHelper.obtener_totp(secreto, nombre_usuario, issuer)
+        
+        # Generar QR
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(totp.provisioning_uri(name=nombre_usuario, issuer_name=issuer))
+        qr.make(fit=True)
+        
+        img = qr.make_image(fill_color="black", back_color="white")
+        
+        # Convertir a base64
+        img_io = BytesIO()
+        img.save(img_io, 'PNG')
+        img_io.seek(0)
+        img_base64 = base64.b64encode(img_io.getvalue()).decode()
+        
+        return f"data:image/png;base64,{img_base64}"
+    
+    @staticmethod
+    def verificar_codigo(secreto, codigo):
+        """
+        Verifica si un código TOTP es válido.
+        
+        Args:
+            secreto: Secreto base32
+            codigo: Código de 6 dígitos ingresado por el usuario
+        
+        Returns:
+            bool: True si es válido, False en caso contrario
+        """
+        try:
+            totp = pyotp.TOTP(secreto)
+            # Verificar con tolerancia de ±1 ventana (30s)
+            return totp.verify(codigo)
+        except:
+            return False
+    
+    @staticmethod
+    def obtener_codigo_actual(secreto):
+        """
+        Obtiene el código TOTP actual (para testing/debugging).
+        
+        Args:
+            secreto: Secreto base32
+        
+        Returns:
+            str: Código de 6 dígitos actual
+        """
+        totp = pyotp.TOTP(secreto)
+        return totp.now()

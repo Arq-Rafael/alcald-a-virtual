@@ -160,6 +160,34 @@ class Usuario(db.Model):
         self.token_sesion = secrets.token_urlsafe(32)
         self.token_expira = datetime.utcnow() + timedelta(hours=12)
         return self.token_sesion
+
+    # ===== Preferencias (JSON) helpers =====
+    def _get_prefs(self):
+        try:
+            return json.loads(self.preferencias) if self.preferencias else {}
+        except Exception:
+            return {}
+
+    def _set_prefs(self, prefs: dict):
+        try:
+            self.preferencias = json.dumps(prefs)
+        except Exception:
+            self.preferencias = json.dumps({})
+
+    def get_totp_secret(self):
+        """Obtiene el secreto TOTP almacenado en preferencias."""
+        prefs = self._get_prefs()
+        return prefs.get('totp_secret')
+
+    def set_totp_secret(self, secret: str):
+        prefs = self._get_prefs()
+        prefs['totp_secret'] = secret
+        prefs['totp_enabled'] = True
+        self._set_prefs(prefs)
+
+    def is_totp_enabled(self):
+        prefs = self._get_prefs()
+        return bool(prefs.get('totp_enabled') and prefs.get('totp_secret'))
     
     def validar_token(self, token):
         """Valida token de sesión"""

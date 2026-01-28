@@ -43,6 +43,7 @@ def create_app(config_class=Config):
     from .routes.contratos_view import contratos_view
     from .routes.plan_contingencia_v2_routes import contingencia_bp
     from .routes.admin_fix import admin_fix_bp
+    from .routes.totp_setup import totp_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
@@ -65,6 +66,7 @@ def create_app(config_class=Config):
     app.register_blueprint(contratos_view)
     app.register_blueprint(contingencia_bp)
     app.register_blueprint(admin_fix_bp)
+    app.register_blueprint(totp_bp)
 
     
     # Context Processors (for templates)
