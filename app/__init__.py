@@ -119,6 +119,29 @@ def create_app(config_class=Config):
     with app.app_context():
         try:
             db.create_all()
+            
+            # Migración automática: agregar campos de primer_acceso si no existen
+            from sqlalchemy import text, inspect
+            try:
+                inspector = inspect(db.engine)
+                existing_columns = [col['name'] for col in inspector.get_columns('usuarios')]
+                
+                if 'primer_acceso' not in existing_columns:
+                    logging.info("[MIGRATION] Agregando campos de primer_acceso...")
+                    migrations = [
+                        "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS primer_acceso BOOLEAN DEFAULT TRUE",
+                        "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS codigo_primer_acceso VARCHAR(6)",
+                        "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS codigo_primer_acceso_expira TIMESTAMP",
+                        "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS primer_acceso_verificado TIMESTAMP",
+                    ]
+                    for sql in migrations:
+                        db.session.execute(text(sql))
+                    db.session.commit()
+                    logging.info("[MIGRATION] ✅ Campos agregados exitosamente")
+            except Exception as migrate_error:
+                logging.warning(f"[MIGRATION] No se pudo ejecutar migración: {migrate_error}")
+                db.session.rollback()
+            
             # Crear usuario admin si no existe
             from .models.usuario import Usuario
             
