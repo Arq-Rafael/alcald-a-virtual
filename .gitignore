@@ -27,6 +27,9 @@ static/imagenes/*.jpg
 !static/imagenes/escudo.png
 !static/imagenes/logo_new.png
 
+# Excepción: Excel del Plan de Desarrollo (necesario en Railway)
+!documentos_generados/plan de desarollo/BASE_RENDICION_PLAN_DESARROLLO_SUPATA.xlsx
+
 # Temporales
 capturar_*.py
 generar_manual*.py
