@@ -11,9 +11,9 @@
     <section class="seg-hero seg-hero-enhanced">
         <div class="seg-hero-bg"></div>
         <div class="seg-hero-content">
-            <div class="seg-hero-badge">📊 REGISTRO_AVANCES</div>
+            <div class="seg-hero-badge">📊 PLAN DE DESARROLLO 2024-2027</div>
             <h1 class="seg-hero-title">Seguimiento de Metas</h1>
-            <p class="seg-hero-subtitle">Datos actualizados en tiempo real del Plan de Desarrollo Municipal</p>
+            <p class="seg-hero-subtitle">198 metas del Plan de Desarrollo Municipal - Datos 2024 y 2025</p>
             <div class="seg-hero-pulse"></div>
         </div>
     </section>
@@ -132,10 +132,15 @@
 
             <!-- Año -->
             <div class="seg-filter-group">
-                <label>Año</label>
+                <label>📅 Filtrar por Año</label>
                 <select id="filtro-ano" class="seg-filter-select" onchange="aplicarFiltros()">
-                    <option value="">Todos los Años</option>
+                    <option value="">📊 Consolidado (Todas)</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
                 </select>
+                <small style="color: #666; font-size: 0.85rem; display: block; margin-top: 4px;">
+                    Consolidado muestra 198 metas únicas
+                </small>
             </div>
 
             <!-- Chart Mini -->
@@ -304,15 +309,15 @@
     // Detectar años dinámicamente de las metas anuales
     const anosUnicos = [...new Set(METAS_ANUALES.map(m => m.ano))].filter(Boolean).sort();
     
-    // Opciones de año
+    // Opciones de año - ACTUALIZADO PARA MOSTRAR 198 METAS
     const opcionesAno = [
-      { value: 'CONSOLIDADO', label: 'Consolidado (94 metas)' },
+      { value: '', label: `📊 Consolidado (${METAS_CONSOLIDADO.length} metas únicas)` },
     ];
     
     // Agregar años dinámicamente
     anosUnicos.forEach(ano => {
       const countAno = METAS_ANUALES.filter(m => m.ano == ano).length;
-      opcionesAno.push({ value: ano.toString(), label: `Año ${ano} (${countAno} metas)` });
+      opcionesAno.push({ value: ano.toString(), label: `${ano} (${countAno} registros)` });
     });
     
     opcionesAno.forEach(({ value, label }) => {
@@ -322,8 +327,8 @@
       selectAno.appendChild(opt);
     });
     
-    // Por defecto: CONSOLIDADO
-    selectAno.value = 'CONSOLIDADO';
+    // Por defecto: CONSOLIDADO (vacío o explícito)
+    selectAno.value = '';
 
     // Poblar ejes desde consolidado (que tiene todas las metas únicas)
     const ejes = [...new Set(METAS_CONSOLIDADO.map(m => m.eje))].filter(Boolean).sort();
@@ -521,28 +526,31 @@
 
     // Seleccionar base según el filtro de año
     let baseMetas;
-    if (ano === 'CONSOLIDADO' || ano === '') {
-      // Mostrar consolidado (94 metas)
+    if (ano === '' || ano === 'CONSOLIDADO') {
+      // Mostrar consolidado (198 metas únicas)
       baseMetas = METAS_CONSOLIDADO;
+      console.log(`Usando CONSOLIDADO: ${baseMetas.length} metas`);
     } else {
       // Año específico (2024, 2025, etc.) - filtrar metas anuales
       baseMetas = METAS_ANUALES.filter(m => String(m.ano) === String(ano));
-      console.log(`Filtrando año ${ano}: ${baseMetas.length} metas encontradas`);
+      console.log(`Filtrando año ${ano}: ${baseMetas.length} registros`);
     }
 
     // Aplicar filtros de búsqueda y estado
     let filtradas = baseMetas.filter(meta => {
       const matchTexto = !texto || 
-        meta.id_meta.toLowerCase().includes(texto) ||
-        meta.meta_producto.toLowerCase().includes(texto) ||
+        (meta.id_meta && meta.id_meta.toLowerCase().includes(texto)) ||
+        (meta.meta_producto && meta.meta_producto.toLowerCase().includes(texto)) ||
         (meta.sector && meta.sector.toLowerCase().includes(texto));
 
       // Comparar estados de forma más flexible
-      const matchEstado = estados.length === 0 || estados.some(e => meta.estado === e);
+      const matchEstado = estados.length === 0 || estados.some(e => (meta.estado || '').includes(e));
       const matchEje = !eje || meta.eje === eje;
       
       return matchTexto && matchEstado && matchEje;
     });
+
+    console.log(`Filtrado final: ${filtradas.length} metas mostradas`);
 
     // Recalcular KPIs y gráfica con el conjunto filtrado
     const kpisLocales = calcularKpisLocales(filtradas);
@@ -557,7 +565,7 @@
     document.getElementById('filtro-texto').value = '';
     document.querySelectorAll('.seg-filter-checks input').forEach(i => i.checked = false);
     document.getElementById('filtro-eje').value = '';
-    document.getElementById('filtro-ano').value = 'CONSOLIDADO';
+    document.getElementById('filtro-ano').value = '';  // Vacío = consolidado
     aplicarFiltros();
   }
 
