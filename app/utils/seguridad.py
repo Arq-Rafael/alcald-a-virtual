@@ -10,6 +10,7 @@ import socket
 from datetime import datetime, timedelta
 from flask import current_app
 from .email_api import send_email_sendgrid
+from .email_resend import send_welcome_email, send_first_login_code_email, send_password_changed_email
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -237,29 +238,35 @@ class EmailService:
     
     @staticmethod
     def enviar_notificacion_registro(email, nombre_usuario):
-        """Notifica creación de cuenta al usuario con logging detallado"""
-        print(f"\n📧 Intentando enviar notificación de registro a {email}...")
+        """Notifica creación de cuenta al usuario"""
+        print(f"\n📧 Enviando notificación de registro a {email}...")
         
         try:
+            email_provider = current_app.config.get('EMAIL_PROVIDER', 'resend')
+            resend_api_key = current_app.config.get('RESEND_API_KEY', '')
+            
+            # Intenta Resend primero
+            if resend_api_key and email_provider in ['resend', 'auto']:
+                print("   ⏳ Intentando Resend...")
+                result = send_welcome_email(email, nombre_usuario)
+                if result.get('success'):
+                    print(f"   ✅ Email enviado vía Resend (ID: {result.get('id')})")
+                    return True
+                else:
+                    print(f"   ⚠️ Resend falló: {result.get('message')}")
+                    if email_provider == 'resend':
+                        return False
+            
+            # Fallback a SMTP si Resend no está configurado
             smtp_server = current_app.config.get('SMTP_SERVER')
             smtp_port = current_app.config.get('SMTP_PORT')
             smtp_user = current_app.config.get('SMTP_USER')
             smtp_password = current_app.config.get('SMTP_PASSWORD')
-            sg_api_key = current_app.config.get('SENDGRID_API_KEY')
-            email_provider = current_app.config.get('EMAIL_PROVIDER', 'auto')
-
-            print(f"   Server: {smtp_server}:{smtp_port}")
-            print(f"   User: {smtp_user}")
-
+            
             if not smtp_user or not smtp_password:
-                print("   ❌ Configuración SMTP incompleta")
+                print("   ❌ Ni Resend ni SMTP configurados")
                 return False
-
-            msg = MIMEMultipart('alternative')
-            msg['Subject'] = 'Bienvenido - Tu cuenta ha sido creada'
-            msg['From'] = smtp_user
-            msg['To'] = email
-
+            
             html = f"""
             <html>
             <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
@@ -272,41 +279,26 @@ class EmailService:
             </body>
             </html>
             """
-
+            
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] = 'Bienvenido - Tu cuenta ha sido creada'
+            msg['From'] = smtp_user
+            msg['To'] = email
             msg.attach(MIMEText(html, 'html'))
-            print("   ✅ Mensaje creado")
-
-            if sg_api_key and (email_provider == 'sendgrid' or email_provider == 'auto'):
-                print("   ⏳ Enviando vía SendGrid API...")
-                if send_email_sendgrid(sg_api_key, smtp_user, email, 'Bienvenido - Tu cuenta ha sido creada', html):
-                    print("   ✅ Mensaje enviado (API)")
-                    print(f"✅ ÉXITO: Notificación enviada a {email}\n")
-                    return True
-                else:
-                    print("   ⚠️ Falló API, intentando SMTP...")
-
-            print("   ⏳ Conectando...")
+            
+            print("   ⏳ Enviando vía SMTP...")
             with smtplib.SMTP(smtp_server, int(smtp_port), timeout=10) as server:
-                print("   ✅ Conectado")
                 server.starttls()
-                print("   ✅ TLS activado")
                 server.login(smtp_user, smtp_password)
-                print("   ✅ Autenticado")
                 server.send_message(msg)
-                print("   ✅ Mensaje enviado")
-
-            print(f"✅ ÉXITO: Notificación enviada a {email}\n")
+            
+            print(f"   ✅ Email enviado vía SMTP")
             return True
             
         except Exception as e:
-            # Fallback API
-            if sg_api_key and email_provider == 'auto':
-                if send_email_sendgrid(sg_api_key, smtp_user, email, 'Bienvenido - Tu cuenta ha sido creada', html):
-                    print("   ✅ Mensaje enviado (fallback API)")
-                    print(f"✅ ÉXITO: Notificación enviada a {email}\n")
-                    return True
-            print(f"❌ ERROR: {type(e).__name__}: {str(e)}\n")
+            print(f"   ❌ Error: {str(e)}")
             return False
+
 
     @staticmethod
     def enviar_alerta_nuevo_usuario(email_admin, nombre_usuario, creador):

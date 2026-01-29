@@ -42,6 +42,12 @@ class Usuario(db.Model):
     codigo_expira = db.Column(db.DateTime, nullable=True)
     requiere_2fa = db.Column(db.Boolean, default=False)
     
+    # Primer acceso - Verificación por código
+    primer_acceso = db.Column(db.Boolean, default=True)  # Marcado hasta que complete verificación
+    codigo_primer_acceso = db.Column(db.String(6), nullable=True)  # Código para verificar primer acceso
+    codigo_primer_acceso_expira = db.Column(db.DateTime, nullable=True)  # Cuándo expira el código
+    primer_acceso_verificado = db.Column(db.DateTime, nullable=True)  # Cuándo completó la verificación
+    
     # Contraseña - Expiración y cambios
     fecha_ultimo_cambio_clave = db.Column(db.DateTime, default=datetime.utcnow)  # Cuándo se cambió la contraseña
     clave_expira_en = db.Column(db.DateTime, nullable=True)  # Cuándo vence la contraseña (90 días)
@@ -102,6 +108,28 @@ class Usuario(db.Model):
         from datetime import timedelta
         self.codigo_verificacion = ''.join([str(secrets.randbelow(10)) for _ in range(6)])
         self.codigo_expira = datetime.utcnow() + timedelta(minutes=10)
+        return self.codigo_verificacion
+    
+    def generar_codigo_primer_acceso(self):
+        """Genera código de 6 dígitos para verificación de primer acceso"""
+        from datetime import timedelta
+        self.codigo_primer_acceso = ''.join([str(secrets.randbelow(10)) for _ in range(6)])
+        self.codigo_primer_acceso_expira = datetime.utcnow() + timedelta(minutes=15)  # Válido por 15 minutos
+        return self.codigo_primer_acceso
+    
+    def verificar_codigo_primer_acceso(self, codigo):
+        """Verifica código de primer acceso"""
+        if not self.codigo_primer_acceso or not self.codigo_primer_acceso_expira:
+            return False
+        if datetime.utcnow() > self.codigo_primer_acceso_expira:
+            return False
+        is_valid = self.codigo_primer_acceso == codigo
+        if is_valid:
+            self.primer_acceso = False
+            self.primer_acceso_verificado = datetime.utcnow()
+            self.codigo_primer_acceso = None  # Limpiar código después de usar
+            self.codigo_primer_acceso_expira = None
+        return is_valid
         return self.codigo_verificacion
     
     def verificar_codigo(self, codigo):

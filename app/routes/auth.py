@@ -58,7 +58,22 @@ def login():
             return redirect(url_for('auth.cambiar_clave_forzado'))
 
         # Contraseña correcta ✅
-        # 2FA desactivado - acceso directo
+        
+        # === VERIFICAR PRIMER ACCESO ===
+        if user.primer_acceso and user.email:
+            # Generar código de verificación
+            codigo = user.generar_codigo_primer_acceso()
+            db.session.commit()
+            
+            # Enviar código por email
+            from app.utils.email_resend import send_first_login_code_email
+            resultado = send_first_login_code_email(user.email, user.usuario, codigo)
+            
+            # Guardar user_id en sesión temporal para verificación
+            session['pending_first_login_user_id'] = user.id
+            
+            flash(f'Se ha enviado un código de verificación a {user.email}. Por favor verifica tu identidad para continuar.', 'info')
+            return redirect(url_for('auth.verificar_primer_acceso'))
         
         # === CREAR SESIÓN Y ACCESO ===
         user.registrar_acceso_exitoso()
@@ -244,4 +259,76 @@ def cambiar_clave_forzado():
             return render_template('cambiar_clave_forzado.html', usuario=user.usuario)
     
     return render_template('cambiar_clave_forzado.html', usuario=user.usuario)
+
+
+# ===== VERIFICACIÓN DE PRIMER ACCESO =====
+@auth_bp.route('/verificar-primer-acceso', methods=['GET', 'POST'])
+def verificar_primer_acceso():
+    """Verifica el código de primer acceso enviado por email"""
+    
+    user_id = session.get('pending_first_login_user_id')
+    if not user_id:
+        flash('Sesión inválida. Inicia sesión nuevamente.', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    user = Usuario.query.get(user_id)
+    if not user:
+        flash('Usuario no encontrado.', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    if request.method == 'POST':
+        codigo = request.form.get('codigo', '').strip()
+        
+        if not codigo or len(codigo) != 6:
+            flash('⚠️ El código debe tener exactamente 6 dígitos.', 'warning')
+            return render_template('verificar_primer_acceso.html', usuario=user.usuario)
+        
+        # Verificar código
+        if user.verificar_codigo_primer_acceso(codigo):
+            db.session.commit()
+            
+            # Registrar acceso exitoso
+            user.registrar_acceso_exitoso()
+            token = user.generar_token_sesion()
+            
+            # Crear sesión
+            sesion = Sesion(
+                usuario_id=user.id,
+                usuario_nombre=user.usuario,
+                token=secrets.token_urlsafe(32),
+                ip_address=request.remote_addr,
+                user_agent=request.headers.get('User-Agent', ''),
+                dispositivo='desktop'
+            )
+            db.session.add(sesion)
+            
+            # Auditoría
+            auditoria = AuditoriaAcceso(
+                usuario_id=user.id,
+                usuario_nombre=user.usuario,
+                accion='primer_acceso_verificado',
+                detalles=f'Verificación de primer acceso completada',
+                ip_address=request.remote_addr,
+                exitoso=True
+            )
+            db.session.add(auditoria)
+            db.session.commit()
+            
+            # Persistir en sesión
+            session.pop('pending_first_login_user_id', None)
+            session['user'] = user.usuario
+            session['role'] = user.role.lower() if user.role else 'user'
+            session['user_role'] = session['role']
+            session['secretaria'] = user.secretaria or ''
+            session['token'] = token
+            session['sesion_id'] = sesion.id
+            
+            flash('✅ Primer acceso verificado. Bienvenido/a.', 'success')
+            return redirect(url_for('main.dashboard'))
+        else:
+            flash('⚠️ Código incorrecto o expirado. Intenta nuevamente.', 'warning')
+            return render_template('verificar_primer_acceso.html', usuario=user.usuario)
+    
+    return render_template('verificar_primer_acceso.html', usuario=user.usuario)
+
 

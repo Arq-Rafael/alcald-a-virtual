@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Verificar Primer Acceso{% endblock %}
+
+{% block content %}
+<div class="auth-container" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="auth-card" style="background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-width: 420px; width: 100%; padding: 40px; margin: 20px;">
+        
+        <!-- Logo -->
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #1f2937; font-size: 28px; margin: 0 0 10px 0;">🏛️</h1>
+            <h2 style="color: #1f2937; font-size: 20px; margin: 0; font-weight: 600;">Alcaldía Virtual</h2>
+        </div>
+        
+        <!-- Mensaje de bienvenida -->
+        <div style="background: #dbeafe; border-left: 4px solid #3b82f6; padding: 15px; margin-bottom: 25px; border-radius: 4px;">
+            <p style="margin: 0; color: #1e40af; font-size: 14px; font-weight: 500;">
+                ✅ Primer acceso detectado
+            </p>
+            <p style="margin: 8px 0 0 0; color: #1e40af; font-size: 13px;">
+                Se ha enviado un código de verificación a tu correo electrónico.
+            </p>
+        </div>
+        
+        <!-- Título -->
+        <h3 style="color: #1f2937; font-size: 18px; margin-bottom: 8px; font-weight: 600;">
+            Introduce el código
+        </h3>
+        <p style="color: #6b7280; font-size: 14px; margin-bottom: 25px;">
+            Usa el código de 6 dígitos que recibiste en tu email:
+        </p>
+        
+        <!-- Form -->
+        <form method="POST" style="margin-bottom: 20px;">
+            <!-- Usuario (solo lectura) -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #374151; font-weight: 500; margin-bottom: 6px; font-size: 14px;">
+                    Usuario
+                </label>
+                <input type="text" value="{{ usuario }}" readonly style="width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; background: #f9fafb; color: #6b7280; font-size: 14px; cursor: not-allowed;">
+            </div>
+            
+            <!-- Código de verificación -->
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; color: #374151; font-weight: 500; margin-bottom: 6px; font-size: 14px;">
+                    Código de Verificación *
+                </label>
+                <input 
+                    type="text" 
+                    name="codigo" 
+                    maxlength="6" 
+                    inputmode="numeric" 
+                    placeholder="000000"
+                    required
+                    autofocus
+                    style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 24px; text-align: center; font-weight: bold; letter-spacing: 4px; font-family: 'Courier New', monospace; transition: border-color 0.3s;"
+                    onblur="this.style.borderColor = '#e5e7eb'"
+                    onfocus="this.style.borderColor = '#667eea'"
+                />
+                <p style="margin: 8px 0 0 0; color: #9ca3af; font-size: 12px;">
+                    Solo números, 6 dígitos
+                </p>
+            </div>
+            
+            <!-- Botón de envío -->
+            <button 
+                type="submit"
+                style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 11px 16px; border: none; border-radius: 6px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);"
+                onmouseover="this.style.transform = 'translateY(-2px)'; this.style.boxShadow = '0 6px 16px rgba(102, 126, 234, 0.6)';"
+                onmouseout="this.style.transform = 'translateY(0)'; this.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)';"
+            >
+                Verificar
+            </button>
+        </form>
+        
+        <!-- Ayuda -->
+        <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 4px; margin-bottom: 20px;">
+            <p style="margin: 0; color: #92400e; font-size: 12px; font-weight: 500;">
+                ⏱️ Código válido por 15 minutos
+            </p>
+            <p style="margin: 6px 0 0 0; color: #d97706; font-size: 12px;">
+                Si no lo recibiste, revisa tu carpeta de spam o solicita uno nuevo.
+            </p>
+        </div>
+        
+        <!-- Enlace de ayuda -->
+        <div style="text-align: center; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+            <p style="margin: 0; color: #6b7280; font-size: 12px;">
+                ¿Problemas? <a href="mailto:soporte@alcaldia.local" style="color: #667eea; text-decoration: none; font-weight: 500;">Contacta soporte</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos adicionales -->
+<style>
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+</style>
+{% endblock %}

@@ -58,7 +58,11 @@ class Config:
     
     # Alternativa sin SMTP: SendGrid API (HTTPS)
     SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY', '')
-    EMAIL_PROVIDER = os.environ.get('EMAIL_PROVIDER', 'auto')  # 'smtp' | 'sendgrid' | 'auto'
+    
+    # Resend API (https://resend.com/)
+    RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
+    
+    EMAIL_PROVIDER = os.environ.get('EMAIL_PROVIDER', 'resend')  # 'smtp' | 'sendgrid' | 'resend' | 'auto'
     
     # Email del administrador para recibir alertas
     ADMIN_ALERT_EMAIL = os.environ.get('ADMIN_ALERT_EMAIL', 'alcaldiavirtual2026@gmail.com')
