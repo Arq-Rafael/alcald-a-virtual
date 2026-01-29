@@ -64,7 +64,15 @@ def _load_plan_excel():
         return None
 
     try:
+        # Verificar hojas disponibles
+        excel_file = pd.ExcelFile(file_path)
+        logger.info(f"Hojas disponibles en Excel: {excel_file.sheet_names}")
+        
         # Cargar REGISTRO_AVANCES (datos reales actualizados)
+        if 'REGISTRO_AVANCES' not in excel_file.sheet_names:
+            logger.error(f"Hoja 'REGISTRO_AVANCES' no encontrada. Hojas disponibles: {excel_file.sheet_names}")
+            return None
+            
         avances_df = pd.read_excel(file_path, sheet_name='REGISTRO_AVANCES', header=0)
         
         # Normalizar nombres de columnas: convertir a minúsculas, reemplazar acentos y espacios
