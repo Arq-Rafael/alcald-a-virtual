@@ -178,14 +178,48 @@ def _load_plan_excel():
         presup_asig_col = col_mapping.get('PRESUPUESTO_ASIGNADO', 'PRESUPUESTO_ASIGNADO')
         presup_ejec_col = col_mapping.get('PRESUPUESTO_EJECUTADO', 'PRESUPUESTO_EJECUTADO')
         
-        avance_prom = float(avances_df[avance_col].mean(skipna=True) or 0) if avance_col in avances_df.columns else 0
-        ejec_fin_prom = float(avances_df[ejec_col].mean(skipna=True) or 0) if ejec_col in avances_df.columns else 0
+        # Calcular promedio de avance - si los valores son muy bajos, inferir desde estados
+        if avance_col in avances_df.columns:
+            avances_numericos = pd.to_numeric(avances_df[avance_col], errors='coerce')
+            avance_prom = float(avances_numericos.mean(skipna=True) or 0)
+        else:
+            avance_prom = 0
+        
+        if ejec_col in avances_df.columns:
+            ejec_numericos = pd.to_numeric(avances_df[ejec_col], errors='coerce')
+            ejec_fin_prom = float(ejec_numericos.mean(skipna=True) or 0)
+        else:
+            ejec_fin_prom = 0
         
         # Contar estados basándose en el ESTADO_CALC (tomado del Excel)
         metas_cumplidas = int((avances_df['ESTADO_CALC'].str.lower().str.contains('cumplid', na=False)).sum())
         metas_en_curso = int((avances_df['ESTADO_CALC'].str.lower().str.contains('ejecuci|curso', na=False, regex=True)).sum())
         metas_en_riesgo = int((avances_df['ESTADO_CALC'].str.lower().str.contains('riesgo', na=False)).sum())
         metas_sin_iniciar = int((avances_df['ESTADO_CALC'].str.lower().str.contains('no inici', na=False)).sum())
+        
+        # CORRECCIÓN: Si el avance promedio es muy bajo pero hay muchas metas cumplidas, 
+        # calcular el avance desde los estados (más confiable)
+        if avance_prom < 10 and metas_cumplidas > (total_metas * 0.3):
+            # Asignar pesos: Cumplida=100%, En curso=60%, En riesgo=30%, No iniciada=0%
+            avance_calculado = (
+                (metas_cumplidas * 100) + 
+                (metas_en_curso * 60) + 
+                (metas_en_riesgo * 30) + 
+                (metas_sin_iniciar * 0)
+            ) / total_metas
+            logger.warning(f"Avance desde Excel muy bajo ({avance_prom:.1f}%) vs estados ({metas_cumplidas} cumplidas). Usando cálculo desde estados: {avance_calculado:.1f}%")
+            avance_prom = avance_calculado
+        
+        # Lo mismo para ejecución financiera
+        if ejec_fin_prom < 10 and metas_cumplidas > (total_metas * 0.3):
+            ejec_calculado = (
+                (metas_cumplidas * 100) + 
+                (metas_en_curso * 60) + 
+                (metas_en_riesgo * 30) + 
+                (metas_sin_iniciar * 0)
+            ) / total_metas
+            logger.warning(f"Ejecución financiera desde Excel muy baja ({ejec_fin_prom:.1f}%) vs estados. Usando cálculo desde estados: {ejec_calculado:.1f}%")
+            ejec_fin_prom = ejec_calculado
         presupuesto_total = float(avances_df[presup_asig_col].sum(skipna=True) or 0) if presup_asig_col in avances_df.columns else 0
         presupuesto_ejec = float(avances_df[presup_ejec_col].sum(skipna=True) or 0) if presup_ejec_col in avances_df.columns else 0
 
@@ -320,8 +354,26 @@ def _load_plan_excel():
             metas_en_riesgo_cons = sum(1 for m in metas_consolidado if 'riesgo' in str(m.get('estado', '')).lower())
             metas_sin_iniciar_cons = sum(1 for m in metas_consolidado if 'no inici' in str(m.get('estado', '')).lower())
             
-            avance_prom_cons = sum((m.get('avance_fisico_pct') or 0) for m in metas_consolidado) / total_cons
-            ejec_fin_prom_cons = sum((m.get('ejec_fin_pct') or 0) for m in metas_consolidado) / total_cons
+            # Calcular promedios desde datos consolidados
+            avance_prom_cons = sum((m.get('avance_fisico_pct') or 0) for m in metas_consolidado) / total_cons if total_cons > 0 else 0
+            ejec_fin_prom_cons = sum((m.get('ejec_fin_pct') or 0) for m in metas_consolidado) / total_cons if total_cons > 0 else 0
+            
+            # CORRECCIÓN: Si los promedios son muy bajos pero hay muchas metas cumplidas, calcular desde estados
+            if avance_prom_cons < 10 and metas_cumplidas_cons > (total_cons * 0.3):
+                avance_prom_cons = (
+                    (metas_cumplidas_cons * 100) + 
+                    (metas_en_curso_cons * 60) + 
+                    (metas_en_riesgo_cons * 30)
+                ) / total_cons
+                logger.warning(f"Consolidado: Avance calculado desde estados = {avance_prom_cons:.1f}%")
+            
+            if ejec_fin_prom_cons < 10 and metas_cumplidas_cons > (total_cons * 0.3):
+                ejec_fin_prom_cons = (
+                    (metas_cumplidas_cons * 100) + 
+                    (metas_en_curso_cons * 60) + 
+                    (metas_en_riesgo_cons * 30)
+                ) / total_cons
+                logger.warning(f"Consolidado: Ejecución financiera calculada desde estados = {ejec_fin_prom_cons:.1f}%")
             presupuesto_total_cons = sum((m.get('presupuesto_asig') or 0) for m in metas_consolidado)
             presupuesto_ejec_cons = sum((m.get('presupuesto_ejec') or 0) for m in metas_consolidado)
 
