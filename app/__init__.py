@@ -21,6 +21,15 @@ def create_app(config_class=Config):
     # Initialize extensions
     db.init_app(app)
     
+    # IMPORTANTE: Ejecutar migraciones ANTES de registrar blueprints
+    # Esto evita errores de schema cuando las rutas hacen queries
+    with app.app_context():
+        try:
+            from .migrations import run_migrations
+            run_migrations(app, db)
+        except Exception as e:
+            logging.warning(f"[MIGRATIONS] Error durante inicialización de migraciones: {e}")
+    
     # Register Blueprints
     from .routes.auth import auth_bp
     from .routes.main import main_bp
@@ -114,60 +123,10 @@ def create_app(config_class=Config):
         upload_dir = app.config.get('UPLOADS_DIR')
         return send_from_directory(upload_dir, filename)
 
-    
-    # Inicializar Base de Datos en Producción (Railway)
+    # Inicializar datos en base de datos
     with app.app_context():
         try:
-            db.create_all()
-            
-            # Migración automática: agregar campos de primer_acceso si no existen
-            from sqlalchemy import text, inspect
-            try:
-                inspector = inspect(db.engine)
-                existing_columns = [col['name'] for col in inspector.get_columns('usuarios')]
-                
-                if 'primer_acceso' not in existing_columns:
-                    logging.info("[MIGRATION] Agregando campos de primer_acceso...")
-                    
-                    # Detectar tipo de BD
-                    db_url = app.config.get('DATABASE_URL', '')
-                    is_postgresql = 'postgresql' in db_url
-                    
-                    if is_postgresql:
-                        migrations = [
-                            "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS primer_acceso BOOLEAN DEFAULT TRUE",
-                            "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS codigo_primer_acceso VARCHAR(6)",
-                            "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS codigo_primer_acceso_expira TIMESTAMP",
-                            "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS primer_acceso_verificado TIMESTAMP",
-                        ]
-                    else:
-                        # SQLite - sin IF NOT EXISTS para columnas
-                        migrations = [
-                            "ALTER TABLE usuarios ADD COLUMN primer_acceso BOOLEAN DEFAULT 1",
-                            "ALTER TABLE usuarios ADD COLUMN codigo_primer_acceso VARCHAR(6)",
-                            "ALTER TABLE usuarios ADD COLUMN codigo_primer_acceso_expira TIMESTAMP",
-                            "ALTER TABLE usuarios ADD COLUMN primer_acceso_verificado TIMESTAMP",
-                        ]
-                    
-                    for sql in migrations:
-                        try:
-                            db.session.execute(text(sql))
-                        except Exception as col_error:
-                            if 'already exists' in str(col_error) or 'duplicate' in str(col_error):
-                                logging.info(f"[MIGRATION] Columna ya existe: {col_error}")
-                            else:
-                                raise
-                    
-                    db.session.commit()
-                    logging.info("[MIGRATION] ✅ Campos agregados exitosamente")
-            except Exception as migrate_error:
-                logging.warning(f"[MIGRATION] No se pudo ejecutar migración: {migrate_error}")
-                db.session.rollback()
-            
-            # Crear usuario admin si no existe
             from .models.usuario import Usuario
-            
-            # Verificar si ya existe admin - evitar duplicados
             admin = Usuario.query.filter_by(usuario='admin').first()
             if not admin:
                 logging.warning("[RAILWAY LOG] Creando usuario admin por defecto...")
