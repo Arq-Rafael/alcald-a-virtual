@@ -143,9 +143,19 @@ def configuracion():
             if user:
                 try:
                     username_to_delete = user.usuario
+                    user_id = user.id
+                    
+                    # Eliminar sesiones del usuario primero (evitar foreign key constraint)
+                    from app.models.usuario import Sesion
+                    Sesion.query.filter_by(usuario_id=user_id).delete()
+                    
+                    # Eliminar auditorías del usuario (si las hay)
+                    AuditoriaAcceso.query.filter_by(usuario_id=user_id).delete()
+                    
+                    # Ahora eliminar el usuario
                     db.session.delete(user)
                     
-                    # Auditoría
+                    # Auditoría de la eliminación
                     auditoria = AuditoriaAcceso(
                         usuario_id=1,
                         usuario_nombre=session.get('user', 'admin'),
