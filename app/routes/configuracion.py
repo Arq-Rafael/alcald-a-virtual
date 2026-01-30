@@ -123,17 +123,20 @@ def configuracion():
                 if nuevo_e:
                     try:
                         from app.utils.email_resend import send_initial_password_email
-                        send_initial_password_email(
+                        resultado = send_initial_password_email(
                             email=nuevo_e,
                             nombre_usuario=nuevo_u,
                             password_temporal=nuevo_p
                         )
-                        flash(f"✅ Usuario '{nuevo_u}' creado. Se envió correo de bienvenida a {nuevo_e}", 'success')
+                        if resultado.get('success'):
+                            flash(f"✅ Usuario '{nuevo_u}' creado. Email de bienvenida enviado a {nuevo_e}", 'success')
+                        else:
+                            flash(f"✅ Usuario '{nuevo_u}' creado. Email NO enviado (Resend requiere dominio verificado). El usuario puede acceder normalmente.", 'warning')
                     except Exception as email_error:
                         # No fallar si el email falla, solo notificar
-                        flash(f"✅ Usuario '{nuevo_u}' creado, pero no se pudo enviar email: {str(email_error)}", 'warning')
+                        flash(f"✅ Usuario '{nuevo_u}' creado. Email NO enviado: {str(email_error)}. El usuario puede acceder normalmente.", 'warning')
                 else:
-                    flash(f"✅ Usuario '{nuevo_u}' creado exitosamente", 'success')
+                    flash(f"✅ Usuario '{nuevo_u}' creado exitosamente (sin email configurado)", 'success')
             except Exception as e:
                 db.session.rollback()
                 flash(f"❌ Error al crear usuario: {str(e)}", 'danger')

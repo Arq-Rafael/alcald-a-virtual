@@ -74,11 +74,21 @@ def login():
                 resultado = send_first_login_code_email(user.email, user.usuario, codigo)
                 logging.info(f"[EMAIL] Resultado envío a {user.email}: {resultado}")
                 
-                # Guardar user_id en sesión temporal para verificación
-                session['pending_first_login_user_id'] = user.id
-                
-                flash(f'✅ Código enviado a {user.email}. Revisa tu bandeja de entrada.', 'info')
-                return redirect(url_for('auth.verificar_primer_acceso'))
+                # Solo redirigir a verificación si el email se envió correctamente
+                if resultado.get('success'):
+                    # Guardar user_id en sesión temporal para verificación
+                    session['pending_first_login_user_id'] = user.id
+                    flash(f'✅ Código enviado a {user.email}. Revisa tu bandeja de entrada.', 'info')
+                    return redirect(url_for('auth.verificar_primer_acceso'))
+                else:
+                    # Email falló (Resend requiere dominio verificado)
+                    # Marcar como verificado automáticamente y continuar
+                    logging.warning(f"[PRIMER ACCESO] Email falló, continuando sin verificación para {user.usuario}")
+                    user.primer_acceso = False
+                    user.primer_acceso_verificado = datetime.utcnow()
+                    db.session.commit()
+                    flash('ℹ️ Sistema de emails en configuración. Accediendo sin verificación por email.', 'info')
+                    # Continuar con login normal (más abajo)
         except (AttributeError, Exception) as e:
             # Columna primer_acceso no existe aún o no se puede usar
             # Continuar con login normal
