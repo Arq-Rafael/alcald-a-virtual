@@ -128,14 +128,36 @@ def create_app(config_class=Config):
                 
                 if 'primer_acceso' not in existing_columns:
                     logging.info("[MIGRATION] Agregando campos de primer_acceso...")
-                    migrations = [
-                        "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS primer_acceso BOOLEAN DEFAULT TRUE",
-                        "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS codigo_primer_acceso VARCHAR(6)",
-                        "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS codigo_primer_acceso_expira TIMESTAMP",
-                        "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS primer_acceso_verificado TIMESTAMP",
-                    ]
+                    
+                    # Detectar tipo de BD
+                    db_url = app.config.get('DATABASE_URL', '')
+                    is_postgresql = 'postgresql' in db_url
+                    
+                    if is_postgresql:
+                        migrations = [
+                            "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS primer_acceso BOOLEAN DEFAULT TRUE",
+                            "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS codigo_primer_acceso VARCHAR(6)",
+                            "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS codigo_primer_acceso_expira TIMESTAMP",
+                            "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS primer_acceso_verificado TIMESTAMP",
+                        ]
+                    else:
+                        # SQLite - sin IF NOT EXISTS para columnas
+                        migrations = [
+                            "ALTER TABLE usuarios ADD COLUMN primer_acceso BOOLEAN DEFAULT 1",
+                            "ALTER TABLE usuarios ADD COLUMN codigo_primer_acceso VARCHAR(6)",
+                            "ALTER TABLE usuarios ADD COLUMN codigo_primer_acceso_expira TIMESTAMP",
+                            "ALTER TABLE usuarios ADD COLUMN primer_acceso_verificado TIMESTAMP",
+                        ]
+                    
                     for sql in migrations:
-                        db.session.execute(text(sql))
+                        try:
+                            db.session.execute(text(sql))
+                        except Exception as col_error:
+                            if 'already exists' in str(col_error) or 'duplicate' in str(col_error):
+                                logging.info(f"[MIGRATION] Columna ya existe: {col_error}")
+                            else:
+                                raise
+                    
                     db.session.commit()
                     logging.info("[MIGRATION] ✅ Campos agregados exitosamente")
             except Exception as migrate_error:
