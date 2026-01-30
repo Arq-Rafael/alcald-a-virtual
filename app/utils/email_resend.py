@@ -139,7 +139,7 @@ def send_initial_password_email(email, nombre_usuario, password_temporal):
         <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px;">
           <p style="margin: 0; color: #92400e; font-weight: 500;">⚠️ Información de Acceso</p>
           <p style="margin: 8px 0 0 0; color: #d97706; font-size: 13px;">
-            <strong>Usuario:</strong> {email}<br>
+            <strong>Usuario:</strong> {nombre_usuario}<br>
             <strong>Contraseña temporal:</strong> {password_temporal}
           </p>
         </div>

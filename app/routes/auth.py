@@ -68,16 +68,22 @@ def login():
                 
                 # Enviar código por email
                 from app.utils.email_resend import send_first_login_code_email
+                import logging
+                logging.info(f"[PRIMER ACCESO] Usuario: {user.usuario}, Email: {user.email}, Código: {codigo}")
+                
                 resultado = send_first_login_code_email(user.email, user.usuario, codigo)
+                logging.info(f"[EMAIL] Resultado envío a {user.email}: {resultado}")
                 
                 # Guardar user_id en sesión temporal para verificación
                 session['pending_first_login_user_id'] = user.id
                 
-                flash(f'Se ha enviado un código de verificación a {user.email}. Por favor verifica tu identidad para continuar.', 'info')
+                flash(f'✅ Código enviado a {user.email}. Revisa tu bandeja de entrada.', 'info')
                 return redirect(url_for('auth.verificar_primer_acceso'))
         except (AttributeError, Exception) as e:
             # Columna primer_acceso no existe aún o no se puede usar
             # Continuar con login normal
+            import logging
+            logging.warning(f"[PRIMER ACCESO] Error: {str(e)}")
             pass
         
         # === CREAR SESIÓN Y ACCESO ===

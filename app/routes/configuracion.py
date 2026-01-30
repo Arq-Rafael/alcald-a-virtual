@@ -98,7 +98,7 @@ def configuracion():
                 user = Usuario(
                     usuario=nuevo_u,
                     clave=nuevo_p,
-                    email=nuevo_e,
+                    email=nuevo_e if nuevo_e else None,
                     role=nuevo_role,
                     secretaria=nueva_secretaria,
                     activo=True,
@@ -119,12 +119,21 @@ def configuracion():
                 db.session.add(auditoria)
                 db.session.commit()
 
-                # Notificaciones
-                admin_alert = current_app.config.get('ADMIN_ALERT_EMAIL')
-                correo_ok = True
-                # Notificaciones por correo desactivadas (SMTP bloqueado en Railway)
-                
-                flash(f"✅ Usuario '{nuevo_u}' creado exitosamente", 'success')
+                # Enviar email de bienvenida si tiene email
+                if nuevo_e:
+                    try:
+                        from app.utils.email_resend import send_initial_password_email
+                        send_initial_password_email(
+                            email=nuevo_e,
+                            nombre_usuario=nuevo_u,
+                            password_temporal=nuevo_p
+                        )
+                        flash(f"✅ Usuario '{nuevo_u}' creado. Se envió correo de bienvenida a {nuevo_e}", 'success')
+                    except Exception as email_error:
+                        # No fallar si el email falla, solo notificar
+                        flash(f"✅ Usuario '{nuevo_u}' creado, pero no se pudo enviar email: {str(email_error)}", 'warning')
+                else:
+                    flash(f"✅ Usuario '{nuevo_u}' creado exitosamente", 'success')
             except Exception as e:
                 db.session.rollback()
                 flash(f"❌ Error al crear usuario: {str(e)}", 'danger')
