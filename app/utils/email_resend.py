@@ -39,6 +39,18 @@ def send_email_resend(to_email, subject, html_content, from_name="Alcaldía Virt
         logger.error("RESEND_API_KEY not configured")
         return {"success": False, "message": "RESEND_API_KEY not configured"}
     
+    # En modo testing, Resend solo permite enviar a alcaldiavirtual2026@gmail.com
+    # Para enviar a otros emails, debes verificar un dominio en resend.com/domains
+    allowed_testing_email = "alcaldiavirtual2026@gmail.com"
+    
+    if to_email != allowed_testing_email:
+        logger.warning(f"⚠️ Resend en modo testing solo permite enviar a {allowed_testing_email}")
+        logger.warning(f"   Para enviar a {to_email}, verifica un dominio en https://resend.com/domains")
+        return {
+            "success": False, 
+            "message": f"Resend en modo testing. Solo se pueden enviar emails a {allowed_testing_email}. Verifica un dominio en resend.com/domains para enviar a otros destinatarios."
+        }
+    
     try:
         resend.api_key = api_key
         
