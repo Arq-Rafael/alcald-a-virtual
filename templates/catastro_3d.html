@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catastro Municipal 3D - Supatá</title>
     
-    <!-- MapLibre GL - Usar versión local por defecto -->
-    <link href="{{ url_for('static', filename='lib/maplibre/maplibre-gl.css') }}" rel="stylesheet">
-    <script src="{{ url_for('static', filename='lib/maplibre/maplibre-gl.js') }}"></script>
+    <!-- MapLibre GL con fallback local -->
+    <link id="ml-css-cdn" href="https://unpkg.com/maplibre-gl@3.7.0/dist/maplibre-gl.css" rel="stylesheet">
+    <script id="ml-js-cdn" src="https://unpkg.com/maplibre-gl@3.7.0/dist/maplibre-gl.js"></script>
     <script>
         // Utilidad para hacer paneles arrastrables
         function makePanelDraggable(panel, handleSelector) {
@@ -39,19 +39,50 @@
                 document.removeEventListener('mouseup', onUp);
             }
         }
-        
-        // Esperar a que MapLibre cargue
-        window.__ensureMapLibreReady = function(){
-            return new Promise((resolve, reject)=>{
-                let waited=0; const max=5000;
-                (function check(){
-                    if(window.maplibregl) return resolve();
-                    waited+=100;
-                    if(waited>=max) return reject(new Error('MapLibre no cargó'));
-                    setTimeout(check,100);
-                })();
-            });
-        };
+        // Carga MapLibre desde CDN y, si falla o se demora, activa copia local y espera a que la librería exista
+        (function setupMapLibreFallback(){
+            const localCssHref = "{{ url_for('static', filename='lib/maplibre/maplibre-gl.css') }}";
+            const localJsSrc = "{{ url_for('static', filename='lib/maplibre/maplibre-gl.js') }}";
+
+            function ensureLocalAssets(){
+                if(!document.getElementById('ml-css-local')){
+                    const link=document.createElement('link');
+                    link.id='ml-css-local';
+                    link.rel='stylesheet';
+                    link.href=localCssHref;
+                    document.head.appendChild(link);
+                }
+                if(!document.getElementById('ml-js-local')){
+                    const script=document.createElement('script');
+                    script.id='ml-js-local';
+                    script.defer=true;
+                    script.src=localJsSrc;
+                    document.head.appendChild(script);
+                }
+            }
+
+            const cdnJs=document.getElementById('ml-js-cdn');
+            if(cdnJs){
+                cdnJs.addEventListener('error', ensureLocalAssets);
+            }
+
+            // Si en 1.2s no existe maplibregl, cargamos local
+            setTimeout(()=>{ if(!window.maplibregl) ensureLocalAssets(); }, 1200);
+
+            // Exponemos un helper para esperar MapLibre antes de iniciar el mapa
+            window.__ensureMapLibreReady = function(){
+                ensureLocalAssets();
+                return new Promise((resolve, reject)=>{
+                    let waited=0; const max=5000;
+                    (function check(){
+                        if(window.maplibregl) return resolve();
+                        waited+=100;
+                        if(waited>=max) return reject(new Error('MapLibre no cargó'));
+                        setTimeout(check,100);
+                    })();
+                });
+            };
+        })();
     </script>
     
     <!-- Turf.js -->
