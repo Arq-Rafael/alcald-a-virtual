@@ -172,37 +172,49 @@ body {
 }
 
 /* ========================================
-   GLASS CARD - iOS 26 MODO CLARO
+   GLASS CARD - MÓDULOS MINIMALISTAS
    ======================================== */
 
 .glass-card {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  padding: 1.8rem 1.5rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  background: var(--card-gradient, linear-gradient(135deg, #f6d365 0%, #fda085 100%));
+  border: none;
+  border-radius: 26px;
+  padding: 1.7rem 1.6rem;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease;
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
   animation: cardSlide 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   opacity: 0;
+  color: #ffffff;
 }
 
-.glass-card:nth-child(1) { animation-delay: 0.05s; }
-.glass-card:nth-child(2) { animation-delay: 0.10s; }
-.glass-card:nth-child(3) { animation-delay: 0.15s; }
-.glass-card:nth-child(4) { animation-delay: 0.20s; }
-.glass-card:nth-child(5) { animation-delay: 0.25s; }
-.glass-card:nth-child(6) { animation-delay: 0.30s; }
-.glass-card:nth-child(7) { animation-delay: 0.35s; }
-.glass-card:nth-child(8) { animation-delay: 0.40s; }
-.glass-card:nth-child(9) { animation-delay: 0.45s; }
-.glass-card:nth-child(10) { animation-delay: 0.50s; }
-.glass-card:nth-child(11) { animation-delay: 0.55s; }
-.glass-card:nth-child(12) { animation-delay: 0.60s; }
-.glass-card:nth-child(13) { animation-delay: 0.65s; }
+/* Redactar Oficios - Amarillo/Naranja */
+.glass-card:nth-child(1) { animation-delay: 0.05s; --card-gradient: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
+/* Solicitudes - Rosa/Magenta */
+.glass-card:nth-child(2) { animation-delay: 0.10s; --card-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+/* Certificados - Púrpura */
+.glass-card:nth-child(3) { animation-delay: 0.15s; --card-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+/* Licencias - Cian/Verde */
+.glass-card:nth-child(4) { animation-delay: 0.20s; --card-gradient: linear-gradient(135deg, #43cea2 0%, #185a9d 100%); }
+/* IA Municipal - Azul Profundo */
+.glass-card:nth-child(5) { animation-delay: 0.25s; --card-gradient: linear-gradient(135deg, #5f72bd 0%, #9b23ea 100%); }
+/* Calendario - Azul Cielo */
+.glass-card:nth-child(6) { animation-delay: 0.30s; --card-gradient: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); }
+/* Participación - Rojo/Rosa */
+.glass-card:nth-child(7) { animation-delay: 0.35s; --card-gradient: linear-gradient(135deg, #ff6b6b 0%, #ff1744 100%); }
+/* Geoportal - Verde Esmeralda */
+.glass-card:nth-child(8) { animation-delay: 0.40s; --card-gradient: linear-gradient(135deg, #00c9a7 0%, #0a7377 100%); }
+/* Seguimiento y Metas - Naranja/Dorado */
+.glass-card:nth-child(9) { animation-delay: 0.45s; --card-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+/* Gestión del Riesgo - Verde Bosque */
+.glass-card:nth-child(10) { animation-delay: 0.50s; --card-gradient: linear-gradient(135deg, #6ee7b7 0%, #059669 100%); }
+/* Contratación - Azul Oscuro */
+.glass-card:nth-child(11) { animation-delay: 0.55s; --card-gradient: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); }
+/* Configuración - Gris/Acero */
+.glass-card:nth-child(12) { animation-delay: 0.60s; --card-gradient: linear-gradient(135deg, #64748b 0%, #334155 100%); }
 
 @keyframes cardSlide {
   to { opacity: 1; transform: translateY(0); }
@@ -210,80 +222,53 @@ body {
 }
 
 .glass-card:hover {
-  background: white;
-  border-color: #667eea;
-  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.15);
-  transform: translateY(-4px);
+  box-shadow: 0 26px 50px rgba(0, 0, 0, 0.14);
+  transform: translateY(-6px);
+  filter: saturate(1.05);
 }
 
 .glass-card:active {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
 }
 
 /* ========================================
-   ICON - COLORFUL iOS 26
+   ICON - MINIMALISTA
    ======================================== */
 
 .card-icon-wrapper {
-  width: 56px;
-  height: 56px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 16px;
-  margin-bottom: 1.2rem;
-  font-size: 1.6rem;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 14px;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  box-shadow: none;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
 }
 
 .glass-card:hover .card-icon-wrapper {
-  transform: scale(1.12) rotate(-3deg);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
-  opacity: 1 !important; /* Asegurar que el icono NO desaparece */
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.15);
+  opacity: 1 !important;
 }
 
-.card-icon-wrapper.text-primary { 
-  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); 
-  color: white;
-  box-shadow: 0 8px 24px rgba(20, 184, 166, 0.4);
-}
-
-.card-icon-wrapper.text-success { 
-  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); 
-  color: white;
-  box-shadow: 0 8px 24px rgba(74, 222, 128, 0.4);
-}
-
-.card-icon-wrapper.text-warning { 
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); 
-  color: white;
-  box-shadow: 0 8px 24px rgba(251, 191, 36, 0.4);
-}
-
-.card-icon-wrapper.text-info { 
-  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); 
-  color: white;
-  box-shadow: 0 8px 24px rgba(96, 165, 250, 0.4);
-}
-
-.card-icon-wrapper.text-danger { 
-  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%); 
-  color: white;
-  box-shadow: 0 8px 24px rgba(248, 113, 113, 0.4);
-}
-
-.card-icon-wrapper.text-secondary { 
-  background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%); 
-  color: white;
-  box-shadow: 0 8px 24px rgba(167, 139, 250, 0.4);
-}
-
-.card-icon-wrapper.text-dark { 
-  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%); 
-  color: white;
-  box-shadow: 0 8px 24px rgba(148, 163, 184, 0.4);
+.card-icon-wrapper.text-primary,
+.card-icon-wrapper.text-success,
+.card-icon-wrapper.text-warning,
+.card-icon-wrapper.text-info,
+.card-icon-wrapper.text-danger,
+.card-icon-wrapper.text-secondary,
+.card-icon-wrapper.text-dark {
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  box-shadow: none;
 }
 
 /* ========================================
@@ -291,16 +276,16 @@ body {
    ======================================== */
 
 .glass-card h5 {
-  font-size: 1.05rem !important;
-  font-weight: 600 !important;
-  color: #1a202c !important;
+  font-size: 1.08rem !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
   margin: 0 0 0.5rem 0 !important;
-  letter-spacing: -0.2px;
+  letter-spacing: -0.3px;
 }
 
 .glass-card p {
-  font-size: 0.85rem !important;
-  color: #718096 !important;
+  font-size: 0.86rem !important;
+  color: rgba(255, 255, 255, 0.85) !important;
   line-height: 1.5 !important;
   margin: 0 0 1.2rem 0 !important;
   flex-grow: 1;
@@ -311,47 +296,29 @@ body {
    ======================================== */
 
 .btn-premium {
-  background: linear-gradient(135deg, var(--ios-teal) 0%, #0d9488 100%) !important;
-  color: white !important;
-  border: none !important;
+  background: rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
   border-radius: 14px !important;
-  padding: 0.85rem 1.4rem !important;
-  font-size: 0.9rem !important;
+  padding: 0.7rem 1.1rem !important;
+  font-size: 0.85rem !important;
   font-weight: 600 !important;
-  letter-spacing: 0.3px !important;
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
-  box-shadow: 0 6px 20px rgba(20, 184, 166, 0.3) !important;
+  letter-spacing: 0.4px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: none !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 0.5rem !important;
+  gap: 0.45rem !important;
   position: relative;
   overflow: hidden;
   text-transform: uppercase;
 }
 
-.btn-premium::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: width 0.5s, height 0.5s;
-}
-
-.btn-premium:hover::before {
-  width: 300px;
-  height: 300px;
-}
-
 .btn-premium:hover {
-  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%) !important;
-  transform: translateY(-3px) !important;
-  box-shadow: 0 10px 32px rgba(20, 184, 166, 0.4) !important;
+  background: rgba(255, 255, 255, 0.35) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12) !important;
 }
 
 .btn-premium:active {
@@ -359,12 +326,12 @@ body {
 }
 
 .btn-premium i {
-  font-size: 1rem;
-  transition: transform 0.3s ease-out;
+  font-size: 0.95rem;
+  transition: transform 0.25s ease-out;
 }
 
 .btn-premium:hover i {
-  transform: translateX(4px);
+  transform: translateX(3px);
 }
 
 /* ========================================
@@ -381,9 +348,9 @@ body {
   }
 
   .card-icon-wrapper {
-    width: 64px;
-    height: 64px;
-    font-size: 1.8rem;
+    width: 52px;
+    height: 52px;
+    font-size: 1.4rem;
   }
 }
 
