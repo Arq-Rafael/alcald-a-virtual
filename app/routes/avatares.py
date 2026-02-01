@@ -1,7 +1,7 @@
 """
 Rutas para servir avatares dinámicos
 """
-from flask import Blueprint, request, Response, session, current_app
+from flask import Blueprint, request, Response, session, current_app, jsonify
 from app.utils.avatares import generate_avatar_svg, get_avatar_collections
 
 avatares_bp = Blueprint('avatares', __name__, url_prefix='/api/avatar')
@@ -34,7 +34,6 @@ def list_collections():
     """
     Lista todas las colecciones de avatares disponibles
     """
-    import json
     collections = get_avatar_collections()
     # Simplificar la respuesta para JSON
     response = {}
@@ -44,4 +43,4 @@ def list_collections():
             'style': collection_data['style'],
             'avatars': [{'id': a['id']} for a in collection_data['avatars']]
         }
-    return json.dumps(response), 200, {'Content-Type': 'application/json'}
+    return jsonify(response)

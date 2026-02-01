@@ -42,6 +42,11 @@ def perfil():
             }
             user.set_preferencias(prefs)
             db.session.commit()
+            
+            # Si es solicitud AJAX, responde JSON
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify(success=True, message='Preferencias guardadas')
+            
             flash('Preferencias guardadas', 'success')
             return redirect(url_for('perfil.perfil'))
         

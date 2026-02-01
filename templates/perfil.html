@@ -53,21 +53,21 @@
       <div style="background:linear-gradient(135deg, rgba(255,255,255,0.92), rgba(248,250,252,0.88)); -webkit-backdrop-filter: blur(40px); backdrop-filter: blur(40px); border: 1px solid rgba(255,255,255,0.6); border-radius:24px; padding:2rem; box-shadow: 0 20px 60px rgba(0,0,0,0.08);">
         <h3 style="font-size:1.2rem; margin-bottom:1.5rem; font-weight:600;">⚙️ Preferencias</h3>
         
-        <form method="post">
+        <form method="post" id="preferencesForm">
           <input type="hidden" name="accion" value="guardar_prefs">
           
           <!-- Visual Preferences Grid -->
           <div class="row g-3 mb-3">
             <div class="col-md-6">
               <label class="form-label" style="font-weight:600; font-size:0.9rem;">🌙 Tema</label>
-              <select name="tema" class="form-select" style="border-radius:12px;">
+              <select name="tema" id="selectTema" class="form-select" style="border-radius:12px;">
                 <option value="light" {% if preferencias.tema == 'light' %}selected{% endif %}>☀️ Claro</option>
                 <option value="dark" {% if preferencias.tema == 'dark' %}selected{% endif %}>🌙 Oscuro</option>
               </select>
             </div>
             <div class="col-md-6">
               <label class="form-label" style="font-weight:600; font-size:0.9rem;">📏 Tamaño de fuente</label>
-              <select name="tamano_fuente" class="form-select" style="border-radius:12px;">
+              <select name="tamano_fuente" id="selectTamano" class="form-select" style="border-radius:12px;">
                 <option value="small" {% if preferencias.tamano_fuente == 'small' %}selected{% endif %}>A Pequeño</option>
                 <option value="medium" {% if preferencias.tamano_fuente == 'medium' %}selected{% endif %}>A Mediano</option>
                 <option value="large" {% if preferencias.tamano_fuente == 'large' %}selected{% endif %}>A Grande</option>
@@ -76,7 +76,7 @@
             </div>
             <div class="col-md-6">
               <label class="form-label" style="font-weight:600; font-size:0.9rem;">🔤 Tipo de fuente</label>
-              <select name="tipo_fuente" class="form-select" style="border-radius:12px;">
+              <select name="tipo_fuente" id="selectTipo" class="form-select" style="border-radius:12px;">
                 <option value="system" {% if preferencias.tipo_fuente == 'system' %}selected{% endif %}>Sistema (Predeterminado)</option>
                 <option value="arial" {% if preferencias.tipo_fuente == 'arial' %}selected{% endif %}>Arial</option>
                 <option value="roboto" {% if preferencias.tipo_fuente == 'roboto' %}selected{% endif %}>Roboto</option>
@@ -85,7 +85,7 @@
             </div>
             <div class="col-md-6">
               <label class="form-label" style="font-weight:600; font-size:0.9rem;">🌐 Idioma</label>
-              <select name="idioma" class="form-select" style="border-radius:12px;">
+              <select name="idioma" id="selectIdioma" class="form-select" style="border-radius:12px;">
                 <option value="es" {% if preferencias.idioma == 'es' %}selected{% endif %}>Español</option>
                 <option value="en" {% if preferencias.idioma == 'en' %}selected{% endif %}>English</option>
               </select>
@@ -281,11 +281,46 @@
         }
       });
     }
+
+    // Manejar formulario de preferencias
+    const prefsForm = document.getElementById('preferencesForm');
+    if (prefsForm) {
+      prefsForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(prefsForm);
+        
+        try {
+          const response = await fetch('{{ url_for("perfil.perfil") }}', {
+            method: 'POST',
+            body: formData
+          });
+          
+          if (response.ok) {
+            // Mostrar notificación de éxito
+            showSuccessNotification('✅ Preferencias guardadas correctamente');
+            
+            // Recargar después de 1 segundo para aplicar cambios
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          } else {
+            showErrorNotification('❌ Error al guardar preferencias');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          showErrorNotification('❌ Error al guardar preferencias');
+        }
+      });
+    }
   });
 
   async function loadProfileAvatarGallery() {
     try {
       const response = await fetch('{{ url_for("avatares.list_collections") }}');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const collections = await response.json();
       const gallery = document.getElementById('profileAvatarGallery');
       gallery.innerHTML = '';
@@ -300,8 +335,11 @@
           const item = document.createElement('div');
           item.className = 'profile-avatar-item';
           item.style.minHeight = '120px';
+          
+          const avatarUrl = `{{ url_for('avatares.avatar_dinamico', usuario=session.user) }}?style=${key}&collection=${avatar.id}`;
+          
           item.innerHTML = `
-            <img src="{{ url_for('avatares.avatar_dinamico', usuario=session.user) }}?style=${key}&collection=${avatar.id}" alt="${avatar.id}">
+            <img src="${avatarUrl}" alt="${avatar.id}">
             <div class="profile-avatar-checkmark">✓</div>
           `;
           
@@ -318,13 +356,32 @@
             try {
               const saveResponse = await fetch('{{ url_for("perfil.perfil") }}', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
               });
+              
               if (saveResponse.ok) {
-                console.log('Avatar guardado exitosamente');
+                try {
+                  const data = await saveResponse.json();
+                  if (data.success) {
+                    console.log('Avatar guardado exitosamente');
+                    showSuccessNotification('✅ Avatar actualizado');
+                    // Recargar después de 500ms para mostrar la selección visual
+                    setTimeout(() => {
+                      window.location.reload();
+                    }, 500);
+                  }
+                } catch (e) {
+                  console.error('Error parsing response:', e);
+                  window.location.reload();
+                }
+              } else {
+                console.error('Error saving avatar:', saveResponse.status);
+                showErrorNotification('❌ Error al guardar avatar');
               }
             } catch (error) {
               console.error('Error guardando avatar:', error);
+              showErrorNotification('❌ Error al guardar avatar');
             }
           });
           
@@ -333,8 +390,86 @@
       }
     } catch (error) {
       console.error('Error cargando galería de avatares:', error);
-      document.getElementById('profileAvatarGallery').innerHTML = '<p style="color: #ef4444;">Error al cargar avatares</p>';
+      const gallery = document.getElementById('profileAvatarGallery');
+      gallery.innerHTML = `<p style="color: #ef4444; grid-column: 1 / -1;">Error al cargar avatares: ${error.message}</p>`;
     }
+  }
+
+  function showSuccessNotification(message) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #7cb342, #9ccc65);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(124,179,66,0.3);
+      z-index: 10000;
+      font-weight: 600;
+      animation: slideInRight 0.3s ease-out;
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.style.animation = 'slideOutRight 0.3s ease-in';
+      setTimeout(() => notification.remove(), 300);
+    }, 2000);
+  }
+
+  function showErrorNotification(message) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #ef4444, #ff6b6b);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(239,68,68,0.3);
+      z-index: 10000;
+      font-weight: 600;
+      animation: slideInRight 0.3s ease-out;
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.style.animation = 'slideOutRight 0.3s ease-in';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
+
+  // Agregar animaciones necesarias si no existen
+  if (!document.querySelector('style[data-notification-animations]')) {
+    const style = document.createElement('style');
+    style.setAttribute('data-notification-animations', 'true');
+    style.textContent = `
+      @keyframes slideInRight {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      @keyframes slideOutRight {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
   }
 </script>
 {% endblock %}
