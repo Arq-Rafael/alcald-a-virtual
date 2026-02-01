@@ -1,0 +1,41 @@
+Opción B: Cambiar la política de ejecución sólo para esta sesión de PowerShell
+Abre PowerShell como administrador o con permisos de tu usuario.
+
+Ejecuta este comando para permitir scripts sólo en la sesión actual:
+
+powershell
+
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+Ahora activa tu entorno normalmente:
+
+powershell
+
+ .\venv\Scripts\Activate.ps1
+
+(fíjate en el punto y la barra al principio: . + ruta)
+
+Una vez activado el entorno ((venv) en tu prompt), ya puedes hacer:
+
+powershell
+
+pip install -r requirements.txt
+python run.py
+
+¡Y listo! Ya tendrás Flask arrancando sin problemas.
+
+
+Instala las dependencias
+Si tienes un requirements.txt, ejecuta:
+
+pip install -r requirements.txt
+
+Si no, instala manualmente las librerías que use tu proyecto:
+
+pip install flask pandas reportlab openpyxl xlrd
+
+flask run --debug
+
+:h6wes!hSN9L6rE
+
+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
