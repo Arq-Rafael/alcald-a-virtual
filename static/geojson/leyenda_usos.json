@@ -1,0 +1,97 @@
+{
+  "titulo": "Usos del Suelo - Municipio de Supata",
+  "fecha": "2026-01-31",
+  "total_predios": 4760,
+  "colores": {
+    "Agricola": {
+      "color": "#90EE90",
+      "categoria": "USO_AGRARIO",
+      "cantidad": 126,
+      "porcentaje": 2.6
+    },
+    "Agroforestal": {
+      "color": "#2D5016",
+      "categoria": "USO_AGRARIO",
+      "cantidad": 3395,
+      "porcentaje": 71.3
+    },
+    "Agroindustrial": {
+      "color": "#5B7C3F",
+      "categoria": "USO_AGRARIO",
+      "cantidad": 1,
+      "porcentaje": 0.0
+    },
+    "Agropecuario": {
+      "color": "#6BAA6B",
+      "categoria": "USO_AGRARIO",
+      "cantidad": 65,
+      "porcentaje": 1.4
+    },
+    "Comercial": {
+      "color": "#FFB347",
+      "categoria": "USO_COMERCIAL",
+      "cantidad": 52,
+      "porcentaje": 1.1
+    },
+    "Educativo": {
+      "color": "#9370DB",
+      "categoria": "USO_INSTITUCIONAL",
+      "cantidad": 17,
+      "porcentaje": 0.4
+    },
+    "Forestal": {
+      "color": "#228B22",
+      "categoria": "USO_AMBIENTAL",
+      "cantidad": 6,
+      "porcentaje": 0.1
+    },
+    "Habitacional": {
+      "color": "#FF6B6B",
+      "categoria": "USO_RESIDENCIAL",
+      "cantidad": 862,
+      "porcentaje": 18.1
+    },
+    "Infraestructura_Transporte": {
+      "color": "#696969",
+      "categoria": "USO_INFRAESTRUCTURA",
+      "cantidad": 2,
+      "porcentaje": 0.0
+    },
+    "Institucional": {
+      "color": "#4169E1",
+      "categoria": "USO_INSTITUCIONAL",
+      "cantidad": 16,
+      "porcentaje": 0.3
+    },
+    "Lote_No_Urbanizable": {
+      "color": "#D2B48C",
+      "categoria": "SUELO_PROTEGIDO",
+      "cantidad": 4,
+      "porcentaje": 0.1
+    },
+    "Lote_Urbanizable_No_Urbanizado": {
+      "color": "#F5DEB3",
+      "categoria": "SUELO_URBANIZABLE",
+      "cantidad": 47,
+      "porcentaje": 1.0
+    },
+    "Lote_Urbanizado_No_Construido": {
+      "color": "#F0E68C",
+      "categoria": "SUELO_URBANO",
+      "cantidad": 162,
+      "porcentaje": 3.4
+    },
+    "Religioso": {
+      "color": "#9932CC",
+      "categoria": "USO_INSTITUCIONAL",
+      "cantidad": 1,
+      "porcentaje": 0.0
+    },
+    "Uso_Publico": {
+      "color": "#FFD700",
+      "categoria": "USO_PUBLICO",
+      "cantidad": 4,
+      "porcentaje": 0.1
+    }
+  }
+}
