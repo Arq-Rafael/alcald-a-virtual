@@ -16,7 +16,13 @@
 /* ===== CONTENEDOR PRINCIPAL ===== */
 .participacion-container {
     min-height: 100vh;
-    background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 50%, #e8f5e9 100%);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    color: white;
     padding: 2rem 1rem;
     position: relative;
 }

@@ -37,17 +37,23 @@ body {
 }
 
 .riesgo-wrapper {
-  background: var(--color-bg);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  color: white;
   padding: 36px 24px 48px;
 }
 
 .riesgo-surface {
   max-width: 1440px;
   margin: 0 auto;
-  background: rgba(255,255,255,0.82);
+  background: transparent;
   border-radius: 26px;
-  box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(10px);
+  box-shadow: none;
+  backdrop-filter: none;
   padding: 32px;
 }
 

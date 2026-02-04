@@ -1,38 +1,64 @@
 /* ========================================
-   SIDEBAR iOS 26 DESIGN
-   Glassmorphism + Modern Logo
+   DOCK FLOTANTE iOS 26
+   Glassmorphism Opaco + Solo Iconos
    ======================================== */
 
 .sidebar {
-  background: linear-gradient(180deg, #e8f5e9 0%, #f1f8e9 50%, #fffde7 100%) !important;
-  border-right: 1px solid rgba(124, 179, 66, 0.15);
-  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(8px);
+  position: fixed !important;
+  left: 20px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 85px !important;
+  height: auto !important;
+  max-height: 90vh !important;
+  background: linear-gradient(180deg, 
+              rgba(255, 255, 255, 0.75) 0%, 
+              rgba(248, 250, 252, 0.8) 50%,
+              rgba(255, 255, 255, 0.75) 100%) !important;
+  backdrop-filter: blur(60px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(60px) saturate(200%) !important;
+  border: 2px solid rgba(255, 255, 255, 0.8) !important;
+  border-radius: 32px !important;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15),
+              0 15px 40px rgba(0, 0, 0, 0.1),
+              inset 0 1px 1px rgba(255, 255, 255, 0.9),
+              inset 0 -1px 3px rgba(0, 0, 0, 0.05) !important;
+  padding: 18px 0 !important;
+  z-index: 1000 !important;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .sidebar-header {
-  padding: 2rem 1rem !important;
+  padding: 0 !important;
   text-align: center;
-  border-bottom: 1px solid rgba(124, 179, 66, 0.1);
-  margin-bottom: 1.2rem;
-  background: rgba(255, 255, 255, 0.5);
+  border-bottom: none !important;
+  margin-bottom: 12px !important;
+  background: transparent !important;
+}
+
+.sidebar-header a {
+  text-decoration: none;
+  display: block;
 }
 
 .logo-ios-modern {
-  width: 76px;
-  height: 76px;
-  margin: 0 auto 1.2rem;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(20, 184, 166, 0.2) 0%, rgba(167, 139, 250, 0.2) 100%);
-  border: 1.5px solid rgba(20, 184, 166, 0.3);
-  border-radius: 24px;
-  box-shadow: 0 8px 24px rgba(20, 184, 166, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(102, 187, 106, 0.4) 0%, rgba(129, 199, 132, 0.35) 100%);
+  border: 2px solid rgba(102, 187, 106, 0.5);
+  border-radius: 18px;
+  box-shadow: 0 6px 20px rgba(102, 187, 106, 0.35), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.5),
+              0 0 0 3px rgba(255, 255, 255, 0.3);
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
   backdrop-filter: blur(12px);
+  cursor: pointer;
 }
 
 .logo-ios-modern::before {
@@ -52,94 +78,417 @@
 }
 
 .logo-ios-modern i {
-  font-size: 2.4rem;
-  background: linear-gradient(135deg, #14b8a6 0%, #a78bfa 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-size: 1.8rem;
+  color: #66BB6A;
   z-index: 1;
   position: relative;
-  filter: drop-shadow(0 4px 12px rgba(20, 184, 166, 0.3));
+  filter: drop-shadow(0 3px 8px rgba(102, 187, 106, 0.5)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
 .logo-ios-modern:hover {
-  transform: scale(1.06) rotate(1deg) translateY(-2px);
-  box-shadow: 0 12px 36px rgba(20, 184, 166, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  border-color: rgba(20, 184, 166, 0.5);
+  transform: scale(1.08) rotate(2deg);
+  box-shadow: 0 8px 24px rgba(124, 179, 66, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  border-color: rgba(124, 179, 66, 0.6);
 }
 
 .sidebar-brand {
-  font-size: 1.15rem !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.5px !important;
-  color: #2d5016 !important;
-  text-decoration: none !important;
-  display: block;
+  display: none !important;
 }
+
+/* ========================================
+   DOCK ICONS - Solo Iconos con Tooltips
+   ======================================== */
+
+.sidebar .nav-link i {
+  font-size: 1.75rem !important;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.25)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
+}
+
+/* Colores específicos para cada icono - Más vibrantes y saturados */
+.sidebar .nav-link:nth-child(1) i { color: #FF5252; } /* Redactar Oficio - Rojo brillante */
+.sidebar .nav-link:nth-child(2) i { color: #00BCD4; } /* Solicitudes - Cyan */
+.sidebar .nav-link:nth-child(3) i { color: #FFC107; } /* Calendario - Ámbar */
+.sidebar .nav-link:nth-child(4) i { color: #64B5F6; } /* Participación - Azul */
+.sidebar .nav-link:nth-child(5) i { color: #26A69A; } /* Geoportal - Teal */
+.sidebar .nav-link:nth-child(6) i { color: #EC407A; } /* Seguimiento - Rosa */
+.sidebar .nav-link:nth-child(7) i { color: #66BB6A; } /* Gestión Riesgo - Verde */
+.sidebar .nav-link:nth-child(8) i { color: #AB47BC; } /* Contratación - Púrpura */
 
 /* ========================================
    NAVIGATION LINKS - iOS 26
    ======================================== */
 
 .sidebar .nav-link {
-  background: transparent !important;
-  color: #558b2f !important;
-  border-radius: 12px !important;
-  padding: 0.75rem 1rem !important;
-  margin: 0.25rem 0.5rem !important;
+  background: rgba(255, 255, 255, 0.4) !important;
+  color: #1a1a1a !important;
+  border-radius: 18px !important;
+  padding: 0 !important;
+  margin: 7px auto !important;
+  width: 56px !important;
+  height: 56px !important;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
-  font-size: 0.9rem !important;
-  font-weight: 500 !important;
-  border: 1px solid transparent !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
   display: flex !important;
   align-items: center !important;
-  gap: 0.7rem !important;
+  justify-content: center !important;
   position: relative;
-  overflow: hidden;
+  overflow: visible !important;
+  font-size: 0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .sidebar .nav-link:hover {
-  background: rgba(123, 179, 66, 0.2) !important;
-  color: #7cb342 !important;
-  border-color: rgba(123, 179, 66, 0.3) !important;
-  transform: translateX(6px);
-  box-shadow: -4px 0 16px rgba(123, 179, 66, 0.2);
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.9) !important;
+  transform: translateX(6px) scale(1.05);
+  box-shadow: -6px 0 20px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .sidebar .nav-link.active {
-  background: rgba(124, 179, 66, 0.18) !important;
-  color: #7cb342 !important;
-  border-color: rgba(124, 179, 66, 0.3) !important;
-  box-shadow: 0 4px 16px rgba(124, 179, 66, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(124, 179, 66, 0.6) !important;
+  box-shadow: 0 4px 16px rgba(124, 179, 66, 0.3), 
+              inset 0 1px 0 rgba(255, 255, 255, 1),
+              0 0 0 3px rgba(124, 179, 66, 0.15) !important;
   position: relative;
 }
 
 .sidebar .nav-link.active::before {
   content: '';
   position: absolute;
-  left: -1px;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background: linear-gradient(180deg, #7cb342 0%, #9ccc65 100%);
-  border-radius: 0 4px 4px 0;
+  left: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 70%;
+  width: 5px;
+  background: linear-gradient(180deg, #66BB6A 0%, #81C784 100%);
+  border-radius: 0 8px 8px 0;
+  box-shadow: 0 0 12px rgba(102, 187, 106, 0.6);
 }
 
 .sidebar .nav-link i {
   font-size: 1rem;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   opacity: 0.9;
-  color: #558b2f;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .sidebar .nav-link:hover i {
   opacity: 1;
-  color: #7cb342;
+  color: #ffffff;
   transform: scale(1.15);
 }
 
 .sidebar .nav-link.active i {
   opacity: 1;
-  color: #9ccc65;
-  filter: drop-shadow(0 2px 6px rgba(123, 179, 66, 0.4));
+  color: #ffffff;
+  filter: drop-shadow(0 2px 6px rgba(255, 255, 255, 0.35));
+}
+/* ========================================
+   WEATHER WIDGET - Dock Compacto
+   ======================================== */
+
+.weather-widget-sidebar {
+  background: linear-gradient(135deg,
+              rgba(255, 255, 255, 0.5) 0%,
+              rgba(255, 255, 255, 0.4) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  border-radius: 18px;
+  padding: 0;
+  margin: 12px auto;
+  width: 56px !important;
+  height: 56px !important;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.6),
+              0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.weather-widget-sidebar:hover {
+  background: linear-gradient(135deg,
+              rgba(255, 255, 255, 0.8) 0%,
+              rgba(255, 255, 255, 0.7) 100%);
+  transform: translateX(6px) scale(1.05);
+  box-shadow: -6px 0 20px rgba(251, 191, 36, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.8),
+              0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.weather-icon-large {
+  font-size: 1.75rem;
+  margin: 0;
+  display: inline;
+  filter: drop-shadow(0 3px 6px rgba(251, 191, 36, 0.4)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  color: #F59E0B;
+  animation: weatherPulse 3s ease-in-out infinite;
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes weatherPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+}
+
+.weather-icon-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.weather-animation-clouds {
+  position: absolute;
+  width: 30px;
+  height: 15px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: cloudsMove 4s ease-in-out infinite;
+  z-index: 1;
+}
+
+.weather-animation-clouds::before,
+.weather-animation-clouds::after {
+  content: '';
+  position: absolute;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+}
+
+.weather-animation-clouds::before {
+  width: 12px;
+  height: 12px;
+  top: -5px;
+  left: 5px;
+}
+
+.weather-animation-clouds::after {
+  width: 15px;
+  height: 15px;
+  top: -6px;
+  right: 5px;
+}
+
+@keyframes cloudsMove {
+  0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.6; }
+  50% { transform: translateX(-50%) translateY(-3px); opacity: 0.9; }
+}
+
+.weather-temp-large,
+.weather-desc-large,
+.weather-details-mini {
+  display: none !important;
+}
+
+/* ========================================
+   USER PROFILE - Dock Compacto
+   ======================================== */
+
+.user-profile {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+  margin: 16px auto 0 !important;
+  gap: 0 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  padding-top: 16px !important;
+  width: 100%;
+}
+
+.user-profile #avatarQuickButton {
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 50% !important;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 2px solid rgba(124, 179, 66, 0.4) !important;
+  box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3),
+              0 0 0 3px rgba(255, 255, 255, 0.1),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  background: transparent !important;
+}
+
+.user-profile #avatarQuickButton:hover {
+  transform: translateX(6px) scale(1.05);
+  border-color: rgba(124, 179, 66, 0.7) !important;
+  box-shadow: -4px 0 20px rgba(124, 179, 66, 0.5),
+              0 0 0 4px rgba(255, 255, 255, 0.15),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.user-profile #avatarThumb {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 50% !important;
+  border: none !important;
+  object-fit: cover;
+}
+
+.user-profile .d-flex.flex-column,
+.user-profile .ms-auto {
+  display: none !important;
+}
+
+/* ========================================
+   WEATHER BUBBLE MODAL - Dise\u00f1o iOS Moderno
+   ======================================== */
+
+.weather-bubble-modal {
+  position: fixed;
+  top: 50%;
+  left: 120px;
+  transform: translateY(-50%);
+  z-index: 2000;
+  animation: bubbleSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes bubbleSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-30px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0) scale(1);
+  }
+}
+
+.weather-bubble-content {
+  background: linear-gradient(135deg, 
+              rgba(255, 255, 255, 0.95) 0%, 
+              rgba(251, 191, 36, 0.1) 50%,
+              rgba(255, 255, 255, 0.92) 100%);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-radius: 28px;
+  padding: 2rem;
+  min-width: 280px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.15),
+              0 10px 30px rgba(251, 191, 36, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+.weather-bubble-content::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.1) 0%, transparent 70%);
+  animation: sunRotate 20s linear infinite;
+}
+
+@keyframes sunRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.weather-bubble-header {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 1.5rem;
+}
+
+.weather-bubble-header i {
+  animation: sunPulse 2s ease-in-out infinite;
+  filter: drop-shadow(0 4px 12px rgba(251, 191, 36, 0.4));
+}
+
+@keyframes sunPulse {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.1) rotate(10deg); }
+}
+
+.weather-bubble-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 1.5rem;
+}
+
+.weather-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  transition: all 0.3s ease;
+}
+
+.weather-detail-item:hover {
+  background: rgba(255, 255, 255, 0.7);
+  transform: translateX(5px);
+}
+
+.weather-detail-item i {
+  font-size: 1.2rem;
+  color: #fbbf24;
+  filter: drop-shadow(0 2px 4px rgba(251, 191, 36, 0.3));
+}
+
+.weather-bubble-close {
+  width: 100%;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #7cb342 0%, #9ccc65 100%);
+  border: none;
+  border-radius: 14px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
+  position: relative;
+  z-index: 2;
+}
+
+.weather-bubble-close:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(124, 179, 66, 0.4);
+}
+
+/* ========================================
+   AJUSTES RESPONSIVOS Y MAIN CONTENT
+   ======================================== */
+
+.main-content {
+  margin-left: 125px !important;
+  padding: 2rem !important;
+  transition: margin-left 0.3s ease;
+}
+
+@media (max-width: 991px) {
+  .sidebar {
+    position: static !important;
+    transform: none !important;
+    width: 100% !important;
+    border-radius: 0 !important;
+  }
+  
+  .main-content {
+    margin-left: 0 !important;
+  }
 }

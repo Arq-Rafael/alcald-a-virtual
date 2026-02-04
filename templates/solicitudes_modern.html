@@ -9,7 +9,13 @@
    ======================================== */
 
 .solicitud-container {
-  background: linear-gradient(135deg, #7cb342 0%, #c0ca33 100%);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  color: white;
   min-height: calc(100vh - 80px);
   padding: 2.5rem 1.5rem;
   position: relative;
@@ -38,6 +44,28 @@
   animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   opacity: 0;
   border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.solicitudes-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.solicitudes-layout .form-card {
+  max-width: none;
+  margin: 0;
+}
+
+.form-side {
+  position: sticky;
+  top: 1.5rem;
+}
+
+.form-side .table-responsive {
+  max-height: 520px;
+  overflow: auto;
 }
 
 @keyframes slideUp {
@@ -337,6 +365,14 @@ textarea {
 
 /* Responsive */
 @media (max-width: 768px) {
+  .solicitudes-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .form-side {
+    position: static;
+  }
+
   .form-card {
     padding: 2rem 1.5rem;
   }
@@ -426,7 +462,8 @@ textarea {
 {% block content %}
 
 <div class="solicitud-container">
-  <div class="form-card">
+  <div class="solicitudes-layout">
+  <div class="form-card form-main">
     
     <div class="form-header">
       <h1><i class="bi bi-file-earmark-text-fill"></i> Nueva Solicitud</h1>
@@ -581,12 +618,12 @@ textarea {
 
     </form>
 
-  </div>
+    </div>
 
-  <!-- ============================================
-       MIS SOLICITUDES - HISTORIAL DEL USUARIO
-       ============================================ -->
-  <div class="form-card" style="margin-top: 2rem;">
+    <!-- ============================================
+      MIS SOLICITUDES - HISTORIAL DEL USUARIO
+      ============================================ -->
+    <div class="form-card form-side">
     <div class="form-header">
       <h2 style="font-size: 1.6rem; font-weight: 700; color: #558b2f; margin-bottom: 0.5rem;">
         <i class="bi bi-clipboard-check"></i> Mis Solicitudes
@@ -686,6 +723,7 @@ textarea {
       <p style="color: #9ccc65;">Completa el formulario de arriba para crear tu primera solicitud</p>
     </div>
     {% endif %}
+  </div>
   </div>
 
 </div>

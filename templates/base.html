@@ -301,60 +301,88 @@
   {% if session.user %}
   <nav class="sidebar d-none d-lg-block">
     <div class="sidebar-header">
-      <div class="logo-ios-modern">
-        <i class="bi bi-buildings-fill"></i>
-      </div>
+      <a href="{{ url_for('main.dashboard') }}" title="Inicio">
+        <div class="logo-ios-modern">
+          <i class="bi bi-buildings-fill"></i>
+        </div>
+      </a>
       <a href="{{ url_for('main.dashboard') }}" class="sidebar-brand">Alcaldía Virtual</a>
     </div>
 
     <div class="d-flex flex-column gap-1">
-      <a class="nav-link {% if request.endpoint=='main.dashboard' %}active{% endif %}" href="{{ url_for('main.dashboard') }}">
-        <i class="bi bi-speedometer2"></i> Inicio
+      <a class="nav-link {% if request.endpoint=='ia.letter' %}active{% endif %}" href="{{ url_for('ia.letter') }}" title="Redactar Oficio">
+        <i class="bi bi-pencil-square"></i>
       </a>
-      
+
       {% if can('solicitudes') %}
-      <a class="nav-link" href="{{ url_for('solicitudes.index') }}">
-        <i class="bi bi-file-earmark-text"></i> Solicitudes
+      <a class="nav-link" href="{{ url_for('solicitudes.index') }}" title="Solicitudes">
+        <i class="bi bi-file-earmark-text"></i>
       </a>
       {% endif %}
 
-      {% if can('certificados') %}
-      <a class="nav-link" href="{{ url_for('certificados.index') }}">
-        <i class="bi bi-patch-check"></i> Certificados
+      <a class="nav-link" href="/calendario" title="Calendario">
+        <i class="bi bi-calendar-event"></i>
       </a>
-      {% endif %}
       
       {% if can('participacion') %}
-      <a class="nav-link" href="{{ url_for('participacion.index') }}">
-        <i class="bi bi-people"></i> Participación
+      <a class="nav-link" href="{{ url_for('participacion.index') }}" title="Participación">
+        <i class="bi bi-people"></i>
       </a>
       {% endif %}
-      
-      {% if can('usos_suelo') %}
-      <a class="nav-link" href="{{ url_for('usos_suelo.index') }}">
-        <i class="bi bi-geo-alt"></i> Usos del Suelo
+
+      <a class="nav-link" href="{{ url_for('main.geoportal') }}" title="Geoportal">
+        <i class="bi bi-globe-americas"></i>
       </a>
-      {% endif %}
-      
-      {% if can('ia') %}
-      <a class="nav-link" href="{{ url_for('ia.index') }}">
-        <i class="bi bi-cpu"></i> IA Municipal
-      </a>
-      {% endif %}
 
       {% if can('seguimiento') %}
-       <a class="nav-link" href="{{ url_for('seguimiento.index') }}">
-         <i class="bi bi-bar-chart"></i> Seguimiento
-       </a>
-       {% endif %}
-       {% if can('configuracion') %}
-       <a class="nav-link" href="{{ url_for('configuracion.index') }}">
-         <i class="bi bi-gear"></i> Configuración
-       </a>
-       {% endif %}
+      <a class="nav-link" href="{{ url_for('seguimiento.index') }}" title="Seguimiento a Metas">
+        <i class="bi bi-graph-up-arrow"></i>
+      </a>
+      {% endif %}
+
+      <a class="nav-link" href="{{ url_for('main.gestion_riesgo') }}" title="Gestión del Riesgo">
+        <i class="bi bi-tree"></i>
+      </a>
+
+      <a class="nav-link" href="/contratos" title="Contratación">
+        <i class="bi bi-file-earmark-contract"></i>
+      </a>
     </div>
 
+    <!-- Weather Widget -->
+    <div class="weather-widget-sidebar" onclick="showWeatherDetails()">
+      <div class="weather-icon-container">
+        <i class="bi bi-cloud-sun-fill weather-icon-large"></i>
+        <div class="weather-animation-clouds"></div>
+      </div>
+    </div>
     
+    <!-- Weather Bubble Modal -->
+    <div id="weatherBubble" class="weather-bubble-modal" style="display: none;">
+      <div class="weather-bubble-content">
+        <div class="weather-bubble-header">
+          <i class="bi bi-cloud-sun-fill" style="font-size: 3rem; color: #fbbf24;"></i>
+          <h3 style="margin: 0.5rem 0; font-weight: 700;">22°C</h3>
+          <p style="margin: 0; opacity: 0.8;">Parcialmente nublado</p>
+        </div>
+        <div class="weather-bubble-details">
+          <div class="weather-detail-item">
+            <i class="bi bi-droplet-fill"></i>
+            <span>Humedad: 65%</span>
+          </div>
+          <div class="weather-detail-item">
+            <i class="bi bi-wind"></i>
+            <span>Viento: 12 km/h</span>
+          </div>
+          <div class="weather-detail-item">
+            <i class="bi bi-thermometer-half"></i>
+            <span>Sensación: 21°C</span>
+          </div>
+        </div>
+        <button onclick="hideWeatherBubble()" class="weather-bubble-close">Cerrar</button>
+      </div>
+    </div>
+
     <div class="user-profile mt-auto">
         <button id="avatarQuickButton" type="button" class="border-0 bg-transparent p-0 position-relative" title="Perfil rápido" style="display:flex; align-items:center;">
           {% if current_user_foto %}
@@ -1085,6 +1113,17 @@
       console.log('💡 TIP: Usa testChatNotification() para probar la notificación');
       console.log('💡 TIP: Usa localStorage.clear() para limpiar historial de notificaciones');
       
+      // Weather Widget Function
+      window.showWeatherDetails = function() {
+        alert('🌤️ Clima en Supatá\n\n' +
+              '📊 Temperatura: 22°C\n' +
+              '💨 Viento: 12 km/h\n' +
+              '💧 Humedad: 65%\n' +
+              '☁️ Condición: Parcialmente nublado\n' +
+              '👁️ Visibilidad: 10 km\n' +
+              '⬇️ Presión: 1013 mb');
+      };
+      
       {% else %}
       console.log('ℹ️ Sistema de notificaciones de chat deshabilitado (no autenticado)');
       {% endif %}
@@ -1291,6 +1330,35 @@
   {% if session.user %}
   <script src="{{ url_for('static', filename='js/chat-bubble.js') }}"></script>
   {% endif %}
+
+  <!-- Weather Bubble Script -->
+  <script>
+    function showWeatherDetails() {
+      const bubble = document.getElementById('weatherBubble');
+      if (bubble) {
+        bubble.style.display = 'block';
+      }
+    }
+    
+    function hideWeatherBubble() {
+      const bubble = document.getElementById('weatherBubble');
+      if (bubble) {
+        bubble.style.display = 'none';
+      }
+    }
+    
+    // Cerrar con click fuera del contenido
+    document.addEventListener('click', function(e) {
+      const bubble = document.getElementById('weatherBubble');
+      const widget = document.querySelector('.weather-widget-sidebar');
+      
+      if (bubble && bubble.style.display === 'block' && 
+          !e.target.closest('.weather-bubble-content') && 
+          !e.target.closest('.weather-widget-sidebar')) {
+        hideWeatherBubble();
+      }
+    });
+  </script>
 
   <!-- Splash Screen & Screen Saver Script -->
   <script src="{{ url_for('static', filename='js/splash-screen.js') }}"></script>

@@ -39,12 +39,16 @@ body {
 }
 
 .dashboard-container {
-  background: #f5f7fa;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 32px;
   padding: 2.5rem;
   margin: 2rem auto;
   max-width: 1400px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.25),
+              inset 0 1px 0 rgba(255, 255, 255, 0.15);
   position: relative;
   z-index: 1;
 }
@@ -55,7 +59,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #7cb342 0%, #9ccc65 25%, #c0ca33 50%, #ffd54f 75%, #ffb74d 100%);
+  background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 25%, #f5f9fc 50%, #fafcfd 75%, #ffffff 100%);
   z-index: -1;
   opacity: 1 !important;
   display: block !important;
@@ -177,16 +181,16 @@ body {
 
 .glass-card {
   background: linear-gradient(135deg, 
-              rgba(255, 255, 255, 0.15) 0%, 
-              rgba(255, 255, 255, 0.08) 100%);
-  backdrop-filter: blur(15px) saturate(180%);
-  -webkit-backdrop-filter: blur(15px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+              rgba(255, 255, 255, 0.25) 0%, 
+              rgba(255, 255, 255, 0.15) 100%);
+  backdrop-filter: blur(20px) saturate(200%);
+  -webkit-backdrop-filter: blur(20px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 24px;
   padding: 1.8rem 1.7rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12),
-              inset 0 1px 0 rgba(255, 255, 255, 0.15),
-              0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04),
+              0 4px 16px rgba(0, 0, 0, 0.03),
+              inset 0 1px 0 rgba(255, 255, 255, 0.25);
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
               box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
               backdrop-filter 0.35s ease;
@@ -207,9 +211,9 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--card-gradient, linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%));
+  background: var(--card-gradient, linear-gradient(135deg, rgba(102, 126, 234, 0.28) 0%, rgba(118, 75, 162, 0.18) 100%));
   border-radius: 24px;
-  opacity: 1;
+  opacity: 0.9;
   z-index: 0;
   transition: opacity 0.3s ease;
 }
@@ -220,18 +224,18 @@ body {
 }
 
 /* Color schemes per card with glassmorphism tints */
-.glass-card:nth-child(1) { animation-delay: 0.05s; --card-gradient: linear-gradient(135deg, rgba(246, 211, 101, 0.2) 0%, rgba(253, 160, 133, 0.15) 100%); }
-.glass-card:nth-child(2) { animation-delay: 0.10s; --card-gradient: linear-gradient(135deg, rgba(240, 147, 251, 0.2) 0%, rgba(245, 87, 108, 0.15) 100%); }
-.glass-card:nth-child(3) { animation-delay: 0.15s; --card-gradient: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.15) 100%); }
-.glass-card:nth-child(4) { animation-delay: 0.20s; --card-gradient: linear-gradient(135deg, rgba(67, 206, 162, 0.2) 0%, rgba(24, 90, 157, 0.15) 100%); }
-.glass-card:nth-child(5) { animation-delay: 0.25s; --card-gradient: linear-gradient(135deg, rgba(95, 114, 189, 0.2) 0%, rgba(155, 35, 234, 0.15) 100%); }
-.glass-card:nth-child(6) { animation-delay: 0.30s; --card-gradient: linear-gradient(135deg, rgba(96, 165, 250, 0.2) 0%, rgba(59, 130, 246, 0.15) 100%); }
-.glass-card:nth-child(7) { animation-delay: 0.35s; --card-gradient: linear-gradient(135deg, rgba(255, 107, 107, 0.2) 0%, rgba(255, 23, 68, 0.15) 100%); }
-.glass-card:nth-child(8) { animation-delay: 0.40s; --card-gradient: linear-gradient(135deg, rgba(0, 201, 167, 0.2) 0%, rgba(10, 115, 119, 0.15) 100%); }
-.glass-card:nth-child(9) { animation-delay: 0.45s; --card-gradient: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.15) 100%); }
-.glass-card:nth-child(10) { animation-delay: 0.50s; --card-gradient: linear-gradient(135deg, rgba(110, 231, 183, 0.2) 0%, rgba(5, 150, 105, 0.15) 100%); }
-.glass-card:nth-child(11) { animation-delay: 0.55s; --card-gradient: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(30, 64, 175, 0.15) 100%); }
-.glass-card:nth-child(12) { animation-delay: 0.60s; --card-gradient: linear-gradient(135deg, rgba(100, 116, 139, 0.2) 0%, rgba(51, 65, 85, 0.15) 100%); }
+.glass-card:nth-child(1) { animation-delay: 0.05s; --card-gradient: linear-gradient(135deg, rgba(246, 211, 101, 0.28) 0%, rgba(253, 160, 133, 0.18) 100%); }
+.glass-card:nth-child(2) { animation-delay: 0.10s; --card-gradient: linear-gradient(135deg, rgba(240, 147, 251, 0.28) 0%, rgba(245, 87, 108, 0.18) 100%); }
+.glass-card:nth-child(3) { animation-delay: 0.15s; --card-gradient: linear-gradient(135deg, rgba(102, 126, 234, 0.28) 0%, rgba(118, 75, 162, 0.18) 100%); }
+.glass-card:nth-child(4) { animation-delay: 0.20s; --card-gradient: linear-gradient(135deg, rgba(67, 206, 162, 0.28) 0%, rgba(24, 90, 157, 0.18) 100%); }
+.glass-card:nth-child(5) { animation-delay: 0.25s; --card-gradient: linear-gradient(135deg, rgba(95, 114, 189, 0.28) 0%, rgba(155, 35, 234, 0.18) 100%); }
+.glass-card:nth-child(6) { animation-delay: 0.30s; --card-gradient: linear-gradient(135deg, rgba(96, 165, 250, 0.28) 0%, rgba(59, 130, 246, 0.18) 100%); }
+.glass-card:nth-child(7) { animation-delay: 0.35s; --card-gradient: linear-gradient(135deg, rgba(255, 107, 107, 0.28) 0%, rgba(255, 23, 68, 0.18) 100%); }
+.glass-card:nth-child(8) { animation-delay: 0.40s; --card-gradient: linear-gradient(135deg, rgba(0, 201, 167, 0.28) 0%, rgba(10, 115, 119, 0.18) 100%); }
+.glass-card:nth-child(9) { animation-delay: 0.45s; --card-gradient: linear-gradient(135deg, rgba(245, 158, 11, 0.28) 0%, rgba(217, 119, 6, 0.18) 100%); }
+.glass-card:nth-child(10) { animation-delay: 0.50s; --card-gradient: linear-gradient(135deg, rgba(110, 231, 183, 0.28) 0%, rgba(5, 150, 105, 0.18) 100%); }
+.glass-card:nth-child(11) { animation-delay: 0.55s; --card-gradient: linear-gradient(135deg, rgba(59, 130, 246, 0.28) 0%, rgba(30, 64, 175, 0.18) 100%); }
+.glass-card:nth-child(12) { animation-delay: 0.60s; --card-gradient: linear-gradient(135deg, rgba(100, 116, 139, 0.28) 0%, rgba(51, 65, 85, 0.18) 100%); }
 
 @keyframes cardSlide {
   to { opacity: 1; transform: translateY(0); }
@@ -239,16 +243,19 @@ body {
 }
 
 .glass-card:hover {
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18),
-              inset 0 1px 0 rgba(255, 255, 255, 0.2),
-              0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06),
+              0 8px 24px rgba(0, 0, 0, 0.05),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
   transform: translateY(-8px);
-  backdrop-filter: blur(20px) saturate(200%);
-  -webkit-backdrop-filter: blur(20px) saturate(200%);
+  backdrop-filter: blur(24px) saturate(220%);
+  -webkit-backdrop-filter: blur(24px) saturate(220%);
+  background: linear-gradient(135deg, 
+              rgba(255, 255, 255, 0.35) 0%, 
+              rgba(255, 255, 255, 0.22) 100%);
 }
 
 .glass-card:hover::before {
-  opacity: 1.2;
+  opacity: 1.0;
 }
 
 .glass-card:active {
@@ -260,43 +267,17 @@ body {
    ======================================== */
 
 .card-icon-wrapper {
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 16px;
+  display: none;
+}
+
+.card-icon {
+  font-size: 3.2rem;
   margin-bottom: 1.2rem;
-  font-size: 1.3rem;
-  background: rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: var(--ios-text);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08),
-              inset 0 1px 0 rgba(255, 255, 255, 0.2);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
 }
 
-.glass-card:hover .card-icon-wrapper {
-  transform: translateY(-2px) scale(1.08);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12),
-              inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-.card-icon-wrapper.text-primary,
-.card-icon-wrapper.text-success,
-.card-icon-wrapper.text-warning,
-.card-icon-wrapper.text-info,
-.card-icon-wrapper.text-danger,
-.card-icon-wrapper.text-secondary,
-.card-icon-wrapper.text-dark {
-  background: rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: var(--ios-text);
+.glass-card:hover .card-icon {
+  transform: scale(1.15);
 }
 
 /* ========================================
@@ -416,26 +397,22 @@ body {
 
   <!-- Redactar Oficios (Movido de IA Municipal) -->
   <div class="glass-card">
-    <div class="card-icon-wrapper text-warning">
-      <i class="bi bi-pencil-square"></i>
-    </div>
+    <i class="bi bi-pencil-square card-icon text-warning"></i>
     <h5>Redactar Oficios</h5>
     <p>Genera documentos institucionales automáticamente.</p>
     <a href="{{ url_for('ia.letter') }}" class="btn btn-premium">
-      REDACTAR <i class="bi bi-arrow-right"></i>
+      REDACTAR
     </a>
   </div>
 
   <!-- Solicitudes -->
   {% if can('solicitudes') %}
   <div class="glass-card">
-    <div class="card-icon-wrapper text-primary">
-      <i class="bi bi-file-earmark-text-fill"></i>
-    </div>
+    <i class="bi bi-file-earmark-text-fill card-icon text-primary"></i>
     <h5>Solicitudes</h5>
     <p>Gestiona las inscripciones al Banco de Programas y Proyectos.</p>
     <a href="{{ url_for('solicitudes.index') }}" class="btn btn-premium">
-      ACCEDER <i class="bi bi-arrow-right"></i>
+      ACCEDER
     </a>
   </div>
   {% endif %}
@@ -443,35 +420,29 @@ body {
   <!-- Certificados -->
   {% if can('certificados') %}
   <div class="glass-card">
-    <div class="card-icon-wrapper text-success">
-      <i class="bi bi-patch-check-fill"></i>
-    </div>
+    <i class="bi bi-patch-check-fill card-icon text-success"></i>
     <h5>Certificados</h5>
     <p>Genera y descarga certificados de manera ágil.</p>
     <a href="{{ url_for('certificados.index') }}" class="btn btn-premium">
-      GENERAR <i class="bi bi-arrow-right"></i>
+      GENERAR
     </a>
   </div>
   {% endif %}
 
   <!-- Licencias -->
   <div class="glass-card">
-    <div class="card-icon-wrapper text-warning">
-      <i class="bi bi-buildings-fill"></i>
-    </div>
+    <i class="bi bi-buildings-fill card-icon text-warning"></i>
     <h5>Licencias</h5>
     <p>Radica y gestiona actos de licencia urbanística.</p>
     <a href="/licencias" class="btn btn-premium">
-      GESTIONAR <i class="bi bi-arrow-right"></i>
+      GESTIONAR
     </a>
   </div>
 
   <!-- IA Municipal -->
   {% if can('ia') %}
   <div class="glass-card">
-    <div class="card-icon-wrapper text-secondary">
-      <i class="bi bi-cpu-fill"></i>
-    </div>
+    <i class="bi bi-cpu-fill card-icon text-secondary"></i>
     <h5>IA Municipal</h5>
     <p>Asistente inteligente y analítica avanzada.</p>
     <a href="{{ url_for('ia.index') }}" class="btn btn-premium">
@@ -482,90 +453,76 @@ body {
 
   <!-- Calendario -->
   <div class="glass-card">
-    <div class="card-icon-wrapper text-info">
-      <i class="bi bi-calendar-event-fill"></i>
-    </div>
+    <i class="bi bi-calendar-event-fill card-icon text-info"></i>
     <h5>Calendario</h5>
     <p>Eventos, alertas y programación municipal.</p>
     <a href="/calendario" class="btn btn-premium">
-      VER AGENDA <i class="bi bi-arrow-right"></i>
+      VER AGENDA
     </a>
   </div>
 
   <!-- Participación -->
   {% if can('participacion') %}
   <div class="glass-card">
-    <div class="card-icon-wrapper text-danger">
-      <i class="bi bi-people-fill"></i>
-    </div>
+    <i class="bi bi-people-fill card-icon text-danger"></i>
     <h5>Participación</h5>
     <p>Atención al ciudadano y gestión de radicados.</p>
     <a href="{{ url_for('participacion.index') }}" class="btn btn-premium">
-      PARTICIPACIÓN <i class="bi bi-arrow-right"></i>
+      PARTICIPACIÓN
     </a>
   </div>
   {% endif %}
 
   <!-- GEOPORTAL - Fusión de Casco Urbano + Usos del Suelo -->
   <div class="glass-card">
-    <div class="card-icon-wrapper text-primary">
-      <i class="bi bi-globe-americas"></i>
-    </div>
+    <i class="bi bi-globe-americas card-icon text-primary"></i>
     <h5>Geoportal</h5>
     <p>Mapas interactivos y cartografía municipal.</p>
     <a href="{{ url_for('main.geoportal') }}" class="btn btn-premium">
-      VER MAPAS <i class="bi bi-arrow-right"></i>
+      VER MAPAS
     </a>
   </div>
 
   <!-- SEGUIMIENTO Y METAS - Fusión -->
   {% if can('seguimiento') %}
   <div class="glass-card">
-    <div class="card-icon-wrapper text-purple">
-      <i class="bi bi-graph-up-arrow"></i>
-    </div>
+    <i class="bi bi-graph-up-arrow card-icon text-purple"></i>
     <h5>Seguimiento y Metas</h5>
     <p>Monitoreo de indicadores y progreso del Plan.</p>
     <a href="{{ url_for('seguimiento.index') }}" class="btn btn-premium">
-      VER INDICADORES <i class="bi bi-arrow-right"></i>
+      VER INDICADORES
     </a>
   </div>
   {% endif %}
 
   <!-- GESTIÓN AMBIENTAL - Fusión de Arbolado + Comité + Gestión Riesgo -->
   <div class="glass-card">
-    <div class="card-icon-wrapper text-success">
-      <i class="bi bi-tree-fill"></i>
-    </div>
+    <i class="bi bi-tree-fill card-icon text-success"></i>
     <h5>Gestión del Riesgo</h5>
     <p>Arbolado urbano, actas CMGR y planes de contingencia.</p>
     <a href="{{ url_for('main.gestion_riesgo') }}" class="btn btn-premium">
-      GESTIONAR <i class="bi bi-arrow-right"></i>
+      GESTIONAR
     </a>
   </div>
 
   <!-- Contratación -->
   <div class="glass-card">
-    <div class="card-icon-wrapper text-info">
-      <i class="bi bi-file-earmark-contract-fill"></i>
-    </div>
+    <i class="bi bi-file-earmark-contract-fill card-icon text-info"></i>
     <h5>Contratación</h5>
     <p>Gestión de contratos municipales.</p>
     <a href="/contratos" class="btn btn-premium">
-      CONTRATOS <i class="bi bi-arrow-right"></i>
+      CONTRATOS
     </a>
   </div>
 
   <!-- Configuración -->
   {% if session.user_role == 'admin' %}
   <div class="glass-card">
-    <div class="card-icon-wrapper text-dark">
-      <i class="bi bi-gear-fill"></i>
-    </div>
+    <i class="bi bi-gear-fill card-icon text-dark"></i>
     <h5>Configuración</h5>
     <p>Gestión de usuarios y permisos.</p>
     <a href="{{ url_for('configuracion.index') }}" class="btn btn-premium">
-      CONFIGURAR <i class="bi bi-arrow-right"></i>
+      CONFIGURAR
     </a>
   </div>
   {% endif %}

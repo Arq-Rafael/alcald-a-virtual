@@ -1,0 +1,9 @@
+.login-glass {
+  background: rgba(255, 255, 255, 0.1);        /* 10% opacidad blanca */
+  backdrop-filter: blur(10px);                  /* Blur moderado */
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);  /* Borde muy sutil */
+  padding: 50px;
+  color: white;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);  /* Sombra discreta */
+}
