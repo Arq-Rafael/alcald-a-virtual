@@ -172,49 +172,66 @@ body {
 }
 
 /* ========================================
-   GLASS CARD - MÓDULOS MINIMALISTAS
+   GLASS CARD - GLASSMORPHISM EFFECT
    ======================================== */
 
 .glass-card {
-  background: var(--card-gradient, linear-gradient(135deg, #f6d365 0%, #fda085 100%));
-  border: none;
-  border-radius: 26px;
-  padding: 1.7rem 1.6rem;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease;
+  background: linear-gradient(135deg, 
+              rgba(255, 255, 255, 0.15) 0%, 
+              rgba(255, 255, 255, 0.08) 100%);
+  backdrop-filter: blur(15px) saturate(180%);
+  -webkit-backdrop-filter: blur(15px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+  padding: 1.8rem 1.7rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12),
+              inset 0 1px 0 rgba(255, 255, 255, 0.15),
+              0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+              backdrop-filter 0.35s ease;
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
   animation: cardSlide 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   opacity: 0;
-  color: #ffffff;
+  color: #1a202c;
 }
 
-/* Redactar Oficios - Amarillo/Naranja */
-.glass-card:nth-child(1) { animation-delay: 0.05s; --card-gradient: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
-/* Solicitudes - Rosa/Magenta */
-.glass-card:nth-child(2) { animation-delay: 0.10s; --card-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-/* Certificados - Púrpura */
-.glass-card:nth-child(3) { animation-delay: 0.15s; --card-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-/* Licencias - Cian/Verde */
-.glass-card:nth-child(4) { animation-delay: 0.20s; --card-gradient: linear-gradient(135deg, #43cea2 0%, #185a9d 100%); }
-/* IA Municipal - Azul Profundo */
-.glass-card:nth-child(5) { animation-delay: 0.25s; --card-gradient: linear-gradient(135deg, #5f72bd 0%, #9b23ea 100%); }
-/* Calendario - Azul Cielo */
-.glass-card:nth-child(6) { animation-delay: 0.30s; --card-gradient: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); }
-/* Participación - Rojo/Rosa */
-.glass-card:nth-child(7) { animation-delay: 0.35s; --card-gradient: linear-gradient(135deg, #ff6b6b 0%, #ff1744 100%); }
-/* Geoportal - Verde Esmeralda */
-.glass-card:nth-child(8) { animation-delay: 0.40s; --card-gradient: linear-gradient(135deg, #00c9a7 0%, #0a7377 100%); }
-/* Seguimiento y Metas - Naranja/Dorado */
-.glass-card:nth-child(9) { animation-delay: 0.45s; --card-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-/* Gestión del Riesgo - Verde Bosque */
-.glass-card:nth-child(10) { animation-delay: 0.50s; --card-gradient: linear-gradient(135deg, #6ee7b7 0%, #059669 100%); }
-/* Contratación - Azul Oscuro */
-.glass-card:nth-child(11) { animation-delay: 0.55s; --card-gradient: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); }
-/* Configuración - Gris/Acero */
-.glass-card:nth-child(12) { animation-delay: 0.60s; --card-gradient: linear-gradient(135deg, #64748b 0%, #334155 100%); }
+/* Subtle gradient overlay for depth */
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--card-gradient, linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%));
+  border-radius: 24px;
+  opacity: 1;
+  z-index: 0;
+  transition: opacity 0.3s ease;
+}
+
+.glass-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Color schemes per card with glassmorphism tints */
+.glass-card:nth-child(1) { animation-delay: 0.05s; --card-gradient: linear-gradient(135deg, rgba(246, 211, 101, 0.2) 0%, rgba(253, 160, 133, 0.15) 100%); }
+.glass-card:nth-child(2) { animation-delay: 0.10s; --card-gradient: linear-gradient(135deg, rgba(240, 147, 251, 0.2) 0%, rgba(245, 87, 108, 0.15) 100%); }
+.glass-card:nth-child(3) { animation-delay: 0.15s; --card-gradient: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.15) 100%); }
+.glass-card:nth-child(4) { animation-delay: 0.20s; --card-gradient: linear-gradient(135deg, rgba(67, 206, 162, 0.2) 0%, rgba(24, 90, 157, 0.15) 100%); }
+.glass-card:nth-child(5) { animation-delay: 0.25s; --card-gradient: linear-gradient(135deg, rgba(95, 114, 189, 0.2) 0%, rgba(155, 35, 234, 0.15) 100%); }
+.glass-card:nth-child(6) { animation-delay: 0.30s; --card-gradient: linear-gradient(135deg, rgba(96, 165, 250, 0.2) 0%, rgba(59, 130, 246, 0.15) 100%); }
+.glass-card:nth-child(7) { animation-delay: 0.35s; --card-gradient: linear-gradient(135deg, rgba(255, 107, 107, 0.2) 0%, rgba(255, 23, 68, 0.15) 100%); }
+.glass-card:nth-child(8) { animation-delay: 0.40s; --card-gradient: linear-gradient(135deg, rgba(0, 201, 167, 0.2) 0%, rgba(10, 115, 119, 0.15) 100%); }
+.glass-card:nth-child(9) { animation-delay: 0.45s; --card-gradient: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.15) 100%); }
+.glass-card:nth-child(10) { animation-delay: 0.50s; --card-gradient: linear-gradient(135deg, rgba(110, 231, 183, 0.2) 0%, rgba(5, 150, 105, 0.15) 100%); }
+.glass-card:nth-child(11) { animation-delay: 0.55s; --card-gradient: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(30, 64, 175, 0.15) 100%); }
+.glass-card:nth-child(12) { animation-delay: 0.60s; --card-gradient: linear-gradient(135deg, rgba(100, 116, 139, 0.2) 0%, rgba(51, 65, 85, 0.15) 100%); }
 
 @keyframes cardSlide {
   to { opacity: 1; transform: translateY(0); }
@@ -222,9 +239,16 @@ body {
 }
 
 .glass-card:hover {
-  box-shadow: 0 26px 50px rgba(0, 0, 0, 0.14);
-  transform: translateY(-6px);
-  filter: saturate(1.05);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2),
+              0 1px 3px rgba(0, 0, 0, 0.08);
+  transform: translateY(-8px);
+  backdrop-filter: blur(20px) saturate(200%);
+  -webkit-backdrop-filter: blur(20px) saturate(200%);
+}
+
+.glass-card:hover::before {
+  opacity: 1.2;
 }
 
 .glass-card:active {
@@ -236,26 +260,29 @@ body {
    ======================================== */
 
 .card-icon-wrapper {
-  width: 44px;
-  height: 44px;
+  width: 50px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 14px;
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
-  background: rgba(255, 255, 255, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  color: #ffffff;
-  box-shadow: none;
+  border-radius: 16px;
+  margin-bottom: 1.2rem;
+  font-size: 1.3rem;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: var(--ios-text);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
 }
 
 .glass-card:hover .card-icon-wrapper {
-  transform: translateY(-1px) scale(1.05);
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.15);
-  opacity: 1 !important;
+  transform: translateY(-2px) scale(1.08);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .card-icon-wrapper.text-primary,
@@ -265,10 +292,11 @@ body {
 .card-icon-wrapper.text-danger,
 .card-icon-wrapper.text-secondary,
 .card-icon-wrapper.text-dark {
-  background: rgba(255, 255, 255, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  color: #ffffff;
-  box-shadow: none;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: var(--ios-text);
 }
 
 /* ========================================
@@ -276,18 +304,19 @@ body {
    ======================================== */
 
 .glass-card h5 {
-  font-size: 1.08rem !important;
+  font-size: 1.1rem !important;
   font-weight: 700 !important;
-  color: #ffffff !important;
-  margin: 0 0 0.5rem 0 !important;
+  color: var(--ios-text) !important;
+  margin: 0 0 0.6rem 0 !important;
   letter-spacing: -0.3px;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 .glass-card p {
-  font-size: 0.86rem !important;
-  color: rgba(255, 255, 255, 0.85) !important;
+  font-size: 0.88rem !important;
+  color: var(--ios-text-secondary) !important;
   line-height: 1.5 !important;
-  margin: 0 0 1.2rem 0 !important;
+  margin: 0 0 1.3rem 0 !important;
   flex-grow: 1;
 }
 
@@ -296,16 +325,19 @@ body {
    ======================================== */
 
 .btn-premium {
-  background: rgba(255, 255, 255, 0.22) !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  color: var(--ios-text) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
   border-radius: 14px !important;
   padding: 0.7rem 1.1rem !important;
   font-size: 0.85rem !important;
   font-weight: 600 !important;
   letter-spacing: 0.4px !important;
   transition: all 0.3s ease !important;
-  box-shadow: none !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -316,9 +348,10 @@ body {
 }
 
 .btn-premium:hover {
-  background: rgba(255, 255, 255, 0.35) !important;
+  background: rgba(255, 255, 255, 0.25) !important;
   transform: translateY(-2px) !important;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
 }
 
 .btn-premium:active {
