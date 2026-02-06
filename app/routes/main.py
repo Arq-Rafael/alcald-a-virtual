@@ -7,17 +7,15 @@ main_bp = Blueprint('main', __name__)
 
 @main_bp.before_app_request
 def load_features():
-    if not current_app.config.get("APP_FEATURES"):
-        # Load features from config.json (or similar) if not already loaded
-        # For this refactor, we attempt to read the original config.json
-        try:
-            config_path = os.path.join(current_app.config['BASE_DIR'], "config.json")
-            if os.path.exists(config_path):
-                with open(config_path, "r", encoding="utf-8") as f:
-                    cfg = json.load(f)
-                    current_app.config["APP_FEATURES"] = normalize_features(cfg.get("features"))
-        except Exception as e:
-            print(f"Error loading features: {e}")
+    # Load features from config.json (if present) to override defaults
+    try:
+        config_path = os.path.join(current_app.config['BASE_DIR'], "config.json")
+        if os.path.exists(config_path):
+            with open(config_path, "r", encoding="utf-8") as f:
+                cfg = json.load(f)
+                current_app.config["APP_FEATURES"] = normalize_features(cfg.get("features"))
+    except Exception as e:
+        print(f"Error loading features: {e}")
 
 @main_bp.route('/dashboard')
 def dashboard():

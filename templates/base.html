@@ -309,12 +309,14 @@
     </a>
 
     <!-- Redactar Oficio -->
+    {% if can('redactar') %}
     <a href="{{ url_for('ia.letter') }}" class="dock-item item-letter {% if request.endpoint=='ia.letter' %}active{% endif %}">
       <div class="icon-box">
         <i class="bi bi-pencil-square"></i>
       </div>
       <span class="label">Redactar</span>
     </a>
+    {% endif %}
 
     <!-- Solicitudes -->
     {% if can('solicitudes') %}
@@ -327,12 +329,14 @@
     {% endif %}
 
     <!-- Calendario -->
+    {% if can('calendario') %}
     <a href="/calendario" class="dock-item item-calendar">
       <div class="icon-box">
         <i class="bi bi-calendar-event"></i>
       </div>
       <span class="label">Calendario</span>
     </a>
+    {% endif %}
 
     <!-- Participación -->
     {% if can('participacion') %}
@@ -345,12 +349,14 @@
     {% endif %}
 
     <!-- Geoportal -->
+    {% if can('geoportal') %}
     <a href="{{ url_for('main.geoportal') }}" class="dock-item item-geoportal">
       <div class="icon-box">
         <i class="bi bi-globe-americas"></i>
       </div>
       <span class="label">Geoportal</span>
     </a>
+    {% endif %}
 
     <!-- Seguimiento -->
     {% if can('seguimiento') %}
@@ -363,20 +369,24 @@
     {% endif %}
 
     <!-- Gestión del Riesgo -->
+    {% if can('riesgo') %}
     <a href="{{ url_for('main.gestion_riesgo') }}" class="dock-item item-riesgo">
       <div class="icon-box">
         <i class="bi bi-tree"></i>
       </div>
       <span class="label">Riesgo</span>
     </a>
+    {% endif %}
 
     <!-- Contratación -->
+    {% if can('contratos') %}
     <a href="/contratos" class="dock-item item-contratos">
       <div class="icon-box">
         <i class="bi bi-file-earmark-contract"></i>
       </div>
       <span class="label">Contratos</span>
     </a>
+    {% endif %}
 
     <!-- Clima -->
     <div class="dock-item item-clima" onclick="showWeatherDetails()">

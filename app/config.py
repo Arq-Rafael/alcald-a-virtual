@@ -72,12 +72,16 @@ class Config:
     
     # Module Access Configuration - Define who can access each module
     APP_FEATURES = {
+        'redactar': {'*'},
         'solicitudes': {'admin', 'formulador', '*'},  # Todos
-        'certificados': {'admin', 'formulador', '*'}, # Todos
+        'calendario': {'*'},
         'participacion': {'admin', 'formulador', '*'}, # Todos
-        'usos_suelo': {'admin', 'formulador', '*'}, # Todos
-        'ia': {'*'},  # Todos los usuarios - IA Municipal
+        'geoportal': {'*'},
         'seguimiento': {'admin', 'formulador', '*'}, # Todos
+        'riesgo': {'*'},
+        'contratos': {'*'},
+        'certificados': {'admin', 'formulador', '*'}, # Todos
+        'ia': {'*'},  # Todos los usuarios - IA Municipal
         'configuracion': {'admin'}, # Solo admin
     }
     

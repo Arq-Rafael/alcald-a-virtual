@@ -106,12 +106,17 @@ class BackupManager:
             # Crear archivo ZIP
             with zipfile.ZipFile(backup_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
                 for directorio in directorios:
-                    if os.path.exists(directorio):
-                        for root, dirs, files in os.walk(directorio):
-                            for file in files:
-                                file_path = os.path.join(root, file)
-                                arcname = os.path.relpath(file_path, self.app.config.get('BASE_DIR', os.getcwd()))
-                                zipf.write(file_path, arcname)
+                    if not os.path.exists(directorio):
+                        continue
+                    if os.path.isfile(directorio):
+                        arcname = os.path.relpath(directorio, self.app.config.get('BASE_DIR', os.getcwd()))
+                        zipf.write(directorio, arcname)
+                        continue
+                    for root, dirs, files in os.walk(directorio):
+                        for file in files:
+                            file_path = os.path.join(root, file)
+                            arcname = os.path.relpath(file_path, self.app.config.get('BASE_DIR', os.getcwd()))
+                            zipf.write(file_path, arcname)
             
             # Guardar metadata
             self._guardar_metadata_backup(backup_path, 'archivos', descripcion)

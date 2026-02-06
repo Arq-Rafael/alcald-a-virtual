@@ -297,56 +297,50 @@
     {% endif %}
   </div>
 
-  <!-- SECCIÓN 3: IMPORTAR DESDE EXCEL -->
+  <!-- SECCIÓN 3: PERMISOS POR MODULO (POR USUARIO) -->
   <div class="panel-section">
-    <h4><i class="bi bi-file-earmark-excel"></i> Importar Usuarios desde Excel</h4>
-    
-    <form method="POST" enctype="multipart/form-data" class="form-section">
-      <div class="row g-3 align-items-end">
-        <div class="col-md-6">
-          <label class="form-label"><strong>Archivo Excel (.xlsx/.xls)</strong></label>
-          <input type="file" name="excel_file" accept=".xlsx,.xls" class="form-control" required>
-          <small class="text-muted">
-            Columnas requeridas: usuario, clave, email, secretaria, role
-          </small>
-        </div>
-        <div class="col-md-6">
-          <button type="submit" name="import_excel" class="btn btn-primary w-100">
-            <i class="bi bi-upload"></i> Importar Usuarios
-          </button>
-        </div>
+    <h4><i class="bi bi-shield-check"></i> Permisos por Modulo (Usuarios)</h4>
+
+    <form method="POST" class="form-section">
+      <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              {% for mod in module_catalog %}
+              <th class="text-center">{{ mod.label }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in permissions_users %}
+            <tr>
+              <td>
+                <strong>{{ u.usuario }}</strong>
+                {% if u.secretaria %}
+                <div class="text-muted" style="font-size: 0.8rem;">{{ u.secretaria }}</div>
+                {% endif %}
+              </td>
+              {% for mod in module_catalog %}
+              <td class="text-center">
+                <input type="checkbox"
+                       name="perm_{{ mod.key }}_{{ u.usuario }}"
+                       {% if u.usuario in features_cfg.get(mod.key, []) %}checked{% endif %}>
+              </td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
+      <button type="submit" name="update_permissions" class="btn btn-primary">
+        <i class="bi bi-save"></i> Guardar permisos
+      </button>
     </form>
 
-    <div class="alert alert-info">
-      <strong>Formato esperado del Excel:</strong>
-      <table class="table table-sm mt-2">
-        <thead>
-          <tr>
-            <th>usuario</th>
-            <th>clave</th>
-            <th>email</th>
-            <th>secretaria</th>
-            <th>role</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>juan.perez</td>
-            <td>MiClave2024!</td>
-            <td>juan@alcaldia.gov</td>
-            <td>Planeación</td>
-            <td>user</td>
-          </tr>
-          <tr>
-            <td>maria.gomez</td>
-            <td>OtraClave2024!</td>
-            <td>maria@alcaldia.gov</td>
-            <td>General</td>
-            <td>admin</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="alert alert-info mt-3">
+      <i class="bi bi-info-circle"></i> Desmarca un modulo para ocultarlo a un usuario.
+      El usuario admin siempre tiene acceso completo.
     </div>
   </div>
 
@@ -355,18 +349,31 @@
     <h4><i class="bi bi-cloud-download"></i> Sistema de Backups</h4>
     
     <form method="POST" class="form-section">
-      <div class="row g-3 align-items-end">
-        <div class="col-md-4">
-          <label class="form-label"><strong>Tipo de Backup</strong></label>
-          <select class="form-select" name="backup_tipo">
-            <option value="database">💾 Base de Datos (BD solamente)</option>
-            <option value="archivos">📁 Archivos (uploads + documentos)</option>
-            <option value="completo" selected>📦 Completo (BD + Archivos)</option>
-          </select>
+      <div class="row g-3">
+        <div class="col-md-12">
+          <label class="form-label"><strong>Selecciona los modulos a respaldar</strong></label>
+          <div class="d-flex flex-wrap gap-3">
+            <label class="form-check">
+              <input class="form-check-input" type="checkbox" name="backup_modules" value="solicitudes">
+              <span class="form-check-label">Solicitudes (CSV)</span>
+            </label>
+            <label class="form-check">
+              <input class="form-check-input" type="checkbox" name="backup_modules" value="certificados">
+              <span class="form-check-label">Certificados (PDFs)</span>
+            </label>
+            <label class="form-check">
+              <input class="form-check-input" type="checkbox" name="backup_modules" value="contratos">
+              <span class="form-check-label">Contratos (PDFs)</span>
+            </label>
+            <label class="form-check">
+              <input class="form-check-input" type="checkbox" name="backup_modules" value="riesgo">
+              <span class="form-check-label">Gestion del Riesgo (PDFs)</span>
+            </label>
+          </div>
         </div>
         <div class="col-md-4">
-          <button type="submit" name="do_backup" class="btn btn-success w-100">
-            <i class="bi bi-arrow-down-circle"></i> Crear Backup
+          <button type="submit" name="backup_modulos" class="btn btn-success w-100">
+            <i class="bi bi-file-earmark-zip"></i> Crear ZIP descargable
           </button>
         </div>
       </div>
@@ -375,10 +382,9 @@
     <div class="alert alert-warning">
       <strong><i class="bi bi-info-circle"></i> Información de Backups:</strong>
       <ul class="mt-2 mb-0">
-        <li>Los backups se guardan en la carpeta <code>/backups/</code></li>
-        <li>Se conservan los últimos 30 días</li>
+        <li>El sistema genera un ZIP descargable con los modulos seleccionados</li>
+        <li>Los archivos se guardan en <code>/backups/archivos</code></li>
         <li>Formato: ZIP con timestamp</li>
-        <li>Los backups automáticos se crean diariamente a las 2:00 AM</li>
       </ul>
     </div>
   </div>
@@ -435,6 +441,35 @@
         </div>
       </div>
     </form>
+  </div>
+
+  <!-- SECCIÓN 6.1: ENVIAR CORREO RAPIDO -->
+  <div class="panel-section">
+    <h4><i class="bi bi-send"></i> Enviar correo rapido</h4>
+    <form method="POST" class="form-section">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label"><strong>Para</strong></label>
+          <input type="email" name="quick_email_to" class="form-control" placeholder="destino@correo.gov" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label"><strong>Asunto</strong></label>
+          <input type="text" name="quick_email_subject" class="form-control" placeholder="Asunto del mensaje" required>
+        </div>
+        <div class="col-12">
+          <label class="form-label"><strong>Mensaje</strong></label>
+          <textarea name="quick_email_message" class="form-control" rows="4" placeholder="Escribe el mensaje" required></textarea>
+        </div>
+        <div class="col-12">
+          <button type="submit" name="send_quick_email" class="btn btn-primary">
+            <i class="bi bi-envelope"></i> Enviar correo
+          </button>
+        </div>
+      </div>
+    </form>
+    <div class="alert alert-info">
+      <i class="bi bi-info-circle"></i> Usa Resend API. Si no hay dominio verificado, el envio puede fallar.
+    </div>
   </div>
 
   <!-- SECCIÓN 7: GESTIÓN DE CHAT -->

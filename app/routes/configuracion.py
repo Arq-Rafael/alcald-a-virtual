@@ -1,15 +1,12 @@
 
 import os
 import json
-import pandas as pd
-from flask import Blueprint, render_template, request, flash, redirect, url_for, session, current_app
-from app.utils import admin_required
+from flask import Blueprint, render_template, request, flash, redirect, url_for, session, current_app, send_file
+from app.utils import admin_required, normalize_features
 from app import db
 from app.models.usuario import Usuario, AuditoriaAcceso
 from app.utils.seguridad import PasswordValidator, EmailService
 from app.utils.backup import BackupManager
-from werkzeug.utils import secure_filename
-from datetime import datetime
 
 configuracion_bp = Blueprint('configuracion', __name__)
 
@@ -19,6 +16,48 @@ def load_config_data():
         with open(path, 'r', encoding='utf-8') as f:
             return json.load(f)
     return {}
+
+def save_config_data(cfg):
+    path = os.path.join(current_app.config['BASE_DIR'], "config.json")
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(cfg, f, ensure_ascii=False, indent=2)
+
+def get_module_catalog():
+    return [
+        {'key': 'redactar', 'label': 'Redactar Oficios'},
+        {'key': 'solicitudes', 'label': 'Solicitudes'},
+        {'key': 'calendario', 'label': 'Calendario'},
+        {'key': 'participacion', 'label': 'Participacion'},
+        {'key': 'geoportal', 'label': 'Geoportal'},
+        {'key': 'seguimiento', 'label': 'Seguimiento'},
+        {'key': 'riesgo', 'label': 'Gestion del Riesgo'},
+        {'key': 'contratos', 'label': 'Contratos'},
+        {'key': 'certificados', 'label': 'Certificados'},
+        {'key': 'ia', 'label': 'IA'},
+        {'key': 'configuracion', 'label': 'Configuracion'}
+    ]
+
+def build_features_config(cfg, users):
+    features = cfg.get('features') or {}
+    usernames = [u.usuario for u in users if u.usuario != 'admin']
+    updated = False
+
+    for module in get_module_catalog():
+        key = module['key']
+        allowed = features.get(key)
+        if not isinstance(allowed, list):
+            allowed = []
+        if key not in features:
+            allowed = list(usernames)
+            updated = True
+        features[key] = allowed
+
+    if updated:
+        cfg['features'] = features
+        save_config_data(cfg)
+        current_app.config["APP_FEATURES"] = normalize_features(features)
+
+    return features
 
 def list_users_db():
     users = Usuario.query.order_by(Usuario.usuario.asc()).all()
@@ -56,6 +95,9 @@ def configuracion():
     total_usuarios = len(usuarios)
     usuarios_activos = sum(1 for u in usuarios if u.activo)
     admins = sum(1 for u in usuarios if u.role == 'admin')
+    module_catalog = get_module_catalog()
+    users_for_permissions = [u for u in usuarios if u.usuario != 'admin']
+    features_cfg = build_features_config(cfg, usuarios)
 
     if request.method == 'POST':
         form = request.form
@@ -119,6 +161,14 @@ def configuracion():
                 db.session.add(auditoria)
                 db.session.commit()
 
+                # Agregar el usuario nuevo a permisos por modulo (si aplica)
+                if cfg.get('features'):
+                    for key, allowed in cfg.get('features', {}).items():
+                        if isinstance(allowed, list) and nuevo_u not in allowed:
+                            allowed.append(nuevo_u)
+                    save_config_data(cfg)
+                    current_app.config["APP_FEATURES"] = normalize_features(cfg.get('features'))
+
                 # Enviar email de bienvenida si tiene email
                 if nuevo_e:
                     try:
@@ -140,6 +190,24 @@ def configuracion():
             except Exception as e:
                 db.session.rollback()
                 flash(f"❌ Error al crear usuario: {str(e)}", 'danger')
+            return redirect(url_for('configuracion.index'))
+
+        # ===== PERMISOS POR MODULO (POR USUARIO) =====
+        if 'update_permissions' in form:
+            features = {}
+            for module in module_catalog:
+                key = module['key']
+                allowed_users = []
+                for user in users_for_permissions:
+                    field_name = f"perm_{key}_{user.usuario}"
+                    if form.get(field_name) == 'on':
+                        allowed_users.append(user.usuario)
+                features[key] = allowed_users
+
+            cfg['features'] = features
+            save_config_data(cfg)
+            current_app.config["APP_FEATURES"] = normalize_features(features)
+            flash('✅ Permisos de modulos actualizados', 'success')
             return redirect(url_for('configuracion.index'))
 
         # ===== ELIMINAR USUARIO =====
@@ -299,82 +367,6 @@ def configuracion():
                     flash(f"❌ Error: {str(e)}", 'danger')
             return redirect(url_for('configuracion.index'))
 
-        # ===== IMPORTAR USUARIOS DESDE EXCEL =====
-        if 'import_excel' in form:
-            file = request.files.get('excel_file')
-            if not file or file.filename == '':
-                flash('❌ Selecciona un archivo Excel', 'warning')
-                return redirect(url_for('configuracion.index'))
-
-            try:
-                df = pd.read_excel(file)
-                df.columns = df.columns.str.strip().str.lower()
-                creados, omitidos = 0, 0
-                errores_detail = []
-                
-                for idx, row in df.iterrows():
-                    usuario = str(row.get('usuario', '')).strip()
-                    clave = str(row.get('clave', '')).strip()
-                    email = str(row.get('email', '')).strip() or None
-                    secretaria = str(row.get('secretaria', '')).strip()
-                    role = str(row.get('role', 'user')).strip().lower() or 'user'
-
-                    # Validaciones
-                    if not usuario or not clave:
-                        omitidos += 1
-                        errores_detail.append(f"Fila {idx+2}: Usuario o clave vacío")
-                        continue
-
-                    if Usuario.query.filter_by(usuario=usuario).first():
-                        omitidos += 1
-                        errores_detail.append(f"Fila {idx+2}: Usuario '{usuario}' ya existe")
-                        continue
-
-                    if email and Usuario.query.filter_by(email=email).first():
-                        omitidos += 1
-                        errores_detail.append(f"Fila {idx+2}: Email '{email}' ya existe")
-                        continue
-
-                    es_valida, _, _ = PasswordValidator.validar_fortaleza(clave)
-                    if not es_valida:
-                        omitidos += 1
-                        errores_detail.append(f"Fila {idx+2}: Contraseña débil para '{usuario}'")
-                        continue
-
-                    if role not in ['admin', 'user']:
-                        role = 'user'
-
-                    try:
-                        u = Usuario(
-                            usuario=usuario,
-                            clave=clave,
-                            email=email,
-                            role=role,
-                            secretaria=secretaria,
-                            activo=True,
-                            creado_por=session.get('user'),
-                            requiere_2fa=bool(email)
-                        )
-                        db.session.add(u)
-                        creados += 1
-                    except:
-                        omitidos += 1
-                        errores_detail.append(f"Fila {idx+2}: Error al crear usuario '{usuario}'")
-
-                db.session.commit()
-                
-                msg = f"✅ Importación completada: {creados} creados, {omitidos} omitidos"
-                flash(msg, 'success')
-                if errores_detail:
-                    for error in errores_detail[:5]:
-                        flash(f"  ⚠️ {error}", 'info')
-                    if len(errores_detail) > 5:
-                        flash(f"  ... y {len(errores_detail)-5} errores más", 'info')
-            except Exception as e:
-                db.session.rollback()
-                flash(f"❌ Error importando Excel: {str(e)}", 'danger')
-            return redirect(url_for('configuracion.index'))
-
         # ===== ACTUALIZAR MI EMAIL (ADMIN) =====
         if 'update_my_email' in form:
             nuevo_email = form.get('my_email', '').strip()
@@ -424,34 +416,74 @@ def configuracion():
                 flash(f"Error al actualizar correo: {str(e)}", 'danger')
             return redirect(url_for('configuracion.index'))
 
-        # ===== CREAR BACKUP =====
-        if 'do_backup' in form:
-            tipo = form.get('backup_tipo', 'completo')
+        # ===== ENVIAR CORREO RAPIDO =====
+        if 'send_quick_email' in form:
+            to_email = form.get('quick_email_to', '').strip()
+            subject = form.get('quick_email_subject', '').strip()
+            message = form.get('quick_email_message', '').strip()
+
+            if not to_email or not subject or not message:
+                flash('❌ Completa destinatario, asunto y mensaje', 'warning')
+                return redirect(url_for('configuracion.index'))
+
+            html = f"""
+            <html>
+            <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
+              <div style="background: #ffffff; border-radius: 12px; padding: 24px; max-width: 640px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <h2 style="margin: 0 0 12px 0; color: #1f2937;">{subject}</h2>
+                <p style="color: #374151; font-size: 15px; line-height: 1.6; white-space: pre-wrap;">{message}</p>
+                <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+                <p style="color: #9ca3af; font-size: 12px;">Alcaldia Virtual - Mensaje enviado desde Configuracion</p>
+              </div>
+            </body>
+            </html>
+            """
+
+            try:
+                from app.utils.email_resend import send_email_resend
+                resultado = send_email_resend(to_email, subject, html)
+                if resultado.get('success'):
+                    flash(f"✅ Email enviado a {to_email}", 'success')
+                else:
+                    flash(f"❌ No se pudo enviar el correo: {resultado.get('message')}", 'danger')
+            except Exception as e:
+                flash(f"❌ Error enviando correo: {str(e)}", 'danger')
+            return redirect(url_for('configuracion.index'))
+
+        # ===== BACKUP POR MODULOS =====
+        if 'backup_modulos' in form:
+            seleccion = request.form.getlist('backup_modules')
+            if not seleccion:
+                flash('❌ Selecciona al menos un modulo para el backup', 'warning')
+                return redirect(url_for('configuracion.index'))
+
+            module_paths = {
+                'solicitudes': current_app.config.get('SOLICITUDES_PATH'),
+                'certificados': str(current_app.config.get('CERTIFICADOS_OUTPUT_DIR')),
+                'contratos': str(current_app.config.get('CONTRATOS_OUTPUT_DIR')),
+                'riesgo': os.path.join(str(current_app.config.get('DOCUMENTOS_DIR')), 'gestion_riesgo')
+            }
+            directorios = [module_paths.get(m) for m in seleccion if module_paths.get(m)]
+
             try:
                 bm = BackupManager(current_app)
-                if tipo == 'database':
-                    exito, ruta, msg = bm.backup_database('manual')
-                elif tipo == 'archivos':
-                    exito, ruta, msg = bm.backup_archivos(descripcion='manual')
-                else:
-                    exito, ruta, msg = bm.backup_completo('manual')
-                
-                if exito:
-                    flash(f"✅ Backup creado: {msg}", 'success')
-                    
-                    # Auditoría
-                    auditoria = AuditoriaAcceso(
-                        usuario_id=1,
-                        usuario_nombre=session.get('user', 'admin'),
-                        accion='crear_backup',
-                        detalles=f"Backup {tipo} creado",
-                        ip_address=request.remote_addr,
-                        exitoso=True
-                    )
-                    db.session.add(auditoria)
-                    db.session.commit()
-                else:
+                exito, ruta, msg = bm.backup_archivos(directorios=directorios, descripcion='modulos')
+                if not exito:
                     flash(f"❌ Error en backup: {msg}", 'danger')
+                    return redirect(url_for('configuracion.index'))
+
+                auditoria = AuditoriaAcceso(
+                    usuario_id=1,
+                    usuario_nombre=session.get('user', 'admin'),
+                    accion='crear_backup_modulos',
+                    detalles=f"Backup modulos: {', '.join(seleccion)}",
+                    ip_address=request.remote_addr,
+                    exitoso=True
+                )
+                db.session.add(auditoria)
+                db.session.commit()
+
+                return send_file(ruta, as_attachment=True, download_name=os.path.basename(ruta))
             except Exception as e:
                 flash(f"❌ Error: {str(e)}", 'danger')
             return redirect(url_for('configuracion.index'))
@@ -467,5 +499,8 @@ def configuracion():
             'admins': admins
         },
         auditoria=auditoria_logs,
-        my_email=my_email
+        my_email=my_email,
+        module_catalog=module_catalog,
+        permissions_users=users_for_permissions,
+        features_cfg=features_cfg
     )
