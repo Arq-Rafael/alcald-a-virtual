@@ -309,17 +309,15 @@
     </a>
 
     <!-- Redactar Oficio -->
-    {% if has_permission('redactar') %}
     <a href="{{ url_for('ia.letter') }}" class="dock-item item-letter {% if request.endpoint=='ia.letter' %}active{% endif %}">
       <div class="icon-box">
         <i class="bi bi-pencil-square"></i>
       </div>
       <span class="label">Redactar</span>
     </a>
-    {% endif %}
 
     <!-- Solicitudes -->
-    {% if has_permission('solicitudes') %}
+    {% if can('solicitudes') %}
     <a href="{{ url_for('solicitudes.index') }}" class="dock-item item-solicitudes">
       <div class="icon-box">
         <i class="bi bi-file-earmark-text"></i>
@@ -329,17 +327,15 @@
     {% endif %}
 
     <!-- Calendario -->
-    {% if has_permission('calendario') %}
     <a href="/calendario" class="dock-item item-calendar">
       <div class="icon-box">
         <i class="bi bi-calendar-event"></i>
       </div>
       <span class="label">Calendario</span>
     </a>
-    {% endif %}
 
     <!-- Participación -->
-    {% if has_permission('participacion') %}
+    {% if can('participacion') %}
     <a href="{{ url_for('participacion.index') }}" class="dock-item item-participacion">
       <div class="icon-box">
         <i class="bi bi-people"></i>
@@ -349,17 +345,15 @@
     {% endif %}
 
     <!-- Geoportal -->
-    {% if has_permission('geoportal') %}
     <a href="{{ url_for('main.geoportal') }}" class="dock-item item-geoportal">
       <div class="icon-box">
         <i class="bi bi-globe-americas"></i>
       </div>
       <span class="label">Geoportal</span>
     </a>
-    {% endif %}
 
     <!-- Seguimiento -->
-    {% if has_permission('seguimiento') %}
+    {% if can('seguimiento') %}
     <a href="{{ url_for('seguimiento.index') }}" class="dock-item item-seguimiento">
       <div class="icon-box">
         <i class="bi bi-graph-up-arrow"></i>
@@ -369,52 +363,20 @@
     {% endif %}
 
     <!-- Gestión del Riesgo -->
-    {% if has_permission('riesgo') %}
     <a href="{{ url_for('main.gestion_riesgo') }}" class="dock-item item-riesgo">
       <div class="icon-box">
         <i class="bi bi-tree"></i>
       </div>
       <span class="label">Riesgo</span>
     </a>
-    {% endif %}
 
     <!-- Contratación -->
-    {% if has_permission('contratos') %}
     <a href="/contratos" class="dock-item item-contratos">
       <div class="icon-box">
         <i class="bi bi-file-earmark-contract"></i>
       </div>
       <span class="label">Contratos</span>
     </a>
-    {% endif %}
-
-    <!-- Certificados -->
-    {% if has_permission('certificados') %}
-    <a href="{{ url_for('certificados.index') }}" class="dock-item item-certificados">
-      <div class="icon-box">
-        <i class="bi bi-file-earmark-check"></i>
-      </div>
-      <span class="label">Certificados</span>
-    </a>
-    {% endif %}
-
-    <!-- IA -->
-    <a href="{{ url_for('ia.index') }}" class="dock-item item-ia">
-      <div class="icon-box">
-        <i class="bi bi-robot"></i>
-      </div>
-      <span class="label">IA</span>
-    </a>
-
-    <!-- Configuración (solo admin) -->
-    {% if has_permission('configuracion') %}
-    <a href="{{ url_for('configuracion.index') }}" class="dock-item item-config">
-      <div class="icon-box">
-        <i class="bi bi-gear-fill"></i>
-      </div>
-      <span class="label">Config</span>
-    </a>
-    {% endif %}
 
     <!-- Clima -->
     <div class="dock-item item-clima" onclick="showWeatherDetails()">

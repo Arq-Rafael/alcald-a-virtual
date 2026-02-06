@@ -3,7 +3,6 @@ API Endpoints para Gestión Arbórea - Gestión del Riesgo
 IMPORTACIONES LAZY PARA EVITAR CIRCULAR IMPORTS
 """
 from flask import Blueprint, request, jsonify, send_file, render_template, current_app
-from app.utils.rbac import require_permission
 from datetime import datetime, timedelta
 import json
 import os
@@ -110,7 +109,6 @@ def listar_especies():
 # ============================================================================
 
 @riesgo_api.route('/arborea', methods=['POST'])
-@require_permission('riesgo')
 def crear_radicado():
     """
     Crea un nuevo radicado de intervención arbórea.
@@ -251,7 +249,6 @@ def obtener_radicado(radicado_id):
 
 
 @riesgo_api.route('/arborea', methods=['GET'])
-@require_permission('riesgo')
 def listar_radicados():
     """
     Lista radicados con filtros opcionales.

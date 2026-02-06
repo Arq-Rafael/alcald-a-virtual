@@ -83,7 +83,6 @@ def create_app(config_class=Config):
     def inject_utilities():
         from .utils import can_access
         from .utils.preferencias import get_user_preferences
-        from .utils.rbac import has_permission, get_accessible_modules, get_user_role, get_user_secretaria
         from flask import session
         try:
             from .models.usuario import Usuario
@@ -105,11 +104,7 @@ def create_app(config_class=Config):
         return dict(
             can=can_access,
             user_preferences=prefs,
-            current_user_foto=current_user_foto,
-            has_permission=has_permission,
-            get_accessible_modules=get_accessible_modules,
-            get_user_role=get_user_role,
-            get_user_secretaria=get_user_secretaria
+            current_user_foto=current_user_foto
         )
         
     # Create database tables if they don't exist

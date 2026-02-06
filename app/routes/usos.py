@@ -7,7 +7,6 @@ import datetime
 import unicodedata
 import logging
 import pandas as pd
-from app.utils.rbac import require_permission
 try:
     import geopandas as gpd
 except ImportError:
@@ -225,7 +224,6 @@ def buscar_norma(uso):
 # --- Routes ---
 
 @usos_bp.route("/usos_suelo", methods=["GET", "POST"], endpoint='index')
-@require_permission('geoportal')
 def usos_suelo():
     resultado = None
     if request.method == "POST":

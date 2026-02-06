@@ -8,7 +8,6 @@ import datetime
 import pandas as pd
 import glob
 from flask import Blueprint, render_template, request, flash, redirect, url_for, send_file, current_app, session, jsonify, abort
-from app.utils.rbac import require_permission
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
@@ -356,7 +355,6 @@ def generate_pdf_certificate(data: dict) -> io.BytesIO:
 
 
 @certificados_bp.route('/certificados', methods=['GET'], endpoint='index')
-@require_permission('certificados')
 def certificados():
     solicitudes_path = current_app.config['SOLICITUDES_PATH']
     
