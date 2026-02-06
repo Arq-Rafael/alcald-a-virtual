@@ -1,0 +1,58 @@
+{
+  "features": {
+    "redactar": [
+      "desarrollo_rural",
+      "desarrollo_social",
+      "gobierno",
+      "hacienda",
+      "planeacion"
+    ],
+    "solicitudes": [
+      "desarrollo_rural",
+      "desarrollo_social",
+      "gobierno",
+      "hacienda",
+      "planeacion"
+    ],
+    "calendario": [
+      "desarrollo_rural",
+      "desarrollo_social",
+      "gobierno",
+      "hacienda",
+      "planeacion"
+    ],
+    "participacion": [
+      "gobierno",
+      "planeacion"
+    ],
+    "geoportal": [
+      "planeacion"
+    ],
+    "seguimiento": [
+      "planeacion"
+    ],
+    "riesgo": [
+      "desarrollo_rural",
+      "desarrollo_social",
+      "gobierno",
+      "hacienda",
+      "planeacion"
+    ],
+    "contratos": [
+      "gobierno",
+      "planeacion"
+    ],
+    "certificados": [
+      "planeacion"
+    ],
+    "ia": [],
+    "configuracion": [],
+    "licencias": [
+      "desarrollo_rural",
+      "desarrollo_social",
+      "gobierno",
+      "hacienda",
+      "planeacion"
+    ]
+  }
+}

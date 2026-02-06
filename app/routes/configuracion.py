@@ -26,6 +26,7 @@ def get_module_catalog():
     return [
         {'key': 'redactar', 'label': 'Redactar Oficios'},
         {'key': 'solicitudes', 'label': 'Solicitudes'},
+        {'key': 'licencias', 'label': 'Licencias'},
         {'key': 'calendario', 'label': 'Calendario'},
         {'key': 'participacion', 'label': 'Participacion'},
         {'key': 'geoportal', 'label': 'Geoportal'},
@@ -459,6 +460,7 @@ def configuracion():
 
             module_paths = {
                 'solicitudes': current_app.config.get('SOLICITUDES_PATH'),
+                'licencias': str(current_app.config.get('LICENCIAS_OUTPUT_DIR')),
                 'certificados': str(current_app.config.get('CERTIFICADOS_OUTPUT_DIR')),
                 'contratos': str(current_app.config.get('CONTRATOS_OUTPUT_DIR')),
                 'riesgo': os.path.join(str(current_app.config.get('DOCUMENTOS_DIR')), 'gestion_riesgo')

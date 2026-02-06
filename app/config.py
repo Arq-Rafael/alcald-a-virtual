@@ -74,6 +74,7 @@ class Config:
     APP_FEATURES = {
         'redactar': {'*'},
         'solicitudes': {'admin', 'formulador', '*'},  # Todos
+        'licencias': {'*'},
         'calendario': {'*'},
         'participacion': {'admin', 'formulador', '*'}, # Todos
         'geoportal': {'*'},
