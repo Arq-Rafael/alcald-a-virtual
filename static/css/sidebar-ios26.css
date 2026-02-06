@@ -1,357 +1,161 @@
 /* ========================================
-   DOCK FLOTANTE iOS 26
-   Glassmorphism Opaco + Solo Iconos
+   DOCK LATERAL GLASSMORPHISM iOS Style
+   Dise�o vertical con efecto ne�n y vidrio
    ======================================== */
 
-.sidebar {
-  position: fixed !important;
-  left: 20px !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  width: 85px !important;
-  height: auto !important;
-  max-height: 90vh !important;
-  background: linear-gradient(180deg, 
-              rgba(255, 255, 255, 0.75) 0%, 
-              rgba(248, 250, 252, 0.8) 50%,
-              rgba(255, 255, 255, 0.75) 100%) !important;
-  backdrop-filter: blur(60px) saturate(200%) !important;
-  -webkit-backdrop-filter: blur(60px) saturate(200%) !important;
-  border: 2px solid rgba(255, 255, 255, 0.8) !important;
-  border-radius: 32px !important;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15),
-              0 15px 40px rgba(0, 0, 0, 0.1),
-              inset 0 1px 1px rgba(255, 255, 255, 0.9),
-              inset 0 -1px 3px rgba(0, 0, 0, 0.05) !important;
-  padding: 18px 0 !important;
-  z-index: 1000 !important;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+/* Contenedor Principal del Dock */
+.dock-container {
+    position: fixed;
+    left: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    
+    /* Efecto Glassmorphism */
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    
+    padding: 20px 12px;
+    border-radius: 35px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    z-index: 1000;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
-.sidebar-header {
-  padding: 0 !important;
-  text-align: center;
-  border-bottom: none !important;
-  margin-bottom: 12px !important;
-  background: transparent !important;
+/* Ocultar scrollbar pero mantener funcionalidad */
+.dock-container::-webkit-scrollbar {
+    width: 0;
+    display: none;
 }
 
-.sidebar-header a {
-  text-decoration: none;
-  display: block;
+/* Estilo de cada �tem (Icono + Texto) */
+.dock-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    position: relative;
+    background: none;
+    border: none;
+    padding: 0;
 }
 
-.logo-ios-modern {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, rgba(102, 187, 106, 0.4) 0%, rgba(129, 199, 132, 0.35) 100%);
-  border: 2px solid rgba(102, 187, 106, 0.5);
-  border-radius: 18px;
-  box-shadow: 0 6px 20px rgba(102, 187, 106, 0.35), 
-              inset 0 1px 0 rgba(255, 255, 255, 0.5),
-              0 0 0 3px rgba(255, 255, 255, 0.3);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(12px);
-  cursor: pointer;
+.dock-item:hover {
+    transform: scale(1.1);
 }
 
-.logo-ios-modern::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
-  animation: shine 3s ease-in-out infinite;
+/* Caja del Icono */
+.icon-box {
+    width: 55px;
+    height: 55px;
+    border-radius: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    
+    /* Gradiente sutil y sombra interna para volumen */
+    background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1));
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
 }
 
-@keyframes shine {
-  0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(-45deg); opacity: 0; }
-  50% { transform: translateX(100%) translateY(100%) rotate(-45deg); opacity: 1; }
+.dock-item:hover .icon-box {
+    box-shadow: 0 0 20px currentColor;
+    border-color: rgba(255,255,255,0.8);
 }
 
-.logo-ios-modern i {
-  font-size: 1.8rem;
-  color: #66BB6A;
-  z-index: 1;
-  position: relative;
-  filter: drop-shadow(0 3px 8px rgba(102, 187, 106, 0.5)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+/* Estilo de los iconos */
+.icon-box i {
+    font-size: 28px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
 }
 
-.logo-ios-modern:hover {
-  transform: scale(1.08) rotate(2deg);
-  box-shadow: 0 8px 24px rgba(124, 179, 66, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  border-color: rgba(124, 179, 66, 0.6);
+/* Texto debajo del icono */
+.label {
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    opacity: 0.8;
+    transition: opacity 0.3s;
 }
 
-.sidebar-brand {
-  display: none !important;
+.dock-item:hover .label {
+    opacity: 1;
+    font-weight: 600;
+}
+
+/* --- Colores Espec�ficos para cada bot�n (Efecto Ne�n) --- */
+
+/* Inicio (Verde Supat�) */
+.item-home { color: #66BB6A; }
+.item-home .icon-box { background: rgba(102, 187, 106, 0.15); }
+
+/* Redactar (Rojo/Rosa) */
+.item-letter { color: #FF5252; }
+.item-letter .icon-box { background: rgba(255, 82, 82, 0.15); }
+
+/* Solicitudes (Cyan) */
+.item-solicitudes { color: #00BCD4; }
+.item-solicitudes .icon-box { background: rgba(0, 188, 212, 0.15); }
+
+/* Calendario (Amarillo) */
+.item-calendar { color: #FFC107; }
+.item-calendar .icon-box { background: rgba(255, 193, 7, 0.15); }
+
+/* Participaci�n (Azul) */
+.item-participacion { color: #64B5F6; }
+.item-participacion .icon-box { background: rgba(100, 181, 246, 0.15); }
+
+/* Geoportal (Teal) */
+.item-geoportal { color: #26A69A; }
+.item-geoportal .icon-box { background: rgba(38, 166, 154, 0.15); }
+
+/* Seguimiento (Rosa) */
+.item-seguimiento { color: #EC407A; }
+.item-seguimiento .icon-box { background: rgba(236, 64, 122, 0.15); }
+
+/* Riesgo (Verde Bosque) */
+.item-riesgo { color: #66BB6A; }
+.item-riesgo .icon-box { background: rgba(102, 187, 106, 0.15); }
+
+/* Contratos (Morado) */
+.item-contratos { color: #AB47BC; }
+.item-contratos .icon-box { background: rgba(171, 71, 188, 0.15); }
+
+/* Clima (Azul Cielo) */
+.item-clima { color: #60a5fa; }
+.item-clima .icon-box { background: rgba(96, 165, 250, 0.15); }
+
+/* Perfil (Lima) */
+.item-profile { color: #a3e635; }
+.item-profile .icon-box { background: rgba(163, 230, 53, 0.15); }
+
+/* Estado activo */
+.dock-item.active .icon-box {
+    background: linear-gradient(135deg, rgba(102, 187, 106, 0.3), rgba(102, 187, 106, 0.15));
+    box-shadow: 0 0 25px rgba(102, 187, 106, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.3);
+    border-color: rgba(102, 187, 106, 0.8);
 }
 
 /* ========================================
-   DOCK ICONS - Solo Iconos con Tooltips
-   ======================================== */
-
-.sidebar .nav-link i {
-  font-size: 1.75rem !important;
-  transition: all 0.3s ease;
-  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.25)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
-}
-
-/* Colores específicos para cada icono - Más vibrantes y saturados */
-.sidebar .nav-link:nth-child(1) i { color: #FF5252; } /* Redactar Oficio - Rojo brillante */
-.sidebar .nav-link:nth-child(2) i { color: #00BCD4; } /* Solicitudes - Cyan */
-.sidebar .nav-link:nth-child(3) i { color: #FFC107; } /* Calendario - Ámbar */
-.sidebar .nav-link:nth-child(4) i { color: #64B5F6; } /* Participación - Azul */
-.sidebar .nav-link:nth-child(5) i { color: #26A69A; } /* Geoportal - Teal */
-.sidebar .nav-link:nth-child(6) i { color: #EC407A; } /* Seguimiento - Rosa */
-.sidebar .nav-link:nth-child(7) i { color: #66BB6A; } /* Gestión Riesgo - Verde */
-.sidebar .nav-link:nth-child(8) i { color: #AB47BC; } /* Contratación - Púrpura */
-
-/* ========================================
-   NAVIGATION LINKS - iOS 26
-   ======================================== */
-
-.sidebar .nav-link {
-  background: rgba(255, 255, 255, 0.4) !important;
-  color: #1a1a1a !important;
-  border-radius: 18px !important;
-  padding: 0 !important;
-  margin: 7px auto !important;
-  width: 56px !important;
-  height: 56px !important;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  position: relative;
-  overflow: visible !important;
-  font-size: 0 !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
-}
-
-.sidebar .nav-link:hover {
-  background: rgba(255, 255, 255, 0.8) !important;
-  border-color: rgba(255, 255, 255, 0.9) !important;
-  transform: translateX(6px) scale(1.05);
-  box-shadow: -6px 0 20px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-
-.sidebar .nav-link.active {
-  background: rgba(255, 255, 255, 0.9) !important;
-  border-color: rgba(124, 179, 66, 0.6) !important;
-  box-shadow: 0 4px 16px rgba(124, 179, 66, 0.3), 
-              inset 0 1px 0 rgba(255, 255, 255, 1),
-              0 0 0 3px rgba(124, 179, 66, 0.15) !important;
-  position: relative;
-}
-
-.sidebar .nav-link.active::before {
-  content: '';
-  position: absolute;
-  left: -2px;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 70%;
-  width: 5px;
-  background: linear-gradient(180deg, #66BB6A 0%, #81C784 100%);
-  border-radius: 0 8px 8px 0;
-  box-shadow: 0 0 12px rgba(102, 187, 106, 0.6);
-}
-
-.sidebar .nav-link i {
-  font-size: 1rem;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  opacity: 0.9;
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.sidebar .nav-link:hover i {
-  opacity: 1;
-  color: #ffffff;
-  transform: scale(1.15);
-}
-
-.sidebar .nav-link.active i {
-  opacity: 1;
-  color: #ffffff;
-  filter: drop-shadow(0 2px 6px rgba(255, 255, 255, 0.35));
-}
-/* ========================================
-   WEATHER WIDGET - Dock Compacto
-   ======================================== */
-
-.weather-widget-sidebar {
-  background: linear-gradient(135deg,
-              rgba(255, 255, 255, 0.5) 0%,
-              rgba(255, 255, 255, 0.4) 100%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1.5px solid rgba(255, 255, 255, 0.6);
-  border-radius: 18px;
-  padding: 0;
-  margin: 12px auto;
-  width: 56px !important;
-  height: 56px !important;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2),
-              inset 0 1px 0 rgba(255, 255, 255, 0.6),
-              0 2px 8px rgba(0, 0, 0, 0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.weather-widget-sidebar:hover {
-  background: linear-gradient(135deg,
-              rgba(255, 255, 255, 0.8) 0%,
-              rgba(255, 255, 255, 0.7) 100%);
-  transform: translateX(6px) scale(1.05);
-  box-shadow: -6px 0 20px rgba(251, 191, 36, 0.3),
-              inset 0 1px 0 rgba(255, 255, 255, 0.8),
-              0 4px 16px rgba(0, 0, 0, 0.12);
-}
-
-.weather-icon-large {
-  font-size: 1.75rem;
-  margin: 0;
-  display: inline;
-  filter: drop-shadow(0 3px 6px rgba(251, 191, 36, 0.4)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
-  color: #F59E0B;
-  animation: weatherPulse 3s ease-in-out infinite;
-  position: relative;
-  z-index: 2;
-}
-
-@keyframes weatherPulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.05); opacity: 0.9; }
-}
-
-.weather-icon-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.weather-animation-clouds {
-  position: absolute;
-  width: 30px;
-  height: 15px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 10px;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  animation: cloudsMove 4s ease-in-out infinite;
-  z-index: 1;
-}
-
-.weather-animation-clouds::before,
-.weather-animation-clouds::after {
-  content: '';
-  position: absolute;
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 50%;
-}
-
-.weather-animation-clouds::before {
-  width: 12px;
-  height: 12px;
-  top: -5px;
-  left: 5px;
-}
-
-.weather-animation-clouds::after {
-  width: 15px;
-  height: 15px;
-  top: -6px;
-  right: 5px;
-}
-
-@keyframes cloudsMove {
-  0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.6; }
-  50% { transform: translateX(-50%) translateY(-3px); opacity: 0.9; }
-}
-
-.weather-temp-large,
-.weather-desc-large,
-.weather-details-mini {
-  display: none !important;
-}
-
-/* ========================================
-   USER PROFILE - Dock Compacto
-   ======================================== */
-
-.user-profile {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  padding: 0 !important;
-  margin: 16px auto 0 !important;
-  gap: 0 !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-  padding-top: 16px !important;
-  width: 100%;
-}
-
-.user-profile #avatarQuickButton {
-  width: 52px !important;
-  height: 52px !important;
-  border-radius: 50% !important;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  border: 2px solid rgba(124, 179, 66, 0.4) !important;
-  box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3),
-              0 0 0 3px rgba(255, 255, 255, 0.1),
-              inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  background: transparent !important;
-}
-
-.user-profile #avatarQuickButton:hover {
-  transform: translateX(6px) scale(1.05);
-  border-color: rgba(124, 179, 66, 0.7) !important;
-  box-shadow: -4px 0 20px rgba(124, 179, 66, 0.5),
-              0 0 0 4px rgba(255, 255, 255, 0.15),
-              inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-.user-profile #avatarThumb {
-  width: 100% !important;
-  height: 100% !important;
-  border-radius: 50% !important;
-  border: none !important;
-  object-fit: cover;
-}
-
-.user-profile .d-flex.flex-column,
-.user-profile .ms-auto {
-  display: none !important;
-}
-
-/* ========================================
-   WEATHER BUBBLE MODAL - Dise\u00f1o iOS Moderno
+   WEATHER BUBBLE MODAL - Dise�o iOS Moderno
    ======================================== */
 
 .weather-bubble-modal {
   position: fixed;
   top: 50%;
-  left: 120px;
+  left: 130px;
   transform: translateY(-50%);
   z-index: 2000;
   animation: bubbleSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -475,17 +279,15 @@
    ======================================== */
 
 .main-content {
-  margin-left: 125px !important;
+  margin-left: 150px !important;
   padding: 2rem !important;
   transition: margin-left 0.3s ease;
 }
 
+/* Responsive - Ocultar dock en m�vil */
 @media (max-width: 991px) {
-  .sidebar {
-    position: static !important;
-    transform: none !important;
-    width: 100% !important;
-    border-radius: 0 !important;
+  .dock-container {
+    display: none !important;
   }
   
   .main-content {

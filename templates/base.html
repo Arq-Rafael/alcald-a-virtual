@@ -299,109 +299,131 @@
 
   <!-- Sidebar Navigation -->
   {% if session.user %}
-  <nav class="sidebar d-none d-lg-block">
-    <div class="sidebar-header">
-      <a href="{{ url_for('main.dashboard') }}" title="Inicio">
-        <div class="logo-ios-modern">
-          <i class="bi bi-buildings-fill"></i>
-        </div>
-      </a>
-      <a href="{{ url_for('main.dashboard') }}" class="sidebar-brand">Alcaldía Virtual</a>
-    </div>
+  <nav class="dock-container d-none d-lg-flex">
+    <!-- Inicio -->
+    <a href="{{ url_for('main.dashboard') }}" class="dock-item item-home">
+      <div class="icon-box">
+        <i class="bi bi-buildings-fill"></i>
+      </div>
+      <span class="label">Inicio</span>
+    </a>
 
-    <div class="d-flex flex-column gap-1">
-      <a class="nav-link {% if request.endpoint=='ia.letter' %}active{% endif %}" href="{{ url_for('ia.letter') }}" title="Redactar Oficio">
+    <!-- Redactar Oficio -->
+    <a href="{{ url_for('ia.letter') }}" class="dock-item item-letter {% if request.endpoint=='ia.letter' %}active{% endif %}">
+      <div class="icon-box">
         <i class="bi bi-pencil-square"></i>
-      </a>
+      </div>
+      <span class="label">Redactar</span>
+    </a>
 
-      {% if can('solicitudes') %}
-      <a class="nav-link" href="{{ url_for('solicitudes.index') }}" title="Solicitudes">
+    <!-- Solicitudes -->
+    {% if can('solicitudes') %}
+    <a href="{{ url_for('solicitudes.index') }}" class="dock-item item-solicitudes">
+      <div class="icon-box">
         <i class="bi bi-file-earmark-text"></i>
-      </a>
-      {% endif %}
+      </div>
+      <span class="label">Solicitudes</span>
+    </a>
+    {% endif %}
 
-      <a class="nav-link" href="/calendario" title="Calendario">
+    <!-- Calendario -->
+    <a href="/calendario" class="dock-item item-calendar">
+      <div class="icon-box">
         <i class="bi bi-calendar-event"></i>
-      </a>
-      
-      {% if can('participacion') %}
-      <a class="nav-link" href="{{ url_for('participacion.index') }}" title="Participación">
+      </div>
+      <span class="label">Calendario</span>
+    </a>
+
+    <!-- Participación -->
+    {% if can('participacion') %}
+    <a href="{{ url_for('participacion.index') }}" class="dock-item item-participacion">
+      <div class="icon-box">
         <i class="bi bi-people"></i>
-      </a>
-      {% endif %}
+      </div>
+      <span class="label">Ciudadanía</span>
+    </a>
+    {% endif %}
 
-      <a class="nav-link" href="{{ url_for('main.geoportal') }}" title="Geoportal">
+    <!-- Geoportal -->
+    <a href="{{ url_for('main.geoportal') }}" class="dock-item item-geoportal">
+      <div class="icon-box">
         <i class="bi bi-globe-americas"></i>
-      </a>
+      </div>
+      <span class="label">Geoportal</span>
+    </a>
 
-      {% if can('seguimiento') %}
-      <a class="nav-link" href="{{ url_for('seguimiento.index') }}" title="Seguimiento a Metas">
+    <!-- Seguimiento -->
+    {% if can('seguimiento') %}
+    <a href="{{ url_for('seguimiento.index') }}" class="dock-item item-seguimiento">
+      <div class="icon-box">
         <i class="bi bi-graph-up-arrow"></i>
-      </a>
-      {% endif %}
+      </div>
+      <span class="label">Metas</span>
+    </a>
+    {% endif %}
 
-      <a class="nav-link" href="{{ url_for('main.gestion_riesgo') }}" title="Gestión del Riesgo">
+    <!-- Gestión del Riesgo -->
+    <a href="{{ url_for('main.gestion_riesgo') }}" class="dock-item item-riesgo">
+      <div class="icon-box">
         <i class="bi bi-tree"></i>
-      </a>
+      </div>
+      <span class="label">Riesgo</span>
+    </a>
 
-      <a class="nav-link" href="/contratos" title="Contratación">
+    <!-- Contratación -->
+    <a href="/contratos" class="dock-item item-contratos">
+      <div class="icon-box">
         <i class="bi bi-file-earmark-contract"></i>
-      </a>
+      </div>
+      <span class="label">Contratos</span>
+    </a>
+
+    <!-- Clima -->
+    <div class="dock-item item-clima" onclick="showWeatherDetails()">
+      <div class="icon-box">
+        <i class="bi bi-cloud-sun-fill"></i>
+      </div>
+      <span class="label">Clima</span>
     </div>
 
-    <!-- Weather Widget -->
-    <div class="weather-widget-sidebar" onclick="showWeatherDetails()">
-      <div class="weather-icon-container">
-        <i class="bi bi-cloud-sun-fill weather-icon-large"></i>
-        <div class="weather-animation-clouds"></div>
+    <!-- Perfil -->
+    <button id="avatarQuickButton" type="button" class="dock-item item-profile">
+      <div class="icon-box">
+        {% if current_user_foto %}
+        <img id="avatarThumb" src="/{{ current_user_foto }}" alt="Perfil" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;" />
+        {% else %}
+        <i class="bi bi-person-fill"></i>
+        {% endif %}
       </div>
-    </div>
-    
-    <!-- Weather Bubble Modal -->
-    <div id="weatherBubble" class="weather-bubble-modal" style="display: none;">
-      <div class="weather-bubble-content">
-        <div class="weather-bubble-header">
-          <i class="bi bi-cloud-sun-fill" style="font-size: 3rem; color: #fbbf24;"></i>
-          <h3 style="margin: 0.5rem 0; font-weight: 700;">22°C</h3>
-          <p style="margin: 0; opacity: 0.8;">Parcialmente nublado</p>
-        </div>
-        <div class="weather-bubble-details">
-          <div class="weather-detail-item">
-            <i class="bi bi-droplet-fill"></i>
-            <span>Humedad: 65%</span>
-          </div>
-          <div class="weather-detail-item">
-            <i class="bi bi-wind"></i>
-            <span>Viento: 12 km/h</span>
-          </div>
-          <div class="weather-detail-item">
-            <i class="bi bi-thermometer-half"></i>
-            <span>Sensación: 21°C</span>
-          </div>
-        </div>
-        <button onclick="hideWeatherBubble()" class="weather-bubble-close">Cerrar</button>
-      </div>
-    </div>
-
-    <div class="user-profile mt-auto">
-        <button id="avatarQuickButton" type="button" class="border-0 bg-transparent p-0 position-relative" title="Perfil rápido" style="display:flex; align-items:center;">
-          {% if current_user_foto %}
-          <img id="avatarThumb" src="/{{ current_user_foto }}" alt="Foto" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 2px solid #e5e7eb;">
-          {% else %}
-          <div id="avatarThumb" class="avatar-wave d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-            <i class="bi bi-person-fill"></i>
-          </div>
-          {% endif %}
-        </button>
-        <div class="d-flex flex-column" style="overflow:hidden;">
-            <span class="fw-bold text-truncate" style="font-size: 0.9rem;">{{ session.user }}</span>
-            <span class="text-muted small">{{ session.user_role }}</span>
-        </div>
-        <a href="{{ url_for('auth.logout') }}" class="ms-auto text-danger" title="Salir">
-            <i class="bi bi-box-arrow-right"></i>
-        </a>
-    </div>
+      <span class="label">Perfil</span>
+    </button>
   </nav>
+  
+  <!-- Weather Bubble Modal -->
+  <div id="weatherBubble" class="weather-bubble-modal" style="display: none;">
+    <div class="weather-bubble-content">
+      <div class="weather-bubble-header">
+        <i class="bi bi-cloud-sun-fill" style="font-size: 3rem; color: #fbbf24;"></i>
+        <h3 style="margin: 0.5rem 0; font-weight: 700;">22°C</h3>
+        <p style="margin: 0; opacity: 0.8;">Parcialmente nublado</p>
+      </div>
+      <div class="weather-bubble-details">
+        <div class="weather-detail-item">
+          <i class="bi bi-droplet-fill"></i>
+          <span>Humedad: 65%</span>
+        </div>
+        <div class="weather-detail-item">
+          <i class="bi bi-wind"></i>
+          <span>Viento: 12 km/h</span>
+        </div>
+        <div class="weather-detail-item">
+          <i class="bi bi-thermometer-half"></i>
+          <span>Sensación: 21°C</span>
+        </div>
+      </div>
+      <button onclick="hideWeatherBubble()" class="weather-bubble-close">Cerrar</button>
+    </div>
+  </div>
   
   <!-- Offcanvas for Mobile -->
   <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas">

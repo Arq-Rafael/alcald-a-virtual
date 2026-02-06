@@ -17,10 +17,35 @@
         --text-secondary: #666666;
         --text-muted: #999999;
     }
+
+    /* Login Glass Effect - Premium Glassmorphism */
+    .login-glass {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    }
+
+    /* Apply login-glass to calendar panels */
+    .calendar-panel.premium,
+    .sidebar-card.premium,
+    .event-detail-panel.premium,
+    .create-event-panel.premium,
+    .quick-event-modal.premium,
+    .event-modal-content.premium {
+        background: rgba(255, 255, 255, 0.1) !important;
+        backdrop-filter: blur(10px) !important;
+        border-radius: 20px !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37) !important;
+    }
     
     .calendar-container {
         min-height: 100vh;
-        background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 50%, #e8f5e9 100%);
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
         padding: 2rem 1rem;
         position: relative;
     }
@@ -108,9 +133,9 @@
         height: 44px;
         border-radius: 50%;
         border: none;
-        background: var(--glass-bg);
+        background: rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(10px);
-        border: 1px solid var(--glass-border);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         cursor: pointer;
         display: flex;
         align-items: center;
@@ -118,14 +143,14 @@
         color: var(--primary-green);
         font-size: 1.2rem;
         transition: all 0.3s ease;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
         text-decoration: none;
     }
     
     .nav-btn:hover {
-        background: rgba(124, 179, 66, 0.1);
+        background: rgba(124, 179, 66, 0.15);
         transform: scale(1.05);
-        box-shadow: 0 4px 12px rgba(124, 179, 66, 0.2);
+        box-shadow: 0 12px 48px 0 rgba(31, 38, 135, 0.3);
         color: var(--primary-green);
     }
     
@@ -136,10 +161,11 @@
     /* Main calendar grid */
     .main-grid {
         display: grid;
-        grid-template-columns: 1fr 350px;
-        gap: 2rem;
-        max-width: 1400px;
+        grid-template-columns: 1fr 300px;
+        gap: 2.5rem;
+        max-width: 100%;
         margin: 0 auto;
+        padding: 0 2rem;
     }
     
     @media (max-width: 1024px) {
@@ -165,21 +191,20 @@
     
     /* Calendar panel glassmorphic */
     .calendar-panel {
-        background: var(--glass-bg);
-        backdrop-filter: blur(20px);
+        background: #ffffff;
         border-radius: 24px;
-        border: 1px solid var(--glass-border);
-        padding: 2rem;
+        padding: 2.5rem;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         overflow: hidden;
+        width: 100%;
     }
     
     /* Grid de días */
     .weekdays {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
-        gap: 0.5rem;
-        margin-bottom: 1rem;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
     }
     
     .weekday-label {
@@ -195,7 +220,7 @@
     .days-grid {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
-        gap: 0.5rem;
+        gap: 1rem;
     }
     
     .day-cell {
@@ -212,8 +237,8 @@
         position: relative;
         font-weight: 500;
         color: var(--text-primary);
-        min-height: 100px;
-        padding: 0.5rem;
+        min-height: 120px;
+        padding: 0.75rem;
         overflow: hidden;
     }
     
@@ -301,12 +326,12 @@
     }
     
     .sidebar-card {
-        background: var(--glass-bg);
-        backdrop-filter: blur(20px);
-        border-radius: 24px;
-        border: 1px solid var(--glass-border);
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
         padding: 1.5rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     }
     
     .sidebar-title {
@@ -502,12 +527,12 @@
         position: fixed;
         bottom: 2rem;
         right: 2rem;
-        background: var(--glass-bg);
-        backdrop-filter: blur(20px);
-        border-radius: 16px;
-        border: 1px solid var(--glass-border);
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
         padding: 1rem 1.5rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
         max-width: 350px;
         z-index: 1100;
         animation: slideIn 0.3s ease;
@@ -601,10 +626,10 @@
         top: 0;
         width: 400px;
         height: 100vh;
-        background: var(--glass-bg);
-        backdrop-filter: blur(20px);
-        border-left: 1px solid var(--glass-border);
-        box-shadow: -8px 0 32px rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-left: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: -8px 0 32px 0 rgba(31, 38, 135, 0.37);
         overflow-y: auto;
         z-index: 1050;
         transition: right 0.3s ease;
@@ -761,14 +786,14 @@
     }
     
     .quick-event-modal {
-        background: var(--glass-bg);
-        backdrop-filter: blur(20px);
-        border: 1px solid var(--glass-border);
-        border-radius: 28px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
         padding: 3rem;
         max-width: 600px;
         width: 95%;
-        box-shadow: 0 25px 65px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 25px 65px 0 rgba(31, 38, 135, 0.37);
         animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     
@@ -904,16 +929,16 @@
     }
     
     .event-modal-content {
-        background: var(--glass-bg);
-        backdrop-filter: blur(20px);
-        border-radius: 24px;
-        border: 1px solid var(--glass-border);
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
         padding: 2rem;
         max-width: 500px;
         width: 90%;
         max-height: 90vh;
         overflow-y: auto;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 20px 60px 0 rgba(31, 38, 135, 0.37);
     }
     
     .event-modal-header {
