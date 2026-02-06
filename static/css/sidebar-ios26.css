@@ -141,6 +141,10 @@
 .item-profile { color: #a3e635; }
 .item-profile .icon-box { background: rgba(163, 230, 53, 0.15); }
 
+/* Logout (Rojo) */
+.item-logout { color: #EF4444; }
+.item-logout .icon-box { background: rgba(239, 68, 68, 0.15); }
+
 /* Estado activo */
 .dock-item.active .icon-box {
     background: linear-gradient(135deg, rgba(102, 187, 106, 0.3), rgba(102, 187, 106, 0.15));
