@@ -3,6 +3,7 @@ import os
 import json
 import pandas as pd
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session, current_app, jsonify
+from app.utils.rbac import require_permission
 from app.utils import admin_required
 from app import db
 from app.models.usuario import Usuario, AuditoriaAcceso
@@ -39,6 +40,7 @@ def _user_dict(u):
     }
 
 @configuracion_bp.route('/configuracion', methods=['GET','POST'], endpoint='index')
+@require_permission('configuracion')
 @admin_required
 def configuracion():
     """Panel de administración completo"""

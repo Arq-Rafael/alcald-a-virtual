@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for, send_file, current_app, abort, jsonify
+from app.utils.rbac import require_permission
 from app import db
 from app.models.metas import MetaPlan
 
@@ -154,6 +155,7 @@ def _load_plan_excel():
 
 
 @seguimiento_bp.route('/seguimiento', endpoint='index')
+@require_permission('seguimiento')
 def seguimiento_plan():
     data = _load_plan_excel()
     if not data:

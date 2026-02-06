@@ -66,7 +66,7 @@ def perfil():
                     return jsonify(success=False, error='Formato de imagen no permitido')
                 return redirect(url_for('perfil.perfil'))
             
-            upload_dir = os.path.join(current_app.config.get('BASE_DIR', os.getcwd()), 'uploads', 'perfiles')
+            upload_dir = os.path.join(str(current_app.config.get('BASE_DIR', os.getcwd())), 'uploads', 'perfiles')
             os.makedirs(upload_dir, exist_ok=True)
             filename = secure_filename(f"{user.usuario}.{ext}")
             path = os.path.join(upload_dir, filename)

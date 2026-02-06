@@ -3,6 +3,7 @@ API de Contratos - Integración con SECOP I y SECOP II
 Permite importar, sincronizar y gestionar contratos desde las plataformas oficiales
 """
 from flask import Blueprint, request, jsonify, send_file
+from app.utils.rbac import require_permission
 from datetime import datetime, timedelta
 import json
 import re
@@ -347,6 +348,7 @@ def importar_desde_secop_ii(proceso_id):
 # ============================================================================
 
 @contratos_api.route('/importar', methods=['POST'])
+@require_permission('contratos')
 def importar_contrato():
     """
     Importa un contrato desde SECOP I o SECOP II mediante URL o ID
@@ -441,6 +443,7 @@ def importar_contrato():
 
 
 @contratos_api.route('', methods=['GET'])
+@require_permission('contratos')
 def listar_contratos():
     """Lista contratos con filtros opcionales"""
     try:

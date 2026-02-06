@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session, current_app, jsonify, send_file
+from app.utils.rbac import require_permission
 from app import db
 from app.models.participacion import Radicado, RespuestaRadicado
 from app.utils import can_access, admin_required
@@ -53,6 +54,7 @@ def radicado_to_dict(radicado):
     }
 
 @participacion_bp.route('', endpoint='index')
+@require_permission('participacion')
 def index():
     """Vista principal del módulo de participación (iOS26 mejorado)"""
     if 'user' not in session:

@@ -8,6 +8,7 @@ from datetime import timedelta
 from flask import Blueprint, render_template, request, flash, redirect, url_for, send_file, session, abort, current_app, jsonify
 from werkzeug.utils import secure_filename
 from app.utils import get_sqlite, dias_restantes, color_semaforo_dias, admin_required, load_plan_desarrollo
+from app.utils.rbac import require_permission
 from app import db
 
 solicitudes_bp = Blueprint('solicitudes', __name__)
@@ -15,6 +16,7 @@ solicitudes_bp = Blueprint('solicitudes', __name__)
 # --- Routes: Solicitudes Generales (CSV) ---
 
 @solicitudes_bp.route('/solicitudes', methods=['GET', 'POST'], endpoint='index')
+@require_permission('solicitudes')
 def solicitudes():
     secretarias = [
       "Secretaría General y de Gobierno",
