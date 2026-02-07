@@ -355,12 +355,22 @@ def contrat_list():
     from flask import session
     if not session.get('user'):
         return redirect(url_for('auth.login'))
+    # Importar can_access localmente para evitar circular imports
+    from app.utils import can_access
+    if not can_access('contratos'):
+        flash('No tienes permisos para acceder a este módulo', 'error')
+        return redirect(url_for('main.dashboard'))
     return render_template('contratos.html')
 # Alias para compatibilidad: /contratos -> /contratacion
 @solicitudes_bp.route('/contratos', endpoint='contratos_alias')
 def contratos_alias():
     if 'user' not in session:
         return redirect(url_for('auth.login'))
+    # Importar can_access localmente para evitar circular imports
+    from app.utils import can_access
+    if not can_access('contratos'):
+        flash('No tienes permisos para acceder a este módulo', 'error')
+        return redirect(url_for('main.dashboard'))
     return redirect(url_for('solicitudes.contrat_list'))
 
 # =========================

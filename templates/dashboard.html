@@ -476,6 +476,7 @@ body {
   {% endif %}
 
   <!-- GEOPORTAL - Fusión de Casco Urbano + Usos del Suelo -->
+  {% if can('geoportal') %}
   <div class="glass-card">
     <i class="bi bi-globe-americas card-icon text-primary"></i>
     <h5>Geoportal</h5>
@@ -484,6 +485,7 @@ body {
       VER MAPAS
     </a>
   </div>
+  {% endif %}
 
   <!-- SEGUIMIENTO Y METAS - Fusión -->
   {% if can('seguimiento') %}
@@ -498,6 +500,7 @@ body {
   {% endif %}
 
   <!-- GESTIÓN AMBIENTAL - Fusión de Arbolado + Comité + Gestión Riesgo -->
+  {% if can('riesgo') %}
   <div class="glass-card">
     <i class="bi bi-tree-fill card-icon text-success"></i>
     <h5>Gestión del Riesgo</h5>
@@ -506,8 +509,10 @@ body {
       GESTIONAR
     </a>
   </div>
+  {% endif %}
 
   <!-- Contratación -->
+  {% if can('contratos') %}
   <div class="glass-card">
     <i class="bi bi-file-earmark-contract-fill card-icon text-info"></i>
     <h5>Contratación</h5>
@@ -516,6 +521,7 @@ body {
       CONTRATOS
     </a>
   </div>
+  {% endif %}
 
   <!-- Configuración -->
   {% if session.user_role == 'admin' %}

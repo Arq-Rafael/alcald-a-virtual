@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session, redirect, url_for, current_app, request
+from flask import Blueprint, render_template, session, redirect, url_for, current_app, request, flash
 from app.utils import can_access, normalize_features
 import json
 import os
@@ -28,6 +28,9 @@ def geoportal():
     """Catastro Municipal 3D Profesional - Vista unificada estilo Google Maps"""
     if not session.get('user'):
         return redirect(url_for('auth.login'))
+    if not can_access('geoportal'):
+        flash('No tienes permisos para acceder a este módulo', 'error')
+        return redirect(url_for('main.dashboard'))
     return render_template('catastro_3d.html')
 
 @main_bp.route('/gestion-riesgo')
@@ -36,18 +39,27 @@ def gestion_riesgo():
     """Módulo de Gestión del Riesgo (Gestión Arbórea + Actas CMGR + Planes de Contingencia)"""
     if not session.get('user'):
         return redirect(url_for('auth.login'))
+    if not can_access('riesgo'):
+        flash('No tienes permisos para acceder a este módulo', 'error')
+        return redirect(url_for('main.dashboard'))
     return render_template('gestion_riesgo.html')
 
 @main_bp.route('/riesgo/gestion-arborea')
 def riesgo_gestion_arborea():
     if not session.get('user'):
         return redirect(url_for('auth.login'))
+    if not can_access('riesgo'):
+        flash('No tienes permisos para acceder a este módulo', 'error')
+        return redirect(url_for('main.dashboard'))
     return render_template('riesgo_gestion_arborea_v2.html', user=session.get('user'))
 
 @main_bp.route('/riesgo/actas-cmgr')
 def riesgo_actas_cmgr():
     if not session.get('user'):
         return redirect(url_for('auth.login'))
+    if not can_access('riesgo'):
+        flash('No tienes permisos para acceder a este módulo', 'error')
+        return redirect(url_for('main.dashboard'))
     return render_template('riesgo_actas_cmgr.html')
 
 @main_bp.route('/riesgo/planes-contingencia')
