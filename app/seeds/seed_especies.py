@@ -2,10 +2,7 @@
 Script para poblar la base de datos con especies de árboles nativos y comunes en Colombia
 Ejecutar con: python app/seeds/seed_especies.py
 """
-from app import db, create_app
 from app.models.riesgo_arborea import ArbolEspecie
-
-app = create_app()
 
 # Datos de especies colombianas
 ESPECIES = [
@@ -221,22 +218,24 @@ ESPECIES = [
     },
 ]
 
-def seed_especies():
+def seed_especies(db_instance):
     """Crea las especies en la base de datos"""
-    with app.app_context():
-        # Verificar si ya existen
-        if ArbolEspecie.query.first():
-            print("Las especies ya existen en la base de datos")
-            return
-        
-        count = 0
-        for especie_data in ESPECIES:
-            especie = ArbolEspecie(**especie_data)
-            db.session.add(especie)
-            count += 1
-        
-        db.session.commit()
-        print(f"✓ {count} especies agregadas a la base de datos")
+    # Verificar si ya existen
+    if ArbolEspecie.query.first():
+        print("Las especies ya existen en la base de datos")
+        return
+    
+    count = 0
+    for especie_data in ESPECIES:
+        especie = ArbolEspecie(**especie_data)
+        db_instance.session.add(especie)
+        count += 1
+    
+    db_instance.session.commit()
+    print(f"✓ {count} especies agregadas a la base de datos")
 
 if __name__ == '__main__':
-    seed_especies()
+    from app import create_app, db
+    app = create_app()
+    with app.app_context():
+        seed_especies(db)

@@ -114,7 +114,16 @@ def create_app(config_class=Config):
         from .models.calendario import EventoCalendario  # noqa: F401
         from .models.participacion import Radicado, RespuestaRadicado  # noqa: F401
         from .models.usuario import Usuario, AuditoriaAcceso  # noqa: F401
+        from .models.riesgo_arborea import RadicadoArborea, ArbolEspecie  # noqa: F401
         db.create_all()
+        
+        # Seed especies de árboles
+        try:
+            from .seeds.seed_especies import seed_especies
+            seed_especies(db)
+            logging.info("[INIT] Especies de árboles cargadas")
+        except Exception as e:
+            logging.error(f"[INIT] Error al cargar especies: {e}")
     
     # Serve uploaded files (perfil photos, etc.)
     @app.route('/uploads/<path:filename>')
