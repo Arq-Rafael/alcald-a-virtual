@@ -53,6 +53,7 @@ def create_app(config_class=Config):
     from .routes.plan_contingencia_v2_routes import contingencia_bp
     from .routes.admin_fix import admin_fix_bp
     from .routes.totp_setup import totp_bp
+    from .routes.backup_api import backup_api
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
@@ -76,6 +77,7 @@ def create_app(config_class=Config):
     app.register_blueprint(contingencia_bp)
     app.register_blueprint(admin_fix_bp)
     app.register_blueprint(totp_bp)
+    app.register_blueprint(backup_api)
 
     
     # Context Processors (for templates)
@@ -116,6 +118,14 @@ def create_app(config_class=Config):
         from .models.usuario import Usuario, AuditoriaAcceso  # noqa: F401
         from .models.riesgo_arborea import RadicadoArborea, ArbolEspecie  # noqa: F401
         db.create_all()
+        
+        # Inicializar sistema de backup
+        try:
+            from .utils.backup_manager import BackupManager
+            app.backup_manager = BackupManager(app)
+            logging.info("[INIT] Sistema de backup inicializado")
+        except Exception as e:
+            logging.error(f"[INIT] Error inicializando backup: {e}")
         
         # Seed especies de árboles
         try:

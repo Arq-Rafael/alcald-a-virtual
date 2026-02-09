@@ -45,6 +45,10 @@ class Config:
     REPORTES_OUTPUT_DIR = DOCUMENTOS_DIR / "reportes"
     TALA_OUTPUT_DIR = DOCUMENTOS_DIR / "tala"
     
+    # Backup Configuration
+    BACKUPS_DIR = BASE_DIR / "backups"  # Directorio para almacenar backups
+    BACKUP_MAX_VERSIONS = 10  # Mantener últimos 10 backups
+    
     # Feature Flags / Permissions
     ALWAYS_ADMIN = True # Dev mode
     
