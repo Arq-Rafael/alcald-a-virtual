@@ -137,12 +137,12 @@
           <div class="col-md-6">
             <label class="form-label">Especie del árbol *</label>
             <div class="input-group">
-              <select class="form-select" id="arbol_especie_select" required>
+              <select class="form-select" id="arbol_especie_select">
                 <option value="">Cargando especies...</option>
               </select>
               <button type="button" class="btn btn-outline-secondary btn-small" id="toggle_especie_manual">Especie no listada</button>
             </div>
-            <input type="text" class="form-control" id="arbol_especie_manual" placeholder="Ingrese especie manualmente" style="display:none; margin-top:8px;">
+            <input type="text" class="form-control" id="arbol_especie_manual" placeholder="Ingrese especie manualmente" style="display:none; margin-top:8px;" required>
             <small class="text-muted">Puedes seleccionar de la lista o escribir manualmente.</small>
           </div>
           <div class="col-md-4">
@@ -439,9 +439,21 @@ document.getElementById('toggle_especie_manual').addEventListener('click', () =>
   const select = document.getElementById('arbol_especie_select');
   const btn = document.getElementById('toggle_especie_manual');
   const willShow = manual.style.display === 'none' || manual.style.display === '';
-  manual.style.display = willShow ? 'block' : 'none';
-  if (willShow) { select.value = ''; btn.textContent = 'Usar lista de especies'; }
-  else { btn.textContent = 'Especie no listada'; }
+  
+  if (willShow) {
+    // Activar modo manual
+    manual.style.display = 'block';
+    manual.focus();
+    select.value = '';
+    btn.textContent = '📋 Usar lista de especies';
+    btn.className = 'btn btn-outline-primary btn-small';
+  } else {
+    // Volver a modo select
+    manual.style.display = 'none';
+    manual.value = '';
+    btn.textContent = '✏️ Especie no listada';
+    btn.className = 'btn btn-outline-secondary btn-small';
+  }
 });
 
 // === FASE 1: RADICACIÓN ===
@@ -449,12 +461,21 @@ document.getElementById('form-radicacion').addEventListener('submit', async (e) 
   e.preventDefault();
   
   const btn = document.getElementById('btn-guardar-radicado');
+  const especieManualInput = document.getElementById('arbol_especie_manual');
+  const especieSelect = document.getElementById('arbol_especie_select');
+  
+  const especieManual = especieManualInput.value.trim();
+  const especieSeleccionada = especieSelect.value;
+  const especieFinal = especieManual || especieSeleccionada;
+  
+  // Validar que se haya especificado una especie
+  if (!especieFinal) {
+    showAlert('❌ Debes seleccionar una especie o ingresarla manualmente', 'error');
+    return;
+  }
+  
   btn.disabled = true;
   btn.innerHTML = '💾 Guardando... <span class="spinner"></span>';
-  
-  const especieManual = document.getElementById('arbol_especie_manual').value.trim();
-  const especieSelect = document.getElementById('arbol_especie_select').value;
-  const especieFinal = especieManual || especieSelect;
 
   const data = {
     solicitante_nombre: document.getElementById('solicitante_nombre').value,
