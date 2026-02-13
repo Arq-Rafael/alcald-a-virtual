@@ -1,26 +1,123 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container my-4">
-  <div class="glass-panel p-5">
-    <div class="mb-4">
-      <h2 class="fw-bold mb-1" style="background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-        <i class="bi bi-file-earmark-plus me-2"></i>Nueva Licencia Urbanística
-      </h2>
-      <p class="text-muted mb-0">Complete la información del trámite</p>
+<div class="bg-animated"></div>
+
+<!-- MODAL AUTORIZACIÓN DATOS PERSONALES -->
+<div id="modalAutorizacion" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+  <div style="background: white; border-radius: 20px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); padding: 30px;">
+    
+    <!-- Header -->
+    <div style="text-align: center; margin-bottom: 25px;">
+      <div style="width: 60px; height: 60px; margin: 0 auto 15px; background: linear-gradient(135deg, #FF9800, #FF6F00); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 28px;">
+        📋
+      </div>
+      <h3 style="font-weight: 700; color: #1a1a1a; margin-bottom: 8px;">Autorización de Datos Personales</h3>
+      <p style="color: #666; font-size: 14px; margin: 0;">Antes de continuar, debes aceptar el tratamiento de tus datos personales</p>
     </div>
 
+    <!-- Contenido autorización -->
+    <div style="background: #f8f9ff; border-left: 4px solid #FF9800; padding: 18px; border-radius: 12px; margin-bottom: 20px; font-size: 13px; line-height: 1.7; color: #333;">
+      <p><strong>CURADURÍA URBANA I - SOACHA</strong></p>
+      <p style="margin-bottom: 15px;"><strong>AUTORIZACIÓN PARA EL MANEJO DE DATOS PERSONALES, CITAS WEB Y NOTIFICACIONES ELECTRÓNICAS</strong></p>
+      
+      <p><strong>IMPORTANTE:</strong> La presente autorización SOLO debe ser diligenciada por la persona natural cuando actúa en nombre propio o sus representantes autorizados. Para tramites ante esta entidad.</p>
+
+      <hr style="border: none; border-top: 1px solid #ddd; margin: 15px 0;">
+
+      <p><strong>TIPOS DE PROCEDIMIENTOS O TRÁMITES:</strong></p>
+      <ul style="margin-left: 20px; margin-bottom: 15px;">
+        <li>Registro de información personal en la Base de Datos del Sistema INFOCU</li>
+        <li>Registro en módulos web para consulta ciudadana y asignación de CITAS</li>
+        <li>Notificaciones por correo electrónico de certificados de información requerida</li>
+        <li>Notificaciones electrónicas de procedimientos administrativos particulares</li>
+        <li>Mensajes de texto certificados informando que se encuentra disponible una comunicación o acto administrativo en línea</li>
+        <li>Notificación del medio electrónico autorizado por la Curaduría</li>
+      </ul>
+
+      <p><strong>POLITICA DE TRATAMIENTO:</strong> La política de tratamiento de datos especiales de la entidad y direcciones web son publicados por INFOCU para consultar el listado de privacidad en: <span style="color: #FF9800; text-decoration: underline;">http://curaduría.soacha.com</span></p>
+
+      <p style="margin-bottom: 15px;"><strong>AUTORIZO:</strong> Es la diligencia como conozco y acepto los términos y condiciones establecidos en la ley 1581 de 2012 y sus normas reglamentarias. Autorizo a esta entidad desagregador mecanismos adicionales, auditoria y gratuita de mis datos administrativos con anotación de la fecha y la hora. Los recursos que luegamente procedan involucrando la notificación de esta manera.</p>
+
+      <p><strong>PARA EFECTOS DECLARO:</strong> Conozco y acepto los términos establecidos en la presente autorización. Las decisiones pueden poner término a una actuación administrativa o notificar personalmente interesado, a su disponible inmediatamente en la página web del incumplimiento de cualquiera de estos requisitos involucrará la notificación de esta manera.</p>
+    </div>
+
+    <!-- Checkbox aceptación -->
+    <div style="margin-bottom: 20px;">
+      <label id="labelAcceptacion" style="display: flex; align-items: flex-start; cursor: pointer; gap: 12px; padding: 12px; border-radius: 10px; transition: background 0.2s;">
+        <input type="checkbox" id="checkAutorizacion" style="width: 20px; height: 20px; cursor: pointer; margin-top: 2px; accent-color: #FF9800;">
+        <span style="color: #333; font-size: 14px;">
+          <strong>Acepto</strong> la autorización para el tratamiento de datos personales, citas web y notificaciones electrónicas en los términos anteriormente descritos.
+        </span>
+      </label>
+    </div>
+
+    <!-- Botones -->
+    <div style="display: flex; gap: 12px; justify-content: flex-end;">
+      <button type="button" onclick="rechazarAutorizacion()" style="padding: 11px 24px; border-radius: 12px; border: 2px solid #ddd; background: white; color: #666; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+        Rechazar
+      </button>
+      <button type="button" id="btnAceptarAuth" onclick="aceptarAutorizacion()" style="padding: 11px 28px; border-radius: 12px; border: none; background: #ddd; color: #999; font-weight: 600; cursor: not-allowed; transition: all 0.2s;" disabled>
+        Continuar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- CONTENIDO PRINCIPAL -->
+<div class="container-fluid fade-in-up" style="max-width: 1000px; padding-top: 30px; padding-bottom: 40px;">
+  
+  <!-- Header con progreso -->
+  <div style="margin-bottom: 40px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 style="font-size: 28px; font-weight: 700; color: #1a1a1a; margin: 0; background: linear-gradient(135deg, #FF9800, #FF6F00); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+          <i class="bi bi-building-fill me-2"></i>Nueva Licencia Urbanística
+        </h2>
+        <p style="color: #999; font-size: 14px; margin: 8px 0 0 0;">Completa tu solicitud en 3 sencillos pasos</p>
+      </div>
+    </div>
+
+    <!-- Indicador de progreso -->
+    <div style="display: flex; gap: 12px; max-width: 500px;">
+      <div class="wizard-step" data-step="1" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #FF9800, #FF6F00); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 18px;">1</div>
+        <span style="font-weight: 600; font-size: 13px; color: #333;">Identificación</span>
+      </div>
+      <div style="flex: none; width: 30px; position: relative; top: 35px;">
+        <div style="width: 100%; height: 3px; background: #e0e0e0; border-radius: 2px;"></div>
+      </div>
+      <div class="wizard-step" data-step="2" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+        <div style="width: 50px; height: 50px; background: #f0f0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ccc; font-weight: 700; font-size: 18px;">2</div>
+        <span style="font-weight: 600; font-size: 13px; color: #999;">Información</span>
+      </div>
+      <div style="flex: none; width: 30px; position: relative; top: 35px;">
+        <div style="width: 100%; height: 3px; background: #e0e0e0; border-radius: 2px;"></div>
+      </div>
+      <div class="wizard-step" data-step="3" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+        <div style="width: 50px; height: 50px; background: #f0f0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ccc; font-weight: 700; font-size: 18px;">3</div>
+        <span style="font-weight: 600; font-size: 13px; color: #999;">Confirmación</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulario en secciones -->
+  <div style="background: white; border-radius: 20px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.6);">
     <form method="post" class="row g-4" id="formLicencia" novalidate>
       
-      <!-- Sección 1: Identificación -->
-      <div class="col-12">
-        <h5 class="fw-bold text-primary mb-3">
-          <i class="bi bi-card-heading me-2"></i>Identificación del Trámite
-        </h5>
+      <!-- SECCIÓN 1: IDENTIFICACIÓN DEL TRÁMITE -->
+      <div class="col-12" style="margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0;">
+          <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #FF9800, #FF6F00); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">📋</div>
+          <div>
+            <h5 style="margin: 0; font-weight: 700; color: #1a1a1a; font-size: 16px;">Tipo de Trámite</h5>
+            <p style="margin: 4px 0 0 0; color: #999; font-size: 13px;">Selecciona el tipo de licencia que necesitas</p>
+          </div>
+        </div>
       </div>
 
-      <div class="col-md-4">
-        <label class="form-label form-label-premium">Tipo de trámite <span class="text-danger">*</span></label>
-        <select name="tipo" id="tipo" class="form-select form-control-glass" required>
+      <div class="col-md-6">
+        <label style="font-weight: 600; color: #333; font-size: 14px; display: block; margin-bottom: 8px;">Tipo de trámite <span style="color: #FF6F00;">*</span></label>
+        <select name="tipo" id="tipo" style="width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; color: #333; background: white; cursor: pointer; transition: all 0.2s;" required onchange="fillModalidades()">
           <option value="">-- Selecciona un tipo --</option>
           <option value="Licencia de Parcelación">Licencia de Parcelación</option>
           <option value="Licencia de Urbanización">Licencia de Urbanización</option>
@@ -30,52 +127,53 @@
           <option value="Otras actuaciones">Otras actuaciones</option>
           <option value="Revalidación">Revalidación</option>
         </select>
-        <small class="text-danger d-none" id="tipoError">Campo requerido</small>
       </div>
 
-      <div class="col-md-4">
-        <label class="form-label form-label-premium">Objeto del trámite</label>
-        <select name="objeto" id="objeto" class="form-select form-control-glass">
-          <option value="">(N/A)</option>
+      <div class="col-md-6">
+        <label style="font-weight: 600; color: #333; font-size: 14px; display: block; margin-bottom: 8px;">Modalidad <span style="color: #FF6F00;">*</span></label>
+        <select name="modalidad" id="modalidad" style="width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; color: #333; background: white; cursor: pointer; transition: all 0.2s;" required></select>
+      </div>
+
+      <div class="col-md-6">
+        <label style="font-weight: 600; color: #333; font-size: 14px; display: block; margin-bottom: 8px;">Objeto del trámite</label>
+        <select name="objeto" id="objeto" style="width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; color: #333; background: white; cursor: pointer; transition: all 0.2s;">
+          <option value="">(No aplica)</option>
           <option value="Prórroga">Prórroga</option>
           <option value="Modificación de licencia vigente">Modificación de licencia vigente</option>
           <option value="Revalidación">Revalidación</option>
         </select>
       </div>
 
-      <div class="col-md-4">
-        <label class="form-label form-label-premium">Modalidad <span class="text-danger">*</span></label>
-        <select name="modalidad" id="modalidad" class="form-select form-control-glass" required>
-          <!-- Se llena dinámicamente -->
-        </select>
-      </div>
-
-      <!-- Sección 2: Información del Predio -->
-      <div class="col-12 mt-4">
-        <h5 class="fw-bold text-primary mb-3">
-          <i class="bi bi-geo-alt me-2"></i>Información del Predio
-        </h5>
-      </div>
-
-      <div class="col-md-4">
-        <label class="form-label form-label-premium">Dirección <span class="text-danger">*</span></label>
-        <input name="direccion" id="direccion" class="form-control form-control-glass" required placeholder="Ej: Calle 10 # 5-20">
-        <small class="text-danger d-none" id="direccionError">La dirección es requerida</small>
+      
+      <!-- SECCIÓN 2: INFORMACIÓN DEL PREDIO -->
+      <div class="col-12" style="margin-top: 30px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0;">
+          <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #4CAF50, #45a049); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">🏠</div>
+          <div>
+            <h5 style="margin: 0; font-weight: 700; color: #1a1a1a; font-size: 16px;">Información del Predio</h5>
+            <p style="margin: 4px 0 0 0; color: #999; font-size: 13px;">Datos de identificación del inmueble</p>
+          </div>
+        </div>
       </div>
 
       <div class="col-md-4">
-        <label class="form-label form-label-premium">Cédula catastral</label>
-        <input name="chip" class="form-control form-control-glass" placeholder="Identificación catastral">
+        <label style="font-weight: 600; color: #333; font-size: 14px; display: block; margin-bottom: 8px;">Dirección <span style="color: #FF6F00;">*</span></label>
+        <input name="direccion" id="direccion" style="width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; color: #333; transition: all 0.2s;" required placeholder="Ej: Calle 10 # 5-20">
       </div>
 
       <div class="col-md-4">
-        <label class="form-label form-label-premium">Matrícula Inmobiliaria</label>
-        <input name="matricula" class="form-control form-control-glass">
+        <label style="font-weight: 600; color: #333; font-size: 14px; display: block; margin-bottom: 8px;">Cédula Catastral</label>
+        <input name="chip" style="width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; color: #333; transition: all 0.2s;" placeholder="Identificación catastral">
       </div>
 
       <div class="col-md-4">
-        <label class="form-label form-label-premium">Clasificación del suelo</label>
-        <select name="clasificacion_suelo" class="form-select form-control-glass">
+        <label style="font-weight: 600; color: #333; font-size: 14px; display: block; margin-bottom: 8px;">Matrícula Inmobiliaria</label>
+        <input name="matricula" style="width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; color: #333; transition: all 0.2s;">
+      </div>
+
+      <div class="col-md-4">
+        <label style="font-weight: 600; color: #333; font-size: 14px; display: block; margin-bottom: 8px;">Clasificación del Suelo</label>
+        <select name="clasificacion_suelo" style="width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; color: #333; background: white; cursor: pointer; transition: all 0.2s;">
           <option value="">(No especifica)</option>
           <option>Urbano</option>
           <option>Rural</option>
@@ -83,16 +181,30 @@
         </select>
       </div>
 
-      <!-- Sección 3: Uso y Áreas -->
-      <div class="col-12 mt-4">
-        <h5 class="fw-bold text-primary mb-3">
-          <i class="bi bi-rulers me-2"></i>Uso y Áreas
-        </h5>
+      <div class="col-md-4">
+        <label style="font-weight: 600; color: #333; font-size: 14px; display: block; margin-bottom: 8px;">Área del Lote (m²)</label>
+        <input name="area_lote" type="number" inputmode="decimal" step="0.01" min="0" style="width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; color: #333; transition: all 0.2s;">
       </div>
 
       <div class="col-md-4">
-        <label class="form-label form-label-premium">Uso</label>
-        <select name="uso" id="uso" class="form-select form-control-glass">
+        <label style="font-weight: 600; color: #333; font-size: 14px; display: block; margin-bottom: 8px;">Área Construida (m²)</label>
+        <input name="area_const" type="number" inputmode="decimal" step="0.01" min="0" style="width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; color: #333; transition: all 0.2s;">
+      </div>
+
+      <!-- SECCIÓN 3: USO Y CARACTERÍSTICAS -->
+      <div class="col-12" style="margin-top: 30px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0;">
+          <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #2196F3, #1976D2); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">📊</div>
+          <div>
+            <h5 style="margin: 0; font-weight: 700; color: #1a1a1a; font-size: 16px;">Uso y Características</h5>
+            <p style="margin: 4px 0 0 0; color: #999; font-size: 13px;">Información del uso del inmueble</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <label style="font-weight: 600; color: #333; font-size: 14px; display: block; margin-bottom: 8px;">Uso del Inmueble</label>
+        <select name="uso" id="uso" style="width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; color: #333; background: white; cursor: pointer; transition: all 0.2s;" onchange="toggleOtroUso()">
           <option>Vivienda</option>
           <option>Comercio y/o Servicios</option>
           <option>Institucional</option>
@@ -101,68 +213,14 @@
         </select>
       </div>
 
-      <div class="col-md-4 d-none" id="uso_otro_wrap">
-        <label class="form-label form-label-premium">¿Cuál?</label>
-        <input name="uso_otro" id="uso_otro" class="form-control form-control-glass" placeholder="Describe el uso">
-      </div>
-
-      <div class="col-md-4">
-        <label class="form-label form-label-premium">Área construida (m²)</label>
-        <input name="area_const" type="number" inputmode="decimal" step="0.01" min="0" class="form-control form-control-glass">
-      </div>
-
-      <div class="col-md-4">
-        <label class="form-label form-label-premium">Área lote (m²)</label>
-        <input name="area_lote" type="number" inputmode="decimal" step="0.01" min="0" class="form-control form-control-glass">
-      </div>
-
-      <!-- Sección 4: Solicitante y Profesionales -->
-      <div class="col-12 mt-4">
-        <h5 class="fw-bold text-primary mb-3">
-          <i class="bi bi-person-badge me-2"></i>Solicitante y Profesionales
-        </h5>
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label form-label-premium">Solicitante <span class="text-danger">*</span></label>
-        <input name="solicitante" id="solicitante" class="form-control form-control-glass" required placeholder="Nombre completo">
-        <small class="text-danger d-none" id="solicitanteError">El solicitante es requerido</small>
-      </div>
-
-      <div class="col-md-2">
-        <label class="form-label form-label-premium">Tipo doc</label>
-        <select name="tipo_doc_solicitante" class="form-select form-control-glass">
-          <option>CC</option>
-          <option>NIT</option>
-          <option>CE</option>
-        </select>
-      </div>
-
-      <div class="col-md-4">
-        <label class="form-label form-label-premium">Documento</label>
-        <input name="doc_solicitante" id="doc_solicitante" class="form-control form-control-glass">
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label form-label-premium">Responsable técnico</label>
-        <input name="responsable" class="form-control form-control-glass">
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label form-label-premium">Matrícula profesional</label>
-        <input name="matricula_prof" class="form-control form-control-glass">
-      </div>
-
-      <!-- Sección 5: Información Adicional -->
-      <div class="col-12 mt-4">
-        <h5 class="fw-bold text-primary mb-3">
-          <i class="bi bi-info-circle me-2"></i>Información Adicional
-        </h5>
+      <div class="col-md-3" id="uso_otro_wrap" style="display: none;">
+        <label style="font-weight: 600; color: #333; font-size: 14px; display: block; margin-bottom: 8px;">¿Cuál es el uso?</label>
+        <input name="uso_otro" id="uso_otro" style="width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; color: #333; transition: all 0.2s;" placeholder="Especifica el uso">
       </div>
 
       <div class="col-md-3">
-        <label class="form-label form-label-premium">Tipo de vivienda</label>
-        <select name="tipo_vivienda" class="form-select form-control-glass">
+        <label style="font-weight: 600; color: #333; font-size: 14px; display: block; margin-bottom: 8px;">Tipo de Vivienda</label>
+        <select name="tipo_vivienda" style="width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; color: #333; background: white; cursor: pointer; transition: all 0.2s;">
           <option value="">N/A</option>
           <option>VIP</option>
           <option>VIS</option>
@@ -171,38 +229,135 @@
       </div>
 
       <div class="col-md-3">
-        <label class="form-label form-label-premium">Bien de Interés Cultural</label>
-        <select name="bic" class="form-select form-control-glass">
+        <label style="font-weight: 600; color: #333; font-size: 14px; display: block; margin-bottom: 8px;">Bien de Interés Cultural</label>
+        <select name="bic" style="width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; color: #333; background: white; cursor: pointer; transition: all 0.2s;">
           <option>No</option>
           <option>Sí</option>
         </select>
       </div>
 
-      <div class="col-md-3">
-        <label class="form-label form-label-premium">Valor ($)</label>
-        <input name="valor" type="number" inputmode="decimal" step="0.01" min="0" class="form-control form-control-glass">
+      <!-- SECCIÓN 4: SOLICITANTE Y PROFESIONALES -->
+      <div class="col-12" style="margin-top: 30px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0;">
+          <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #9C27B0, #7B1FA2); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">👤</div>
+          <div>
+            <h5 style="margin: 0; font-weight: 700; color: #1a1a1a; font-size: 16px;">Solicitante y Profesionales</h5>
+            <p style="margin: 4px 0 0 0; color: #999; font-size: 13px;">Datos de identificación de responsables</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label style="font-weight: 600; color: #333; font-size: 14px; display: block; margin-bottom: 8px;">Solicitante <span style="color: #FF6F00;">*</span></label>
+        <input name="solicitante" id="solicitante" style="width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; color: #333; transition: all 0.2s;" required placeholder="Nombre completo">
+      </div>
+
+      <div class="col-md-2">
+        <label style="font-weight: 600; color: #333; font-size: 14px; display: block; margin-bottom: 8px;">Tipo Doc</label>
+        <select name="tipo_doc_solicitante" style="width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; color: #333; background: white; cursor: pointer; transition: all 0.2s;">
+          <option>CC</option>
+          <option>NIT</option>
+          <option>CE</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label style="font-weight: 600; color: #333; font-size: 14px; display: block; margin-bottom: 8px;">Número Documento</label>
+        <input name="doc_solicitante" id="doc_solicitante" style="width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; color: #333; transition: all 0.2s;">
+      </div>
+
+      <div class="col-md-6">
+        <label style="font-weight: 600; color: #333; font-size: 14px; display: block; margin-bottom: 8px;">Responsable Técnico</label>
+        <input name="responsable" style="width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; color: #333; transition: all 0.2s;" placeholder="Profesional responsable">
+      </div>
+
+      <div class="col-md-6">
+        <label style="font-weight: 600; color: #333; font-size: 14px; display: block; margin-bottom: 8px;">Matrícula Profesional</label>
+        <input name="matricula_prof" style="width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; color: #333; transition: all 0.2s;">
+      </div>
+      <!-- SECCIÓN 5: OBSERVACIONES -->
+      <div class="col-12" style="margin-top: 30px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0;">
+          <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #FF5722, #E64A19); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">📝</div>
+          <div>
+            <h5 style="margin: 0; font-weight: 700; color: #1a1a1a; font-size: 16px;">Información Adicional</h5>
+            <p style="margin: 4px 0 0 0; color: #999; font-size: 13px;">Detalles complementarios y observaciones</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label style="font-weight: 600; color: #333; font-size: 14px; display: block; margin-bottom: 8px;">Valor de la inversión ($)</label>
+        <input name="valor" type="number" inputmode="decimal" step="0.01" min="0" style="width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; color: #333; transition: all 0.2s;">
+      </div>
+
+      <div class="col-md-6">
+        <label style="font-weight: 600; color: #333; font-size: 14px; display: block; margin-bottom: 8px;">Plazo estimado de ejecución</label>
+        <input name="plazo_ejecucion" type="number" inputmode="numeric" placeholder="Meses" style="width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; color: #333; transition: all 0.2s;">
       </div>
 
       <div class="col-12">
-        <label class="form-label form-label-premium">Observaciones</label>
-        <textarea name="observaciones" class="form-control form-control-glass" rows="3" placeholder="Información adicional relevante..."></textarea>
+        <label style="font-weight: 600; color: #333; font-size: 14px; display: block; margin-bottom: 8px;">Observaciones adicionales</label>
+        <textarea name="observaciones" style="width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; color: #333; transition: all 0.2s; font-family: inherit; resize: vertical;" rows="3" placeholder="Información adicional relevante para tu solicitud..."></textarea>
       </div>
 
-      <!-- Botones de acción -->
-      <div class="col-12 text-end mt-5 d-flex flex-wrap gap-2 justify-content-end">
-        <a class="action-btn-form btn-outline" href="{{ url_for('solicitudes.licencias_list') }}">
-          <i class="bi bi-x-circle me-2"></i>Cancelar
+      <!-- BOTONES DE ACCIÓN -->
+      <div class="col-12" style="margin-top: 40px; display: flex; gap: 12px; justify-content: flex-end;">
+        <a href="{{ url_for('solicitudes.licencias_list') }}" style="padding: 13px 28px; border-radius: 12px; border: 2px solid #e0e0e0; background: white; color: #666; font-weight: 600; text-decoration: none; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;">
+          <i class="bi bi-x-circle"></i>Cancelar
         </a>
-        <button type="submit" class="action-btn-form btn-primary" id="btnSubmitLicencia">
-          <i class="bi bi-check-circle me-2"></i>Radicar Licencia
+        <button type="submit" id="btnSubmitLicencia" style="padding: 13px 28px; border-radius: 12px; border: none; background: linear-gradient(135deg, #FF9800, #FF6F00); color: white; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);">
+          <i class="bi bi-check-circle"></i>Radicar Licencia
         </button>
       </div>
     </form>
   </div>
 </div>
 
+<!-- ESTILOS Y SCRIPTS -->
+<style>
+  input[type="number"]:focus,
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  textarea:focus,
+  select:focus {
+    border-color: #FF9800 !important;
+    box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1) !important;
+    outline: none;
+  }
+
+  #btnSubmitLicencia:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 152, 0, 0.4) !important;
+    background: linear-gradient(135deg, #FFA726, #FF7043) !important;
+  }
+
+  #checkAutorizacion:checked + span {
+    color: #FF9800;
+  }
+
+  #labelAcceptacion:hover {
+    background: rgba(255, 152, 0, 0.05);
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .fade-in-up {
+    animation: slideDown 0.5s ease-out;
+  }
+</style>
+
 <script>
-  // Modalidades según FUN
+  // Variables globales
   const MODS = {
     "Licencia de Parcelación": ["Parcelación"],
     "Licencia de Urbanización": ["Desarrollo", "Saneamiento", "Reurbanización"],
@@ -221,6 +376,7 @@
     "Revalidación": ["(N/A)"]
   };
 
+  // Llenar modalidades según tipo de trámite
   function fillModalidades() {
     const tipo = document.getElementById('tipo').value;
     const sel = document.getElementById('modalidad');
@@ -235,54 +391,70 @@
     sel.disabled = (arr.length === 1 && arr[0] === "(N/A)");
   }
 
-  document.getElementById('tipo').addEventListener('change', fillModalidades);
-  fillModalidades();
-
-  // Mostrar campo "Otro" en uso
-  const usoSel = document.getElementById('uso');
-  const usoWrap = document.getElementById('uso_otro_wrap');
-  usoSel.addEventListener('change', () => {
-    if (usoSel.value === 'Otro') usoWrap.classList.remove('d-none');
-    else {
-      usoWrap.classList.add('d-none');
+  // Toggle "Otro uso"
+  function toggleOtroUso() {
+    const usoSel = document.getElementById('uso');
+    const usoWrap = document.getElementById('uso_otro_wrap');
+    if (usoSel.value === 'Otro') {
+      usoWrap.style.display = 'block';
+    } else {
+      usoWrap.style.display = 'none';
       document.getElementById('uso_otro').value = "";
+    }
+  }
+
+  // Autorización datos personales
+  const checkAuth = document.getElementById('checkAutorizacion');
+  const btnAuth = document.getElementById('btnAceptarAuth');
+  const labelAuth = document.getElementById('labelAcceptacion');
+
+  checkAuth.addEventListener('change', function() {
+    if (this.checked) {
+      btnAuth.disabled = false;
+      btnAuth.style.background = 'linear-gradient(135deg, #FF9800, #FF6F00)';
+      btnAuth.style.color = 'white';
+      btnAuth.style.cursor = 'pointer';
+    } else {
+      btnAuth.disabled = true;
+      btnAuth.style.background = '#ddd';
+      btnAuth.style.color = '#999';
+      btnAuth.style.cursor = 'not-allowed';
+    }
+  });
+
+  function aceptarAutorizacion() {
+    if (checkAuth.checked) {
+      sessionStorage.setItem('autorizacion_aceptada', 'si');
+      document.getElementById('modalAutorizacion').style.display = 'none';
+    }
+  }
+
+  function rechazarAutorizacion() {
+    window.location.href = "{{ url_for('solicitudes.licencias_list') }}";
+  }
+
+  // Verificar si ya aceptó la autorización
+  window.addEventListener('load', function() {
+    const autorizacionAceptada = sessionStorage.getItem('autorizacion_aceptada');
+    if (autorizacionAceptada === 'si') {
+      document.getElementById('modalAutorizacion').style.display = 'none';
+    }
+    // Inicializar modalidades
+    fillModalidades();
+  });
+
+  // Validaciones del formulario
+  document.getElementById('formLicencia').addEventListener('submit', function(e) {
+    const tipo = document.getElementById('tipo').value;
+    const direccion = document.getElementById('direccion').value;
+    const solicitante = document.getElementById('solicitante').value;
+    const modalidad = document.getElementById('modalidad').value;
+
+    if (!tipo || !direccion || !solicitante || !modalidad) {
+      e.preventDefault();
+      alert('Por favor completa todos los campos requeridos (marcados con *)');
+      return false;
     }
   });
 </script>
-
-<style>
-.action-btn-form {
-  padding: 10px 28px;
-  border-radius: 14px;
-  border: none;
-  font-weight: 600;
-  font-size: 0.96rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  text-decoration: none;
-}
-.action-btn-form.btn-primary {
-  background: linear-gradient(135deg, #7cb342, #9ccc65);
-  color: #fff;
-  box-shadow: 0 8px 16px rgba(122, 179, 66, 0.3);
-}
-.action-btn-form.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 24px rgba(122, 179, 66, 0.4);
-  background: linear-gradient(135deg, #8bc34a, #aed581);
-}
-.action-btn-form.btn-outline {
-  background: transparent;
-  color: #7cb342;
-  border: 2px solid rgba(122, 179, 66, 0.3);
-}
-.action-btn-form.btn-outline:hover {
-  background: rgba(122, 179, 66, 0.08);
-  border-color: #7cb342;
-  transform: translateY(-1px);
-}
-</style>
 {% endblock %}
