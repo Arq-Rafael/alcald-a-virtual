@@ -56,14 +56,157 @@
   .compensacion-result { background: #e8f5e9; padding: 20px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #7cb342; text-align: center; }
   .compensacion-numero { font-size: 36px; font-weight: bold; color: #2d5016; }
   .historial-container { margin-top: 40px; padding-top: 40px; border-top: 2px solid #f0f0f0; }
-  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 2px solid #2d5016; background: white; border-radius: 50%; cursor: pointer; transition: all 0.3s ease; font-size: 18px; margin: 0 4px; position: relative; }
-  .icon-btn:hover { background: #2d5016; color: white; transform: scale(1.1); }
-  .icon-btn.btn-primary-custom { background: #7cb342; color: white; border-color: #7cb342; font-size: 14px; font-weight: bold; padding: 8px 12px; width: auto; min-width: 110px; }
-  .icon-btn.btn-primary-custom:hover { background: #2d5016; border-color: #2d5016; transform: scale(1.05); box-shadow: 0 4px 12px rgba(45, 80, 22, 0.3); }
-  .icon-btn[data-title]::after { content: attr(data-title); position: absolute; background: #2d5016; color: white; padding: 6px 10px; border-radius: 4px; font-size: 11px; white-space: nowrap; bottom: 100%; left: 50%; transform: translateX(-50%); opacity: 0; pointer-events: none; transition: opacity 0.3s; margin-bottom: 8px; font-weight: 500; }
-  .icon-btn:hover[data-title]::after { opacity: 1; }
-  .icon-btn[data-title]::before { content: ''; position: absolute; background: #2d5016; width: 6px; height: 6px; bottom: 100%; left: 50%; transform: translateX(-50%) rotate(45deg); opacity: 0; pointer-events: none; transition: opacity 0.3s; margin-bottom: -2px; }
-  .icon-btn:hover[data-title]::before { opacity: 1; }
+  
+  /* ESTILOS DE BOTONES MEJORADOS */
+  .actions-cell { white-space: nowrap; padding: 8px !important; }
+  .btn-group-actions { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+  
+  .action-btn { 
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+    padding: 6px 12px; 
+    border: none; 
+    border-radius: 6px; 
+    font-size: 13px; 
+    font-weight: 600;
+    cursor: pointer; 
+    transition: all 0.3s ease; 
+    text-decoration: none;
+    white-space: nowrap;
+    gap: 4px;
+  }
+  
+  /* Botón CONTINUAR - Verde destacado */
+  .action-btn.btn-continue { 
+    background: linear-gradient(135deg, #7cb342 0%, #558b2f 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(124, 179, 66, 0.3);
+    min-width: 110px;
+  }
+  .action-btn.btn-continue:hover { 
+    background: linear-gradient(135deg, #9ccc65 0%, #7cb342 100%);
+    box-shadow: 0 4px 12px rgba(124, 179, 66, 0.4);
+    transform: translateY(-2px);
+  }
+  .action-btn.btn-continue:active { transform: translateY(0); }
+  
+  /* Botón EDITAR - Naranja/Amber */
+  .action-btn.btn-edit { 
+    background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(255, 167, 38, 0.3);
+  }
+  .action-btn.btn-edit:hover { 
+    background: linear-gradient(135deg, #ffb74d 0%, #ffa726 100%);
+    box-shadow: 0 4px 12px rgba(255, 167, 38, 0.4);
+    transform: translateY(-2px);
+  }
+  
+  /* Botón DICTAMEN - Azul */
+  .action-btn.btn-dictamen { 
+    background: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(66, 165, 245, 0.3);
+    min-width: 110px;
+  }
+  .action-btn.btn-dictamen:hover { 
+    background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
+    box-shadow: 0 4px 12px rgba(66, 165, 245, 0.4);
+    transform: translateY(-2px);
+  }
+  
+  /* Botones INFO - Gris */
+  .action-btn.btn-info { 
+    background: linear-gradient(135deg, #90a4ae 0%, #607d8b 100%);
+    color: white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    padding: 6px 10px;
+    min-width: 45px;
+  }
+  .action-btn.btn-info:hover { 
+    background: linear-gradient(135deg, #b0bec5 0%, #90a4ae 100%);
+    box-shadow: 0 3px 9px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+  }
+  
+  /* Botón ELIMINAR - Rojo */
+  .action-btn.btn-delete { 
+    background: linear-gradient(135deg, #ef5350 0%, #e53935 100%);
+    color: white;
+    box-shadow: 0 2px 6px rgba(239, 83, 80, 0.3);
+    padding: 6px 10px;
+    min-width: 45px;
+  }
+  .action-btn.btn-delete:hover { 
+    background: linear-gradient(135deg, #f44336 0%, #ef5350 100%);
+    box-shadow: 0 4px 10px rgba(239, 83, 80, 0.4);
+    transform: translateY(-2px);
+  }
+  
+  /* Tooltips mejorados */
+  .action-btn[data-title] { position: relative; }
+  .action-btn[data-title]::after { 
+    content: attr(data-title); 
+    position: absolute; 
+    background: rgba(0, 0, 0, 0.85); 
+    color: white; 
+    padding: 6px 10px; 
+    border-radius: 4px; 
+    font-size: 11px; 
+    white-space: nowrap; 
+    bottom: 100%; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    opacity: 0; 
+    pointer-events: none; 
+    transition: opacity 0.3s; 
+    margin-bottom: 8px; 
+    font-weight: 500; 
+    z-index: 1000;
+  }
+  .action-btn:hover[data-title]::after { opacity: 1; }
+  .action-btn[data-title]::before { 
+    content: ''; 
+    position: absolute; 
+    background: rgba(0, 0, 0, 0.85); 
+    width: 6px; 
+    height: 6px; 
+    bottom: 100%; 
+    left: 50%; 
+    transform: translateX(-50%) rotate(45deg); 
+    opacity: 0; 
+    pointer-events: none; 
+    transition: opacity 0.3s; 
+    margin-bottom: -2px; 
+    z-index: 1000;
+  }
+  .action-btn:hover[data-title]::before { opacity: 1; }
+  
+  /* Responsive para pantallas pequeñas */
+  @media (max-width: 768px) {
+    .btn-group-actions { gap: 4px; }
+    .action-btn { 
+      padding: 5px 10px; 
+      font-size: 12px;
+      min-width: auto;
+    }
+    .action-btn.btn-continue,
+    .action-btn.btn-dictamen { 
+      min-width: 90px;
+    }
+  }
+  
+  /* Estado de botón desactivado */
+  .action-btn:disabled { 
+    opacity: 0.5; 
+    cursor: not-allowed;
+    transform: none !important;
+  }
+  .action-btn:disabled:hover { 
+    transform: none !important;
+    box-shadow: none;
+  }
 </style>
 {% endblock %}
 
@@ -760,13 +903,15 @@ async function cargarHistorial() {
             <td>${r.solicitante_nombre}</td>
             <td>${r.arbol_especie_comun}</td>
             <td><span class="badge badge-${r.estado.toLowerCase()}">${r.estado}</span></td>
-            <td style="text-align: center; white-space: nowrap;">
-              ${isRadicada ? `<button class="icon-btn btn-primary-custom" data-title="Continuar con Informe" onclick="continuarConRadicado(${r.id})" title="Continuar">▶️ Continuar</button>` : ''}
-              ${isRadicada ? `<button class="icon-btn" data-title="Editar Radicado" onclick="editarRadicado(${r.id})" title="Editar">✏️</button>` : ''}
-              ${isVisitada ? `<button class="icon-btn btn-primary-custom" data-title="Continuar con Dictamen" onclick="continuarConDictamen(${r.id})" title="Dictamen">▶️ Dictamen</button>` : ''}
-              ${hasInforme ? `<button class="icon-btn" data-title="Descargar Informe" onclick="descargarPDF(${r.id})" title="Informe PDF">📄</button>` : ''}
-              ${hasPermiso ? `<button class="icon-btn" data-title="Descargar Permiso" onclick="descargarPermisoPDF(${r.id})" title="Permiso PDF">📋</button>` : ''}
-              ${isRadicada ? `<button class="icon-btn" data-title="Eliminar" onclick="confirmarEliminar(${r.id}, '${r.numero_radicado}')" title="Eliminar">🗑️</button>` : ''}
+            <td class="actions-cell">
+              <div class="btn-group-actions">
+                ${isRadicada ? `<button class="action-btn btn-continue" data-title="Continuar con Informe" onclick="continuarConRadicado(${r.id})">▶️ Continuar</button>` : ''}
+                ${isRadicada ? `<button class="action-btn btn-edit" data-title="Editar Radicado" onclick="editarRadicado(${r.id})">✏️</button>` : ''}
+                ${isVisitada ? `<button class="action-btn btn-dictamen" data-title="Continuar con Dictamen" onclick="continuarConDictamen(${r.id})">▶️ Dictamen</button>` : ''}
+                ${hasInforme ? `<button class="action-btn btn-info" data-title="Descargar Informe" onclick="descargarPDF(${r.id})">📄</button>` : ''}
+                ${hasPermiso ? `<button class="action-btn btn-info" data-title="Descargar Permiso" onclick="descargarPermisoPDF(${r.id})">📋</button>` : ''}
+                ${isRadicada ? `<button class="action-btn btn-delete" data-title="Eliminar" onclick="confirmarEliminar(${r.id}, '${r.numero_radicado}')">🗑️</button>` : ''}
+              </div>
             </td>
           </tr>
         `;
