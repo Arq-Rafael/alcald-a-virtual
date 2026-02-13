@@ -82,35 +82,53 @@ ESPECIES = [
 
 def seed_especies(db_instance):
     """Crea las especies en la base de datos de forma segura"""
-    # Verificar si ya existen especies
-    existing_count = db_instance.session.query(ArbolEspecie).count()
-    
-    if existing_count >= len(ESPECIES):
-        # Las especies ya están cargadas
-        return
-    
-    # Si hay algunas pero no todas, solo agregar las que faltan
-    existing_names = {e.nombre_comun for e in db_instance.session.query(ArbolEspecie.nombre_comun).all()}
-    
-    count = 0
-    for especie_data in ESPECIES:
-        if especie_data['nombre_comun'] not in existing_names:
-            try:
-                especie = ArbolEspecie(**especie_data)
-                db_instance.session.add(especie)
-                count += 1
-            except Exception as e:
-                # Si falla al insertar una especie, continúa con la siguiente
-                print(f"Advertencia: No se pudo insertar {especie_data['nombre_comun']}: {e}")
-                continue
-    
     try:
-        db_instance.session.commit()
-        if count > 0:
-            print(f"Cargadas {count} especies nuevas en la base de datos")
+        # Verificar si ya existen especies
+        existing_count = db_instance.session.query(ArbolEspecie).count()
+        print(f"[SEED] Especies existentes: {existing_count}/{len(ESPECIES)}")
+        
+        if existing_count >= len(ESPECIES):
+            # Las especies ya están cargadas
+            print(f"[SEED] Todas las especies ya están en la BD. Saltando seed.")
+            return
+        
+        # Si hay algunas pero no todas, solo agregar las que faltan
+        existing_names = {e.nombre_comun for e in db_instance.session.query(ArbolEspecie.nombre_comun).all()}
+        print(f"[SEED] Especies a cargar: {len(ESPECIES) - len(existing_names)} nuevas")
+        
+        count = 0
+        errors = []
+        
+        for especie_data in ESPECIES:
+            if especie_data['nombre_comun'] not in existing_names:
+                try:
+                    especie = ArbolEspecie(**especie_data)
+                    db_instance.session.add(especie)
+                    count += 1
+                except Exception as e:
+                    # Si falla al insertar una especie, continúa con la siguiente
+                    error_msg = f"No se pudo insertar {especie_data['nombre_comun']}: {str(e)}"
+                    print(f"[SEED] ⚠️  {error_msg}")
+                    errors.append(error_msg)
+                    continue
+        
+        try:
+            db_instance.session.commit()
+            if count > 0:
+                print(f"[SEED] ✅ Cargadas {count} especies nuevas en la base de datos")
+            if errors:
+                print(f"[SEED] ⚠️  Se encontraron {len(errors)} errores durante la carga")
+        except Exception as e:
+            db_instance.session.rollback()
+            error_msg = f"Error al guardar especies: {str(e)}"
+            print(f"[SEED] ❌ {error_msg}")
+            raise
+    
     except Exception as e:
-        db_instance.session.rollback()
-        print(f"Error al guardar especies: {e}")
+        print(f"[SEED] ❌ Error crítico en seed_especies: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        # No lanzar la excepción, solo registrarla para no bloquear la app
 
 if __name__ == '__main__':
     from app import create_app, db

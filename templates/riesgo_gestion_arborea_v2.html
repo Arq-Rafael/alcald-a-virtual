@@ -934,73 +934,111 @@ function descargarPermisoPDF(id) {
 
 async function continuarConRadicado(id) {
   try {
+    console.log(`[JS] Cargando radicado ID: ${id}`);
     const resp = await fetch(`/api/riesgo/arborea/${id}`);
     const data = await resp.json();
     
-    if (resp.ok && data.radicado) {
-      radicadoActual = data.radicado;
-      mostrarDatos2(); // Cargar datos en Fase 2
-      showSection(2); // Ir a Fase 2
-      document.querySelector('.wizard-container').scrollIntoView({ behavior: 'smooth' });
-      showAlert('✅ Cargado. Ahora completa el informe técnico.', 'success');
-    } else {
-      showAlert('❌ Error al cargar radicado', 'error');
+    console.log(`[JS] Respuesta HTTP ${resp.status}:`, data);
+    
+    if (!resp.ok) {
+      console.error(`[JS] Error HTTP ${resp.status}:`, data);
+      showAlert(`❌ Error del servidor (${resp.status}): ${data.error || 'Error desconocido'}`, 'error');
+      return;
     }
+    
+    if (!data.radicado) {
+      console.error('[JS] Respuesta sin campo radicado:', data);
+      showAlert('❌ Datos inválidos del servidor', 'error');
+      return;
+    }
+    
+    radicadoActual = data.radicado;
+    console.log('[JS] Radicado cargado:', radicadoActual);
+    mostrarDatos2(); // Cargar datos en Fase 2
+    showSection(2); // Ir a Fase 2
+    document.querySelector('.wizard-container').scrollIntoView({ behavior: 'smooth' });
+    showAlert('✅ Cargado. Ahora completa el informe técnico.', 'success');
   } catch (err) {
+    console.error('[JS] Error en continuarConRadicado:', err);
     showAlert(`❌ Error: ${err.message}`, 'error');
   }
 }
 
 async function editarRadicado(id) {
   try {
+    console.log(`[JS] Editando radicado ID: ${id}`);
     const resp = await fetch(`/api/riesgo/arborea/${id}`);
     const data = await resp.json();
     
-    if (resp.ok && data.radicado) {
-      const r = data.radicado;
-      radicadoActual = r;
-      
-      // Cargar datos en Fase 1 para edición
-      document.getElementById('solicitante_nombre').value = r.solicitante_nombre || '';
-      document.getElementById('solicitante_documento').value = r.solicitante_documento || '';
-      document.getElementById('solicitante_contacto').value = r.solicitante_contacto || '';
-      document.getElementById('solicitante_correo').value = r.solicitante_correo || '';
-      document.getElementById('ubicacion_direccion').value = r.ubicacion_direccion || '';
-      document.getElementById('tipo_solicitud').value = r.tipo_solicitud || 'Poda';
-      document.getElementById('arbol_especie_select').value = r.arbol_especie_comun || '';
-      document.getElementById('arbol_dap_cm').value = r.arbol_dap_cm || '';
-      document.getElementById('arbol_altura_m').value = r.arbol_altura_m || '';
-      document.getElementById('arbol_copa_m').value = r.arbol_copa_m || '';
-      document.getElementById('motivo_solicitud').value = r.motivo_solicitud || '';
-      
-      // Mostrar Fase 1 para edición
-      document.getElementById('radicado-confirmacion').style.display = 'none';
-      showSection(1);
-      document.querySelector('.wizard-container').scrollIntoView({ behavior: 'smooth' });
-      showAlert('↔️ En modo edición. Modifica los datos necesarios y vuelve a guardar.', 'info');
-    } else {
-      showAlert('❌ Error al cargar radicado', 'error');
+    console.log(`[JS] Respuesta HTTP ${resp.status}:`, data);
+    
+    if (!resp.ok) {
+      console.error(`[JS] Error HTTP ${resp.status}:`, data);
+      showAlert(`❌ Error del servidor (${resp.status}): ${data.error || 'Error desconocido'}`, 'error');
+      return;
     }
+    
+    if (!data.radicado) {
+      console.error('[JS] Respuesta sin campo radicado:', data);
+      showAlert('❌ Datos inválidos del servidor', 'error');
+      return;
+    }
+    
+    const r = data.radicado;
+    radicadoActual = r;
+    
+    // Cargar datos en Fase 1 para edición
+    document.getElementById('solicitante_nombre').value = r.solicitante_nombre || '';
+    document.getElementById('solicitante_documento').value = r.solicitante_documento || '';
+    document.getElementById('solicitante_contacto').value = r.solicitante_contacto || '';
+    document.getElementById('solicitante_correo').value = r.solicitante_correo || '';
+    document.getElementById('ubicacion_direccion').value = r.ubicacion_direccion || '';
+    document.getElementById('tipo_solicitud').value = r.tipo_solicitud || 'Poda';
+    document.getElementById('arbol_especie_select').value = r.arbol_especie_comun || '';
+    document.getElementById('arbol_dap_cm').value = r.arbol_dap_cm || '';
+    document.getElementById('arbol_altura_m').value = r.arbol_altura_m || '';
+    document.getElementById('arbol_copa_m').value = r.arbol_copa_m || '';
+    document.getElementById('motivo_solicitud').value = r.motivo_solicitud || '';
+    
+    // Mostrar Fase 1 para edición
+    document.getElementById('radicado-confirmacion').style.display = 'none';
+    showSection(1);
+    document.querySelector('.wizard-container').scrollIntoView({ behavior: 'smooth' });
+    showAlert('↔️ En modo edición. Modifica los datos necesarios y vuelve a guardar.', 'info');
   } catch (err) {
+    console.error('[JS] Error en editarRadicado:', err);
     showAlert(`❌ Error: ${err.message}`, 'error');
   }
 }
 
 async function continuarConDictamen(id) {
   try {
+    console.log(`[JS] Cargando dictamen radicado ID: ${id}`);
     const resp = await fetch(`/api/riesgo/arborea/${id}`);
     const data = await resp.json();
     
-    if (resp.ok && data.radicado) {
-      radicadoActual = data.radicado;
-      prepararFase3(); // Cargar datos en Fase 3
-      showSection(3); // Ir a Fase 3
-      document.querySelector('.wizard-container').scrollIntoView({ behavior: 'smooth' });
-      showAlert('✅ Cargado. Ahora emite el dictamen del CMGR.', 'success');
-    } else {
-      showAlert('❌ Error al cargar radicado', 'error');
+    console.log(`[JS] Respuesta HTTP ${resp.status}:`, data);
+    
+    if (!resp.ok) {
+      console.error(`[JS] Error HTTP ${resp.status}:`, data);
+      showAlert(`❌ Error del servidor (${resp.status}): ${data.error || 'Error desconocido'}`, 'error');
+      return;
     }
+    
+    if (!data.radicado) {
+      console.error('[JS] Respuesta sin campo radicado:', data);
+      showAlert('❌ Datos inválidos del servidor', 'error');
+      return;
+    }
+    
+    radicadoActual = data.radicado;
+    console.log('[JS] Radicado cargado para dictamen:', radicadoActual);
+    prepararFase3(); // Cargar datos en Fase 3
+    showSection(3); // Ir a Fase 3
+    document.querySelector('.wizard-container').scrollIntoView({ behavior: 'smooth' });
+    showAlert('✅ Cargado. Ahora emite el dictamen del CMGR.', 'success');
   } catch (err) {
+    console.error('[JS] Error en continuarConDictamen:', err);
     showAlert(`❌ Error: ${err.message}`, 'error');
   }
 }

@@ -219,8 +219,11 @@ def crear_radicado():
 def obtener_radicado(radicado_id):
     """Obtiene un radicado completo por ID"""
     try:
+        logger.info(f"[GET] Obteniendo radicado ID: {radicado_id}")
         RadicadoArborea, _ = get_models()
         radicado = RadicadoArborea.query.get_or_404(radicado_id)
+        
+        logger.info(f"[GET] Radicado encontrado: {radicado.numero_radicado}")
         
         # Parsear JSON fields
         archivos_radicacion = json.loads(radicado.archivos_radicacion) if radicado.archivos_radicacion else []
@@ -228,7 +231,7 @@ def obtener_radicado(radicado_id):
         archivos_compensacion = json.loads(radicado.archivos_compensacion) if radicado.archivos_compensacion else []
         calculo = json.loads(radicado.compensacion_calculo_json) if radicado.compensacion_calculo_json else {}
         
-        return jsonify({
+        response = {
             'success': True,
             'radicado': {
                 'id': radicado.id,
@@ -266,8 +269,12 @@ def obtener_radicado(radicado_id):
                 'permiso_firmante1': radicado.permiso_firmante1,
                 'created_at': radicado.created_at.isoformat()
             }
-        })
+        }
+        
+        logger.info(f"[GET] Retornando radicado exitosamente")
+        return jsonify(response)
     except Exception as e:
+        logger.error(f"[GET] Error obteniendo radicado {radicado_id}: {str(e)}", exc_info=True)
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
