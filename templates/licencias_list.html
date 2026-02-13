@@ -31,207 +31,111 @@
     {% set apr = rows|selectattr('estado','equalto','Aprobada')|list|length %}
     {% set neg = rows|selectattr('estado','equalto','Negada')|list|length %}
     
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 30px;">
-      <div style="background: white; border-radius: 14px; padding: 18px; border: 1px solid #f0f0f0; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-        <p style="margin: 0 0 8px 0; color: #999; font-size: 12px; font-weight: 600; text-transform: uppercase;">Total</p>
-        <h3 style="margin: 0; font-size: 28px; font-weight: 700; color: #1a1a1a;">{{ total }}</h3>
-        <span style="display: inline-block; margin-top: 8px; padding: 4px 10px; background: #f0f0f0; color: #666; border-radius: 6px; font-size: 12px; font-weight: 600;">Todos los</span>
-      </div>
-      <div style="background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), rgba(33, 150, 243, 0.05)); border-radius: 14px; padding: 18px; border: 1px solid rgba(33, 150, 243, 0.2);">
-        <p style="margin: 0 0 8px 0; color: #1976D2; font-size: 12px; font-weight: 600; text-transform: uppercase;">Radicadas</p>
-        <h3 style="margin: 0; font-size: 28px; font-weight: 700; color: #1976D2;">{{ rad }}</h3>
-        <span style="display: inline-block; margin-top: 8px; padding: 4px 10px; background: rgba(33, 150, 243, 0.15); color: #1976D2; border-radius: 6px; font-size: 12px; font-weight: 600;">En trámite</span>
-      </div>
-      <div style="background: linear-gradient(135deg, rgba(255, 152, 0, 0.1), rgba(255, 152, 0, 0.05)); border-radius: 14px; padding: 18px; border: 1px solid rgba(255, 152, 0, 0.2);">
-        <p style="margin: 0 0 8px 0; color: #E65100; font-size: 12px; font-weight: 600; text-transform: uppercase;">Revisión</p>
-        <h3 style="margin: 0; font-size: 28px; font-weight: 700; color: #E65100;">{{ rev }}</h3>
-        <span style="display: inline-block; margin-top: 8px; padding: 4px 10px; background: rgba(255, 152, 0, 0.15); color: #E65100; border-radius: 6px; font-size: 12px; font-weight: 600;">Analizando</span>
-      </div>
-      <div style="background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(76, 175, 80, 0.05)); border-radius: 14px; padding: 18px; border: 1px solid rgba(76, 175, 80, 0.2);">
-        <p style="margin: 0 0 8px 0; color: #2E7D32; font-size: 12px; font-weight: 600; text-transform: uppercase;">Aprobadas</p>
-        <h3 style="margin: 0; font-size: 28px; font-weight: 700; color: #2E7D32;">{{ apr }}</h3>
-        <span style="display: inline-block; margin-top: 8px; padding: 4px 10px; background: rgba(76, 175, 80, 0.15); color: #2E7D32; border-radius: 6px; font-size: 12px; font-weight: 600;">Completadas</span>
-      </div>
-      <div style="background: linear-gradient(135deg, rgba(244, 67, 54, 0.1), rgba(244, 67, 54, 0.05)); border-radius: 14px; padding: 18px; border: 1px solid rgba(244, 67, 54, 0.2);">
-        <p style="margin: 0 0 8px 0; color: #C62828; font-size: 12px; font-weight: 600; text-transform: uppercase;">Negadas</p>
-        <h3 style="margin: 0; font-size: 28px; font-weight: 700; color: #C62828;">{{ neg }}</h3>
-        <span style="display: inline-block; margin-top: 8px; padding: 4px 10px; background: rgba(244, 67, 54, 0.15); color: #C62828; border-radius: 6px; font-size: 12px; font-weight: 600;">Rechazadas</span>
-      </div>
-    </div>
-  </div>
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 22px; margin-bottom: 24px; align-items: start;">
+      <!-- Main column: filtros + tabla -->
+      <div>
+        <div style="background: white; border-radius: 12px; padding: 18px; margin-bottom: 18px; box-shadow: 0 6px 18px rgba(0,0,0,0.06);">
+          <form class="d-flex gap-2 align-items-end" method="get" style="width: 100%; flex-wrap: nowrap; gap:12px;">
+            <div style="flex: 0 0 220px;">
+              <label style="font-weight: 600; color: #333; font-size: 13px; display: block; margin-bottom: 6px;">Estado</label>
+              <select name="estado" style="width: 100%; padding: 10px 12px; border: 1px solid #e6e6e6; border-radius: 10px; font-size: 13px; color: #333; background: white;">
+                <option value="">Todos</option>
+                {% for e in ['Radicada','En revisión','Subsanación','Aprobada','Negada'] %}
+                <option value="{{e}}" {% if request.args.get('estado')==e %}selected{% endif %}>{{e}}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div style="flex: 1; min-width: 220px;">
+              <label style="font-weight: 600; color: #333; font-size: 13px; display: block; margin-bottom: 6px;">Buscar</label>
+              <input type="text" name="q" style="width: 100%; padding: 10px 12px; border: 1px solid #e6e6e6; border-radius: 10px; font-size: 13px; color: #333;" placeholder="Dirección, solicitante, cédula o matrícula..." value="{{request.args.get('q','')}}">
+            </div>
+            <div style="display:flex; gap:10px;">
+              <button type="submit" style="padding: 10px 18px; border-radius: 10px; border: none; background: #2E7D32; color: white; font-weight: 600; cursor: pointer; font-size: 13px;">🔍 Buscar</button>
+              <a href="{{ url_for('solicitudes.licencias_list') }}" style="padding: 10px 14px; border-radius: 10px; border: 1px solid #ddd; background: white; color: #666; font-weight: 600; text-decoration: none;">↻ Limpiar</a>
+            </div>
+          </form>
+        </div>
 
-  <!-- Tabla de licencias -->
-  <div style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 1px solid #f0f0f0;">
-    
-    <!-- Filtros -->
-    <div style="padding: 20px; border-bottom: 1px solid #f0f0f0; display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;">
-      <form class="d-flex gap-2" method="get" style="width: 100%; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 200px;">
-          <label style="font-weight: 600; color: #333; font-size: 13px; display: block; margin-bottom: 6px;">Filtrar por estado</label>
-          <select name="estado" style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 13px; color: #333; background: white;">
-            <option value="">Todos los estados</option>
-            <option value="Radicada" {% if request.args.get('estado')=='Radicada' %}selected{% endif %}>Radicada</option>
-            <option value="En revisión" {% if request.args.get('estado')=='En revisión' %}selected{% endif %}>En revisión</option>
-            <option value="Subsanación" {% if request.args.get('estado')=='Subsanación' %}selected{% endif %}>Subsanación</option>
-            <option value="Aprobada" {% if request.args.get('estado')=='Aprobada' %}selected{% endif %}>Aprobada</option>
-            <option value="Negada" {% if request.args.get('estado')=='Negada' %}selected{% endif %}>Negada</option>
-          </select>
-        </div>
-        <div style="flex: 2; min-width: 250px;">
-          <label style="font-weight: 600; color: #333; font-size: 13px; display: block; margin-bottom: 6px;">Buscar</label>
-          <input type="text" name="q" style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 13px; color: #333;" placeholder="Dirección, solicitante, cédula o matrícula..." value="{{request.args.get('q','')}}">
-        </div>
-        <button type="submit" style="padding: 10px 20px; border-radius: 10px; border: none; background: #FF9800; color: white; font-weight: 600; cursor: pointer; font-size: 13px;">
-          🔍 Buscar
-        </button>
-        <a href="{{ url_for('solicitudes.licencias_list') }}" style="padding: 10px 20px; border-radius: 10px; border: 1px solid #ddd; background: white; color: #666; font-weight: 600; text-decoration: none; cursor: pointer; font-size: 13px;">
-          ↻ Limpiar
-        </a>
-      </form>
-    </div>
-          <div class="d-flex align-items-baseline gap-2">
-            <h3 class="mb-0 fw-bold">{{ rev }}</h3>
-            <span class="badge kpi-badge kpi-amber">Analizando</span>
+        <div class="glass-panel p-3" style="border-radius:12px; padding: 12px;">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle" style="margin-bottom:0;">
+              <thead>
+                <tr class="border-bottom">
+                  <th class="fw-bold text-muted">#</th>
+                  <th class="fw-bold text-muted">Dirección</th>
+                  <th class="fw-bold text-muted">Solicitante</th>
+                  <th class="fw-bold text-muted">Uso</th>
+                  <th class="fw-bold text-muted">Área (m²)</th>
+                  <th class="fw-bold text-muted">Estado</th>
+                  <th class="fw-bold text-muted">SLA</th>
+                  <th class="fw-bold text-muted">Actualizado</th>
+                  <th class="fw-bold text-muted text-end">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for r in rows %}
+                <tr class="row-licencia">
+                  <td><strong class="text-primary">#{{ r['consecutivo'] }}</strong></td>
+                  <td>{{ r['direccion'] or '-' }}</td>
+                  <td>{{ r['solicitante'] or '-' }}</td>
+                  <td>{{ r['uso'] or '-' }}</td>
+                  <td>{{ (r['area_const'] or 0)|round(2) }}</td>
+                  <td>
+                    <span class="estado-chip estado-{{ (r['estado'] or 'radicada')|lower|replace(' ','-')|replace('á','a')|replace('é','e')|replace('í','i')|replace('ó','o')|replace('ú','u') }}">{{ r['estado'] }}</span>
+                  </td>
+                  <td>
+                    <span class="badge bg-{{ r['semaforo_color'] }} rounded-pill px-3 py-2" title="Días hábiles transcurridos">{{ r['dias_habiles'] }} días</span>
+                  </td>
+                  <td class="text-muted small">{{ r['actualizado_en'][:10] if r['actualizado_en'] else '-' }}</td>
+                  <td class="text-end">
+                    <div class="d-flex justify-content-end gap-2 action-buttons-wrapper">
+                      <a class="action-btn btn-track" href="{{ url_for('solicitudes.licencias_detalle', licencia_id=r['id'], focus='estado') }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Seguimiento / Estado"><i class="bi bi-activity"></i></a>
+                      <a class="action-btn btn-upload" href="{{ url_for('solicitudes.licencias_detalle', licencia_id=r['id'], focus='soportes') }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Cargar información"><i class="bi bi-upload"></i></a>
+                      <a class="action-btn btn-view" href="{{ url_for('solicitudes.licencias_detalle', licencia_id=r['id']) }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Ver detalles"><i class="bi bi-eye"></i></a>
+                      <button class="action-btn btn-delete" data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar licencia" onclick="if(confirm('¿Eliminar esta licencia permanentemente?')) { fetch('{{ url_for('solicitudes.licencias_eliminar', licencia_id=r['id']) }}', {method:'POST'}).then(r => r.text()).then(() => location.reload()).catch(e => alert('Solo administradores pueden eliminar')); }"><i class="bi bi-trash"></i></button>
+                    </div>
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="9" class="text-center text-muted py-5"><i class="bi bi-inbox display-4 d-block mb-3 opacity-25"></i><p class="mb-0">No se encontraron licencias</p></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
-      <div class="col-lg col-md-4 col-sm-6">
-        <div class="kpi-card">
-          <p class="text-muted small mb-1">Subsanación</p>
-          <div class="d-flex align-items-baseline gap-2">
-            <h3 class="mb-0 fw-bold">{{ sub }}</h3>
-            <span class="badge kpi-badge kpi-orange">Ajustes</span>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg col-md-4 col-sm-6">
-        <div class="kpi-card">
-          <p class="text-muted small mb-1">Aprobadas</p>
-          <div class="d-flex align-items-baseline gap-2">
-            <h3 class="mb-0 fw-bold">{{ apr }}</h3>
-            <span class="badge kpi-badge kpi-green">OK</span>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg col-md-4 col-sm-6">
-        <div class="kpi-card">
-          <p class="text-muted small mb-1">Negadas</p>
-          <div class="d-flex align-items-baseline gap-2">
-            <h3 class="mb-0 fw-bold">{{ neg }}</h3>
-            <span class="badge kpi-badge kpi-red">Alertas</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Filtros -->
-    <form class="row g-2 mb-3 align-items-end" method="get">
-      <div class="col-lg-2 col-md-3">
-        <label class="form-label form-label-premium small">Estado</label>
-        <select name="estado" class="form-select form-control-glass">
-          <option value="">Todos</option>
-          {% for e in ['Radicada','En revisión','Subsanación','Aprobada','Negada'] %}
-          <option value="{{e}}" {% if request.args.get('estado')==e %}selected{% endif %}>{{e}}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="col-lg-7 col-md-6">
-        <label class="form-label form-label-premium small">Búsqueda</label>
-        <input type="text" class="form-control form-control-glass" name="q"
-          placeholder="Dirección, solicitante, cédula catastral o matrícula..."
-          value="{{ request.args.get('q','') }}">
-      </div>
-      <div class="col-lg-3 col-md-3 d-flex gap-2">
-        <button class="btn btn-premium flex-fill">
-          <i class="bi bi-funnel me-1"></i>Filtrar
-        </button>
-        <a class="btn btn-outline-secondary" href="{{ url_for('solicitudes.licencias_list') }}" 
-           style="border-radius: 12px;" title="Limpiar filtros">
-          <i class="bi bi-x-circle"></i>
-        </a>
-      </div>
-    </form>
-  </div>
+      <!-- Sidebar: tarjetas verticales KPI -->
+      <div>
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="background: rgba(255,255,255,0.9); border-radius: 12px; padding: 18px; box-shadow: 0 6px 18px rgba(0,0,0,0.04);">
+            <p style="margin: 0 0 6px 0; color: #888; font-weight: 700; text-transform: uppercase; font-size: 12px;">Subsanación</p>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <h2 style="margin:0; font-size:28px; color:#1b5e20;">{{ sub }}</h2>
+              <span style="padding:6px 12px; border-radius:999px; background:linear-gradient(135deg,#ffb88c,#de6262); color:#5c2c10; font-weight:700;">Ajustes</span>
+            </div>
+          </div>
 
-  <!-- Tabla de resultados con acciones directas -->
-  <div class="glass-panel p-4">
-    <div class="table-responsive">
-      <table class="table table-hover align-middle">
-        <thead>
-          <tr class="border-bottom">
-            <th class="fw-bold text-muted">#</th>
-            <th class="fw-bold text-muted">Dirección</th>
-            <th class="fw-bold text-muted">Solicitante</th>
-            <th class="fw-bold text-muted">Uso</th>
-            <th class="fw-bold text-muted">Área (m²)</th>
-            <th class="fw-bold text-muted">Estado</th>
-            <th class="fw-bold text-muted">SLA</th>
-            <th class="fw-bold text-muted">Actualizado</th>
-            <th class="fw-bold text-muted text-end">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for r in rows %}
-          <tr class="row-licencia">
-            <td><strong class="text-primary">#{{ r['consecutivo'] }}</strong></td>
-            <td>{{ r['direccion'] or '-' }}</td>
-            <td>{{ r['solicitante'] or '-' }}</td>
-            <td>{{ r['uso'] or '-' }}</td>
-            <td>{{ (r['area_const'] or 0)|round(2) }}</td>
-            <td>
-              <span class="estado-chip estado-{{ (r['estado'] or 'radicada')|lower|replace(' ','-')|replace('á','a')|replace('é','e')|replace('í','i')|replace('ó','o')|replace('ú','u') }}">{{ r['estado'] }}</span>
-            </td>
-            <td>
-              <span class="badge bg-{{ r['semaforo_color'] }} rounded-pill px-3 py-2" title="Días hábiles transcurridos">
-                {{ r['dias_habiles'] }} días
-              </span>
-            </td>
-            <td class="text-muted small">{{ r['actualizado_en'][:10] if r['actualizado_en'] else '-' }}</td>
-            <td class="text-end">
-              <div class="d-flex justify-content-end gap-2 action-buttons-wrapper">
-                <a class="action-btn btn-track" 
-                   href="{{ url_for('solicitudes.licencias_detalle', licencia_id=r['id'], focus='estado') }}" 
-                   data-bs-toggle="tooltip" 
-                   data-bs-placement="top" 
-                   title="Seguimiento / Estado">
-                  <i class="bi bi-activity"></i>
-                </a>
-                <a class="action-btn btn-upload" 
-                   href="{{ url_for('solicitudes.licencias_detalle', licencia_id=r['id'], focus='soportes') }}" 
-                   data-bs-toggle="tooltip" 
-                   data-bs-placement="top" 
-                   title="Cargar información">
-                  <i class="bi bi-upload"></i>
-                </a>
-                <a class="action-btn btn-view" 
-                   href="{{ url_for('solicitudes.licencias_detalle', licencia_id=r['id']) }}" 
-                   data-bs-toggle="tooltip" 
-                   data-bs-placement="top" 
-                   title="Ver detalles">
-                  <i class="bi bi-eye"></i>
-                </a>
-                <button class="action-btn btn-delete" 
-                        data-bs-toggle="tooltip" 
-                        data-bs-placement="top" 
-                        title="Eliminar licencia"
-                        onclick="if(confirm('¿Eliminar esta licencia permanentemente?')) { fetch('{{ url_for('solicitudes.licencias_eliminar', licencia_id=r['id']) }}', {method:'POST'}).then(r => r.text()).then(() => location.reload()).catch(e => alert('Solo administradores pueden eliminar')); }">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
-          {% else %}
-          <tr>
-            <td colspan="9" class="text-center text-muted py-5">
-              <i class="bi bi-inbox display-4 d-block mb-3 opacity-25"></i>
-              <p class="mb-0">No se encontraron licencias</p>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          <div style="background: rgba(255,255,255,0.9); border-radius: 12px; padding: 18px; box-shadow: 0 6px 18px rgba(0,0,0,0.04);">
+            <p style="margin: 0 0 6px 0; color: #888; font-weight: 700; text-transform: uppercase; font-size: 12px;">Aprobadas</p>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <h2 style="margin:0; font-size:28px; color:#2e7d32;">{{ apr }}</h2>
+              <span style="padding:6px 12px; border-radius:999px; background:linear-gradient(135deg,#a5d6a7,#81c784); color:#1b5e20; font-weight:700;">OK</span>
+            </div>
+          </div>
+
+          <div style="background: rgba(255,255,255,0.9); border-radius: 12px; padding: 18px; box-shadow: 0 6px 18px rgba(0,0,0,0.04);">
+            <p style="margin: 0 0 6px 0; color: #888; font-weight: 700; text-transform: uppercase; font-size: 12px;">Negadas</p>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <h2 style="margin:0; font-size:28px; color:#c62828;">{{ neg }}</h2>
+              <span style="padding:6px 12px; border-radius:999px; background:linear-gradient(135deg,#ff6a6a,#d32f2f); color:#fff; font-weight:700;">Alertas</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
 </div>
 
 <!-- Modal de radicación rápida -->
