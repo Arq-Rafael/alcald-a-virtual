@@ -263,9 +263,10 @@ def obtener_radicado(radicado_id):
                 'dictamen_decision': radicado.dictamen_decision,
                 'dictamen_motivo_negacion': radicado.dictamen_motivo_negacion,
                 'compensacion_arboles_plantar': radicado.compensacion_arboles_plantar,
+                'compensacion_coeficiente': radicado.compensacion_coeficiente,
                 'compensacion_calculo': calculo,
                 'permiso_fecha_limite': radicado.permiso_fecha_limite.isoformat() if radicado.permiso_fecha_limite else None,
-                'permiso_condiciones_ejecucion': radicado.permiso_condiciones_ejecucion,
+                'permiso_obligaciones': radicado.permiso_obligaciones,
                 'permiso_firmante1': radicado.permiso_firmante1,
                 'created_at': radicado.created_at.isoformat()
             }
