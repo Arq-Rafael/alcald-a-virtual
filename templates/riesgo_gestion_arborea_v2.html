@@ -58,6 +58,8 @@
   .historial-container { margin-top: 40px; padding-top: 40px; border-top: 2px solid #f0f0f0; }
   .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 2px solid #2d5016; background: white; border-radius: 50%; cursor: pointer; transition: all 0.3s ease; font-size: 18px; margin: 0 4px; position: relative; }
   .icon-btn:hover { background: #2d5016; color: white; transform: scale(1.1); }
+  .icon-btn.btn-primary-custom { background: #7cb342; color: white; border-color: #7cb342; font-size: 14px; font-weight: bold; padding: 8px 12px; width: auto; min-width: 110px; }
+  .icon-btn.btn-primary-custom:hover { background: #2d5016; border-color: #2d5016; transform: scale(1.05); box-shadow: 0 4px 12px rgba(45, 80, 22, 0.3); }
   .icon-btn[data-title]::after { content: attr(data-title); position: absolute; background: #2d5016; color: white; padding: 6px 10px; border-radius: 4px; font-size: 11px; white-space: nowrap; bottom: 100%; left: 50%; transform: translateX(-50%); opacity: 0; pointer-events: none; transition: opacity 0.3s; margin-bottom: 8px; font-weight: 500; }
   .icon-btn:hover[data-title]::after { opacity: 1; }
   .icon-btn[data-title]::before { content: ''; position: absolute; background: #2d5016; width: 6px; height: 6px; bottom: 100%; left: 50%; transform: translateX(-50%) rotate(45deg); opacity: 0; pointer-events: none; transition: opacity 0.3s; margin-bottom: -2px; }
@@ -747,7 +749,8 @@ async function cargarHistorial() {
     
     if (data.radicados && data.radicados.length > 0) {
       tbody.innerHTML = data.radicados.map(r => {
-        const canDelete = r.estado === 'Radicada'; // Solo permite eliminar radicados nuevos
+        const isRadicada = r.estado === 'Radicada'; // Recién creado, sin informe
+        const isVisitada = r.estado === 'Visitada'; // Tiene informe, pendiente dictamen
         const hasInforme = r.estado === 'Visitada' || r.estado === 'Aprobada' || r.estado === 'Negada';
         const hasPermiso = r.estado === 'Aprobada' || r.estado === 'Negada';
         
@@ -758,9 +761,12 @@ async function cargarHistorial() {
             <td>${r.arbol_especie_comun}</td>
             <td><span class="badge badge-${r.estado.toLowerCase()}">${r.estado}</span></td>
             <td style="text-align: center; white-space: nowrap;">
+              ${isRadicada ? `<button class="icon-btn btn-primary-custom" data-title="Continuar con Informe" onclick="continuarConRadicado(${r.id})" title="Continuar">▶️ Continuar</button>` : ''}
+              ${isRadicada ? `<button class="icon-btn" data-title="Editar Radicado" onclick="editarRadicado(${r.id})" title="Editar">✏️</button>` : ''}
+              ${isVisitada ? `<button class="icon-btn btn-primary-custom" data-title="Continuar con Dictamen" onclick="continuarConDictamen(${r.id})" title="Dictamen">▶️ Dictamen</button>` : ''}
               ${hasInforme ? `<button class="icon-btn" data-title="Descargar Informe" onclick="descargarPDF(${r.id})" title="Informe PDF">📄</button>` : ''}
               ${hasPermiso ? `<button class="icon-btn" data-title="Descargar Permiso" onclick="descargarPermisoPDF(${r.id})" title="Permiso PDF">📋</button>` : ''}
-              ${canDelete ? `<button class="icon-btn" data-title="Eliminar" onclick="confirmarEliminar(${r.id}, '${r.numero_radicado}')" title="Eliminar">🗑️</button>` : ''}
+              ${isRadicada ? `<button class="icon-btn" data-title="Eliminar" onclick="confirmarEliminar(${r.id}, '${r.numero_radicado}')" title="Eliminar">🗑️</button>` : ''}
             </td>
           </tr>
         `;
@@ -779,6 +785,79 @@ function descargarPDF(id) {
 
 function descargarPermisoPDF(id) {
   window.open(`/api/riesgo/arborea/${id}/pdf/dictamen`, '_blank');
+}
+
+async function continuarConRadicado(id) {
+  try {
+    const resp = await fetch(`/api/riesgo/arborea/${id}`);
+    const data = await resp.json();
+    
+    if (resp.ok && data.radicado) {
+      radicadoActual = data.radicado;
+      mostrarDatos2(); // Cargar datos en Fase 2
+      showSection(2); // Ir a Fase 2
+      document.querySelector('.wizard-container').scrollIntoView({ behavior: 'smooth' });
+      showAlert('✅ Cargado. Ahora completa el informe técnico.', 'success');
+    } else {
+      showAlert('❌ Error al cargar radicado', 'error');
+    }
+  } catch (err) {
+    showAlert(`❌ Error: ${err.message}`, 'error');
+  }
+}
+
+async function editarRadicado(id) {
+  try {
+    const resp = await fetch(`/api/riesgo/arborea/${id}`);
+    const data = await resp.json();
+    
+    if (resp.ok && data.radicado) {
+      const r = data.radicado;
+      radicadoActual = r;
+      
+      // Cargar datos en Fase 1 para edición
+      document.getElementById('solicitante_nombre').value = r.solicitante_nombre || '';
+      document.getElementById('solicitante_documento').value = r.solicitante_documento || '';
+      document.getElementById('solicitante_contacto').value = r.solicitante_contacto || '';
+      document.getElementById('solicitante_correo').value = r.solicitante_correo || '';
+      document.getElementById('ubicacion_direccion').value = r.ubicacion_direccion || '';
+      document.getElementById('tipo_solicitud').value = r.tipo_solicitud || 'Poda';
+      document.getElementById('arbol_especie_select').value = r.arbol_especie_comun || '';
+      document.getElementById('arbol_dap_cm').value = r.arbol_dap_cm || '';
+      document.getElementById('arbol_altura_m').value = r.arbol_altura_m || '';
+      document.getElementById('arbol_copa_m').value = r.arbol_copa_m || '';
+      document.getElementById('motivo_solicitud').value = r.motivo_solicitud || '';
+      
+      // Mostrar Fase 1 para edición
+      document.getElementById('radicado-confirmacion').style.display = 'none';
+      showSection(1);
+      document.querySelector('.wizard-container').scrollIntoView({ behavior: 'smooth' });
+      showAlert('↔️ En modo edición. Modifica los datos necesarios y vuelve a guardar.', 'info');
+    } else {
+      showAlert('❌ Error al cargar radicado', 'error');
+    }
+  } catch (err) {
+    showAlert(`❌ Error: ${err.message}`, 'error');
+  }
+}
+
+async function continuarConDictamen(id) {
+  try {
+    const resp = await fetch(`/api/riesgo/arborea/${id}`);
+    const data = await resp.json();
+    
+    if (resp.ok && data.radicado) {
+      radicadoActual = data.radicado;
+      prepararFase3(); // Cargar datos en Fase 3
+      showSection(3); // Ir a Fase 3
+      document.querySelector('.wizard-container').scrollIntoView({ behavior: 'smooth' });
+      showAlert('✅ Cargado. Ahora emite el dictamen del CMGR.', 'success');
+    } else {
+      showAlert('❌ Error al cargar radicado', 'error');
+    }
+  } catch (err) {
+    showAlert(`❌ Error: ${err.message}`, 'error');
+  }
 }
 
 async function confirmarEliminar(id, numeroRadicado) {

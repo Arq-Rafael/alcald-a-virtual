@@ -229,23 +229,46 @@ def obtener_radicado(radicado_id):
         calculo = json.loads(radicado.compensacion_calculo_json) if radicado.compensacion_calculo_json else {}
         
         return jsonify({
-            'id': radicado.id,
-            'numero_radicado': radicado.numero_radicado,
-            'solicitante_nombre': radicado.solicitante_nombre,
-            'solicitante_documento': radicado.solicitante_documento,
-            'ubicacion_direccion': radicado.ubicacion_direccion,
-            'arbol_especie_comun': radicado.arbol_especie_comun,
-            'arbol_dap_cm': radicado.arbol_dap_cm,
-            'tipo_solicitud': radicado.tipo_solicitud,
-            'estado': radicado.estado,
-            'dictamen_decision': radicado.dictamen_decision,
-            'permiso_fecha_limite': radicado.permiso_fecha_limite.isoformat() if radicado.permiso_fecha_limite else None,
-            'compensacion_arboles_plantar': radicado.compensacion_arboles_plantar,
-            'compensacion_calculo': calculo,
-            'created_at': radicado.created_at.isoformat()
+            'success': True,
+            'radicado': {
+                'id': radicado.id,
+                'numero_radicado': radicado.numero_radicado,
+                'solicitante_nombre': radicado.solicitante_nombre,
+                'solicitante_documento': radicado.solicitante_documento,
+                'solicitante_contacto': radicado.solicitante_contacto,
+                'solicitante_correo': radicado.solicitante_correo,
+                'ubicacion_direccion': radicado.ubicacion_direccion,
+                'ubicacion_vereda_sector': radicado.ubicacion_vereda_sector,
+                'ubicacion_lat': radicado.ubicacion_lat,
+                'ubicacion_lng': radicado.ubicacion_lng,
+                'matricula_catastral': radicado.matricula_catastral,
+                'arbol_especie_comun': radicado.arbol_especie_comun,
+                'arbol_especie_cientifico': radicado.arbol_especie_cientifico,
+                'arbol_dap_cm': radicado.arbol_dap_cm,
+                'arbol_altura_m': radicado.arbol_altura_m,
+                'arbol_copa_m': radicado.arbol_copa_m,
+                'arbol_fitosanitario': radicado.arbol_fitosanitario,
+                'arbol_inclinacion_raices': radicado.arbol_inclinacion_raices,
+                'tipo_solicitud': radicado.tipo_solicitud,
+                'motivo_solicitud': radicado.motivo_solicitud,
+                'estado': radicado.estado,
+                'visita_fecha': radicado.visita_fecha.isoformat() if radicado.visita_fecha else None,
+                'visita_tecnico': radicado.visita_tecnico,
+                'visita_riesgo_final': radicado.visita_riesgo_final,
+                'visita_observaciones': radicado.visita_observaciones,
+                'diagnostico_recomendaciones': radicado.diagnostico_recomendaciones,
+                'dictamen_decision': radicado.dictamen_decision,
+                'dictamen_motivo_negacion': radicado.dictamen_motivo_negacion,
+                'compensacion_arboles_plantar': radicado.compensacion_arboles_plantar,
+                'compensacion_calculo': calculo,
+                'permiso_fecha_limite': radicado.permiso_fecha_limite.isoformat() if radicado.permiso_fecha_limite else None,
+                'permiso_condiciones_ejecucion': radicado.permiso_condiciones_ejecucion,
+                'permiso_firmante1': radicado.permiso_firmante1,
+                'created_at': radicado.created_at.isoformat()
+            }
         })
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @riesgo_api.route('/arborea', methods=['GET'])
