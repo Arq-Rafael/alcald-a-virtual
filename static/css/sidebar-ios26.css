@@ -282,18 +282,14 @@
    AJUSTES RESPONSIVOS Y MAIN CONTENT
    ======================================== */
 
+/* main-content manejado por layout flex del body.has-sidebar */
 .main-content {
-  margin-left: 150px !important;
-  padding: 2rem !important;
-  transition: margin-left 0.3s ease;
+  margin-left: 0 !important;
+  padding: 0 !important;
+  transition: none;
 }
 
-/* Responsive - Ocultar dock en m�vil */
 @media (max-width: 991px) {
-  .dock-container {
-    display: none !important;
-  }
-  
   .main-content {
     margin-left: 0 !important;
   }
