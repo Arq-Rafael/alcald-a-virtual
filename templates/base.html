@@ -608,7 +608,9 @@
   <!-- MOBILE HEADER -->
   <div class="av-mobile-header">
     <div class="av-mobile-header-brand">
-      <img src="{{ url_for('static', filename='imagenes/escudo.png') }}" alt="Escudo" style="width:24px;height:24px;object-fit:contain;">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:#f1f5f9;border:1px solid #e2e8f0;flex-shrink:0;">
+        <img src="{{ url_for('static', filename='imagenes/escudo.png') }}" alt="Escudo" style="width:24px;height:24px;object-fit:contain;">
+      </span>
       Alcaldía Virtual
     </div>
     <button class="av-mobile-toggle" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
@@ -812,7 +814,9 @@
   <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas" style="width:var(--sb-width,272px);">
     <div class="offcanvas-header border-bottom" style="padding:1rem;">
       <div class="d-flex align-items-center gap-2">
-        <img src="{{ url_for('static', filename='imagenes/escudo.png') }}" alt="Escudo" style="width:28px;height:28px;object-fit:contain;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;background:#f1f5f9;border:1px solid #e2e8f0;flex-shrink:0;">
+          <img src="{{ url_for('static', filename='imagenes/escudo.png') }}" alt="Escudo" style="width:28px;height:28px;object-fit:contain;">
+        </span>
         <span class="fw-bold" style="font-size:0.95rem;color:#1e293b;">Alcaldía Virtual</span>
       </div>
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
