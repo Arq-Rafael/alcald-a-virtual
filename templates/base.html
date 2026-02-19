@@ -133,26 +133,10 @@
   </style>
 
   <style>
-    /* Animated Gradient Background - Restored from premium.css */
-    @keyframes gradientBG {
-      0% { background-position: 0% 50%; }
-      25% { background-position: 50% 75%; }
-      50% { background-position: 100% 50%; }
-      75% { background-position: 50% 25%; }
-      100% { background-position: 0% 50%; }
-    }
-    
+    /* Base body — color neutro, el sidebar layout lo maneja has-sidebar */
     body {
-      background: linear-gradient(-45deg,
-        #1b5e20,      /* Dark Green */
-        #4caf50,      /* Fresh Green */
-        #f9a825,      /* Ochre */
-        #66bb6a,      /* Light Green */
-        #fdd835       /* Bright Yellow */
-      ) !important;
-      background-size: 400% 400% !important;
-      background-position: 0% 50% !important;
-      animation: gradientBG 15s ease infinite !important;
+      background: #f1f5f9 !important;
+      animation: none !important;
       min-height: 100vh !important;
     }
     
@@ -734,7 +718,7 @@
       {% if can('contratos') %}
       <a href="/contratos"
          class="av-nav-item {% if request.endpoint and 'contratos' in request.endpoint %}active{% endif %}">
-        <i class="bi bi-file-earmark-contract av-nav-icon"></i>
+        <i class="bi bi-journal-text av-nav-icon"></i>
         Contratos
       </a>
       {% endif %}
@@ -842,7 +826,7 @@
         {% if can('geoportal') %}<a class="av-nav-item" href="{{ url_for('main.geoportal') }}"><i class="bi bi-globe-americas av-nav-icon"></i> Geoportal</a>{% endif %}
         {% if can('seguimiento') %}<a class="av-nav-item" href="{{ url_for('seguimiento.index') }}"><i class="bi bi-graph-up-arrow av-nav-icon"></i> Metas</a>{% endif %}
         {% if can('riesgo') %}<a class="av-nav-item" href="{{ url_for('main.gestion_riesgo') }}"><i class="bi bi-tree av-nav-icon"></i> Riesgo</a>{% endif %}
-        {% if can('contratos') %}<a class="av-nav-item" href="/contratos"><i class="bi bi-file-earmark-contract av-nav-icon"></i> Contratos</a>{% endif %}
+        {% if can('contratos') %}<a class="av-nav-item" href="/contratos"><i class="bi bi-journal-text av-nav-icon"></i> Contratos</a>{% endif %}
         <a class="av-nav-item danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right av-nav-icon"></i> Cerrar Sesión</a>
       </div>
     </div>

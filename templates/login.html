@@ -48,9 +48,13 @@
     inset: 0;
     background-image: url("{{ url_for('static', filename='paisaje2.jpg') }}");
     background-size: cover;
-    background-position: center 40%;
+    background-position: center 30%;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
     z-index: 0;
-    transition: transform 8s ease;
+    transition: transform 0.08s linear;
+    will-change: transform;
+    transform: scale(1.06);
   }
 
   /* Doble overlay: oscuro abajo, azul institucional suave arriba */
@@ -137,29 +141,26 @@
     margin: 0 0 1.5rem;
   }
 
-  .lp-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .lp-badge {
+  /* Crédito secretaría en panel izquierdo */
+  .lp-credit {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.5rem;
     background: rgba(255,255,255,0.1);
     border: 1px solid rgba(255,255,255,0.18);
-    color: rgba(255,255,255,0.85);
-    font-size: 0.75rem;
+    color: rgba(255,255,255,0.8);
+    font-size: 0.78rem;
     font-weight: 500;
-    padding: 0.35rem 0.75rem;
+    padding: 0.45rem 0.9rem;
     border-radius: 999px;
     backdrop-filter: blur(8px);
+    letter-spacing: 0.2px;
   }
 
-  .lp-badge i {
-    font-size: 0.8rem;
+  .lp-credit i {
+    font-size: 0.85rem;
     color: #7dd3fc;
+    flex-shrink: 0;
   }
 
   /* =====================================================
@@ -413,32 +414,6 @@
     color: #0f4c81;
   }
 
-  /* ---- Info cards en el panel derecho ---- */
-  .lp-info-row {
-    display: flex;
-    gap: 0.75rem;
-    margin-bottom: 1.75rem;
-    width: 100%;
-  }
-
-  .lp-info-card {
-    flex: 1;
-    background: #f0f7ff;
-    border: 1px solid #dbeafe;
-    border-radius: 12px;
-    padding: 0.75rem;
-    text-align: center;
-    font-size: 0.78rem;
-    color: #334155;
-  }
-
-  .lp-info-card i {
-    display: block;
-    font-size: 1.2rem;
-    color: #0f4c81;
-    margin-bottom: 0.3rem;
-  }
-
   /* =====================================================
      RESPONSIVE — Ocultar panel izquierdo en móvil
      ===================================================== */
@@ -477,8 +452,7 @@
   .lp-brand       { animation: lp-fade-left 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s both; }
   .lp-hero-text   { animation: lp-fade-left 0.6s cubic-bezier(0.16,1,0.3,1) 0.2s both; }
   .lp-form-header { animation: lp-fade-up 0.5s cubic-bezier(0.16,1,0.3,1) 0.15s both; }
-  .lp-info-row    { animation: lp-fade-up 0.5s cubic-bezier(0.16,1,0.3,1) 0.25s both; }
-  .lp-form        { animation: lp-fade-up 0.5s cubic-bezier(0.16,1,0.3,1) 0.3s both; }
+  .lp-form        { animation: lp-fade-up 0.5s cubic-bezier(0.16,1,0.3,1) 0.25s both; }
 </style>
 {% endblock %}
 
@@ -500,15 +474,14 @@
 
     <!-- Hero text bottom-left -->
     <div class="lp-hero-text">
-      <h2>Municipio conectado<br>con su <em>comunidad</em></h2>
+      <h2>Municipio en línea,<br>con su <em>comunidad</em></h2>
       <p>
-        Accede a los servicios institucionales de Supatá de forma rápida,
-        segura y desde cualquier lugar.
+        Servicios institucionales de Supatá disponibles de forma rápida,
+        segura y desde cualquier lugar del mundo.
       </p>
-      <div class="lp-badges">
-        <span class="lp-badge"><i class="bi bi-shield-check-fill"></i> Acceso seguro</span>
-        <span class="lp-badge"><i class="bi bi-lock-fill"></i> 2FA disponible</span>
-        <span class="lp-badge"><i class="bi bi-cloud-fill"></i> Siempre disponible</span>
+      <div class="lp-credit">
+        <i class="bi bi-building"></i>
+        Secretaría de Planeación y Obras Públicas
       </div>
     </div>
   </div>
@@ -538,22 +511,6 @@
     </div>
     {% endif %}
     {% endwith %}
-
-    <!-- Info cards rápidas -->
-    <div class="lp-info-row">
-      <div class="lp-info-card">
-        <i class="bi bi-file-earmark-text"></i>
-        Trámites en línea
-      </div>
-      <div class="lp-info-card">
-        <i class="bi bi-people-fill"></i>
-        Participación ciudadana
-      </div>
-      <div class="lp-info-card">
-        <i class="bi bi-graph-up-arrow"></i>
-        Seguimiento de metas
-      </div>
-    </div>
 
     <!-- Formulario -->
     <form method="POST" class="lp-form" id="loginForm" autocomplete="off">
