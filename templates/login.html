@@ -111,12 +111,21 @@
     z-index: 2;
   }
 
-  .lp-brand img {
+  /* Wrapper para mezcla: el mix-blend-mode no puede coexistir con filter */
+  .lp-brand-logo {
     width: 58px;
     height: 58px;
+    flex-shrink: 0;
+    mix-blend-mode: luminosity;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .lp-brand-logo img {
+    width: 100%;
+    height: 100%;
     object-fit: contain;
-    mix-blend-mode: multiply;
-    filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5));
+    display: block;
   }
 
   .lp-brand-text {
@@ -491,7 +500,9 @@
 
     <!-- Brand top-left -->
     <div class="lp-brand">
-      <img src="{{ url_for('static', filename='imagenes/escudo.png') }}" alt="Escudo Supatá" />
+      <div class="lp-brand-logo">
+        <img src="{{ url_for('static', filename='imagenes/escudo.png') }}" alt="Escudo Supatá" />
+      </div>
       <div class="lp-brand-text">
         <h1>Alcaldía de Supatá</h1>
         <span>Cundinamarca · Colombia</span>
