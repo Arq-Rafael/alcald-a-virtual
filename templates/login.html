@@ -9,25 +9,49 @@
      Foto de Supatá + Formulario institucional
      ===================================================== */
 
-  /* Ocultar el sidebar y el fondo animado global en la página de login */
-  body {
-    background: #0f172a !important;
+  /* Login: sin scroll, pantalla fija 100vh */
+  html, body {
+    height: 100% !important;
+    overflow: hidden !important;
+    background: #0a0f1a !important;
     animation: none !important;
   }
+
+  /* Ocultar sidebar y elementos de navegación */
   .dock-container,
+  .av-sidebar,
+  .av-mobile-header,
   .d-lg-none.p-3 {
     display: none !important;
   }
+
+  /* Quitar padding/margin del main para que el wrapper ocupe todo */
   main.main-content {
     padding: 0 !important;
     margin: 0 !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    flex: unset !important;
   }
 
-  /* ---- Wrapper principal ---- */
+  /* body.has-sidebar: anular el flex-row para el login */
+  body.has-sidebar {
+    display: block !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  /* ---- Wrapper principal — altura exacta sin scroll ---- */
   .lp-wrapper {
     display: flex;
-    min-height: 100vh;
+    height: 100vh;
     width: 100%;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
   }
 
   /* =====================================================
@@ -36,7 +60,7 @@
   .lp-left {
     position: relative;
     flex: 1.1;
-    min-height: 100vh;
+    height: 100vh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -173,10 +197,11 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 3rem 3.5rem;
+    padding: 2.5rem 3.5rem;
     position: relative;
-    min-height: 100vh;
+    height: 100vh;
     overflow-y: auto;
+    overflow-x: hidden;
     box-shadow: -2px 0 60px rgba(0,0,0,0.25);
   }
 
@@ -423,16 +448,16 @@
     }
     .lp-right {
       flex: 1;
+      flex-basis: 100%;
       padding: 2rem 1.5rem;
+      height: 100vh;
+      overflow-y: auto;
     }
   }
 
   @media (max-width: 480px) {
     .lp-right {
       padding: 1.5rem 1.25rem;
-    }
-    .lp-info-row {
-      flex-direction: column;
     }
   }
 
