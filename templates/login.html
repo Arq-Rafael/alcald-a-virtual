@@ -1,56 +1,652 @@
 {% extends "base.html" %}
 
-{% block content %}
-<div class="bg-animated"></div>
-<div class="auth-container fade-in-up">
-    <div class="login-glass">
-        
-        <div class="mb-4">
-          <div class="bg-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow-lg" style="width: 80px; height: 80px;">
-              <i class="bi bi-building-check text-primary" style="font-size: 2.5rem;"></i>
-          </div>
-          <h4 class="fw-bold fs-3">Alcaldía Virtual</h4>
-          <p class="text-white-50">Acceso Institucional</p>
-        </div>
+{% block title %}Ingresar — Alcaldía Virtual Supatá{% endblock %}
 
-        <form method="POST">
-          <div class="mb-4 text-start">
-            <label for="usuario" class="form-label mb-2 fw-bold">Usuario</label>
-            <input
-              type="text"
-              class="form-control form-control-lg"
-              id="usuario"
-              name="usuario"
-              placeholder="Ej. planeacion"
-              required
-              style="border-radius: 12px; padding: 0.9rem;"
-            />
-          </div>
-          <div class="mb-5 text-start">
-             <label for="clave" class="form-label mb-2 fw-bold">Contraseña</label>
-            <input
-              type="password"
-              class="form-control form-control-lg"
-              id="clave"
-              name="clave"
-              placeholder="••••••••"
-              required
-              style="border-radius: 12px; padding: 0.9rem;"
-            />
-          </div>
-          <button type="submit" class="btn btn-login-premium w-100 py-3 shadow">
-            Ingresar
-          </button>
-          
-          <div class="mt-3 text-center">
-            <a href="{{ url_for('recuperacion.solicitar_recuperacion') }}" class="text-decoration-none text-white-50 small">
-              <i class="bi bi-key me-1"></i> ¿Olvidaste tu contraseña?
-            </a>
-          </div>
-        </form>
-        <div class="mt-4 pt-3 border-top border-white-50">
-           <small class="text-white-50">© 2026 Alcaldía de Supatá</small>
-        </div>
+{% block styles %}
+<style>
+  /* =====================================================
+     LOGIN PAGE — Diseño profesional dividido
+     Foto de Supatá + Formulario institucional
+     ===================================================== */
+
+  /* Ocultar el sidebar y el fondo animado global en la página de login */
+  body {
+    background: #0f172a !important;
+    animation: none !important;
+  }
+  .dock-container,
+  .d-lg-none.p-3 {
+    display: none !important;
+  }
+  main.main-content {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* ---- Wrapper principal ---- */
+  .lp-wrapper {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+  }
+
+  /* =====================================================
+     PANEL IZQUIERDO — Foto + Identidad
+     ===================================================== */
+  .lp-left {
+    position: relative;
+    flex: 1.1;
+    min-height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .lp-left-bg {
+    position: absolute;
+    inset: 0;
+    background-image: url("{{ url_for('static', filename='paisaje2.jpg') }}");
+    background-size: cover;
+    background-position: center 40%;
+    z-index: 0;
+    transition: transform 8s ease;
+  }
+
+  /* Doble overlay: oscuro abajo, azul institucional suave arriba */
+  .lp-left::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      160deg,
+      rgba(15, 76, 129, 0.72) 0%,
+      rgba(10, 40, 80, 0.55) 40%,
+      rgba(5, 15, 35, 0.85) 100%
+    );
+    z-index: 1;
+  }
+
+  .lp-left-content {
+    position: relative;
+    z-index: 2;
+    padding: 3rem;
+  }
+
+  .lp-brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: auto;
+    padding: 2.5rem 3rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .lp-brand img {
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
+  }
+
+  .lp-brand-text {
+    color: #fff;
+  }
+
+  .lp-brand-text h1 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.3px;
+    line-height: 1.2;
+  }
+
+  .lp-brand-text span {
+    font-size: 0.78rem;
+    font-weight: 400;
+    opacity: 0.75;
+    letter-spacing: 0.5px;
+  }
+
+  .lp-hero-text {
+    padding: 0 3rem 3rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .lp-hero-text h2 {
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    margin-bottom: 0.75rem;
+  }
+
+  .lp-hero-text h2 em {
+    font-style: normal;
+    color: #7dd3fc; /* sky-300 */
+  }
+
+  .lp-hero-text p {
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.65);
+    max-width: 380px;
+    line-height: 1.7;
+    margin: 0 0 1.5rem;
+  }
+
+  .lp-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .lp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.85);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    backdrop-filter: blur(8px);
+  }
+
+  .lp-badge i {
+    font-size: 0.8rem;
+    color: #7dd3fc;
+  }
+
+  /* =====================================================
+     PANEL DERECHO — Formulario
+     ===================================================== */
+  .lp-right {
+    flex: 0 0 460px;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 3.5rem;
+    position: relative;
+    min-height: 100vh;
+    overflow-y: auto;
+    box-shadow: -2px 0 60px rgba(0,0,0,0.25);
+  }
+
+  .lp-form-header {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 2.25rem;
+  }
+
+  .lp-form-header .lp-icon-wrap {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #0f4c81 0%, #0ea5e9 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+    box-shadow: 0 8px 24px rgba(15, 76, 129, 0.25);
+  }
+
+  .lp-form-header .lp-icon-wrap i {
+    font-size: 1.75rem;
+    color: #fff;
+  }
+
+  .lp-form-header h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 0.3rem;
+    letter-spacing: -0.4px;
+  }
+
+  .lp-form-header p {
+    font-size: 0.88rem;
+    color: #64748b;
+    margin: 0;
+  }
+
+  /* Flash messages */
+  .lp-flash {
+    width: 100%;
+    margin-bottom: 1.25rem;
+  }
+
+  .lp-flash .alert {
+    border-radius: 12px;
+    font-size: 0.875rem;
+    border: none;
+    padding: 0.75rem 1rem;
+  }
+
+  /* ---- Campos del formulario ---- */
+  .lp-form {
+    width: 100%;
+  }
+
+  .lp-field {
+    margin-bottom: 1.25rem;
+  }
+
+  .lp-field label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+
+  .lp-field .input-wrap {
+    position: relative;
+  }
+
+  .lp-field .input-wrap i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 1rem;
+    pointer-events: none;
+    transition: color 0.2s;
+  }
+
+  .lp-field input {
+    width: 100%;
+    padding: 0.85rem 1rem 0.85rem 2.75rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    color: #0f172a;
+    background: #f8fafc;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    outline: none;
+    font-family: inherit;
+  }
+
+  .lp-field input:focus {
+    border-color: #0f4c81;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.1);
+  }
+
+  .lp-field input:focus + i,
+  .lp-field .input-wrap:focus-within i {
+    color: #0f4c81;
+  }
+
+  /* Ícono contraseña toggle */
+  .lp-field .pw-toggle {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #94a3b8;
+    padding: 0;
+    font-size: 1rem;
+    transition: color 0.2s;
+    pointer-events: all;
+  }
+  .lp-field .pw-toggle:hover {
+    color: #0f4c81;
+  }
+
+  /* ---- Botón principal ---- */
+  .lp-btn-submit {
+    width: 100%;
+    padding: 0.9rem;
+    background: linear-gradient(135deg, #0f4c81 0%, #1565c0 100%);
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s;
+    box-shadow: 0 4px 16px rgba(15, 76, 129, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .lp-btn-submit::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .lp-btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(15, 76, 129, 0.4);
+    background: linear-gradient(135deg, #1565c0 0%, #0f4c81 100%);
+  }
+
+  .lp-btn-submit:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(15, 76, 129, 0.3);
+  }
+
+  /* Loader en botón */
+  .lp-btn-submit .btn-spinner {
+    display: none;
+    width: 18px;
+    height: 18px;
+    border: 2.5px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ---- Links secundarios ---- */
+  .lp-link-forgot {
+    display: block;
+    text-align: center;
+    margin-top: 1.25rem;
+    font-size: 0.84rem;
+    color: #64748b;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .lp-link-forgot:hover {
+    color: #0f4c81;
+  }
+
+  /* ---- Separador ---- */
+  .lp-divider {
+    margin: 1.75rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #cbd5e1;
+    font-size: 0.78rem;
+  }
+
+  .lp-divider::before,
+  .lp-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e2e8f0;
+  }
+
+  /* ---- Footer del formulario ---- */
+  .lp-footer {
+    margin-top: 2rem;
+    text-align: center;
+    font-size: 0.78rem;
+    color: #94a3b8;
+  }
+
+  .lp-footer a {
+    color: #64748b;
+    text-decoration: none;
+  }
+
+  .lp-footer a:hover {
+    color: #0f4c81;
+  }
+
+  /* ---- Info cards en el panel derecho ---- */
+  .lp-info-row {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.75rem;
+    width: 100%;
+  }
+
+  .lp-info-card {
+    flex: 1;
+    background: #f0f7ff;
+    border: 1px solid #dbeafe;
+    border-radius: 12px;
+    padding: 0.75rem;
+    text-align: center;
+    font-size: 0.78rem;
+    color: #334155;
+  }
+
+  .lp-info-card i {
+    display: block;
+    font-size: 1.2rem;
+    color: #0f4c81;
+    margin-bottom: 0.3rem;
+  }
+
+  /* =====================================================
+     RESPONSIVE — Ocultar panel izquierdo en móvil
+     ===================================================== */
+  @media (max-width: 768px) {
+    .lp-left {
+      display: none;
+    }
+    .lp-right {
+      flex: 1;
+      padding: 2rem 1.5rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .lp-right {
+      padding: 1.5rem 1.25rem;
+    }
+    .lp-info-row {
+      flex-direction: column;
+    }
+  }
+
+  /* =====================================================
+     ANIMACIONES DE ENTRADA
+     ===================================================== */
+  @keyframes lp-fade-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes lp-fade-left {
+    from { opacity: 0; transform: translateX(-24px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .lp-brand       { animation: lp-fade-left 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s both; }
+  .lp-hero-text   { animation: lp-fade-left 0.6s cubic-bezier(0.16,1,0.3,1) 0.2s both; }
+  .lp-form-header { animation: lp-fade-up 0.5s cubic-bezier(0.16,1,0.3,1) 0.15s both; }
+  .lp-info-row    { animation: lp-fade-up 0.5s cubic-bezier(0.16,1,0.3,1) 0.25s both; }
+  .lp-form        { animation: lp-fade-up 0.5s cubic-bezier(0.16,1,0.3,1) 0.3s both; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lp-wrapper">
+
+  <!-- ===== PANEL IZQUIERDO ===== -->
+  <div class="lp-left">
+    <div class="lp-left-bg" id="lpBg"></div>
+
+    <!-- Brand top-left -->
+    <div class="lp-brand">
+      <img src="{{ url_for('static', filename='imagenes/escudo.png') }}" alt="Escudo Supatá" />
+      <div class="lp-brand-text">
+        <h1>Alcaldía de Supatá</h1>
+        <span>Cundinamarca · Colombia</span>
+      </div>
     </div>
-</div>
+
+    <!-- Hero text bottom-left -->
+    <div class="lp-hero-text">
+      <h2>Municipio conectado<br>con su <em>comunidad</em></h2>
+      <p>
+        Accede a los servicios institucionales de Supatá de forma rápida,
+        segura y desde cualquier lugar.
+      </p>
+      <div class="lp-badges">
+        <span class="lp-badge"><i class="bi bi-shield-check-fill"></i> Acceso seguro</span>
+        <span class="lp-badge"><i class="bi bi-lock-fill"></i> 2FA disponible</span>
+        <span class="lp-badge"><i class="bi bi-cloud-fill"></i> Siempre disponible</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PANEL DERECHO ===== -->
+  <div class="lp-right">
+
+    <!-- Header del form -->
+    <div class="lp-form-header">
+      <div class="lp-icon-wrap">
+        <i class="bi bi-building-check"></i>
+      </div>
+      <h3>Acceso Institucional</h3>
+      <p>Ingresa tus credenciales para continuar</p>
+    </div>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="lp-flash">
+      {% for cat, msg in messages %}
+      <div class="alert alert-{{ 'danger' if cat == 'error' else cat }}">
+        <i class="bi bi-{{ 'exclamation-triangle' if cat in ['error','danger'] else 'info-circle' }}-fill me-2"></i>
+        {{ msg }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Info cards rápidas -->
+    <div class="lp-info-row">
+      <div class="lp-info-card">
+        <i class="bi bi-file-earmark-text"></i>
+        Trámites en línea
+      </div>
+      <div class="lp-info-card">
+        <i class="bi bi-people-fill"></i>
+        Participación ciudadana
+      </div>
+      <div class="lp-info-card">
+        <i class="bi bi-graph-up-arrow"></i>
+        Seguimiento de metas
+      </div>
+    </div>
+
+    <!-- Formulario -->
+    <form method="POST" class="lp-form" id="loginForm" autocomplete="off">
+
+      <div class="lp-field">
+        <label for="usuario">Usuario</label>
+        <div class="input-wrap">
+          <input
+            type="text"
+            id="usuario"
+            name="usuario"
+            placeholder="Ej: planeacion"
+            required
+            autocomplete="username"
+          />
+          <i class="bi bi-person"></i>
+        </div>
+      </div>
+
+      <div class="lp-field">
+        <label for="clave">Contraseña</label>
+        <div class="input-wrap">
+          <input
+            type="password"
+            id="clave"
+            name="clave"
+            placeholder="••••••••"
+            required
+            autocomplete="current-password"
+          />
+          <i class="bi bi-lock"></i>
+          <button type="button" class="pw-toggle" id="pwToggle" aria-label="Mostrar contraseña">
+            <i class="bi bi-eye" id="pwIcon"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="lp-btn-submit" id="submitBtn">
+        <span class="btn-spinner" id="btnSpinner"></span>
+        <span id="btnText">Ingresar</span>
+        <i class="bi bi-arrow-right-short" id="btnArrow" style="font-size:1.2rem;"></i>
+      </button>
+
+    </form>
+
+    <a href="{{ url_for('recuperacion.solicitar_recuperacion') }}" class="lp-link-forgot">
+      <i class="bi bi-key me-1"></i>¿Olvidaste tu contraseña?
+    </a>
+
+    <div class="lp-divider">Acceso seguro con cifrado TLS</div>
+
+    <div class="lp-footer">
+      © 2026 Alcaldía Municipal de Supatá &mdash; Cundinamarca<br>
+      <a href="#">Política de privacidad</a> &middot; <a href="#">Soporte</a>
+    </div>
+
+  </div><!-- /lp-right -->
+
+</div><!-- /lp-wrapper -->
+
+<script>
+  // Toggle mostrar/ocultar contraseña
+  const pwToggle = document.getElementById('pwToggle');
+  const pwInput  = document.getElementById('clave');
+  const pwIcon   = document.getElementById('pwIcon');
+  if (pwToggle) {
+    pwToggle.addEventListener('click', () => {
+      const show = pwInput.type === 'password';
+      pwInput.type = show ? 'text' : 'password';
+      pwIcon.className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
+    });
+  }
+
+  // Loader en submit
+  const loginForm = document.getElementById('loginForm');
+  const submitBtn = document.getElementById('submitBtn');
+  if (loginForm) {
+    loginForm.addEventListener('submit', () => {
+      submitBtn.disabled = true;
+      document.getElementById('btnSpinner').style.display = 'block';
+      document.getElementById('btnText').textContent = 'Verificando...';
+      document.getElementById('btnArrow').style.display = 'none';
+    });
+  }
+
+  // Efecto parallax suave en la imagen de fondo
+  const lpBg = document.getElementById('lpBg');
+  if (lpBg) {
+    document.addEventListener('mousemove', (e) => {
+      const x = (e.clientX / window.innerWidth  - 0.5) * 6;
+      const y = (e.clientY / window.innerHeight - 0.5) * 6;
+      lpBg.style.transform = `translate(${x}px, ${y}px) scale(1.04)`;
+    });
+  }
+</script>
 {% endblock %}

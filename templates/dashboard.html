@@ -1,542 +1,573 @@
 {% extends "base.html" %}
 
-{% block title %}Panel de Control - Alcaldía Virtual Supatá{% endblock %}
+{% block title %}Panel de Control — Alcaldía Virtual Supatá{% endblock %}
 
 {% block styles %}
 <style>
-/* ========================================
-   iOS 26 MODO CLARO - DEGRADADO SUAVE
-   Inspirado en diseños modernos premium
-   ======================================== */
+/* =====================================================
+   DASHBOARD — Diseño profesional tipo SaaS
+   ===================================================== */
 
-:root {
-  --ios-bg-light: #f0f4ff;
-  --ios-bg-gradient-start: #667eea;
-  --ios-bg-gradient-end: #764ba2;
-  --ios-card-bg: rgba(255, 255, 255, 0.85);
-  --ios-card-hover: rgba(255, 255, 255, 0.95);
-  --ios-text: #1a202c;
-  --ios-text-secondary: #4a5568;
-  --ios-border: rgba(255, 255, 255, 0.4);
-  --ios-teal: #14b8a6;
-  --ios-purple: #a78bfa;
-  --ios-blue: #60a5fa;
-  --ios-orange: #fb923c;
-  --ios-red: #f87171;
-  --ios-green: #4ade80;
-  --ios-yellow: #fbbf24;
+body.has-sidebar {
+  background: #f1f5f9 !important;
 }
 
-* {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif !important;
+.db-page {
+  padding: 1.75rem 2rem;
+  max-width: 1380px;
+  margin: 0 auto;
+  animation: db-fade-in 0.4s ease both;
 }
 
-body {
-  background: var(--ios-bg-light) !important;
-  color: var(--ios-text) !important;
-  overflow-x: hidden;
-  min-height: 100vh;
+@keyframes db-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.dashboard-container {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 32px;
-  padding: 2.5rem;
-  margin: 2rem auto;
-  max-width: 1400px;
-  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.25),
-              inset 0 1px 0 rgba(255, 255, 255, 0.15);
+/* =====================================================
+   BANNER DE BIENVENIDA
+   ===================================================== */
+.db-banner {
   position: relative;
-  z-index: 1;
+  overflow: hidden;
+  border-radius: 18px;
+  background: linear-gradient(130deg, #0f4c81 0%, #1565c0 55%, #0ea5e9 100%);
+  padding: 2rem 2.25rem;
+  margin-bottom: 1.75rem;
+  box-shadow: 0 8px 32px rgba(15,76,129,0.22);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
 }
 
-.dashboard-bg {
-  position: fixed !important;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #e8f4f8 0%, #f0f7fa 25%, #f5f9fc 50%, #fafcfd 75%, #ffffff 100%);
-  z-index: -1;
-  opacity: 1 !important;
-  display: block !important;
-}
-
-.dashboard-bg::before {
+.db-banner::before {
   content: '';
   position: absolute;
-  top: 0;
-  right: 0;
-  width: 600px;
-  height: 600px;
-  background-image: repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 2px,
-    rgba(255, 255, 255, 0.03) 2px,
-    rgba(255, 255, 255, 0.03) 4px
-  );
+  right: -80px;
+  top: -80px;
+  width: 320px;
+  height: 320px;
+  background: rgba(255,255,255,0.07);
   border-radius: 50%;
-  opacity: 0.6;
+  pointer-events: none;
 }
 
-.dashboard-bg::after {
+.db-banner::after {
   content: '';
   position: absolute;
-  top: -100px;
-  right: -100px;
-  width: 500px;
-  height: 500px;
-  border: 80px solid rgba(255, 255, 255, 0.05);
+  right: 60px;
+  bottom: -60px;
+  width: 200px;
+  height: 200px;
+  background: rgba(255,255,255,0.05);
   border-radius: 50%;
-  box-shadow: 
-    0 0 0 1px rgba(255, 255, 255, 0.03),
-    0 0 0 40px rgba(255, 255, 255, 0.02);
+  pointer-events: none;
 }
 
-/* ========================================
-   HEADER - iOS 26 CLARO
-   ======================================== */
+.db-banner-left { position: relative; z-index: 1; }
 
-.dashboard-header {
-  padding: 1.5rem 0 1.8rem;
-  background: transparent;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  opacity: 0;
+.db-banner-left h2 {
+  font-size: 1.75rem !important;
+  font-weight: 800 !important;
+  color: #fff !important;
+  margin: 0 0 0.3rem !important;
+  letter-spacing: -0.4px !important;
+  line-height: 1.2 !important;
+}
+
+.db-banner-left p {
+  font-size: 0.92rem;
+  color: rgba(255,255,255,0.75);
+  margin: 0 0 1.25rem;
+}
+
+.db-banner-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.db-banner-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.9);
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+}
+
+.db-banner-chip.chip-success i { color: #6ee7b7; }
+.db-banner-chip.chip-warn    i { color: #fde68a; }
+.db-banner-chip.chip-info    i { color: #bae6fd; }
+
+.db-banner-right { position: relative; z-index: 1; flex-shrink: 0; }
+
+.db-weather-card {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  text-align: center;
+  min-width: 110px;
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+
+.db-weather-card i  { font-size: 2rem; color: #fde68a; display: block; margin-bottom: 0.25rem; }
+.db-weather-card .temp { font-size: 1.4rem; font-weight: 700; color: #fff; line-height: 1; }
+.db-weather-card .desc { font-size: 0.72rem; color: rgba(255,255,255,0.65); margin-top: 0.15rem; }
+
+/* =====================================================
+   SECTION TITLE
+   ===================================================== */
+.db-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #64748b;
   margin-bottom: 1rem;
 }
+.db-section-title i { font-size: 1rem; color: #0f4c81; }
 
-@keyframes slideDown {
-  to { opacity: 1; transform: translateY(0); }
-  from { opacity: 0; transform: translateY(-20px); }
-}
-
-.dashboard-header h2 {
-  font-size: 1.8rem !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.5px !important;
-  color: #1a202c !important;
-  margin: 0 !important;
-  line-height: 1.2;
-}
-
-.dashboard-header p {
-  font-size: 0.9rem !important;
-  color: #718096 !important;
-  margin: 0.4rem 0 0 0 !important;
-  font-weight: 400 !important;
-}
-
-.dashboard-header .badge {
-  background: linear-gradient(135deg, var(--ios-teal) 0%, var(--ios-purple) 100%) !important;
-  color: white !important;
-  border: none !important;
-  border-radius: 20px !important;
-  padding: 0.7rem 1.6rem !important;
-  font-size: 0.8rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 1px !important;
-  box-shadow: 0 8px 24px rgba(20, 184, 166, 0.3) !important;
-  animation: scaleIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
-  opacity: 0;
-}
-
-@keyframes scaleIn {
-  to { opacity: 1; transform: scale(1); }
-  from { opacity: 0; transform: scale(0.8); }
-}
-
-/* ========================================
-   GRID - ESPACIOSO Y LIMPIO
-   ======================================== */
-
-.dashboard-grid {
+/* =====================================================
+   GRID DE MÓDULOS
+   ===================================================== */
+.db-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  padding: 1.5rem 0;
-  animation: fadeIn 0.8s ease-out 0.1s forwards;
-  opacity: 0;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.75rem;
 }
 
-@keyframes fadeIn {
-  to { opacity: 1; }
-  from { opacity: 0; }
-}
+@media (max-width: 640px) { .db-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 420px) { .db-grid { grid-template-columns: 1fr; } }
 
-@media (max-width: 768px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-    gap: 1.8rem;
-  }
-}
-
-/* ========================================
-   GLASS CARD - GLASSMORPHISM EFFECT
-   ======================================== */
-
-.glass-card {
-  background: linear-gradient(135deg, 
-              rgba(255, 255, 255, 0.25) 0%, 
-              rgba(255, 255, 255, 0.15) 100%);
-  backdrop-filter: blur(20px) saturate(200%);
-  -webkit-backdrop-filter: blur(20px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 24px;
-  padding: 1.8rem 1.7rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04),
-              0 4px 16px rgba(0, 0, 0, 0.03),
-              inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
-              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
-              backdrop-filter 0.35s ease;
+.db-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.4rem 1.25rem;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  text-decoration: none !important;
+  color: inherit;
   position: relative;
   overflow: hidden;
-  animation: cardSlide 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  opacity: 0;
-  color: #1a202c;
+  animation: card-in 0.4s cubic-bezier(0.16,1,0.3,1) both;
 }
 
-/* Subtle gradient overlay for depth */
-.glass-card::before {
+.db-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  border-color: var(--card-accent, #0f4c81);
+  text-decoration: none !important;
+}
+
+.db-card::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--card-gradient, linear-gradient(135deg, rgba(102, 126, 234, 0.28) 0%, rgba(118, 75, 162, 0.18) 100%));
-  border-radius: 24px;
-  opacity: 0.9;
-  z-index: 0;
-  transition: opacity 0.3s ease;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--card-accent, #0f4c81);
+  opacity: 0;
+  transition: opacity 0.2s;
 }
 
-.glass-card > * {
-  position: relative;
-  z-index: 1;
+.db-card:hover::before { opacity: 1; }
+
+.db-card:nth-child(1)  { animation-delay: 0.03s; }
+.db-card:nth-child(2)  { animation-delay: 0.06s; }
+.db-card:nth-child(3)  { animation-delay: 0.09s; }
+.db-card:nth-child(4)  { animation-delay: 0.12s; }
+.db-card:nth-child(5)  { animation-delay: 0.15s; }
+.db-card:nth-child(6)  { animation-delay: 0.18s; }
+.db-card:nth-child(7)  { animation-delay: 0.21s; }
+.db-card:nth-child(8)  { animation-delay: 0.24s; }
+.db-card:nth-child(9)  { animation-delay: 0.27s; }
+.db-card:nth-child(10) { animation-delay: 0.30s; }
+.db-card:nth-child(11) { animation-delay: 0.33s; }
+.db-card:nth-child(12) { animation-delay: 0.36s; }
+
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Color schemes per card with glassmorphism tints */
-.glass-card:nth-child(1) { animation-delay: 0.05s; --card-gradient: linear-gradient(135deg, rgba(246, 211, 101, 0.28) 0%, rgba(253, 160, 133, 0.18) 100%); }
-.glass-card:nth-child(2) { animation-delay: 0.10s; --card-gradient: linear-gradient(135deg, rgba(240, 147, 251, 0.28) 0%, rgba(245, 87, 108, 0.18) 100%); }
-.glass-card:nth-child(3) { animation-delay: 0.15s; --card-gradient: linear-gradient(135deg, rgba(102, 126, 234, 0.28) 0%, rgba(118, 75, 162, 0.18) 100%); }
-.glass-card:nth-child(4) { animation-delay: 0.20s; --card-gradient: linear-gradient(135deg, rgba(67, 206, 162, 0.28) 0%, rgba(24, 90, 157, 0.18) 100%); }
-.glass-card:nth-child(5) { animation-delay: 0.25s; --card-gradient: linear-gradient(135deg, rgba(95, 114, 189, 0.28) 0%, rgba(155, 35, 234, 0.18) 100%); }
-.glass-card:nth-child(6) { animation-delay: 0.30s; --card-gradient: linear-gradient(135deg, rgba(96, 165, 250, 0.28) 0%, rgba(59, 130, 246, 0.18) 100%); }
-.glass-card:nth-child(7) { animation-delay: 0.35s; --card-gradient: linear-gradient(135deg, rgba(255, 107, 107, 0.28) 0%, rgba(255, 23, 68, 0.18) 100%); }
-.glass-card:nth-child(8) { animation-delay: 0.40s; --card-gradient: linear-gradient(135deg, rgba(0, 201, 167, 0.28) 0%, rgba(10, 115, 119, 0.18) 100%); }
-.glass-card:nth-child(9) { animation-delay: 0.45s; --card-gradient: linear-gradient(135deg, rgba(245, 158, 11, 0.28) 0%, rgba(217, 119, 6, 0.18) 100%); }
-.glass-card:nth-child(10) { animation-delay: 0.50s; --card-gradient: linear-gradient(135deg, rgba(110, 231, 183, 0.28) 0%, rgba(5, 150, 105, 0.18) 100%); }
-.glass-card:nth-child(11) { animation-delay: 0.55s; --card-gradient: linear-gradient(135deg, rgba(59, 130, 246, 0.28) 0%, rgba(30, 64, 175, 0.18) 100%); }
-.glass-card:nth-child(12) { animation-delay: 0.60s; --card-gradient: linear-gradient(135deg, rgba(100, 116, 139, 0.28) 0%, rgba(51, 65, 85, 0.18) 100%); }
-
-@keyframes cardSlide {
-  to { opacity: 1; transform: translateY(0); }
-  from { opacity: 0; transform: translateY(24px); }
+.db-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  background: var(--card-icon-bg, #e0f2fe);
+  color: var(--card-accent, #0f4c81);
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
 }
 
-.glass-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06),
-              0 8px 24px rgba(0, 0, 0, 0.05),
-              inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  transform: translateY(-8px);
-  backdrop-filter: blur(24px) saturate(220%);
-  -webkit-backdrop-filter: blur(24px) saturate(220%);
-  background: linear-gradient(135deg, 
-              rgba(255, 255, 255, 0.35) 0%, 
-              rgba(255, 255, 255, 0.22) 100%);
+.db-card:hover .db-card-icon {
+  background: var(--card-accent, #0f4c81);
+  color: #fff;
 }
 
-.glass-card:hover::before {
-  opacity: 1.0;
-}
-
-.glass-card:active {
-  transform: translateY(-2px);
-}
-
-/* ========================================
-   ICON - MINIMALISTA
-   ======================================== */
-
-.card-icon-wrapper {
-  display: none;
-}
-
-.card-icon {
-  font-size: 3.2rem;
-  margin-bottom: 1.2rem;
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.glass-card:hover .card-icon {
-  transform: scale(1.15);
-}
-
-/* ========================================
-   TEXT CONTENT
-   ======================================== */
-
-.glass-card h5 {
-  font-size: 1.1rem !important;
-  font-weight: 700 !important;
-  color: var(--ios-text) !important;
-  margin: 0 0 0.6rem 0 !important;
-  letter-spacing: -0.3px;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
-}
-
-.glass-card p {
-  font-size: 0.88rem !important;
-  color: var(--ios-text-secondary) !important;
-  line-height: 1.5 !important;
-  margin: 0 0 1.3rem 0 !important;
-  flex-grow: 1;
-}
-
-/* ========================================
-   BUTTON - PREMIUM iOS 26
-   ======================================== */
-
-.btn-premium {
-  background: rgba(255, 255, 255, 0.15) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-  color: var(--ios-text) !important;
-  border: 1px solid rgba(255, 255, 255, 0.25) !important;
-  border-radius: 14px !important;
-  padding: 0.7rem 1.1rem !important;
-  font-size: 0.85rem !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.4px !important;
-  transition: all 0.3s ease !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05),
-              inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 0.45rem !important;
-  position: relative;
-  overflow: hidden;
-  text-transform: uppercase;
-}
-
-.btn-premium:hover {
-  background: rgba(255, 255, 255, 0.25) !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1),
-              inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-}
-
-.btn-premium:active {
-  transform: translateY(-1px) !important;
-}
-
-.btn-premium i {
+.db-card-title {
   font-size: 0.95rem;
-  transition: transform 0.25s ease-out;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0.3rem;
+  line-height: 1.3;
 }
 
-.btn-premium:hover i {
-  transform: translateX(3px);
+.db-card-desc {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.5;
+  flex: 1;
 }
 
-/* ========================================
-   RESPONSIVE
-   ======================================== */
+.db-card-arrow {
+  display: none;
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--card-accent, #0f4c81);
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.db-card:hover .db-card-arrow { display: flex; }
+
+/* Acentos por tarjeta */
+.db-card[data-accent="blue"]    { --card-accent:#0f4c81; --card-icon-bg:#e0f2fe; }
+.db-card[data-accent="sky"]     { --card-accent:#0ea5e9; --card-icon-bg:#e0f2fe; }
+.db-card[data-accent="violet"]  { --card-accent:#7c3aed; --card-icon-bg:#ede9fe; }
+.db-card[data-accent="emerald"] { --card-accent:#059669; --card-icon-bg:#d1fae5; }
+.db-card[data-accent="amber"]   { --card-accent:#d97706; --card-icon-bg:#fef3c7; }
+.db-card[data-accent="rose"]    { --card-accent:#e11d48; --card-icon-bg:#ffe4e6; }
+.db-card[data-accent="teal"]    { --card-accent:#0d9488; --card-icon-bg:#ccfbf1; }
+.db-card[data-accent="indigo"]  { --card-accent:#4f46e5; --card-icon-bg:#e0e7ff; }
+.db-card[data-accent="orange"]  { --card-accent:#ea580c; --card-icon-bg:#ffedd5; }
+.db-card[data-accent="green"]   { --card-accent:#16a34a; --card-icon-bg:#dcfce7; }
+.db-card[data-accent="slate"]   { --card-accent:#475569; --card-icon-bg:#f1f5f9; }
+
+/* =====================================================
+   PANEL DE ESTADO
+   ===================================================== */
+.db-status-panel {
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.db-status-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.db-status-header h4 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.db-status-header h4 i { color: #0f4c81; }
+
+.db-status-header a {
+  font-size: 0.8rem;
+  color: #0f4c81;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.db-status-header a:hover { text-decoration: underline; }
+
+.db-status-body { padding: 0.25rem 1.25rem; }
+
+.db-status-row {
+  padding: 1rem 0;
+  border-bottom: 1px solid #f8fafc;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.db-status-row:last-child { border-bottom: none; }
+
+.db-status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.db-status-dot.active  { background: #0f4c81; }
+.db-status-dot.success { background: #059669; }
+.db-status-dot.pending { background: #d97706; }
+
+.db-status-info { flex: 1; min-width: 0; }
+
+.db-status-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.db-status-meta { font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.4rem; }
+
+.db-progress-bar {
+  height: 5px;
+  background: #f1f5f9;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.db-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--fill-color, #0f4c81);
+  transition: width 1s ease;
+}
+
+.db-status-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.db-status-badge.blue   { background: #e0f2fe; color: #0f4c81; }
+.db-status-badge.green  { background: #d1fae5; color: #059669; }
+.db-status-badge.amber  { background: #fef3c7; color: #d97706; }
+.db-status-badge.slate  { background: #f1f5f9; color: #475569; }
 
 @media (max-width: 768px) {
-  .dashboard-header h2 {
-    font-size: 1.8rem !important;
-  }
-
-  .glass-card {
-    padding: 1.8rem 1.5rem;
-  }
-
-  .card-icon-wrapper {
-    width: 52px;
-    height: 52px;
-    font-size: 1.4rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+  .db-page { padding: 1.25rem 1rem; }
+  .db-banner { padding: 1.5rem; }
+  .db-banner-left h2 { font-size: 1.4rem !important; }
+  .db-banner-right { display: none; }
 }
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="db-page">
 
-<div class="dashboard-bg"></div>
-
-<div class="dashboard-container">
-  <div class="dashboard-header d-flex justify-content-between align-items-center">
-    <div>
-      <h2>¡Bienvenido, {{ session.user }}!</h2>
-      <p>Panel de Control General de la Alcaldía</p>
+  <!-- BANNER -->
+  <div class="db-banner">
+    <div class="db-banner-left">
+      <h2>¡Hola, {{ session.user }}!</h2>
+      <p>Panel de control · Alcaldía Municipal de Supatá</p>
+      <div class="db-banner-chips">
+        <span class="db-banner-chip chip-success">
+          <i class="bi bi-shield-check-fill"></i> Sesión verificada
+        </span>
+        <span class="db-banner-chip chip-info">
+          <i class="bi bi-person-badge-fill"></i> {{ session.user_role|upper }}
+        </span>
+      </div>
     </div>
-    <span class="badge">{{ session.user_role|upper }}</span>
+    <div class="db-banner-right">
+      <div class="db-weather-card" onclick="showWeatherDetails()">
+        <i class="bi bi-cloud-sun-fill"></i>
+        <div class="temp">22°C</div>
+        <div class="desc">Supatá</div>
+      </div>
+    </div>
   </div>
 
-<div class="dashboard-grid">
+  <!-- MÓDULOS -->
+  <div class="db-section-title">
+    <i class="bi bi-grid-3x3-gap-fill"></i>
+    Módulos del Sistema
+  </div>
 
-  <!-- Redactar Oficios (Movido de IA Municipal) -->
-  <div class="glass-card">
-    <i class="bi bi-pencil-square card-icon text-warning"></i>
-    <h5>Redactar Oficios</h5>
-    <p>Genera documentos institucionales automáticamente.</p>
-    <a href="{{ url_for('ia.letter') }}" class="btn btn-premium">
-      REDACTAR
+  <div class="db-grid">
+
+    <a href="{{ url_for('ia.letter') }}" class="db-card" data-accent="amber">
+      <div class="db-card-icon"><i class="bi bi-pencil-square"></i></div>
+      <div class="db-card-title">Redactar Oficios</div>
+      <p class="db-card-desc">Genera documentos institucionales automáticamente con IA.</p>
+      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Abrir</div>
     </a>
-  </div>
 
-  <!-- Solicitudes -->
-  {% if can('solicitudes') %}
-  <div class="glass-card">
-    <i class="bi bi-file-earmark-text-fill card-icon text-primary"></i>
-    <h5>Solicitudes</h5>
-    <p>Gestiona las inscripciones al Banco de Programas y Proyectos.</p>
-    <a href="{{ url_for('solicitudes.index') }}" class="btn btn-premium">
-      ACCEDER
+    {% if can('solicitudes') %}
+    <a href="{{ url_for('solicitudes.index') }}" class="db-card" data-accent="blue">
+      <div class="db-card-icon"><i class="bi bi-file-earmark-text-fill"></i></div>
+      <div class="db-card-title">Solicitudes</div>
+      <p class="db-card-desc">Gestiona inscripciones al Banco de Programas y Proyectos.</p>
+      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Abrir</div>
     </a>
-  </div>
-  {% endif %}
+    {% endif %}
 
-  <!-- Certificados -->
-  {% if can('certificados') %}
-  <div class="glass-card">
-    <i class="bi bi-patch-check-fill card-icon text-success"></i>
-    <h5>Certificados</h5>
-    <p>Genera y descarga certificados de manera ágil.</p>
-    <a href="{{ url_for('certificados.index') }}" class="btn btn-premium">
-      GENERAR
+    {% if can('certificados') %}
+    <a href="{{ url_for('certificados.index') }}" class="db-card" data-accent="emerald">
+      <div class="db-card-icon"><i class="bi bi-patch-check-fill"></i></div>
+      <div class="db-card-title">Certificados</div>
+      <p class="db-card-desc">Genera y descarga certificados institucionales de manera ágil.</p>
+      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Generar</div>
     </a>
-  </div>
-  {% endif %}
+    {% endif %}
 
-  <!-- Licencias -->
-  {% if can('licencias') %}
-  <div class="glass-card">
-    <i class="bi bi-buildings-fill card-icon text-warning"></i>
-    <h5>Licencias</h5>
-    <p>Radica y gestiona actos de licencia urbanística.</p>
-    <a href="/licencias" class="btn btn-premium">
-      GESTIONAR
+    {% if can('licencias') %}
+    <a href="/licencias" class="db-card" data-accent="orange">
+      <div class="db-card-icon"><i class="bi bi-buildings-fill"></i></div>
+      <div class="db-card-title">Licencias</div>
+      <p class="db-card-desc">Radica y gestiona actos de licencia urbanística.</p>
+      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Gestionar</div>
     </a>
-  </div>
-  {% endif %}
+    {% endif %}
 
-  <!-- IA Municipal -->
-  {% if can('ia') %}
-  <div class="glass-card">
-    <i class="bi bi-cpu-fill card-icon text-secondary"></i>
-    <h5>IA Municipal</h5>
-    <p>Asistente inteligente y analítica avanzada.</p>
-    <a href="{{ url_for('ia.index') }}" class="btn btn-premium">
-      CONSULTAR IA <i class="bi bi-stars"></i>
+    {% if can('ia') %}
+    <a href="{{ url_for('ia.index') }}" class="db-card" data-accent="violet">
+      <div class="db-card-icon"><i class="bi bi-cpu-fill"></i></div>
+      <div class="db-card-title">IA Municipal</div>
+      <p class="db-card-desc">Asistente inteligente con análisis de datos y reportes avanzados.</p>
+      <div class="db-card-arrow"><i class="bi bi-stars"></i> Consultar</div>
     </a>
-  </div>
-  {% endif %}
+    {% endif %}
 
-  <!-- Calendario -->
-  <div class="glass-card">
-    <i class="bi bi-calendar-event-fill card-icon text-info"></i>
-    <h5>Calendario</h5>
-    <p>Eventos, alertas y programación municipal.</p>
-    <a href="/calendario" class="btn btn-premium">
-      VER AGENDA
+    <a href="/calendario" class="db-card" data-accent="sky">
+      <div class="db-card-icon"><i class="bi bi-calendar-event-fill"></i></div>
+      <div class="db-card-title">Calendario</div>
+      <p class="db-card-desc">Eventos, alertas y programación institucional del municipio.</p>
+      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Ver agenda</div>
     </a>
-  </div>
 
-  <!-- Participación -->
-  {% if can('participacion') %}
-  <div class="glass-card">
-    <i class="bi bi-people-fill card-icon text-danger"></i>
-    <h5>Participación</h5>
-    <p>Atención al ciudadano y gestión de radicados.</p>
-    <a href="{{ url_for('participacion.index') }}" class="btn btn-premium">
-      PARTICIPACIÓN
+    {% if can('participacion') %}
+    <a href="{{ url_for('participacion.index') }}" class="db-card" data-accent="rose">
+      <div class="db-card-icon"><i class="bi bi-people-fill"></i></div>
+      <div class="db-card-title">Participación</div>
+      <p class="db-card-desc">Atención al ciudadano: PQRS, radicados y seguimiento.</p>
+      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Abrir</div>
     </a>
-  </div>
-  {% endif %}
+    {% endif %}
 
-  <!-- GEOPORTAL - Fusión de Casco Urbano + Usos del Suelo -->
-  {% if can('geoportal') %}
-  <div class="glass-card">
-    <i class="bi bi-globe-americas card-icon text-primary"></i>
-    <h5>Geoportal</h5>
-    <p>Mapas interactivos y cartografía municipal.</p>
-    <a href="{{ url_for('main.geoportal') }}" class="btn btn-premium">
-      VER MAPAS
+    {% if can('geoportal') %}
+    <a href="{{ url_for('main.geoportal') }}" class="db-card" data-accent="teal">
+      <div class="db-card-icon"><i class="bi bi-globe-americas"></i></div>
+      <div class="db-card-title">Geoportal</div>
+      <p class="db-card-desc">Mapas interactivos, catastro 3D y cartografía municipal.</p>
+      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Ver mapas</div>
     </a>
-  </div>
-  {% endif %}
+    {% endif %}
 
-  <!-- SEGUIMIENTO Y METAS - Fusión -->
-  {% if can('seguimiento') %}
-  <div class="glass-card">
-    <i class="bi bi-graph-up-arrow card-icon text-purple"></i>
-    <h5>Seguimiento y Metas</h5>
-    <p>Monitoreo de indicadores y progreso del Plan.</p>
-    <a href="{{ url_for('seguimiento.index') }}" class="btn btn-premium">
-      VER INDICADORES
+    {% if can('seguimiento') %}
+    <a href="{{ url_for('seguimiento.index') }}" class="db-card" data-accent="indigo">
+      <div class="db-card-icon"><i class="bi bi-graph-up-arrow"></i></div>
+      <div class="db-card-title">Seguimiento y Metas</div>
+      <p class="db-card-desc">Monitoreo de indicadores y progreso del Plan de Desarrollo.</p>
+      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Indicadores</div>
     </a>
-  </div>
-  {% endif %}
+    {% endif %}
 
-  <!-- GESTIÓN AMBIENTAL - Fusión de Arbolado + Comité + Gestión Riesgo -->
-  {% if can('riesgo') %}
-  <div class="glass-card">
-    <i class="bi bi-tree-fill card-icon text-success"></i>
-    <h5>Gestión del Riesgo</h5>
-    <p>Arbolado urbano, actas CMGR y planes de contingencia.</p>
-    <a href="{{ url_for('main.gestion_riesgo') }}" class="btn btn-premium">
-      GESTIONAR
+    {% if can('riesgo') %}
+    <a href="{{ url_for('main.gestion_riesgo') }}" class="db-card" data-accent="green">
+      <div class="db-card-icon"><i class="bi bi-tree-fill"></i></div>
+      <div class="db-card-title">Gestión del Riesgo</div>
+      <p class="db-card-desc">Arbolado urbano, actas CMGR y planes de contingencia.</p>
+      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Gestionar</div>
     </a>
-  </div>
-  {% endif %}
+    {% endif %}
 
-  <!-- Contratación -->
-  {% if can('contratos') %}
-  <div class="glass-card">
-    <i class="bi bi-file-earmark-contract-fill card-icon text-info"></i>
-    <h5>Contratación</h5>
-    <p>Gestión de contratos municipales.</p>
-    <a href="/contratos" class="btn btn-premium">
-      CONTRATOS
+    {% if can('contratos') %}
+    <a href="/contratos" class="db-card" data-accent="sky">
+      <div class="db-card-icon"><i class="bi bi-file-earmark-contract-fill"></i></div>
+      <div class="db-card-title">Contratación</div>
+      <p class="db-card-desc">Gestión de contratos municipales e integración con SECOP.</p>
+      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Contratos</div>
     </a>
-  </div>
-  {% endif %}
+    {% endif %}
 
-  <!-- Configuración -->
-  {% if session.user_role == 'admin' %}
-  <div class="glass-card">
-    <i class="bi bi-gear-fill card-icon text-dark"></i>
-    <h5>Configuración</h5>
-    <p>Gestión de usuarios y permisos.</p>
-    <a href="{{ url_for('configuracion.index') }}" class="btn btn-premium">
-      CONFIGURAR
+    {% if session.user_role == 'admin' %}
+    <a href="{{ url_for('configuracion.index') }}" class="db-card" data-accent="slate">
+      <div class="db-card-icon"><i class="bi bi-gear-fill"></i></div>
+      <div class="db-card-title">Configuración</div>
+      <p class="db-card-desc">Gestión de usuarios, permisos y ajustes del sistema.</p>
+      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Configurar</div>
     </a>
+    {% endif %}
+
+  </div><!-- /db-grid -->
+
+  <!-- ESTADO DEL SISTEMA -->
+  <div class="db-section-title">
+    <i class="bi bi-activity"></i>
+    Estado del Sistema
   </div>
-  {% endif %}
 
-</div>
+  <div class="db-status-panel">
+    <div class="db-status-header">
+      <h4><i class="bi bi-clipboard2-check"></i> Módulos y servicios</h4>
+      <a href="{{ url_for('configuracion.index') if session.user_role == 'admin' else '#' }}">Ver detalles →</a>
+    </div>
+    <div class="db-status-body">
 
-</div>
+      <div class="db-status-row">
+        <div class="db-status-dot active"></div>
+        <div class="db-status-info">
+          <div class="db-status-name">Sistema activo y funcionando</div>
+          <div class="db-status-meta">Todos los módulos operativos</div>
+          <div class="db-progress-bar">
+            <div class="db-progress-fill" style="width:100%; --fill-color:#0f4c81;"></div>
+          </div>
+        </div>
+        <span class="db-status-badge blue">Activo</span>
+      </div>
 
+      <div class="db-status-row">
+        <div class="db-status-dot success"></div>
+        <div class="db-status-info">
+          <div class="db-status-name">Base de datos sincronizada</div>
+          <div class="db-status-meta">Última sincronización: hoy</div>
+          <div class="db-progress-bar">
+            <div class="db-progress-fill" style="width:100%; --fill-color:#059669;"></div>
+          </div>
+        </div>
+        <span class="db-status-badge green">OK</span>
+      </div>
+
+      <div class="db-status-row">
+        <div class="db-status-dot pending"></div>
+        <div class="db-status-info">
+          <div class="db-status-name">Auditoría periódica programada</div>
+          <div class="db-status-meta">Revisión mensual del sistema</div>
+          <div class="db-progress-bar">
+            <div class="db-progress-fill" style="width:65%; --fill-color:#d97706;"></div>
+          </div>
+        </div>
+        <span class="db-status-badge amber">Programado</span>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /db-page -->
 {% endblock %}

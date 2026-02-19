@@ -544,11 +544,13 @@ body {
   transform: scale(1.2) rotate(-15deg);
 }
 
-/* Main Content Area */
+/* Main Content Area — nuevo layout flex con sidebar SaaS */
 .main-content {
-  margin-left: calc(var(--sidebar-width) + 2.5rem);
-  padding: 2.5rem 3rem 2.5rem 0;
+  margin-left: 0;
+  padding: 0;
   min-height: 100vh;
+  flex: 1;
+  min-width: 0;
 }
 
 

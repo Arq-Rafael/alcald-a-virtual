@@ -289,135 +289,516 @@
   </div>
   {% endif %}
 
-  <!-- Mobile Toggle Button (Visible only on mobile) -->
-  <div class="d-lg-none p-3 d-flex justify-content-between align-items-center bg-white shadow-sm sticky-top">
-     <span class="fw-bold text-primary">Alcaldía Virtual</span>
-     <button class="btn btn-sm btn-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
-       <i class="bi bi-list fs-4"></i>
-     </button>
+  <!-- ===================================================================
+       SIDEBAR MODERNO — SaaS style (reemplaza dock iOS)
+       =================================================================== -->
+
+  <!-- Estilos del nuevo sidebar -->
+  <style>
+  /* ---------------------------------------------------------------
+     SIDEBAR VARIABLES & RESET
+  --------------------------------------------------------------- */
+  :root {
+    --sb-width: 272px;
+    --sb-bg: #ffffff;
+    --sb-border: #e2e8f0;
+    --sb-primary: #0f4c81;
+    --sb-primary-light: #e0f2fe;
+    --sb-text: #1e293b;
+    --sb-muted: #64748b;
+    --sb-hover-bg: #f1f5f9;
+    --sb-active-bg: #0f4c81;
+    --sb-active-text: #ffffff;
+    --sb-radius: 10px;
+    --sb-transition: 0.18s ease;
+  }
+
+  /* ---------------------------------------------------------------
+     LAYOUT WRAPPER — sidebar + main side by side
+  --------------------------------------------------------------- */
+  body.has-sidebar {
+    display: flex !important;
+    flex-direction: row !important;
+    background: #f1f5f9 !important;
+    animation: none !important;
+  }
+
+  body.has-sidebar main.main-content {
+    flex: 1;
+    min-width: 0;
+    background: #f1f5f9 !important;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+
+  /* ---------------------------------------------------------------
+     SIDEBAR ITSELF
+  --------------------------------------------------------------- */
+  .av-sidebar {
+    width: var(--sb-width);
+    min-width: var(--sb-width);
+    background: var(--sb-bg);
+    border-right: 1px solid var(--sb-border);
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 100;
+    box-shadow: 1px 0 0 var(--sb-border), 2px 0 8px rgba(0,0,0,0.03);
+    transition: width var(--sb-transition);
+  }
+
+  /* ---- Brand header ---- */
+  .av-sidebar-brand {
+    padding: 1.25rem 1.25rem 1rem;
+    border-bottom: 1px solid var(--sb-border);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .av-sidebar-brand-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--sb-primary) 0%, #0ea5e9 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(15,76,129,0.25);
+  }
+
+  .av-sidebar-brand-icon img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+  }
+
+  .av-sidebar-brand-text h2 {
+    font-size: 0.9rem !important;
+    font-weight: 700 !important;
+    color: var(--sb-text) !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.2px !important;
+  }
+
+  .av-sidebar-brand-text span {
+    font-size: 0.72rem;
+    color: var(--sb-muted);
+    font-weight: 400;
+  }
+
+  /* ---- Nav scroll area ---- */
+  .av-sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0.75rem 0.75rem 0.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+
+  .av-sidebar-nav::-webkit-scrollbar { width: 3px; }
+  .av-sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+  .av-sidebar-nav::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 20px; }
+
+  /* ---- Section labels ---- */
+  .av-nav-section {
+    padding: 0.75rem 0.6rem 0.35rem;
+  }
+
+  .av-nav-section-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #94a3b8;
+    display: block;
+  }
+
+  /* ---- Nav items ---- */
+  .av-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--sb-radius);
+    color: var(--sb-muted);
+    text-decoration: none !important;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background var(--sb-transition), color var(--sb-transition), transform var(--sb-transition);
+    position: relative;
+    margin-bottom: 0.1rem;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+
+  .av-nav-item:hover {
+    background: var(--sb-hover-bg);
+    color: var(--sb-primary);
+  }
+
+  .av-nav-item.active {
+    background: var(--sb-primary);
+    color: var(--sb-active-text) !important;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(15,76,129,0.2);
+  }
+
+  .av-nav-item.active .av-nav-icon {
+    color: #fff !important;
+  }
+
+  .av-nav-icon {
+    font-size: 1rem;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+    transition: color var(--sb-transition);
+  }
+
+  .av-nav-item:hover .av-nav-icon {
+    color: var(--sb-primary);
+  }
+
+  .av-nav-item.danger {
+    color: #ef4444;
+  }
+
+  .av-nav-item.danger:hover {
+    background: #fef2f2;
+    color: #dc2626;
+  }
+
+  /* Badge contador en nav items */
+  .av-nav-badge {
+    margin-left: auto;
+    font-size: 0.68rem;
+    font-weight: 700;
+    background: #ef4444;
+    color: #fff;
+    border-radius: 999px;
+    padding: 0.1rem 0.45rem;
+    line-height: 1.4;
+  }
+
+  /* ---- Footer del sidebar (perfil + logout) ---- */
+  .av-sidebar-footer {
+    border-top: 1px solid var(--sb-border);
+    padding: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .av-user-card {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.6rem 0.5rem;
+    border-radius: var(--sb-radius);
+    cursor: pointer;
+    transition: background var(--sb-transition);
+    margin-bottom: 0.35rem;
+  }
+
+  .av-user-card:hover {
+    background: var(--sb-hover-bg);
+  }
+
+  .av-user-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid var(--sb-border);
+  }
+
+  .av-user-avatar-placeholder {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--sb-primary) 0%, #0ea5e9 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  .av-user-info {
+    min-width: 0;
+  }
+
+  .av-user-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--sb-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+  }
+
+  .av-user-role {
+    font-size: 0.7rem;
+    color: var(--sb-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ---------------------------------------------------------------
+     MOBILE — header bar + offcanvas
+  --------------------------------------------------------------- */
+  .av-mobile-header {
+    display: none;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: #ffffff;
+    border-bottom: 1px solid var(--sb-border);
+    padding: 0.75rem 1rem;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  .av-mobile-header-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--sb-text);
+  }
+
+  .av-mobile-toggle {
+    background: none;
+    border: 1px solid var(--sb-border);
+    border-radius: 8px;
+    padding: 0.35rem 0.55rem;
+    cursor: pointer;
+    color: var(--sb-muted);
+    transition: background var(--sb-transition);
+  }
+
+  .av-mobile-toggle:hover {
+    background: var(--sb-hover-bg);
+  }
+
+  @media (max-width: 991px) {
+    body.has-sidebar {
+      flex-direction: column !important;
+    }
+    .av-sidebar {
+      display: none;
+    }
+    .av-mobile-header {
+      display: flex !important;
+    }
+  }
+
+  /* Sidebar dentro del offcanvas móvil */
+  .offcanvas .av-sidebar {
+    display: flex !important;
+    width: 100% !important;
+    min-width: unset !important;
+    height: 100% !important;
+    position: relative !important;
+    border-right: none !important;
+    box-shadow: none !important;
+  }
+  </style>
+
+  <!-- MOBILE HEADER -->
+  <div class="av-mobile-header">
+    <div class="av-mobile-header-brand">
+      <img src="{{ url_for('static', filename='imagenes/escudo.png') }}" alt="Escudo" style="width:24px;height:24px;object-fit:contain;">
+      Alcaldía Virtual
+    </div>
+    <button class="av-mobile-toggle" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
+      <i class="bi bi-list fs-5"></i>
+    </button>
   </div>
 
-  <!-- Sidebar Navigation -->
   {% if session.user %}
-  <nav class="dock-container d-none d-lg-flex">
-    <!-- Inicio -->
-    <a href="{{ url_for('main.dashboard') }}" class="dock-item item-home">
-      <div class="icon-box">
-        <i class="bi bi-buildings-fill"></i>
-      </div>
-      <span class="label">Inicio</span>
-    </a>
 
-    <!-- Redactar Oficio -->
-    {% if can('redactar') %}
-    <a href="{{ url_for('ia.letter') }}" class="dock-item item-letter {% if request.endpoint=='ia.letter' %}active{% endif %}">
-      <div class="icon-box">
-        <i class="bi bi-pencil-square"></i>
-      </div>
-      <span class="label">Redactar</span>
-    </a>
-    {% endif %}
+  <!-- SIDEBAR DESKTOP -->
+  <aside class="av-sidebar">
 
-    <!-- Solicitudes -->
-    {% if can('solicitudes') %}
-    <a href="{{ url_for('solicitudes.index') }}" class="dock-item item-solicitudes">
-      <div class="icon-box">
-        <i class="bi bi-file-earmark-text"></i>
+    <!-- Brand -->
+    <div class="av-sidebar-brand">
+      <div class="av-sidebar-brand-icon">
+        <img src="{{ url_for('static', filename='imagenes/escudo.png') }}" alt="Escudo Supatá">
       </div>
-      <span class="label">Solicitudes</span>
-    </a>
-    {% endif %}
-
-    <!-- Calendario -->
-    {% if can('calendario') %}
-    <a href="/calendario" class="dock-item item-calendar">
-      <div class="icon-box">
-        <i class="bi bi-calendar-event"></i>
+      <div class="av-sidebar-brand-text">
+        <h2>Alcaldía Virtual</h2>
+        <span>Portal Institucional</span>
       </div>
-      <span class="label">Calendario</span>
-    </a>
-    {% endif %}
-
-    <!-- Participación -->
-    {% if can('participacion') %}
-    <a href="{{ url_for('participacion.index') }}" class="dock-item item-participacion">
-      <div class="icon-box">
-        <i class="bi bi-people"></i>
-      </div>
-      <span class="label">Ciudadanía</span>
-    </a>
-    {% endif %}
-
-    <!-- Geoportal -->
-    {% if can('geoportal') %}
-    <a href="{{ url_for('main.geoportal') }}" class="dock-item item-geoportal">
-      <div class="icon-box">
-        <i class="bi bi-globe-americas"></i>
-      </div>
-      <span class="label">Geoportal</span>
-    </a>
-    {% endif %}
-
-    <!-- Seguimiento -->
-    {% if can('seguimiento') %}
-    <a href="{{ url_for('seguimiento.index') }}" class="dock-item item-seguimiento">
-      <div class="icon-box">
-        <i class="bi bi-graph-up-arrow"></i>
-      </div>
-      <span class="label">Metas</span>
-    </a>
-    {% endif %}
-
-    <!-- Gestión del Riesgo -->
-    {% if can('riesgo') %}
-    <a href="{{ url_for('main.gestion_riesgo') }}" class="dock-item item-riesgo">
-      <div class="icon-box">
-        <i class="bi bi-tree"></i>
-      </div>
-      <span class="label">Riesgo</span>
-    </a>
-    {% endif %}
-
-    <!-- Contratación -->
-    {% if can('contratos') %}
-    <a href="/contratos" class="dock-item item-contratos">
-      <div class="icon-box">
-        <i class="bi bi-file-earmark-contract"></i>
-      </div>
-      <span class="label">Contratos</span>
-    </a>
-    {% endif %}
-
-    <!-- Clima -->
-    <div class="dock-item item-clima" onclick="showWeatherDetails()">
-      <div class="icon-box">
-        <i class="bi bi-cloud-sun-fill"></i>
-      </div>
-      <span class="label">Clima</span>
     </div>
 
-    <!-- Perfil -->
-    <button id="avatarQuickButton" type="button" class="dock-item item-profile">
-      <div class="icon-box">
-        {% if current_user_foto %}
-        <img id="avatarThumb" src="/{{ current_user_foto }}" alt="Perfil" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;" />
-        {% else %}
-        <i class="bi bi-person-fill"></i>
-        {% endif %}
-      </div>
-      <span class="label">Perfil</span>
-    </button>
+    <!-- Nav -->
+    <nav class="av-sidebar-nav">
 
-    <!-- Cerrar Sesión -->
-    <a href="{{ url_for('auth.logout') }}" class="dock-item item-logout">
-      <div class="icon-box">
-        <i class="bi bi-box-arrow-right"></i>
+      <!-- PRINCIPAL -->
+      <div class="av-nav-section">
+        <span class="av-nav-section-label">Principal</span>
       </div>
-      <span class="label">Salir</span>
-    </a>
-  </nav>
-  
-  <!-- Weather Bubble Modal -->
+
+      <a href="{{ url_for('main.dashboard') }}"
+         class="av-nav-item {% if request.endpoint == 'main.dashboard' %}active{% endif %}">
+        <i class="bi bi-grid-fill av-nav-icon"></i>
+        Mi Panel
+      </a>
+
+      {% if can('redactar') %}
+      <a href="{{ url_for('ia.letter') }}"
+         class="av-nav-item {% if request.endpoint == 'ia.letter' %}active{% endif %}">
+        <i class="bi bi-pencil-square av-nav-icon"></i>
+        Redactar Oficio
+      </a>
+      {% endif %}
+
+      {% if can('solicitudes') %}
+      <a href="{{ url_for('solicitudes.index') }}"
+         class="av-nav-item {% if request.endpoint and 'solicitudes' in request.endpoint %}active{% endif %}">
+        <i class="bi bi-file-earmark-text av-nav-icon"></i>
+        Solicitudes
+      </a>
+      {% endif %}
+
+      {% if can('calendario') %}
+      <a href="/calendario"
+         class="av-nav-item {% if request.endpoint == 'main.calendario' %}active{% endif %}">
+        <i class="bi bi-calendar-event av-nav-icon"></i>
+        Calendario
+      </a>
+      {% endif %}
+
+      <!-- SERVICIOS -->
+      <div class="av-nav-section">
+        <span class="av-nav-section-label">Servicios</span>
+      </div>
+
+      {% if can('certificados') %}
+      <a href="{{ url_for('certificados.index') }}"
+         class="av-nav-item {% if request.endpoint and 'certificados' in request.endpoint %}active{% endif %}">
+        <i class="bi bi-patch-check av-nav-icon"></i>
+        Certificados
+      </a>
+      {% endif %}
+
+      {% if can('participacion') %}
+      <a href="{{ url_for('participacion.index') }}"
+         class="av-nav-item {% if request.endpoint and 'participacion' in request.endpoint %}active{% endif %}">
+        <i class="bi bi-people av-nav-icon"></i>
+        Participación
+      </a>
+      {% endif %}
+
+      {% if can('geoportal') %}
+      <a href="{{ url_for('main.geoportal') }}"
+         class="av-nav-item {% if request.endpoint == 'main.geoportal' %}active{% endif %}">
+        <i class="bi bi-globe-americas av-nav-icon"></i>
+        Geoportal
+      </a>
+      {% endif %}
+
+      {% if can('seguimiento') %}
+      <a href="{{ url_for('seguimiento.index') }}"
+         class="av-nav-item {% if request.endpoint and 'seguimiento' in request.endpoint %}active{% endif %}">
+        <i class="bi bi-graph-up-arrow av-nav-icon"></i>
+        Seguimiento y Metas
+      </a>
+      {% endif %}
+
+      {% if can('riesgo') %}
+      <a href="{{ url_for('main.gestion_riesgo') }}"
+         class="av-nav-item {% if request.endpoint == 'main.gestion_riesgo' %}active{% endif %}">
+        <i class="bi bi-tree av-nav-icon"></i>
+        Gestión del Riesgo
+      </a>
+      {% endif %}
+
+      {% if can('contratos') %}
+      <a href="/contratos"
+         class="av-nav-item {% if request.endpoint and 'contratos' in request.endpoint %}active{% endif %}">
+        <i class="bi bi-file-earmark-contract av-nav-icon"></i>
+        Contratos
+      </a>
+      {% endif %}
+
+      {% if can('ia') %}
+      <a href="{{ url_for('ia.index') }}"
+         class="av-nav-item {% if request.endpoint == 'ia.index' %}active{% endif %}">
+        <i class="bi bi-cpu av-nav-icon"></i>
+        IA Municipal
+      </a>
+      {% endif %}
+
+      <!-- ADMIN -->
+      {% if session.user_role == 'admin' %}
+      <div class="av-nav-section">
+        <span class="av-nav-section-label">Administración</span>
+      </div>
+
+      <a href="{{ url_for('configuracion.index') }}"
+         class="av-nav-item {% if request.endpoint and 'configuracion' in request.endpoint %}active{% endif %}">
+        <i class="bi bi-gear av-nav-icon"></i>
+        Configuración
+      </a>
+      {% endif %}
+
+      <!-- Clima (weather widget) -->
+      <div class="av-nav-section">
+        <span class="av-nav-section-label">Información</span>
+      </div>
+      <button class="av-nav-item" onclick="showWeatherDetails()" type="button">
+        <i class="bi bi-cloud-sun av-nav-icon"></i>
+        Clima Supatá
+      </button>
+
+    </nav><!-- /nav -->
+
+    <!-- Footer: perfil + logout -->
+    <div class="av-sidebar-footer">
+
+      <!-- User card → abre panel de avatar -->
+      <button id="avatarQuickButton" type="button" class="av-user-card w-100 border-0 text-start">
+        {% if current_user_foto %}
+        <img id="avatarThumb" class="av-user-avatar" src="/{{ current_user_foto }}" alt="Foto perfil" />
+        {% else %}
+        <div class="av-user-avatar-placeholder" id="avatarThumb">
+          <i class="bi bi-person-fill"></i>
+        </div>
+        {% endif %}
+        <div class="av-user-info">
+          <div class="av-user-name">{{ session.user }}</div>
+          <div class="av-user-role">{{ session.user_role|title }}</div>
+        </div>
+        <i class="bi bi-three-dots-vertical ms-auto" style="color:#94a3b8;font-size:0.85rem;"></i>
+      </button>
+
+      <a href="{{ url_for('auth.logout') }}" class="av-nav-item danger">
+        <i class="bi bi-box-arrow-right av-nav-icon"></i>
+        Cerrar Sesión
+      </a>
+
+    </div>
+  </aside>
+
+  <!-- Weather Bubble Modal (se mantiene igual) -->
   <div id="weatherBubble" class="weather-bubble-modal" style="display: none;">
     <div class="weather-bubble-content">
       <div class="weather-bubble-header">
@@ -442,22 +823,38 @@
       <button onclick="hideWeatherBubble()" class="weather-bubble-close">Cerrar</button>
     </div>
   </div>
-  
-  <!-- Offcanvas for Mobile -->
-  <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas">
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title fw-bold text-primary">Menú</h5>
+
+  <!-- OFFCANVAS MOBILE -->
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas" style="width:var(--sb-width,272px);">
+    <div class="offcanvas-header border-bottom" style="padding:1rem;">
+      <div class="d-flex align-items-center gap-2">
+        <img src="{{ url_for('static', filename='imagenes/escudo.png') }}" alt="Escudo" style="width:28px;height:28px;object-fit:contain;">
+        <span class="fw-bold" style="font-size:0.95rem;color:#1e293b;">Alcaldía Virtual</span>
+      </div>
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
     </div>
-    <div class="offcanvas-body">
-       <!-- Same links as desktop sidebar (simplified) -->
-       <div class="d-flex flex-column gap-2">
-         <a class="nav-link" href="{{ url_for('main.dashboard') }}"><i class="bi bi-speedometer2"></i> Inicio</a>
-         <a class="nav-link text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right"></i> Salir</a>
-       </div>
+    <div class="offcanvas-body p-0" style="overflow-y:auto;">
+      <div style="padding:0.75rem;">
+        <p class="av-nav-section-label" style="font-size:0.68rem;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#94a3b8;padding:0.5rem 0.6rem 0.2rem;">Principal</p>
+        <a class="av-nav-item" href="{{ url_for('main.dashboard') }}"><i class="bi bi-grid-fill av-nav-icon"></i> Mi Panel</a>
+        {% if can('solicitudes') %}<a class="av-nav-item" href="{{ url_for('solicitudes.index') }}"><i class="bi bi-file-earmark-text av-nav-icon"></i> Solicitudes</a>{% endif %}
+        {% if can('participacion') %}<a class="av-nav-item" href="{{ url_for('participacion.index') }}"><i class="bi bi-people av-nav-icon"></i> Participación</a>{% endif %}
+        {% if can('geoportal') %}<a class="av-nav-item" href="{{ url_for('main.geoportal') }}"><i class="bi bi-globe-americas av-nav-icon"></i> Geoportal</a>{% endif %}
+        {% if can('seguimiento') %}<a class="av-nav-item" href="{{ url_for('seguimiento.index') }}"><i class="bi bi-graph-up-arrow av-nav-icon"></i> Metas</a>{% endif %}
+        {% if can('riesgo') %}<a class="av-nav-item" href="{{ url_for('main.gestion_riesgo') }}"><i class="bi bi-tree av-nav-icon"></i> Riesgo</a>{% endif %}
+        {% if can('contratos') %}<a class="av-nav-item" href="/contratos"><i class="bi bi-file-earmark-contract av-nav-icon"></i> Contratos</a>{% endif %}
+        <a class="av-nav-item danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right av-nav-icon"></i> Cerrar Sesión</a>
+      </div>
     </div>
   </div>
-  </div>
+
+  <!-- Script: activar clase en body para layout con sidebar -->
+  <script>
+    (function() {
+      document.body.classList.add('has-sidebar');
+    })();
+  </script>
+
   {% endif %}
 
   <main class="main-content">
