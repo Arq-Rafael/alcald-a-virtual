@@ -734,7 +734,7 @@
       {% if can('contratos') %}
       <a href="/contratos"
          class="av-nav-item {% if request.endpoint and 'contratos' in request.endpoint %}active{% endif %}">
-        <i class="bi bi-file-earmark-contract av-nav-icon"></i>
+        <i class="bi bi-file-earmark-contract-fill av-nav-icon"></i>
         Contratos
       </a>
       {% endif %}
@@ -842,7 +842,7 @@
         {% if can('geoportal') %}<a class="av-nav-item" href="{{ url_for('main.geoportal') }}"><i class="bi bi-globe-americas av-nav-icon"></i> Geoportal</a>{% endif %}
         {% if can('seguimiento') %}<a class="av-nav-item" href="{{ url_for('seguimiento.index') }}"><i class="bi bi-graph-up-arrow av-nav-icon"></i> Metas</a>{% endif %}
         {% if can('riesgo') %}<a class="av-nav-item" href="{{ url_for('main.gestion_riesgo') }}"><i class="bi bi-tree av-nav-icon"></i> Riesgo</a>{% endif %}
-        {% if can('contratos') %}<a class="av-nav-item" href="/contratos"><i class="bi bi-file-earmark-contract av-nav-icon"></i> Contratos</a>{% endif %}
+        {% if can('contratos') %}<a class="av-nav-item" href="/contratos"><i class="bi bi-file-earmark-contract-fill av-nav-icon"></i> Contratos</a>{% endif %}
         <a class="av-nav-item danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right av-nav-icon"></i> Cerrar Sesión</a>
       </div>
     </div>
