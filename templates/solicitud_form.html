@@ -1,31 +1,235 @@
 {% extends 'base.html' %}
 
+{% block title %}Nueva Solicitud — Alcaldía Virtual Supatá{% endblock %}
+
+{% block styles %}
+<style>
+.sol-page {
+  padding: 1.75rem 2rem;
+  max-width: 760px;
+  margin: 0 auto;
+  animation: sf-fade 0.4s ease both;
+}
+
+@keyframes sf-fade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.sol-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+  text-decoration: none;
+  margin-bottom: 1.25rem;
+  transition: color 0.18s;
+}
+.sol-back-link:hover { color: #0f4c81; }
+
+.sol-card {
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.sol-card-header {
+  background: linear-gradient(130deg, #0f4c81 0%, #1565c0 60%, #0ea5e9 100%);
+  padding: 1.5rem 1.75rem;
+}
+
+.sol-card-header h1 {
+  font-size: 1.25rem !important;
+  font-weight: 800 !important;
+  color: #fff !important;
+  margin: 0 0 0.2rem !important;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sol-card-header p {
+  color: rgba(255,255,255,0.72);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.sol-card-body { padding: 1.75rem; }
+
+.sol-info-box {
+  background: #f0f9ff;
+  border-left: 3px solid #0ea5e9;
+  border-radius: 0 10px 10px 0;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.82rem;
+  color: #0369a1;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.sol-form-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.4rem;
+}
+
+.sol-required { color: #ef4444; margin-left: 2px; }
+
+.sol-form-control {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  color: #1e293b;
+  background: #fff;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  font-family: inherit;
+}
+
+.sol-form-control:focus {
+  outline: none;
+  border-color: #0f4c81;
+  box-shadow: 0 0 0 3px rgba(15,76,129,0.1);
+}
+
+.sol-form-control::placeholder { color: #94a3b8; }
+
+textarea.sol-form-control {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.sol-form-group { margin-bottom: 1.1rem; }
+
+.sol-form-actions {
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #f1f5f9;
+  margin-top: 0.5rem;
+}
+
+.sol-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1.4rem;
+  background: #0f4c81;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s, transform 0.18s;
+  text-decoration: none;
+}
+
+.sol-btn-primary:hover {
+  background: #0d3d6b;
+  box-shadow: 0 4px 14px rgba(15,76,129,0.25);
+  transform: translateY(-1px);
+  color: #fff;
+}
+
+.sol-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1.1rem;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  text-decoration: none;
+}
+
+.sol-btn-secondary:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+@media (max-width: 768px) {
+  .sol-page { padding: 1.25rem 1rem; }
+}
+</style>
+{% endblock %}
+
 {% block content %}
-  <h1>Nueva Solicitud de Inscripción</h1>
-  <p><strong>Secretaría:</strong> {{ secretaria.name }}</p>
+<div class="sol-page">
 
-  <form method="POST">
-    <div class="form-group">
-      <label>Fecha</label>
-      <input type="date" name="fecha" value="{{ today }}" required>
-    </div>
-    <div class="form-group">
-      <label>Solicitante</label>
-      <input type="text" name="solicitante" placeholder="Tu nombre" required>
-    </div>
-    <div class="form-group">
-      <label>Objeto del Proyecto</label>
-      <textarea name="objeto" rows="3" required></textarea>
-    </div>
-    <div class="form-group">
-      <label>Justificación</label>
-      <textarea name="justificacion" rows="3" required></textarea>
-    </div>
-    <div class="form-group">
-      <label>Rubro</label>
-      <input type="text" name="rubro" placeholder="Ej: Infraestructura">
+  <a href="{{ url_for('solicitudes.index') }}" class="sol-back-link">
+    <i class="bi bi-arrow-left"></i> Volver a Solicitudes
+  </a>
+
+  <div class="sol-card">
+    <div class="sol-card-header">
+      <h1><i class="bi bi-file-earmark-plus-fill"></i> Nueva Solicitud de Inscripción</h1>
+      <p>Secretaría: <strong style="color:#fff;">{{ secretaria.name if secretaria else 'General' }}</strong></p>
     </div>
 
-    <button type="submit" class="btn-primary">Generar Solicitud</button>
-  </form>
+    <div class="sol-card-body">
+
+      <div class="sol-info-box">
+        <i class="bi bi-info-circle-fill"></i>
+        <span>Completa todos los campos marcados con <strong>*</strong>. La solicitud se guardará y podrás generar el PDF posteriormente.</span>
+      </div>
+
+      <form method="POST">
+
+        <div class="sol-form-group">
+          <label class="sol-form-label">Fecha <span class="sol-required">*</span></label>
+          <input type="date" name="fecha" class="sol-form-control" value="{{ today }}" required>
+        </div>
+
+        <div class="sol-form-group">
+          <label class="sol-form-label">Solicitante <span class="sol-required">*</span></label>
+          <input type="text" name="solicitante" class="sol-form-control"
+                 placeholder="Tu nombre completo" required>
+        </div>
+
+        <div class="sol-form-group">
+          <label class="sol-form-label">Objeto del Proyecto <span class="sol-required">*</span></label>
+          <textarea name="objeto" class="sol-form-control"
+                    placeholder="Describe brevemente el objeto del proyecto..." required></textarea>
+        </div>
+
+        <div class="sol-form-group">
+          <label class="sol-form-label">Justificación <span class="sol-required">*</span></label>
+          <textarea name="justificacion" class="sol-form-control"
+                    placeholder="Justifica la necesidad del proyecto..." required></textarea>
+        </div>
+
+        <div class="sol-form-group">
+          <label class="sol-form-label">Rubro</label>
+          <input type="text" name="rubro" class="sol-form-control"
+                 placeholder="Ej: Infraestructura, Educación, Salud...">
+        </div>
+
+        <div class="sol-form-actions">
+          <button type="submit" class="sol-btn-primary">
+            <i class="bi bi-check-circle-fill"></i> Generar Solicitud
+          </button>
+          <a href="{{ url_for('solicitudes.index') }}" class="sol-btn-secondary">
+            <i class="bi bi-x"></i> Cancelar
+          </a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+</div>
 {% endblock %}
