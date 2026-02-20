@@ -5,7 +5,10 @@ import copy
 import base64
 import logging
 import datetime
-import pandas as pd
+try:
+    import pandas as pd
+except Exception:
+    pd = None
 import glob
 from flask import Blueprint, render_template, request, flash, redirect, url_for, send_file, current_app, session, jsonify, abort
 from reportlab.pdfgen import canvas

@@ -1,7 +1,10 @@
 import os
 import io
 import logging
-import pandas as pd
+try:
+    import pandas as pd
+except Exception:
+    pd = None
 from datetime import datetime
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for, send_file, current_app, abort, jsonify

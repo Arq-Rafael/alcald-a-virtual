@@ -6,7 +6,10 @@ import base64
 import datetime
 import unicodedata
 import logging
-import pandas as pd
+try:
+    import pandas as pd
+except Exception:
+    pd = None
 try:
     import geopandas as gpd
 except ImportError:

@@ -10,7 +10,6 @@ import datetime
 from datetime import timedelta
 from functools import wraps
 from flask import session, current_app, flash, redirect, url_for
-import pandas as pd
 
 def _norm(s):
     return str(s or "").strip().lower()
@@ -88,12 +87,20 @@ def color_semaforo_dias(d):
 def load_plan_desarrollo():
     """Carga y normaliza el Plan de Desarrollo desde Excel (con fallback)."""
     try:
+        try:
+            import pandas as pd
+        except Exception:
+            pd = None
         # Get BASE_DIR from Flask config - this is set in app/config.py
         base_dir = str(current_app.config['BASE_DIR'])
         path = os.path.join(base_dir, 'datos', 'plan_desarrollo', 'plan_desarrollo.xlsx')
         
         if not os.path.exists(path):
             print(f"⚠️ Plan file not found at: {path}. Using fallback data.")
+            return _get_fallback_plan()
+
+        if pd is None:
+            print("⚠️ pandas no está disponible; usando datos de fallback para el plan de desarrollo.")
             return _get_fallback_plan()
 
         df = pd.read_excel(path)

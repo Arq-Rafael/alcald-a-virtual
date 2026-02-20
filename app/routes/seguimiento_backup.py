@@ -5,7 +5,10 @@ import csv
 import json
 import uuid
 import logging
-import pandas as pd
+try:
+    import pandas as pd
+except Exception:
+    pd = None
 import datetime as dt
 from datetime import datetime
 from io import BytesIO
