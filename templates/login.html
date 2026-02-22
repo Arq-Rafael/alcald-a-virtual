@@ -14,6 +14,10 @@
     background: #0f172a !important;
     animation: none !important;
   }
+  .av-mobile-header,
+  #sidebarOffcanvas {
+    display: none !important;
+  }
   .dock-container,
   .d-lg-none.p-3 {
     display: none !important;
@@ -26,7 +30,8 @@
   /* ---- Wrapper principal ---- */
   .lp-wrapper {
     display: flex;
-    min-height: 100vh;
+    min-height: 100dvh;
+    height: 100dvh;
     width: 100%;
   }
 
@@ -36,7 +41,8 @@
   .lp-left {
     position: relative;
     flex: 1.1;
-    min-height: 100vh;
+    min-height: 100%;
+    height: 100%;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -53,18 +59,9 @@
     transition: transform 8s ease;
   }
 
-  /* Doble overlay: oscuro abajo, azul institucional suave arriba */
+  /* Sin overlay para mostrar la imagen completa */
   .lp-left::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      160deg,
-      rgba(15, 76, 129, 0.72) 0%,
-      rgba(10, 40, 80, 0.55) 40%,
-      rgba(5, 15, 35, 0.85) 100%
-    );
-    z-index: 1;
+    display: none !important;
   }
 
   .lp-left-content {
@@ -78,7 +75,7 @@
     align-items: center;
     gap: 1rem;
     margin-bottom: auto;
-    padding: 2.5rem 3rem;
+    padding: 1.5rem 3rem 2.5rem 3rem;
     position: relative;
     z-index: 2;
   }
@@ -185,7 +182,8 @@
     justify-content: center;
     padding: 3rem 3.5rem;
     position: relative;
-    min-height: 100vh;
+    min-height: 100%;
+    height: 100%;
     overflow-y: auto;
     box-shadow: -2px 0 60px rgba(0,0,0,0.25);
   }
@@ -339,6 +337,9 @@
     position: relative;
     overflow: hidden;
   }
+  .lp-btn-arrow {
+    font-size: 1.2rem;
+  }
 
   .lp-btn-submit::after {
     content: '';
@@ -454,12 +455,101 @@
      RESPONSIVE — Ocultar panel izquierdo en móvil
      ===================================================== */
   @media (max-width: 768px) {
+    .lp-wrapper {
+      position: relative;
+      display: block;
+      width: 100%;
+      height: 100dvh;
+      min-height: 100dvh;
+    }
+
     .lp-left {
+      display: block;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+    }
+
+    .lp-brand,
+    .lp-hero-text {
       display: none;
     }
+
     .lp-right {
+      position: relative;
+      z-index: 3;
       flex: 1;
-      padding: 2rem 1.5rem;
+      width: min(92vw, 460px);
+      margin: 1rem auto;
+      padding: 1.1rem 1rem;
+      min-height: calc(100dvh - 2rem);
+      height: auto;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border-radius: 16px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+      overflow-y: auto;
+    }
+
+    .lp-form-header {
+      margin-bottom: 1.1rem;
+    }
+
+    .lp-form-header .lp-icon-wrap {
+      width: 52px;
+      height: 52px;
+      margin-bottom: 0.8rem;
+    }
+
+    .lp-form-header h3 {
+      font-size: 1.2rem;
+    }
+
+    .lp-form-header p {
+      font-size: 0.82rem;
+    }
+
+    .lp-field {
+      margin-bottom: 0.85rem;
+    }
+
+    .lp-field label {
+      font-size: 0.74rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .lp-field input {
+      padding: 0.72rem 0.9rem 0.72rem 2.5rem;
+      font-size: 0.9rem;
+    }
+
+    .lp-field .input-wrap i {
+      left: 0.85rem;
+      font-size: 0.92rem;
+    }
+
+    .lp-btn-submit {
+      padding: 0.78rem;
+      font-size: 0.88rem;
+      margin-top: 0.2rem;
+    }
+
+    .lp-link-forgot {
+      margin-top: 0.9rem;
+      font-size: 0.8rem;
+    }
+
+    .lp-divider {
+      margin: 1rem 0;
+      font-size: 0.7rem;
+    }
+
+    .lp-footer {
+      margin-top: 1rem;
+      font-size: 0.72rem;
     }
   }
 
@@ -506,7 +596,7 @@
       <div class="lp-brand-text">
         <h1>Alcaldía de Supatá</h1>
         <span>Cundinamarca · Colombia</span>
-        <span class="lp-brand-sub">Por Secretaría de Planeación y Obras Públicas</span>
+        <span class="lp-brand-sub">Secretaría de Planeación y Obras Públicas</span>
       </div>
     </div>
 
@@ -588,7 +678,7 @@
       <button type="submit" class="lp-btn-submit" id="submitBtn">
         <span class="btn-spinner" id="btnSpinner"></span>
         <span id="btnText">Ingresar</span>
-        <i class="bi bi-arrow-right-short" id="btnArrow" style="font-size:1.2rem;"></i>
+        <i class="bi bi-arrow-right-short lp-btn-arrow" id="btnArrow"></i>
       </button>
 
     </form>
@@ -656,8 +746,13 @@
 
   /* Evitar scroll dentro de los paneles del login */
   .lp-wrapper, .lp-left, .lp-right {
-    height: 100vh !important;
+    height: 100dvh !important;
     overflow: hidden !important;
+  }
+
+  /* Oculta el bloque global de flashes de base para evitar franja superior */
+  main.main-content > .mb-4 {
+    display: none !important;
   }
 
   /* Asegurar que el contenido del formulario se centre sin scrollbar */
@@ -667,34 +762,46 @@
   @media (max-width: 768px) {
     html, body { overflow: hidden !important; }
     .lp-right { padding: 1.25rem !important; }
-    .lp-form { max-height: calc(100vh - 4rem); overflow:auto; }
+    .lp-form { max-height: calc(100dvh - 5rem); overflow:auto; }
   }
 
-  /* Eliminar la banda azul del overlay original y usar un overlay oscuro más neutro */
+  /* Eliminar completamente la banda azul y cualquier overlay */
   .lp-left::before {
-    background: rgba(5,15,25,0.55) !important;
-    z-index: 1;
+    display: none !important;
   }
 
-  /* Animación sutil: pan lento + zoom en la imagen de fondo (agradable y discreto) */
-  @keyframes lp-hero-pan {
+  /* Animación cinematográfica: pan diagonal + zoom dinámico con brillo suave */
+  @keyframes lp-hero-cinematic {
     0% {
-      background-position: center 40%;
-      background-size: 100%;
+      background-position: center bottom;
+      background-size: 106%;
+      filter: brightness(1);
+    }
+    25% {
+      background-position: center 35%;
+      background-size: 103%;
+      filter: brightness(1.02);
     }
     50% {
-      background-position: center 44%;
-      background-size: 104%;
+      background-position: center 45%;
+      background-size: 108%;
+      filter: brightness(1);
+    }
+    75% {
+      background-position: center 40%;
+      background-size: 102%;
+      filter: brightness(1.01);
     }
     100% {
-      background-position: center 40%;
-      background-size: 100%;
+      background-position: center bottom;
+      background-size: 106%;
+      filter: brightness(1);
     }
   }
 
   .lp-left-bg {
-    animation: lp-hero-pan 20s ease-in-out infinite;
-    will-change: background-position, background-size;
+    animation: lp-hero-cinematic 18s ease-in-out infinite;
+    will-change: background-position, background-size, filter;
     background-repeat: no-repeat !important;
     background-size: cover !important;
   }

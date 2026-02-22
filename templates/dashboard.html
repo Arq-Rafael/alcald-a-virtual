@@ -45,10 +45,8 @@ body.has-sidebar {
 .db-banner::before {
   content: '';
   position: absolute;
-  right: -80px;
-  top: -80px;
-  width: 320px;
-  height: 320px;
+  right: -80px; top: -80px;
+  width: 320px; height: 320px;
   background: rgba(255,255,255,0.07);
   border-radius: 50%;
   pointer-events: none;
@@ -57,10 +55,8 @@ body.has-sidebar {
 .db-banner::after {
   content: '';
   position: absolute;
-  right: 60px;
-  bottom: -60px;
-  width: 200px;
-  height: 200px;
+  right: 60px; bottom: -60px;
+  width: 200px; height: 200px;
   background: rgba(255,255,255,0.05);
   border-radius: 50%;
   pointer-events: none;
@@ -100,7 +96,6 @@ body.has-sidebar {
 }
 
 .db-banner-chip.chip-success i { color: #6ee7b7; }
-.db-banner-chip.chip-warn    i { color: #fde68a; }
 .db-banner-chip.chip-info    i { color: #bae6fd; }
 
 .db-banner-right { position: relative; z-index: 1; flex-shrink: 0; }
@@ -116,7 +111,7 @@ body.has-sidebar {
   cursor: pointer;
 }
 
-.db-weather-card i  { font-size: 2rem; color: #fde68a; display: block; margin-bottom: 0.25rem; }
+.db-weather-card i    { font-size: 2rem; color: #fde68a; display: block; margin-bottom: 0.25rem; }
 .db-weather-card .temp { font-size: 1.4rem; font-weight: 700; color: #fff; line-height: 1; }
 .db-weather-card .desc { font-size: 0.72rem; color: rgba(255,255,255,0.65); margin-top: 0.15rem; }
 
@@ -137,42 +132,51 @@ body.has-sidebar {
 .db-section-title i { font-size: 1rem; color: #0f4c81; }
 
 /* =====================================================
-   GRID DE MÓDULOS
+   HERO CARDS — ACCESOS DESTACADOS
    ===================================================== */
-.db-grid {
+.db-hero-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
   margin-bottom: 1.75rem;
 }
 
-@media (max-width: 640px) { .db-grid { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 420px) { .db-grid { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .db-hero-grid { grid-template-columns: 1fr; } }
 
-.db-card {
-  background: #ffffff;
+.db-hero-card {
+  border-radius: 18px;
   border: 1.5px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 1.4rem 1.25rem;
+  background: #fff;
+  padding: 1.75rem 1.75rem 1.5rem;
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
   cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
   text-decoration: none !important;
   color: inherit;
   position: relative;
   overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
   animation: card-in 0.4s cubic-bezier(0.16,1,0.3,1) both;
 }
 
-.db-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-  border-color: var(--card-accent, #0f4c81);
-  text-decoration: none !important;
+.db-hero-card:nth-child(1) { animation-delay: 0.04s; }
+.db-hero-card:nth-child(2) { animation-delay: 0.08s; }
+
+.db-hero-card::after {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 140px; height: 140px;
+  background: var(--hero-bubble, rgba(15,76,129,0.05));
+  border-radius: 50%;
+  pointer-events: none;
+  transition: transform 0.35s ease;
 }
 
-.db-card::before {
+.db-hero-card:hover::after { transform: scale(1.25); }
+
+.db-hero-card::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
@@ -182,197 +186,321 @@ body.has-sidebar {
   transition: opacity 0.2s;
 }
 
-.db-card:hover::before { opacity: 1; }
+.db-hero-card:hover::before { opacity: 1; }
 
-.db-card:nth-child(1)  { animation-delay: 0.03s; }
-.db-card:nth-child(2)  { animation-delay: 0.06s; }
-.db-card:nth-child(3)  { animation-delay: 0.09s; }
-.db-card:nth-child(4)  { animation-delay: 0.12s; }
-.db-card:nth-child(5)  { animation-delay: 0.15s; }
-.db-card:nth-child(6)  { animation-delay: 0.18s; }
-.db-card:nth-child(7)  { animation-delay: 0.21s; }
-.db-card:nth-child(8)  { animation-delay: 0.24s; }
-.db-card:nth-child(9)  { animation-delay: 0.27s; }
-.db-card:nth-child(10) { animation-delay: 0.30s; }
-.db-card:nth-child(11) { animation-delay: 0.33s; }
-.db-card:nth-child(12) { animation-delay: 0.36s; }
+.db-hero-card:hover {
+  border-color: var(--card-accent, #0f4c81);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.09);
+  transform: translateY(-3px);
+  text-decoration: none !important;
+}
 
+.db-hero-card-icon {
+  width: 54px; height: 54px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  background: var(--card-icon-bg, #fef3c7);
+  color: var(--card-accent, #d97706);
+  transition: background 0.2s, color 0.2s;
+  position: relative; z-index: 1;
+  flex-shrink: 0;
+}
+
+.db-hero-card:hover .db-hero-card-icon {
+  background: var(--card-accent, #d97706);
+  color: #fff;
+}
+
+.db-hero-card-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1.3;
+  margin: 0.4rem 0 0;
+  position: relative; z-index: 1;
+}
+
+.db-hero-card-desc {
+  font-size: 0.83rem;
+  color: #64748b;
+  line-height: 1.55;
+  flex: 1; margin: 0;
+  position: relative; z-index: 1;
+}
+
+.db-hero-card-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--card-accent, #d97706);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.45rem 1.1rem;
+  border-radius: 999px;
+  width: fit-content;
+  margin-top: 0.5rem;
+  position: relative; z-index: 1;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.db-hero-card:hover .db-hero-card-btn {
+  opacity: 0.9;
+  transform: translateX(3px);
+}
+
+.db-hero-card[data-accent="amber"]  { --card-accent:#d97706; --card-icon-bg:#fef3c7; --hero-bubble:rgba(217,119,6,0.06); }
+.db-hero-card[data-accent="sky"]    { --card-accent:#0ea5e9; --card-icon-bg:#e0f2fe; --hero-bubble:rgba(14,165,233,0.06); }
+.db-hero-card[data-accent="blue"]   { --card-accent:#0f4c81; --card-icon-bg:#dbeafe; --hero-bubble:rgba(15,76,129,0.06); }
+
+/* =====================================================
+   QUICK ACCESS — MÓDULOS ESTILO iOS
+   ===================================================== */
+.db-quick-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.db-quick-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none !important;
+  color: inherit;
+  width: 72px;
+  flex-shrink: 0;
+  animation: card-in 0.4s cubic-bezier(0.16,1,0.3,1) both;
+}
+
+.db-quick-item:nth-child(1)  { animation-delay: 0.06s; }
+.db-quick-item:nth-child(2)  { animation-delay: 0.10s; }
+.db-quick-item:nth-child(3)  { animation-delay: 0.14s; }
+.db-quick-item:nth-child(4)  { animation-delay: 0.18s; }
+.db-quick-item:nth-child(5)  { animation-delay: 0.22s; }
+.db-quick-item:nth-child(6)  { animation-delay: 0.26s; }
+.db-quick-item:nth-child(7)  { animation-delay: 0.30s; }
+.db-quick-item:nth-child(8)  { animation-delay: 0.34s; }
+.db-quick-item:nth-child(9)  { animation-delay: 0.38s; }
+.db-quick-item:nth-child(10) { animation-delay: 0.42s; }
+
+.db-quick-item:hover { text-decoration: none !important; }
+
+.db-quick-icon {
+  width: 62px; height: 62px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #fff;
+  background: var(--icon-gradient, linear-gradient(135deg, #0f4c81, #1565c0));
+  box-shadow: 0 4px 14px var(--icon-shadow, rgba(15,76,129,0.28));
+  transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
+  flex-shrink: 0;
+}
+
+.db-quick-item:hover .db-quick-icon {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 8px 22px var(--icon-shadow, rgba(15,76,129,0.38));
+}
+
+.db-quick-label {
+  font-size: 0.67rem;
+  font-weight: 600;
+  color: #334155;
+  text-align: center;
+  line-height: 1.3;
+  max-width: 72px;
+}
+
+/* Gradientes iOS por acento */
+.db-quick-item[data-accent="blue"]    { --icon-gradient: linear-gradient(135deg, #0f4c81, #1565c0); --icon-shadow: rgba(15,76,129,0.30); }
+.db-quick-item[data-accent="sky"]     { --icon-gradient: linear-gradient(135deg, #0284c7, #0ea5e9); --icon-shadow: rgba(14,165,233,0.30); }
+.db-quick-item[data-accent="violet"]  { --icon-gradient: linear-gradient(135deg, #6d28d9, #7c3aed); --icon-shadow: rgba(124,58,237,0.30); }
+.db-quick-item[data-accent="emerald"] { --icon-gradient: linear-gradient(135deg, #047857, #059669); --icon-shadow: rgba(5,150,105,0.30); }
+.db-quick-item[data-accent="amber"]   { --icon-gradient: linear-gradient(135deg, #b45309, #d97706); --icon-shadow: rgba(217,119,6,0.30); }
+.db-quick-item[data-accent="rose"]    { --icon-gradient: linear-gradient(135deg, #be123c, #e11d48); --icon-shadow: rgba(225,29,72,0.30); }
+.db-quick-item[data-accent="teal"]    { --icon-gradient: linear-gradient(135deg, #0f766e, #0d9488); --icon-shadow: rgba(13,148,136,0.30); }
+.db-quick-item[data-accent="indigo"]  { --icon-gradient: linear-gradient(135deg, #4338ca, #4f46e5); --icon-shadow: rgba(79,70,229,0.30); }
+.db-quick-item[data-accent="orange"]  { --icon-gradient: linear-gradient(135deg, #c2410c, #ea580c); --icon-shadow: rgba(234,88,12,0.30); }
+.db-quick-item[data-accent="green"]   { --icon-gradient: linear-gradient(135deg, #15803d, #16a34a); --icon-shadow: rgba(22,163,74,0.30); }
+.db-quick-item[data-accent="slate"]   { --icon-gradient: linear-gradient(135deg, #334155, #475569); --icon-shadow: rgba(71,85,105,0.30); }
+
+/* =====================================================
+   STATS GRID — RESUMEN DEL SISTEMA
+   ===================================================== */
+.db-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.db-stat-card {
+  border-radius: 18px;
+  padding: 1.25rem 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  position: relative;
+  overflow: hidden;
+  background: var(--stat-gradient, linear-gradient(130deg, #0f4c81, #1565c0));
+  animation: card-in 0.5s cubic-bezier(0.16,1,0.3,1) both;
+  cursor: default;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.db-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+}
+
+/* Burbuja decorativa */
+.db-stat-card::after {
+  content: '';
+  position: absolute;
+  bottom: -20px; right: -20px;
+  width: 80px; height: 80px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+}
+
+.db-stat-icon {
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  color: #fff;
+  margin-bottom: 0.4rem;
+  flex-shrink: 0;
+}
+
+.db-stat-num {
+  font-size: 2.1rem;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: -1.5px;
+}
+
+.db-stat-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.92);
+  margin-top: 0.1rem;
+}
+
+.db-stat-sub {
+  font-size: 0.67rem;
+  color: rgba(255,255,255,0.62);
+}
+
+/* Estado de carga (skeleton) */
+.db-stat-card.loading {
+  background: linear-gradient(90deg, #e2e8f0 25%, #cbd5e1 50%, #e2e8f0 75%) !important;
+  background-size: 200% 100% !important;
+  animation: skeleton-shimmer 1.4s ease infinite !important;
+}
+
+.db-stat-card.loading * { visibility: hidden; }
+
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Gradientes por módulo */
+.db-stat-blue    { --stat-gradient: linear-gradient(130deg, #0c3d6b, #0f4c81); }
+.db-stat-sky     { --stat-gradient: linear-gradient(130deg, #0369a1, #0ea5e9); }
+.db-stat-amber   { --stat-gradient: linear-gradient(130deg, #92400e, #d97706); }
+.db-stat-rose    { --stat-gradient: linear-gradient(130deg, #9f1239, #e11d48); }
+.db-stat-emerald { --stat-gradient: linear-gradient(130deg, #065f46, #059669); }
+.db-stat-violet  { --stat-gradient: linear-gradient(130deg, #5b21b6, #7c3aed); }
+.db-stat-orange  { --stat-gradient: linear-gradient(130deg, #9a3412, #ea580c); }
+.db-stat-green   { --stat-gradient: linear-gradient(130deg, #14532d, #16a34a); }
+.db-stat-slate   { --stat-gradient: linear-gradient(130deg, #1e293b, #475569); }
+.db-stat-teal    { --stat-gradient: linear-gradient(130deg, #134e4a, #0d9488); }
+
+/* Retraso de entrada escalonado */
+.db-stat-card:nth-child(1) { animation-delay: 0.05s; }
+.db-stat-card:nth-child(2) { animation-delay: 0.09s; }
+.db-stat-card:nth-child(3) { animation-delay: 0.13s; }
+.db-stat-card:nth-child(4) { animation-delay: 0.17s; }
+.db-stat-card:nth-child(5) { animation-delay: 0.21s; }
+.db-stat-card:nth-child(6) { animation-delay: 0.25s; }
+.db-stat-card:nth-child(7) { animation-delay: 0.29s; }
+.db-stat-card:nth-child(8) { animation-delay: 0.33s; }
+
+/* =====================================================
+   ADMIN STATUS ROW
+   ===================================================== */
+.db-admin-status {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.7rem 1rem;
+  margin-bottom: 2rem;
+}
+
+.db-spill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+}
+
+.db-spill.active  { background: #e0f2fe; color: #0f4c81; }
+.db-spill.active  i { font-size: 0.45rem; color: #0f4c81; }
+.db-spill.ok      { background: #d1fae5; color: #059669; }
+.db-spill.ok      i { font-size: 0.45rem; color: #059669; }
+.db-spill.pending { background: #fef3c7; color: #d97706; }
+.db-spill.pending i { font-size: 0.45rem; color: #d97706; }
+
+.db-admin-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #0f4c81;
+  text-decoration: none;
+  margin-left: auto;
+}
+
+.db-admin-link:hover { text-decoration: underline; }
+
+/* =====================================================
+   SHARED ANIMATION
+   ===================================================== */
 @keyframes card-in {
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
-.db-card-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-  margin-bottom: 1rem;
-  background: var(--card-icon-bg, #e0f2fe);
-  color: var(--card-accent, #0f4c81);
-  transition: background 0.2s, color 0.2s;
-  flex-shrink: 0;
-}
-
-.db-card:hover .db-card-icon {
-  background: var(--card-accent, #0f4c81);
-  color: #fff;
-}
-
-.db-card-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin: 0 0 0.3rem;
-  line-height: 1.3;
-}
-
-.db-card-desc {
-  font-size: 0.8rem;
-  color: #64748b;
-  margin: 0;
-  line-height: 1.5;
-  flex: 1;
-}
-
-.db-card-arrow {
-  display: none;
-  margin-top: 1rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--card-accent, #0f4c81);
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.db-card:hover .db-card-arrow { display: flex; }
-
-/* Acentos por tarjeta */
-.db-card[data-accent="blue"]    { --card-accent:#0f4c81; --card-icon-bg:#e0f2fe; }
-.db-card[data-accent="sky"]     { --card-accent:#0ea5e9; --card-icon-bg:#e0f2fe; }
-.db-card[data-accent="violet"]  { --card-accent:#7c3aed; --card-icon-bg:#ede9fe; }
-.db-card[data-accent="emerald"] { --card-accent:#059669; --card-icon-bg:#d1fae5; }
-.db-card[data-accent="amber"]   { --card-accent:#d97706; --card-icon-bg:#fef3c7; }
-.db-card[data-accent="rose"]    { --card-accent:#e11d48; --card-icon-bg:#ffe4e6; }
-.db-card[data-accent="teal"]    { --card-accent:#0d9488; --card-icon-bg:#ccfbf1; }
-.db-card[data-accent="indigo"]  { --card-accent:#4f46e5; --card-icon-bg:#e0e7ff; }
-.db-card[data-accent="orange"]  { --card-accent:#ea580c; --card-icon-bg:#ffedd5; }
-.db-card[data-accent="green"]   { --card-accent:#16a34a; --card-icon-bg:#dcfce7; }
-.db-card[data-accent="slate"]   { --card-accent:#475569; --card-icon-bg:#f1f5f9; }
-
-/* =====================================================
-   PANEL DE ESTADO
-   ===================================================== */
-.db-status-panel {
-  background: #fff;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 16px;
-  overflow: hidden;
-  margin-bottom: 2rem;
-}
-
-.db-status-header {
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid #f1f5f9;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.db-status-header h4 {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.db-status-header h4 i { color: #0f4c81; }
-
-.db-status-header a {
-  font-size: 0.8rem;
-  color: #0f4c81;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.db-status-header a:hover { text-decoration: underline; }
-
-.db-status-body { padding: 0.25rem 1.25rem; }
-
-.db-status-row {
-  padding: 1rem 0;
-  border-bottom: 1px solid #f8fafc;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.db-status-row:last-child { border-bottom: none; }
-
-.db-status-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  margin-top: 5px;
-}
-
-.db-status-dot.active  { background: #0f4c81; }
-.db-status-dot.success { background: #059669; }
-.db-status-dot.pending { background: #d97706; }
-
-.db-status-info { flex: 1; min-width: 0; }
-
-.db-status-name {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 0.2rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.db-status-meta { font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.4rem; }
-
-.db-progress-bar {
-  height: 5px;
-  background: #f1f5f9;
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-.db-progress-fill {
-  height: 100%;
-  border-radius: 999px;
-  background: var(--fill-color, #0f4c81);
-  transition: width 1s ease;
-}
-
-.db-status-badge {
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0.2rem 0.55rem;
-  border-radius: 999px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.db-status-badge.blue   { background: #e0f2fe; color: #0f4c81; }
-.db-status-badge.green  { background: #d1fae5; color: #059669; }
-.db-status-badge.amber  { background: #fef3c7; color: #d97706; }
-.db-status-badge.slate  { background: #f1f5f9; color: #475569; }
 
 @media (max-width: 768px) {
   .db-page { padding: 1.25rem 1rem; }
   .db-banner { padding: 1.5rem; }
   .db-banner-left h2 { font-size: 1.4rem !important; }
   .db-banner-right { display: none; }
+  .db-stats-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+  .db-quick-row { gap: 0.75rem 1.1rem; }
 }
 </style>
 {% endblock %}
@@ -380,7 +508,7 @@ body.has-sidebar {
 {% block content %}
 <div class="db-page">
 
-  <!-- BANNER -->
+  <!-- ===== BANNER ===== -->
   <div class="db-banner">
     <div class="db-banner-left">
       <h2>¡Hola, {{ session.user }}!</h2>
@@ -403,171 +531,268 @@ body.has-sidebar {
     </div>
   </div>
 
-  <!-- MÓDULOS -->
+  <!-- ===== ACCESOS DESTACADOS ===== -->
+  <div class="db-section-title">
+    <i class="bi bi-stars"></i>
+    Accesos Destacados
+  </div>
+
+  <div class="db-hero-grid">
+
+    <a href="{{ url_for('ia.letter') }}" class="db-hero-card" data-accent="amber">
+      <div class="db-hero-card-icon"><i class="bi bi-pencil-square"></i></div>
+      <div class="db-hero-card-title">Redactar Oficios con IA</div>
+      <p class="db-hero-card-desc">Genera documentos institucionales automáticamente. Formato oficial, en segundos.</p>
+      <div class="db-hero-card-btn"><i class="bi bi-stars"></i> Abrir asistente</div>
+    </a>
+
+    <a href="/calendario" class="db-hero-card" data-accent="sky">
+      <div class="db-hero-card-icon"><i class="bi bi-calendar-event-fill"></i></div>
+      <div class="db-hero-card-title">Agenda Institucional</div>
+      <p class="db-hero-card-desc">Eventos, alertas y programación del municipio en un solo lugar.</p>
+      <div class="db-hero-card-btn"><i class="bi bi-arrow-right-short"></i> Ver agenda</div>
+    </a>
+
+  </div>
+
+  <!-- ===== MÓDULOS DEL SISTEMA (estilo iOS) ===== -->
   <div class="db-section-title">
     <i class="bi bi-grid-3x3-gap-fill"></i>
     Módulos del Sistema
   </div>
 
-  <div class="db-grid">
-
-    <a href="{{ url_for('ia.letter') }}" class="db-card" data-accent="amber">
-      <div class="db-card-icon"><i class="bi bi-pencil-square"></i></div>
-      <div class="db-card-title">Redactar Oficios</div>
-      <p class="db-card-desc">Genera documentos institucionales automáticamente con IA.</p>
-      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Abrir</div>
-    </a>
+  <div class="db-quick-row">
 
     {% if can('solicitudes') %}
-    <a href="{{ url_for('solicitudes.index') }}" class="db-card" data-accent="blue">
-      <div class="db-card-icon"><i class="bi bi-file-earmark-text-fill"></i></div>
-      <div class="db-card-title">Solicitudes</div>
-      <p class="db-card-desc">Gestiona inscripciones al Banco de Programas y Proyectos.</p>
-      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Abrir</div>
+    <a href="{{ url_for('solicitudes.index') }}" class="db-quick-item" data-accent="blue">
+      <div class="db-quick-icon"><i class="bi bi-file-earmark-text-fill"></i></div>
+      <span class="db-quick-label">Solicitudes</span>
     </a>
     {% endif %}
 
     {% if can('certificados') %}
-    <a href="{{ url_for('certificados.index') }}" class="db-card" data-accent="emerald">
-      <div class="db-card-icon"><i class="bi bi-patch-check-fill"></i></div>
-      <div class="db-card-title">Certificados</div>
-      <p class="db-card-desc">Genera y descarga certificados institucionales de manera ágil.</p>
-      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Generar</div>
+    <a href="{{ url_for('certificados.index') }}" class="db-quick-item" data-accent="emerald">
+      <div class="db-quick-icon"><i class="bi bi-patch-check-fill"></i></div>
+      <span class="db-quick-label">Certificados</span>
     </a>
     {% endif %}
 
     {% if can('licencias') %}
-    <a href="/licencias" class="db-card" data-accent="orange">
-      <div class="db-card-icon"><i class="bi bi-buildings-fill"></i></div>
-      <div class="db-card-title">Licencias</div>
-      <p class="db-card-desc">Radica y gestiona actos de licencia urbanística.</p>
-      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Gestionar</div>
+    <a href="/licencias" class="db-quick-item" data-accent="orange">
+      <div class="db-quick-icon"><i class="bi bi-buildings-fill"></i></div>
+      <span class="db-quick-label">Licencias</span>
     </a>
     {% endif %}
 
     {% if can('ia') %}
-    <a href="{{ url_for('ia.index') }}" class="db-card" data-accent="violet">
-      <div class="db-card-icon"><i class="bi bi-cpu-fill"></i></div>
-      <div class="db-card-title">IA Municipal</div>
-      <p class="db-card-desc">Asistente inteligente con análisis de datos y reportes avanzados.</p>
-      <div class="db-card-arrow"><i class="bi bi-stars"></i> Consultar</div>
+    <a href="{{ url_for('ia.index') }}" class="db-quick-item" data-accent="violet">
+      <div class="db-quick-icon"><i class="bi bi-cpu-fill"></i></div>
+      <span class="db-quick-label">IA Municipal</span>
     </a>
     {% endif %}
 
-    <a href="/calendario" class="db-card" data-accent="sky">
-      <div class="db-card-icon"><i class="bi bi-calendar-event-fill"></i></div>
-      <div class="db-card-title">Calendario</div>
-      <p class="db-card-desc">Eventos, alertas y programación institucional del municipio.</p>
-      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Ver agenda</div>
-    </a>
-
     {% if can('participacion') %}
-    <a href="{{ url_for('participacion.index') }}" class="db-card" data-accent="rose">
-      <div class="db-card-icon"><i class="bi bi-people-fill"></i></div>
-      <div class="db-card-title">Participación</div>
-      <p class="db-card-desc">Atención al ciudadano: PQRS, radicados y seguimiento.</p>
-      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Abrir</div>
+    <a href="{{ url_for('participacion.index') }}" class="db-quick-item" data-accent="rose">
+      <div class="db-quick-icon"><i class="bi bi-people-fill"></i></div>
+      <span class="db-quick-label">Participación</span>
     </a>
     {% endif %}
 
     {% if can('geoportal') %}
-    <a href="{{ url_for('main.geoportal') }}" class="db-card" data-accent="teal">
-      <div class="db-card-icon"><i class="bi bi-globe-americas"></i></div>
-      <div class="db-card-title">Geoportal</div>
-      <p class="db-card-desc">Mapas interactivos, catastro 3D y cartografía municipal.</p>
-      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Ver mapas</div>
+    <a href="{{ url_for('main.geoportal') }}" class="db-quick-item" data-accent="teal">
+      <div class="db-quick-icon"><i class="bi bi-globe-americas"></i></div>
+      <span class="db-quick-label">Geoportal</span>
     </a>
     {% endif %}
 
     {% if can('seguimiento') %}
-    <a href="{{ url_for('seguimiento.index') }}" class="db-card" data-accent="indigo">
-      <div class="db-card-icon"><i class="bi bi-graph-up-arrow"></i></div>
-      <div class="db-card-title">Seguimiento y Metas</div>
-      <p class="db-card-desc">Monitoreo de indicadores y progreso del Plan de Desarrollo.</p>
-      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Indicadores</div>
+    <a href="{{ url_for('seguimiento.index') }}" class="db-quick-item" data-accent="indigo">
+      <div class="db-quick-icon"><i class="bi bi-graph-up-arrow"></i></div>
+      <span class="db-quick-label">Seguimiento</span>
     </a>
     {% endif %}
 
     {% if can('riesgo') %}
-    <a href="{{ url_for('main.gestion_riesgo') }}" class="db-card" data-accent="green">
-      <div class="db-card-icon"><i class="bi bi-tree-fill"></i></div>
-      <div class="db-card-title">Gestión del Riesgo</div>
-      <p class="db-card-desc">Arbolado urbano, actas CMGR y planes de contingencia.</p>
-      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Gestionar</div>
+    <a href="{{ url_for('main.gestion_riesgo') }}" class="db-quick-item" data-accent="green">
+      <div class="db-quick-icon"><i class="bi bi-tree-fill"></i></div>
+      <span class="db-quick-label">Gestión Riesgo</span>
     </a>
     {% endif %}
 
     {% if can('contratos') %}
-    <a href="/contratos" class="db-card" data-accent="sky">
-      <div class="db-card-icon"><i class="bi bi-file-earmark-contract-fill"></i></div>
-      <div class="db-card-title">Contratación</div>
-      <p class="db-card-desc">Gestión de contratos municipales e integración con SECOP.</p>
-      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Contratos</div>
+    <a href="/contratos" class="db-quick-item" data-accent="sky">
+      <div class="db-quick-icon"><i class="bi bi-briefcase-fill"></i></div>
+      <span class="db-quick-label">Contratación</span>
     </a>
     {% endif %}
 
     {% if session.user_role == 'admin' %}
-    <a href="{{ url_for('configuracion.index') }}" class="db-card" data-accent="slate">
-      <div class="db-card-icon"><i class="bi bi-gear-fill"></i></div>
-      <div class="db-card-title">Configuración</div>
-      <p class="db-card-desc">Gestión de usuarios, permisos y ajustes del sistema.</p>
-      <div class="db-card-arrow"><i class="bi bi-arrow-right-short"></i> Configurar</div>
+    <a href="{{ url_for('configuracion.index') }}" class="db-quick-item" data-accent="slate">
+      <div class="db-quick-icon"><i class="bi bi-gear-fill"></i></div>
+      <span class="db-quick-label">Configuración</span>
     </a>
     {% endif %}
 
-  </div><!-- /db-grid -->
+  </div><!-- /db-quick-row -->
 
-  <!-- ESTADO DEL SISTEMA -->
+  <!-- ===== RESUMEN DEL SISTEMA ===== -->
+  {% set has_stats = can('solicitudes') or can('participacion') or can('contratos') or can('riesgo') or session.user_role in ['admin','superadmin'] %}
+  {% if has_stats %}
   <div class="db-section-title">
-    <i class="bi bi-activity"></i>
-    Estado del Sistema
+    <i class="bi bi-bar-chart-fill"></i>
+    Resumen del Sistema
   </div>
 
-  <div class="db-status-panel">
-    <div class="db-status-header">
-      <h4><i class="bi bi-clipboard2-check"></i> Módulos y servicios</h4>
-      <a href="{{ url_for('configuracion.index') if session.user_role == 'admin' else '#' }}">Ver detalles →</a>
+  <div class="db-stats-grid" id="statsGrid">
+
+    {% if can('solicitudes') %}
+    <div class="db-stat-card db-stat-blue loading">
+      <div class="db-stat-icon"><i class="bi bi-file-earmark-text-fill"></i></div>
+      <div class="db-stat-num" id="stat-sol-total">…</div>
+      <div class="db-stat-label">Solicitudes</div>
+      <div class="db-stat-sub">total registradas</div>
     </div>
-    <div class="db-status-body">
-
-      <div class="db-status-row">
-        <div class="db-status-dot active"></div>
-        <div class="db-status-info">
-          <div class="db-status-name">Sistema activo y funcionando</div>
-          <div class="db-status-meta">Todos los módulos operativos</div>
-          <div class="db-progress-bar">
-            <div class="db-progress-fill" style="width:100%; --fill-color:#0f4c81;"></div>
-          </div>
-        </div>
-        <span class="db-status-badge blue">Activo</span>
-      </div>
-
-      <div class="db-status-row">
-        <div class="db-status-dot success"></div>
-        <div class="db-status-info">
-          <div class="db-status-name">Base de datos sincronizada</div>
-          <div class="db-status-meta">Última sincronización: hoy</div>
-          <div class="db-progress-bar">
-            <div class="db-progress-fill" style="width:100%; --fill-color:#059669;"></div>
-          </div>
-        </div>
-        <span class="db-status-badge green">OK</span>
-      </div>
-
-      <div class="db-status-row">
-        <div class="db-status-dot pending"></div>
-        <div class="db-status-info">
-          <div class="db-status-name">Auditoría periódica programada</div>
-          <div class="db-status-meta">Revisión mensual del sistema</div>
-          <div class="db-progress-bar">
-            <div class="db-progress-fill" style="width:65%; --fill-color:#d97706;"></div>
-          </div>
-        </div>
-        <span class="db-status-badge amber">Programado</span>
-      </div>
-
+    <div class="db-stat-card db-stat-amber loading">
+      <div class="db-stat-icon"><i class="bi bi-hourglass-split"></i></div>
+      <div class="db-stat-num" id="stat-sol-pend">…</div>
+      <div class="db-stat-label">Certificados</div>
+      <div class="db-stat-sub">pendientes de emitir</div>
     </div>
+    {% endif %}
+
+    {% if can('participacion') %}
+    <div class="db-stat-card db-stat-rose loading">
+      <div class="db-stat-icon"><i class="bi bi-chat-dots-fill"></i></div>
+      <div class="db-stat-num" id="stat-pqrs-pend">…</div>
+      <div class="db-stat-label">PQRS Pendientes</div>
+      <div class="db-stat-sub">sin respuesta</div>
+    </div>
+    <div class="db-stat-card db-stat-orange loading">
+      <div class="db-stat-icon"><i class="bi bi-arrow-repeat"></i></div>
+      <div class="db-stat-num" id="stat-pqrs-tramite">…</div>
+      <div class="db-stat-label">En Trámite</div>
+      <div class="db-stat-sub">en proceso</div>
+    </div>
+    {% endif %}
+
+    {% if can('contratos') %}
+    <div class="db-stat-card db-stat-sky loading">
+      <div class="db-stat-icon"><i class="bi bi-briefcase-fill"></i></div>
+      <div class="db-stat-num" id="stat-contratos-total">…</div>
+      <div class="db-stat-label">Contratos</div>
+      <div class="db-stat-sub">en el sistema</div>
+    </div>
+    <div class="db-stat-card db-stat-amber loading">
+      <div class="db-stat-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+      <div class="db-stat-num" id="stat-contratos-alerta">…</div>
+      <div class="db-stat-label">Por Vencer</div>
+      <div class="db-stat-sub">con alerta activa</div>
+    </div>
+    {% endif %}
+
+    {% if can('riesgo') %}
+    <div class="db-stat-card db-stat-green loading">
+      <div class="db-stat-icon"><i class="bi bi-tree-fill"></i></div>
+      <div class="db-stat-num" id="stat-riesgo-total">…</div>
+      <div class="db-stat-label">Gestión Arbórea</div>
+      <div class="db-stat-sub">radicados totales</div>
+    </div>
+    <div class="db-stat-card db-stat-teal loading">
+      <div class="db-stat-icon"><i class="bi bi-clipboard2-check-fill"></i></div>
+      <div class="db-stat-num" id="stat-riesgo-pend">…</div>
+      <div class="db-stat-label">Sin Dictamen</div>
+      <div class="db-stat-sub">pendientes de decisión</div>
+    </div>
+    {% endif %}
+
+    {% if session.user_role in ['admin', 'superadmin'] %}
+    <div class="db-stat-card db-stat-violet loading">
+      <div class="db-stat-icon"><i class="bi bi-people-fill"></i></div>
+      <div class="db-stat-num" id="stat-usuarios-total">…</div>
+      <div class="db-stat-label">Usuarios</div>
+      <div class="db-stat-sub">en el sistema</div>
+    </div>
+    <div class="db-stat-card db-stat-slate loading">
+      <div class="db-stat-icon"><i class="bi bi-person-check-fill"></i></div>
+      <div class="db-stat-num" id="stat-usuarios-activos">…</div>
+      <div class="db-stat-label">Activos</div>
+      <div class="db-stat-sub">sin bloqueo</div>
+    </div>
+    {% endif %}
+
+  </div><!-- /db-stats-grid -->
+
+  <!-- Estado del sistema (solo admin, compacto) -->
+  {% if session.user_role in ['admin', 'superadmin'] %}
+  <div class="db-admin-status">
+    <span class="db-spill active"><i class="bi bi-circle-fill"></i> Sistema operativo</span>
+    <span class="db-spill ok"><i class="bi bi-circle-fill"></i> Base de datos OK</span>
+    <span class="db-spill pending"><i class="bi bi-circle-half"></i> Auditoría programada</span>
+    <a href="{{ url_for('configuracion.index') }}" class="db-admin-link">
+      <i class="bi bi-gear-fill"></i> Panel de administración
+    </a>
   </div>
+  {% endif %}
+
+  {% endif %}<!-- /has_stats -->
 
 </div><!-- /db-page -->
+
+<script>
+(function () {
+  function animateCount(el, target) {
+    if (isNaN(target) || target < 0) { el.textContent = target; return; }
+    const dur = 700, start = performance.now();
+    (function step(now) {
+      const p = Math.min((now - start) / dur, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(ease * target);
+      if (p < 1) requestAnimationFrame(step);
+    })(start);
+  }
+
+  function setText(id, val) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const n = parseInt(val, 10);
+    if (!isNaN(n)) animateCount(el, n);
+    else el.textContent = val ?? '--';
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    fetch('/api/dashboard-stats')
+      .then(r => r.json())
+      .then(d => {
+        if (d.solicitudes) {
+          setText('stat-sol-total', d.solicitudes.total);
+          setText('stat-sol-pend',  d.solicitudes.pendientes);
+        }
+        if (d.pqrs) {
+          setText('stat-pqrs-pend',   d.pqrs.pendiente);
+          setText('stat-pqrs-tramite', d.pqrs.en_tramite);
+        }
+        if (d.contratos) {
+          setText('stat-contratos-total',  d.contratos.total);
+          setText('stat-contratos-alerta', d.contratos.alerta);
+        }
+        if (d.riesgo) {
+          setText('stat-riesgo-total', d.riesgo.total);
+          setText('stat-riesgo-pend',  d.riesgo.pendientes);
+        }
+        if (d.usuarios) {
+          setText('stat-usuarios-total',  d.usuarios.total);
+          setText('stat-usuarios-activos', d.usuarios.activos);
+        }
+        document.querySelectorAll('#statsGrid .db-stat-card.loading')
+          .forEach(c => c.classList.remove('loading'));
+      })
+      .catch(() => {
+        document.querySelectorAll('#statsGrid .db-stat-num')
+          .forEach(n => { if (n.textContent === '…') n.textContent = '--'; });
+        document.querySelectorAll('#statsGrid .db-stat-card.loading')
+          .forEach(c => c.classList.remove('loading'));
+      });
+  });
+})();
+</script>
 {% endblock %}

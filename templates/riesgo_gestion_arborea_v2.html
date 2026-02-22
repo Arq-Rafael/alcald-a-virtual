@@ -207,6 +207,17 @@
     transform: none !important;
     box-shadow: none;
   }
+
+  /* Inline-to-class cleanup */
+  .wz-subtitle { margin: 8px 0 0 0; opacity: 0.95; }
+  .hidden-manual-species { display: none; margin-top: 8px; }
+  .wz-actions-right { margin-top: 28px; text-align: right; }
+  .wz-confirm-block { display: none; margin-top: 24px; }
+  .wz-confirm-p { margin: 10px 0 0 0; }
+  .file-input-hidden { display: none; }
+  .wz-section-gap { margin: 16px 0; }
+  .wz-hidden { display: none; }
+  .wz-comp-label { font-size: 14px; color: #666; margin-bottom: 8px; }
 </style>
 {% endblock %}
 
@@ -215,7 +226,7 @@
   <!-- Header -->
   <div class="wizard-header">
     <h1>🌳 Gestión Arbórea - Sistema de Radicación</h1>
-    <p style="margin: 8px 0 0 0; opacity: 0.95;">Radicación → Visita Técnica → Dictamen CMGR → Compensación</p>
+    <p class="wz-subtitle">Radicación → Visita Técnica → Dictamen CMGR → Compensación</p>
   </div>
 
   <!-- Steps indicator -->
@@ -287,7 +298,7 @@
               </select>
               <button type="button" class="btn btn-outline-secondary btn-small" id="toggle_especie_manual">Especie no listada</button>
             </div>
-            <input type="text" class="form-control" id="arbol_especie_manual" placeholder="Ingrese especie manualmente" style="display:none; margin-top:8px;" required>
+            <input type="text" class="form-control" id="arbol_especie_manual" placeholder="Ingrese especie manualmente" class="hidden-manual-species" required>
             <small class="text-muted">Puedes seleccionar de la lista o escribir manualmente.</small>
           </div>
           <div class="col-md-4">
@@ -310,7 +321,7 @@
           </div>
         </div>
 
-        <div style="margin-top: 28px; text-align: right;">
+        <div class="wz-actions-right">
           <button type="submit" class="btn-primary-custom" id="btn-guardar-radicado">
             💾 Guardar y Radicar
           </button>
@@ -318,11 +329,11 @@
       </form>
 
       <!-- Confirmación Fase 1 -->
-      <div id="radicado-confirmacion" style="display: none; margin-top: 24px;">
+      <div id="radicado-confirmacion" class="wz-confirm-block">
         <div class="alert alert-success">
           <strong>✅ ¡Radicado creado exitosamente!</strong>
           <div class="radicado-badge" id="numero-radicado"></div>
-          <p style="margin: 10px 0 0 0;"><strong>Próximo paso:</strong> El técnico diligenciará el informe de visita técnica.</p>
+          <p class="wz-confirm-p"><strong>Próximo paso:</strong> El técnico diligenciará el informe de visita técnica.</p>
         </div>
         <button class="btn-primary-custom" onclick="showSection(2)">Siguiente: Visita Técnica →</button>
       </div>
@@ -397,14 +408,14 @@
           <h4>📸 Fotografías de la Inspección</h4>
           <div class="file-upload" id="file-upload-area">
             <p>📷 Arrastra fotos aquí o haz clic para seleccionar</p>
-            <input type="file" id="file-input" multiple accept="image/*" style="display:none;">
+            <input type="file" id="file-input" multiple accept="image/*" class="file-input-hidden">
             <small class="text-muted">Máximo 5 MB por foto. Formatos: JPG, PNG</small>
           </div>
           <div class="uploaded-files" id="uploaded-files"></div>
           <input type="hidden" id="archivos_visita">
         </div>
 
-        <div style="margin-top: 28px; text-align: right;">
+        <div class="wz-actions-right">
           <button type="button" class="btn-secondary-custom" onclick="showSection(1)">← Anterior</button>
           <button type="submit" class="btn-primary-custom" id="btn-guardar-visita">
             💾 Guardar Visita e Informe
@@ -413,14 +424,14 @@
       </form>
 
       <!-- Confirmación Fase 2 -->
-      <div id="visita-confirmacion" style="display: none; margin-top: 24px;">
+      <div id="visita-confirmacion" class="wz-confirm-block">
         <div class="alert alert-info">
           <strong>✅ Informe registrado - Pendiente aprobación del CMGR</strong>
-          <p style="margin: 10px 0 0 0;">
+          <p class="wz-confirm-p">
             El informe está listo para ser revisado. El CMGR realizará el dictamen en la siguiente fase.
           </p>
         </div>
-        <div style="margin: 16px 0;">
+        <div class="wz-section-gap">
           <button class="btn-secondary-custom" onclick="descargarPDF()">
             📥 Descargar Informe PDF
           </button>
@@ -469,7 +480,7 @@
         </div>
 
         <!-- COMPENSACIÓN (solo si aprobado) -->
-        <div id="compensacion-section" style="display: none;">
+        <div id="compensacion-section" class="wz-hidden">
           <div class="form-group-section">
             <h4>🌱 Compensación Ambiental</h4>
             <div class="row g-3">
@@ -486,8 +497,8 @@
                 <button type="button" class="btn-secondary-custom" onclick="calcularCompensacion()">🧮 Calcular Compensación</button>
               </div>
               <div class="col-12">
-                <div id="resultado-compensacion" class="compensacion-result" style="display: none;">
-                  <div style="font-size: 14px; color: #666; margin-bottom: 8px;">Árboles a compensar:</div>
+                <div id="resultado-compensacion" class="compensacion-result" class="wz-hidden">
+                  <div class="wz-comp-label">Árboles a compensar:</div>
                   <div class="compensacion-numero" id="compensacion-arboles-display">0</div>
                   <small id="calculo-detalles" class="text-muted"></small>
                 </div>
@@ -504,7 +515,7 @@
           </div>
         </div>
 
-        <div style="margin-top: 28px; text-align: right;">
+        <div class="wz-actions-right">
           <button type="button" class="btn-secondary-custom" onclick="showSection(2)">← Anterior</button>
           <button type="submit" class="btn-primary-custom" id="btn-emitir-permiso">
             ✅ Emitir Dictamen
@@ -513,12 +524,12 @@
       </form>
 
       <!-- Confirmación Fase 3 -->
-      <div id="permiso-confirmacion" style="display: none; margin-top: 24px;">
+      <div id="permiso-confirmacion" class="wz-confirm-block">
         <div class="alert alert-success">
           <strong>✅ ¡Dictamen emitido exitosamente!</strong>
-          <p style="margin: 10px 0 0 0;">El expediente está completo y procesado.</p>
+          <p class="wz-confirm-p">El expediente está completo y procesado.</p>
         </div>
-        <div style="margin: 16px 0;">
+        <div class="wz-section-gap">
           <button class="btn-secondary-custom" onclick="descargarDictamenPDF()">📥 Descargar Permiso/Dictamen PDF</button>
         </div>
         <button class="btn-primary-custom" onclick="location.reload()">🔄 Nuevo Radicado</button>
@@ -1105,3 +1116,4 @@ async function cargarEspecies() {
 }
 </script>
 {% endblock %}
+

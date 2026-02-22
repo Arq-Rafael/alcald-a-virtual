@@ -4,6 +4,8 @@ from app.models.participacion import Radicado, RespuestaRadicado
 from app.utils import can_access, admin_required
 import os
 import datetime
+import hashlib
+import io
 from werkzeug.utils import secure_filename
 import json
 import csv
@@ -123,10 +125,19 @@ def radicar_api():
                 'error': 'Faltan campos requeridos'
             }), 400
         
-        # Generar número de radicado
+        # Número de radicado: manual si viene, auto si no
+        numero_radicado = request.form.get('numero_radicado', '').strip()
         year = datetime.datetime.now().year
-        count = Radicado.query.filter(Radicado.numero_radicado.like(f"%{year}%")).count()
-        numero_radicado = f"RAD-{year}-{str(count+1).zfill(5)}"
+        if numero_radicado:
+            # Verificar que no exista ya
+            if Radicado.query.filter_by(numero_radicado=numero_radicado).first():
+                return jsonify({
+                    'success': False,
+                    'error': f'El número de radicado {numero_radicado} ya existe. Por favor usa otro.'
+                }), 409
+        else:
+            count = Radicado.query.filter(Radicado.numero_radicado.like(f"RAD-{year}-%")).count()
+            numero_radicado = f"RAD-{year}-{str(count+1).zfill(5)}"
         
         # Crear radicado
         nuevo_radicado = Radicado(
@@ -319,6 +330,174 @@ def descargar(id):
     
     flash('Archivo no encontrado.', 'error')
     return redirect(url_for('participacion.ver', id=id))
+
+@participacion_bp.route('/siguiente-radicado', methods=['GET'], endpoint='siguiente_radicado')
+def siguiente_radicado():
+    """Retorna el siguiente número de radicado disponible para el año actual"""
+    if 'user' not in session:
+        return jsonify({'error': 'No autenticado'}), 401
+    year = datetime.datetime.now().year
+    count = Radicado.query.filter(Radicado.numero_radicado.like(f"RAD-{year}-%")).count()
+    numero = f"RAD-{year}-{str(count + 1).zfill(5)}"
+    return jsonify({'numero': numero})
+
+
+@participacion_bp.route('/radicado/<int:id>/constancia-pdf', methods=['GET'], endpoint='constancia_pdf')
+def constancia_pdf(id):
+    """Genera y descarga la constancia de radicado en PDF"""
+    if 'user' not in session:
+        return redirect(url_for('auth.login'))
+
+    radicado = Radicado.query.get_or_404(id)
+
+    # Verificar permisos mínimos
+    user = session.get('user')
+    secretaria = session.get('secretaria', '')
+    is_authorized = (
+        can_radicar() or
+        radicado.asignado_a == user or
+        radicado.asignado_a == secretaria or
+        radicado.creado_por == user
+    )
+    if not is_authorized:
+        return jsonify({'error': 'Sin permiso para descargar esta constancia'}), 403
+
+    # Código de verificación único (12 chars hex derivado del ID + número + fecha)
+    raw = f"{radicado.id}-{radicado.numero_radicado}-{radicado.fecha_radicacion}"
+    codigo_verificacion = hashlib.sha256(raw.encode()).hexdigest()[:12].upper()
+
+    # Datos de oficina destino
+    oficinas = get_oficinas()
+    nombre_oficina = oficinas.get(radicado.oficina_destino, radicado.oficina_destino or '—')
+
+    # Fecha formateada
+    fecha_rad = radicado.fecha_radicacion.strftime('%d de %B de %Y') if radicado.fecha_radicacion else '—'
+    fecha_venc = radicado.fecha_vencimiento.strftime('%d/%m/%Y') if radicado.fecha_vencimiento else '—'
+
+    # Ruta logo
+    logo_path = os.path.join(current_app.root_path, '..', 'static', 'imagenes', 'logo_new.png')
+    logo_path = os.path.abspath(logo_path)
+    logo_src = f"file:///{logo_path.replace(chr(92), '/')}" if os.path.exists(logo_path) else ''
+
+    estado_label = {
+        'PENDIENTE': 'Pendiente',
+        'EN_TRAMITE': 'En Trámite',
+        'RESPONDIDO': 'Respondido',
+    }.get(radicado.estado, radicado.estado)
+
+    html_content = f"""<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  body {{ font-family: 'Inter', Arial, sans-serif; color: #1a1a1a; background: #fff; padding: 2.5cm; }}
+  .header {{ display: flex; align-items: center; gap: 1.5rem; border-bottom: 3px solid #0f4c81; padding-bottom: 1.2rem; margin-bottom: 1.8rem; }}
+  .header img {{ width: 72px; height: 72px; object-fit: contain; }}
+  .header-text h1 {{ font-size: 1.05rem; color: #0f4c81; font-weight: 700; margin-bottom: .2rem; }}
+  .header-text p {{ font-size: .8rem; color: #555; }}
+  .titulo-constancia {{ text-align: center; font-size: 1.3rem; font-weight: 700; color: #0f4c81;
+    margin-bottom: 1.5rem; letter-spacing: .5px; text-transform: uppercase; }}
+  .numero-grande {{ text-align: center; font-size: 2.2rem; font-weight: 700; color: #1565c0;
+    background: #eef4fb; border-radius: 12px; padding: .8rem 1.5rem; margin-bottom: 2rem;
+    letter-spacing: 1px; border: 2px solid #b3cde8; }}
+  table {{ width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }}
+  th {{ background: #0f4c81; color: white; padding: .55rem .9rem; text-align: left;
+    font-size: .78rem; font-weight: 600; }}
+  td {{ padding: .55rem .9rem; font-size: .82rem; border-bottom: 1px solid #e5e7eb; }}
+  tr:nth-child(even) td {{ background: #f8fafc; }}
+  .section-label {{ font-size: .7rem; font-weight: 700; color: #0f4c81; text-transform: uppercase;
+    letter-spacing: .8px; margin-bottom: .5rem; margin-top: 1.2rem; }}
+  .asunto-box {{ background: #f8fafc; border-left: 4px solid #0f4c81; padding: .8rem 1rem;
+    border-radius: 0 8px 8px 0; font-size: .83rem; margin-bottom: 1.5rem; line-height: 1.5; }}
+  .verificacion {{ margin-top: 2rem; border: 1.5px dashed #b3cde8; border-radius: 10px;
+    padding: 1rem 1.2rem; display: flex; align-items: center; gap: 1.2rem; }}
+  .verif-icon {{ font-size: 2rem; }}
+  .verif-label {{ font-size: .72rem; color: #555; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }}
+  .verif-code {{ font-size: 1.05rem; font-weight: 700; color: #0f4c81; font-family: monospace; letter-spacing: 2px; }}
+  .footer {{ margin-top: 2.5rem; text-align: center; font-size: .72rem; color: #888;
+    border-top: 1px solid #e5e7eb; padding-top: 1rem; }}
+</style>
+</head>
+<body>
+  <!-- ENCABEZADO -->
+  <div class="header">
+    {'<img src="' + logo_src + '" alt="Logo Alcaldía">' if logo_src else '<div style="width:72px;height:72px;background:#0f4c81;border-radius:8px;"></div>'}
+    <div class="header-text">
+      <h1>Alcaldía Municipal de Supatá</h1>
+      <p>Sistema de Gestión Documental · Participación Ciudadana</p>
+    </div>
+  </div>
+
+  <!-- TÍTULO Y NÚMERO -->
+  <div class="titulo-constancia">Constancia de Radicación</div>
+  <div class="numero-grande">{radicado.numero_radicado}</div>
+
+  <!-- DATOS DEL RADICADO -->
+  <p class="section-label">Información del Radicado</p>
+  <table>
+    <tr><th>Campo</th><th>Valor</th></tr>
+    <tr><td>Fecha de Radicación</td><td>{fecha_rad}</td></tr>
+    <tr><td>Tipo</td><td>{radicado.tipo}</td></tr>
+    <tr><td>Estado</td><td>{estado_label}</td></tr>
+    <tr><td>Plazo de respuesta</td><td>{radicado.plazo_dias} días hábiles</td></tr>
+    <tr><td>Fecha de vencimiento</td><td>{fecha_venc}</td></tr>
+    <tr><td>Oficina destinataria</td><td>{nombre_oficina}</td></tr>
+    <tr><td>Radicado por</td><td>{radicado.creado_por or '—'}</td></tr>
+  </table>
+
+  <!-- DATOS DEL REMITENTE -->
+  <p class="section-label">Datos del Remitente</p>
+  <table>
+    <tr><th>Campo</th><th>Valor</th></tr>
+    <tr><td>Nombre</td><td>{radicado.remitente_nombre}</td></tr>
+    <tr><td>Entidad / Organización</td><td>{radicado.remitente_entidad or 'Particular'}</td></tr>
+  </table>
+
+  <!-- ASUNTO Y DESCRIPCIÓN -->
+  <p class="section-label">Asunto y Descripción</p>
+  <div class="asunto-box">
+    <strong>{radicado.asunto}</strong><br>
+    <span style="color:#555;">{radicado.descripcion or ''}</span>
+  </div>
+
+  <!-- CÓDIGO DE VERIFICACIÓN -->
+  <div class="verificacion">
+    <div class="verif-icon">🔐</div>
+    <div>
+      <div class="verif-label">Código de Verificación</div>
+      <div class="verif-code">{codigo_verificacion}</div>
+      <div style="font-size:.7rem;color:#888;margin-top:.25rem;">
+        Use este código para verificar la autenticidad de este documento ante la Alcaldía Municipal.
+      </div>
+    </div>
+  </div>
+
+  <!-- PIE DE PÁGINA -->
+  <div class="footer">
+    Alcaldía Municipal de Supatá · Sistema de Gestión Documental<br>
+    Documento generado el {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')} · {radicado.numero_radicado}
+  </div>
+</body>
+</html>"""
+
+    try:
+        from weasyprint import HTML as WP_HTML
+        pdf_bytes = WP_HTML(string=html_content).write_pdf()
+        nombre_archivo = f"constancia_{radicado.numero_radicado}.pdf"
+        return send_file(
+            io.BytesIO(pdf_bytes),
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=nombre_archivo
+        )
+    except ImportError:
+        return jsonify({'error': 'WeasyPrint no está instalado en el servidor'}), 500
+    except Exception as e:
+        print(f'Error generando PDF constancia: {e}')
+        return jsonify({'error': f'Error al generar PDF: {str(e)}'}), 500
+
 
 @participacion_bp.route('/eliminar/<int:id>', methods=['POST'], endpoint='eliminar')
 def eliminar(id):

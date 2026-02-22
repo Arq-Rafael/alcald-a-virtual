@@ -1,9 +1,9 @@
 /* ===== PARTICIPACIÓN iOS26 - MODERN DESIGN ===== */
 
 :root {
-    --primary-green: #7cb342;
-    --primary-green-light: #a5d6a7;
-    --primary-green-dark: #558b2f;
+    --primary-blue: #1565c0;
+    --primary-blue-light: #0ea5e9;
+    --primary-blue-dark: #0f4c81;
     --glass-bg: rgba(255, 255, 255, 0.7);
     --glass-border: rgba(255, 255, 255, 0.3);
     --text-primary: #1a1a1a;
@@ -53,13 +53,13 @@
     padding: 0.875rem 1.75rem;
     border-radius: 12px;
     border: none;
-    background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+    background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark));
     color: white;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 1rem;
-    box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
+    box-shadow: 0 4px 12px rgba(15, 76, 129, 0.3);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -67,7 +67,7 @@
 
 .btn-radicar-nuevo:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(124, 179, 66, 0.4);
+    box-shadow: 0 6px 20px rgba(15, 76, 129, 0.4);
 }
 
 .btn-radicar-nuevo:active {
@@ -96,7 +96,7 @@
 .stat-number {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--primary-green);
+    color: var(--primary-blue);
     margin-bottom: 0.5rem;
 }
 
@@ -172,8 +172,8 @@
     height: 40px;
     border-radius: 50%;
     border: none;
-    background: rgba(124, 179, 66, 0.1);
-    color: var(--primary-green);
+    background: rgba(15, 76, 129, 0.1);
+    color: var(--primary-blue);
     cursor: pointer;
     font-size: 1.5rem;
     display: flex;
@@ -183,7 +183,7 @@
 }
 
 .modal-close:hover {
-    background: rgba(124, 179, 66, 0.2);
+    background: rgba(15, 76, 129, 0.2);
     transform: rotate(90deg);
 }
 
@@ -221,9 +221,9 @@
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: var(--primary-green);
+    border-color: var(--primary-blue);
     background: rgba(255, 255, 255, 0.95);
-    box-shadow: 0 0 0 3px rgba(124, 179, 66, 0.1);
+    box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.1);
 }
 
 .form-group textarea {
@@ -242,28 +242,28 @@
 }
 
 .file-upload-area {
-    border: 2px dashed var(--primary-green);
+    border: 2px dashed var(--primary-blue);
     border-radius: 12px;
     padding: 2rem;
     text-align: center;
-    background: rgba(124, 179, 66, 0.05);
+    background: rgba(15, 76, 129, 0.04);
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .file-upload-area:hover {
-    background: rgba(124, 179, 66, 0.1);
-    border-color: var(--primary-green-dark);
+    background: rgba(15, 76, 129, 0.08);
+    border-color: var(--primary-blue-dark);
 }
 
 .file-upload-area.dragover {
-    background: rgba(124, 179, 66, 0.15);
-    border-color: var(--primary-green-dark);
+    background: rgba(15, 76, 129, 0.12);
+    border-color: var(--primary-blue-dark);
 }
 
 .file-upload-icon {
     font-size: 2rem;
-    color: var(--primary-green);
+    color: var(--primary-blue);
     margin-bottom: 0.5rem;
 }
 
@@ -291,24 +291,24 @@
 }
 
 .btn-modal-primary {
-    background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+    background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark));
     color: white;
-    box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
+    box-shadow: 0 4px 12px rgba(15, 76, 129, 0.3);
 }
 
 .btn-modal-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(124, 179, 66, 0.4);
+    box-shadow: 0 6px 20px rgba(15, 76, 129, 0.4);
 }
 
 .btn-modal-secondary {
-    background: rgba(124, 179, 66, 0.1);
-    color: var(--primary-green);
-    border: 1px solid rgba(124, 179, 66, 0.3);
+    background: rgba(15, 76, 129, 0.08);
+    color: var(--primary-blue);
+    border: 1px solid rgba(15, 76, 129, 0.25);
 }
 
 .btn-modal-secondary:hover {
-    background: rgba(124, 179, 66, 0.15);
+    background: rgba(15, 76, 129, 0.14);
 }
 
 /* ===== HISTORIAL DE RADICADOS ===== */
@@ -360,8 +360,8 @@
 .radicado-numero {
     font-size: 1rem;
     font-weight: 700;
-    color: var(--primary-green);
-    background: rgba(124, 179, 66, 0.1);
+    color: var(--primary-blue);
+    background: rgba(15, 76, 129, 0.08);
     padding: 0.5rem 0.75rem;
     border-radius: 8px;
 }
@@ -372,8 +372,8 @@
     border-radius: 20px;
     font-size: 0.75rem;
     font-weight: 600;
-    background: rgba(124, 179, 66, 0.15);
-    color: var(--primary-green);
+    background: rgba(14, 165, 233, 0.12);
+    color: var(--primary-blue);
     text-transform: capitalize;
 }
 
@@ -426,7 +426,7 @@
     justify-content: space-between;
     margin-bottom: 1rem;
     padding: 0.75rem;
-    background: rgba(124, 179, 66, 0.05);
+    background: rgba(15, 76, 129, 0.04);
     border-radius: 8px;
 }
 
@@ -491,7 +491,7 @@
 
 /* ===== INFORMACIÓN DE PLAZO ===== */
 .plazo-info {
-    background: linear-gradient(135deg, rgba(124, 179, 66, 0.08), rgba(124, 179, 66, 0.02));
+    background: linear-gradient(135deg, rgba(15, 76, 129, 0.07), rgba(14, 165, 233, 0.03));
     border-radius: 8px;
     padding: 0.75rem;
     margin-bottom: 1rem;
@@ -499,12 +499,12 @@
 }
 
 .plazo-info strong {
-    color: var(--primary-green);
+    color: var(--primary-blue);
 }
 
 .dias-restantes {
     font-weight: 700;
-    color: var(--primary-green);
+    color: var(--primary-blue);
 }
 
 /* ===== BOTONES DE ACCIÓN ===== */
@@ -533,24 +533,24 @@
 }
 
 .btn-action-primary {
-    background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+    background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark));
     color: white;
-    box-shadow: 0 2px 6px rgba(124, 179, 66, 0.2);
+    box-shadow: 0 2px 6px rgba(15, 76, 129, 0.2);
 }
 
 .btn-action-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
+    box-shadow: 0 4px 12px rgba(15, 76, 129, 0.3);
 }
 
 .btn-action-secondary {
-    background: rgba(124, 179, 66, 0.1);
-    color: var(--primary-green);
-    border: 1px solid rgba(124, 179, 66, 0.3);
+    background: rgba(15, 76, 129, 0.08);
+    color: var(--primary-blue);
+    border: 1px solid rgba(15, 76, 129, 0.25);
 }
 
 .btn-action-secondary:hover {
-    background: rgba(124, 179, 66, 0.15);
+    background: rgba(15, 76, 129, 0.14);
 }
 
 .btn-action-danger {
@@ -561,6 +561,16 @@
 
 .btn-action-danger:hover {
     background: rgba(239, 68, 68, 0.2);
+}
+
+.btn-action-pdf {
+    background: rgba(14, 165, 233, 0.1);
+    color: #0369a1;
+    border: 1px solid rgba(14, 165, 233, 0.3);
+}
+
+.btn-action-pdf:hover {
+    background: rgba(14, 165, 233, 0.18);
 }
 
 /* ===== EMPTY STATE ===== */
@@ -609,7 +619,7 @@
 
 .search-input:focus {
     outline: none;
-    border-color: var(--primary-green);
+    border-color: var(--primary-blue);
     background: rgba(255, 255, 255, 0.95);
 }
 
@@ -625,7 +635,7 @@
 
 .filter-select:focus {
     outline: none;
-    border-color: var(--primary-green);
+    border-color: var(--primary-blue);
     background: rgba(255, 255, 255, 0.95);
 }
 
@@ -642,41 +652,41 @@
         text-align: center;
         gap: 1rem;
     }
-    
+
     .participacion-header h1 {
         font-size: 1.75rem;
     }
-    
+
     .header-actions {
         width: 100%;
         flex-direction: column;
     }
-    
+
     .btn-radicar-nuevo {
         width: 100%;
     }
-    
+
     .stats-grid {
         grid-template-columns: 1fr 1fr;
     }
-    
+
     .radicados-list {
         grid-template-columns: 1fr;
     }
-    
+
     .modal-content {
         width: 95%;
         max-height: 95vh;
     }
-    
+
     .form-row {
         grid-template-columns: 1fr;
     }
-    
+
     .radicado-details {
         grid-template-columns: 1fr;
     }
-    
+
     .participacion-container {
         padding: 1rem 0.5rem;
     }
@@ -686,19 +696,19 @@
     .participacion-header h1 {
         font-size: 1.5rem;
     }
-    
+
     .stat-number {
         font-size: 1.5rem;
     }
-    
+
     .radicado-card {
         padding: 1rem;
     }
-    
+
     .modal-body {
         padding: 1.5rem;
     }
-    
+
     .modal-header,
     .modal-actions {
         padding: 1.5rem;
@@ -729,10 +739,10 @@
 }
 
 .modal-content::-webkit-scrollbar-thumb {
-    background: rgba(124, 179, 66, 0.3);
+    background: rgba(15, 76, 129, 0.25);
     border-radius: 4px;
 }
 
 .modal-content::-webkit-scrollbar-thumb:hover {
-    background: rgba(124, 179, 66, 0.5);
+    background: rgba(15, 76, 129, 0.45);
 }

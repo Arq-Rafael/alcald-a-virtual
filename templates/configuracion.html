@@ -236,23 +236,23 @@
             </span>
             {% endif %}
             {% if u.email %}
-            <span style="color: #666; margin-left: 0.5rem;">
+            <span class="cfg-meta-inline">
               <i class="bi bi-envelope"></i> {{ u.email }}
             </span>
             {% endif %}
             {% if u.secretaria %}
-            <span style="color: #666; margin-left: 0.5rem;">
+            <span class="cfg-meta-inline">
               <i class="bi bi-building"></i> {{ u.secretaria }}
             </span>
             {% endif %}
-            <div class="mt-2" style="font-size: 0.8rem; color: #999;">
+            <div class="mt-2 cfg-meta-muted">
               Creado: {{ u.creado_en }} | Último acceso: {{ u.ultimo_acceso }}
             </div>
           </div>
         </div>
         <div class="user-actions">
           <!-- Cambiar Contraseña -->
-          <form method="POST" style="display:inline;">
+          <form method="POST" class="cfg-inline-form">
             <input type="hidden" name="user_id" value="{{ u.id }}">
             <input type="hidden" name="change_password_value" id="pwd_{{ u.id }}">
             <button type="button" class="btn btn-sm btn-outline-warning btn-sm-custom" 
@@ -262,9 +262,9 @@
           </form>
 
           <!-- Cambiar Rol -->
-          <form method="POST" style="display:inline;">
+          <form method="POST" class="cfg-inline-form">
             <input type="hidden" name="user_id" value="{{ u.id }}">
-            <select name="change_role_value" class="form-select form-select-sm" style="width:auto; display:inline-block;" onchange="this.form.submit()">
+            <select name="change_role_value" class="form-select form-select-sm cfg-role-select" onchange="this.form.submit()">
               <option>Cambiar rol...</option>
               <option value="user">Usuario</option>
               <option value="admin">Admin</option>
@@ -272,7 +272,7 @@
           </form>
 
           <!-- Bloquear/Desbloquear -->
-          <form method="POST" style="display:inline;">
+          <form method="POST" class="cfg-inline-form">
             <input type="hidden" name="user_id" value="{{ u.id }}">
             <button type="submit" name="toggle_block" 
               class="btn btn-sm {% if u.bloqueado %}btn-outline-success{% else %}btn-outline-danger{% endif %} btn-sm-custom">
@@ -282,7 +282,7 @@
           </form>
 
           <!-- Eliminar -->
-          <form method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar usuario {{ u.usuario }}?');">
+          <form method="POST" class="cfg-inline-form" onsubmit="return confirm('¿Eliminar usuario {{ u.usuario }}?');">
             <input type="hidden" name="delete_user" value="{{ u.usuario }}">
             <button type="submit" class="btn btn-sm btn-outline-danger btn-sm-custom">
               <i class="bi bi-trash"></i> Eliminar
@@ -319,7 +319,7 @@
               <td>
                 <strong>{{ u.usuario }}</strong>
                 {% if u.secretaria %}
-                <div class="text-muted" style="font-size: 0.8rem;">{{ u.secretaria }}</div>
+                <div class="text-muted cfg-secretaria-muted">{{ u.secretaria }}</div>
                 {% endif %}
               </td>
               {% for mod in module_catalog %}
@@ -689,3 +689,4 @@ async function deleteAllMessages() {
 </script>
 
 {% endblock %}
+

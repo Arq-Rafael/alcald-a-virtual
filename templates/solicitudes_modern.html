@@ -78,12 +78,8 @@
   transition: all 0.18s ease;
 }
 
-.sol-banner-btn.primary {
-  background: #fff;
-  color: #0f4c81;
-}
+.sol-banner-btn.primary { background: #fff; color: #0f4c81; }
 .sol-banner-btn.primary:hover { background: #e0f2fe; }
-
 .sol-banner-btn.outline {
   background: rgba(255,255,255,0.12);
   color: #fff;
@@ -91,25 +87,42 @@
 }
 .sol-banner-btn.outline:hover { background: rgba(255,255,255,0.2); }
 
-/* ---- Chips de stats ---- */
+/* ---- Stats row — tarjetas con degradado ---- */
 .sol-stats-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
-  flex-wrap: wrap;
   margin-bottom: 1.75rem;
 }
 
+@media (max-width: 768px) {
+  .sol-stats-row { display: none; }
+}
+
 .sol-stat-chip {
-  background: #fff;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  padding: 1.15rem 1.25rem;
   display: flex;
   align-items: center;
-  gap: 0.85rem;
-  flex: 1;
-  min-width: 150px;
+  gap: 0.9rem;
+  position: relative;
+  overflow: hidden;
+  animation: sol-fade-in 0.4s ease both;
 }
+
+.sol-stat-chip::after {
+  content: '';
+  position: absolute;
+  bottom: -14px; right: -14px;
+  width: 60px; height: 60px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+}
+
+.sol-stat-chip.total    { background: linear-gradient(130deg, #0c3d6b, #0f4c81); }
+.sol-stat-chip.nuevas   { background: linear-gradient(130deg, #0369a1, #0ea5e9); }
+.sol-stat-chip.pendientes { background: linear-gradient(130deg, #9a3412, #ea580c); }
+.sol-stat-chip.generadas  { background: linear-gradient(130deg, #065f46, #059669); }
 
 .sol-stat-icon {
   width: 40px; height: 40px;
@@ -117,25 +130,29 @@
   display: flex; align-items: center; justify-content: center;
   font-size: 1.1rem;
   flex-shrink: 0;
+  background: rgba(255,255,255,0.18);
+  color: #fff;
 }
 
-.sol-stat-info { min-width: 0; }
+.sol-stat-info { min-width: 0; position: relative; z-index: 1; }
 
 .sol-stat-num {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: #1e293b;
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #fff;
   line-height: 1;
+  letter-spacing: -1px;
 }
 
 .sol-stat-label {
-  font-size: 0.75rem;
-  color: #64748b;
+  font-size: 0.73rem;
+  color: rgba(255,255,255,0.8);
   margin-top: 0.15rem;
   white-space: nowrap;
+  font-weight: 600;
 }
 
-/* ---- Sección título ---- */
+/* ---- Section title ---- */
 .sol-section-title {
   display: flex;
   align-items: center;
@@ -157,32 +174,22 @@
 
 .sol-section-title-left i { font-size: 1rem; color: #0f4c81; }
 
-/* ---- Layout grid ---- */
-.sol-layout {
-  display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 1.5rem;
-  align-items: start;
-}
-
-@media (max-width: 1100px) {
-  .sol-layout { grid-template-columns: 1fr; }
-}
-
 /* ---- Panel tarjeta ---- */
 .sol-panel {
   background: #fff;
   border: 1.5px solid #e2e8f0;
   border-radius: 16px;
   overflow: hidden;
+  margin-bottom: 1.75rem;
 }
 
 .sol-panel-header {
-  padding: 1rem 1.25rem;
+  padding: 1rem 1.5rem;
   border-bottom: 1px solid #f1f5f9;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background: #fafbfc;
 }
 
 .sol-panel-header h4 {
@@ -197,9 +204,36 @@
 
 .sol-panel-header h4 i { color: #0f4c81; }
 
-.sol-panel-body { padding: 1.5rem; }
+.sol-panel-body { padding: 1.75rem 2rem; }
 
-/* ---- Formulario ---- */
+/* ---- Formulario nueva solicitud ---- */
+.sol-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .sol-form-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 600px) {
+  .sol-form-grid { grid-template-columns: 1fr; }
+  .sol-panel-body { padding: 1.25rem; }
+}
+
+.sol-form-span2 { grid-column: span 2; }
+.sol-form-span3 { grid-column: span 3; }
+
+@media (max-width: 900px) {
+  .sol-form-span2 { grid-column: span 2; }
+  .sol-form-span3 { grid-column: span 2; }
+}
+
+@media (max-width: 600px) {
+  .sol-form-span2, .sol-form-span3 { grid-column: span 1; }
+}
+
 .sol-form-label {
   display: block;
   font-size: 0.8rem;
@@ -212,7 +246,7 @@
 
 .sol-form-control {
   width: 100%;
-  padding: 0.6rem 0.9rem;
+  padding: 0.65rem 0.9rem;
   border: 1.5px solid #e2e8f0;
   border-radius: 10px;
   font-size: 0.875rem;
@@ -228,11 +262,7 @@
   box-shadow: 0 0 0 3px rgba(15,76,129,0.1);
 }
 
-.sol-form-control[readonly] {
-  background: #f8fafc;
-  color: #64748b;
-}
-
+.sol-form-control[readonly] { background: #f8fafc; color: #64748b; }
 .sol-form-control::placeholder { color: #94a3b8; }
 
 textarea.sol-form-control {
@@ -240,22 +270,12 @@ textarea.sol-form-control {
   min-height: 90px;
 }
 
-.sol-form-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.sol-form-group { margin-bottom: 1rem; }
-.sol-form-group:last-child { margin-bottom: 0; }
-
 .sol-info-box {
   background: #f0f9ff;
   border-left: 3px solid #0ea5e9;
   border-radius: 0 10px 10px 0;
   padding: 0.85rem 1rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
   font-size: 0.82rem;
   color: #0369a1;
   display: flex;
@@ -268,30 +288,32 @@ textarea.sol-form-control {
 .sol-form-actions {
   display: flex;
   gap: 0.75rem;
-  padding-top: 1.25rem;
+  padding-top: 1.5rem;
   border-top: 1px solid #f1f5f9;
-  margin-top: 1.25rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .sol-btn-primary {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.65rem 1.4rem;
-  background: #0f4c81;
+  padding: 0.7rem 1.75rem;
+  background: linear-gradient(130deg, #0f4c81, #1565c0);
   color: #fff;
   border: none;
   border-radius: 10px;
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 0.9rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.18s, box-shadow 0.18s, transform 0.18s;
+  transition: all 0.18s ease;
   text-decoration: none;
+  box-shadow: 0 4px 14px rgba(15,76,129,0.25);
 }
 
 .sol-btn-primary:hover {
-  background: #0d3d6b;
-  box-shadow: 0 4px 14px rgba(15,76,129,0.25);
+  background: linear-gradient(130deg, #0d3d6b, #0f4c81);
+  box-shadow: 0 6px 20px rgba(15,76,129,0.35);
   transform: translateY(-1px);
   color: #fff;
 }
@@ -300,27 +322,42 @@ textarea.sol-form-control {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.65rem 1.1rem;
+  padding: 0.7rem 1.25rem;
   background: #f1f5f9;
   color: #475569;
   border: 1.5px solid #e2e8f0;
   border-radius: 10px;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.18s ease;
   text-decoration: none;
 }
 
-.sol-btn-secondary:hover {
-  background: #e2e8f0;
-  color: #1e293b;
+.sol-btn-secondary:hover { background: #e2e8f0; color: #1e293b; }
+
+/* ---- Historial collapse toggle ---- */
+.sol-collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #0f4c81;
+  background: #e0f2fe;
+  border: none;
+  border-radius: 8px;
+  padding: 0.3rem 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s;
 }
+
+.sol-collapse-btn:hover { background: #bae6fd; }
 
 /* ---- Tabla de solicitudes ---- */
 .sol-table-wrap {
   overflow-x: auto;
-  max-height: 480px;
+  max-height: 520px;
   overflow-y: auto;
 }
 
@@ -367,13 +404,13 @@ textarea.sol-form-control {
   white-space: nowrap;
 }
 
-.sol-badge.nuevo    { background: #dbeafe; color: #1d4ed8; }
-.sol-badge.editado  { background: #fef3c7; color: #d97706; }
-.sol-badge.pendiente{ background: #ffedd5; color: #ea580c; }
-.sol-badge.generado { background: #d1fae5; color: #059669; }
-.sol-badge.borrador { background: #f1f5f9; color: #475569; }
+.sol-badge.nuevo     { background: #dbeafe; color: #1d4ed8; }
+.sol-badge.editado   { background: #fef3c7; color: #d97706; }
+.sol-badge.pendiente { background: #ffedd5; color: #ea580c; }
+.sol-badge.generado  { background: #d1fae5; color: #059669; }
+.sol-badge.borrador  { background: #f1f5f9; color: #475569; }
 
-/* ---- Botones de acción en tabla ---- */
+/* ---- Botones de acción ---- */
 .sol-action-btn {
   width: 30px; height: 30px;
   border: none;
@@ -389,15 +426,12 @@ textarea.sol-form-control {
 }
 
 .sol-action-btn:hover { transform: translateY(-1px); }
-
-.sol-action-btn.edit   { background: #e0f2fe; color: #0369a1; }
-.sol-action-btn.edit:hover { background: #0369a1; color: #fff; }
-
-.sol-action-btn.send   { background: #fef3c7; color: #d97706; }
-.sol-action-btn.send:hover { background: #d97706; color: #fff; }
-
-.sol-action-btn.del    { background: #ffe4e6; color: #e11d48; }
-.sol-action-btn.del:hover { background: #e11d48; color: #fff; }
+.sol-action-btn.edit  { background: #e0f2fe; color: #0369a1; }
+.sol-action-btn.edit:hover  { background: #0369a1; color: #fff; }
+.sol-action-btn.send  { background: #fef3c7; color: #d97706; }
+.sol-action-btn.send:hover  { background: #d97706; color: #fff; }
+.sol-action-btn.del   { background: #ffe4e6; color: #e11d48; }
+.sol-action-btn.del:hover   { background: #e11d48; color: #fff; }
 
 /* ---- Empty state ---- */
 .sol-empty {
@@ -406,15 +440,9 @@ textarea.sol-form-control {
   color: #94a3b8;
 }
 
-.sol-empty i { font-size: 2.5rem; margin-bottom: 0.75rem; display: block; opacity: 0.5; }
+.sol-empty i { font-size: 2.5rem; margin-bottom: 0.75rem; display: block; opacity: 0.4; }
 .sol-empty p { font-size: 0.875rem; margin: 0; }
 .sol-empty .sol-empty-sub { font-size: 0.8rem; color: #cbd5e1; margin-top: 0.25rem; }
-
-/* ---- Sidebar sticky ---- */
-.sol-side {
-  position: sticky;
-  top: 1.5rem;
-}
 
 /* ---- Select2 overrides ---- */
 .select2-container--bootstrap-5 .select2-selection {
@@ -429,11 +457,57 @@ textarea.sol-form-control {
   box-shadow: 0 0 0 3px rgba(15,76,129,0.1) !important;
 }
 
+/* ---- Modal ---- */
+.sol-modal-content {
+  border-radius: 16px;
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+
+.sol-modal-header {
+  background: linear-gradient(130deg,#0f4c81 0%,#1565c0 60%,#0ea5e9 100%);
+  border-radius: 16px 16px 0 0;
+  padding: 1.25rem 1.5rem;
+  border: none;
+}
+
+.sol-modal-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 1rem;
+}
+
+.sol-modal-title   { color: #fff; font-weight: 700; font-size: 1rem; }
+.sol-modal-subtitle { color: rgba(255,255,255,0.7); font-size: 0.75rem; }
+.sol-modal-body    { padding: 1.5rem; }
+.sol-state-box     {
+  display: flex; align-items: center; gap: 0.6rem;
+  background: #f8fafc; border: 1.5px solid #e2e8f0;
+  border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1.25rem;
+}
+.sol-state-label { font-size: 0.78rem; font-weight: 600; color: #64748b; }
+.sol-state-pill  { padding: 0.2rem 0.7rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
+.sol-label-icon i { color: #0f4c81; }
+.sol-modal-footer { padding: 1rem 1.5rem; border-top: 1.5px solid #f1f5f9; gap: 0.6rem; }
+.sol-btn-send { background: #d97706; display: none; }
+.sol-form-inline { display: inline; }
+.sol-count-label { font-size: 0.78rem; color: #64748b; }
+.sol-th-actions  { text-align: center; }
+.sol-td-date     { white-space: nowrap; color: #64748b; }
+.sol-td-secretaria { max-width: 140px; }
+.sol-td-objeto   { max-width: 220px; }
+.sol-truncate    { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sol-td-valor    { white-space: nowrap; font-weight: 600; color: #0f4c81; }
+.sol-td-actions  { text-align: center; white-space: nowrap; }
+.sol-form-row    { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+.sol-form-group  { margin-bottom: 0; }
+
 @media (max-width: 768px) {
   .sol-page { padding: 1.25rem 1rem; }
   .sol-banner { padding: 1.25rem; }
   .sol-banner-left h2 { font-size: 1.25rem !important; }
-  .sol-stats-row { display: none; }
 }
 </style>
 {% endblock %}
@@ -441,7 +515,7 @@ textarea.sol-form-control {
 {% block content %}
 <div class="sol-page">
 
-  <!-- BANNER -->
+  <!-- ===== BANNER ===== -->
   <div class="sol-banner">
     <div class="sol-banner-left">
       <h2><i class="bi bi-file-earmark-text-fill me-2"></i>Solicitudes</h2>
@@ -454,44 +528,36 @@ textarea.sol-form-control {
     </div>
   </div>
 
-  <!-- STATS -->
-  {% set total = user_solicitudes|length if user_solicitudes else 0 %}
-  {% set nuevas = user_solicitudes|selectattr('estado','equalto','nuevo')|list|length if user_solicitudes else 0 %}
+  <!-- ===== STATS ===== -->
+  {% set total     = user_solicitudes|length if user_solicitudes else 0 %}
+  {% set nuevas    = user_solicitudes|selectattr('estado','equalto','nuevo')|list|length if user_solicitudes else 0 %}
   {% set generadas = user_solicitudes|selectattr('estado','equalto','generado')|list|length if user_solicitudes else 0 %}
-  {% set pendientes = user_solicitudes|selectattr('estado','equalto','pendiente')|list|length if user_solicitudes else 0 %}
+  {% set pendientes= user_solicitudes|selectattr('estado','equalto','pendiente')|list|length if user_solicitudes else 0 %}
 
   <div class="sol-stats-row">
-    <div class="sol-stat-chip">
-      <div class="sol-stat-icon" style="background:#e0f2fe; color:#0369a1;">
-        <i class="bi bi-folder2-open"></i>
-      </div>
+    <div class="sol-stat-chip total">
+      <div class="sol-stat-icon"><i class="bi bi-folder2-open"></i></div>
       <div class="sol-stat-info">
         <div class="sol-stat-num">{{ total }}</div>
         <div class="sol-stat-label">Total solicitudes</div>
       </div>
     </div>
-    <div class="sol-stat-chip">
-      <div class="sol-stat-icon" style="background:#dbeafe; color:#1d4ed8;">
-        <i class="bi bi-star-fill"></i>
-      </div>
+    <div class="sol-stat-chip nuevas">
+      <div class="sol-stat-icon"><i class="bi bi-star-fill"></i></div>
       <div class="sol-stat-info">
         <div class="sol-stat-num">{{ nuevas }}</div>
         <div class="sol-stat-label">Nuevas</div>
       </div>
     </div>
-    <div class="sol-stat-chip">
-      <div class="sol-stat-icon" style="background:#ffedd5; color:#ea580c;">
-        <i class="bi bi-hourglass-split"></i>
-      </div>
+    <div class="sol-stat-chip pendientes">
+      <div class="sol-stat-icon"><i class="bi bi-hourglass-split"></i></div>
       <div class="sol-stat-info">
         <div class="sol-stat-num">{{ pendientes }}</div>
         <div class="sol-stat-label">Pendientes</div>
       </div>
     </div>
-    <div class="sol-stat-chip">
-      <div class="sol-stat-icon" style="background:#d1fae5; color:#059669;">
-        <i class="bi bi-check-circle-fill"></i>
-      </div>
+    <div class="sol-stat-chip generadas">
+      <div class="sol-stat-icon"><i class="bi bi-check-circle-fill"></i></div>
       <div class="sol-stat-info">
         <div class="sol-stat-num">{{ generadas }}</div>
         <div class="sol-stat-label">Generadas</div>
@@ -499,221 +565,211 @@ textarea.sol-form-control {
     </div>
   </div>
 
-  <!-- LAYOUT PRINCIPAL -->
-  <div class="sol-layout">
-
-    <!-- ====== HISTORIAL ====== -->
-    <div>
-      <div class="sol-section-title">
-        <div class="sol-section-title-left">
-          <i class="bi bi-clipboard-check-fill"></i>
-          Mis Solicitudes
-        </div>
-      </div>
-
-      <div class="sol-panel">
-        <div class="sol-panel-header">
-          <h4><i class="bi bi-table"></i> Registro de solicitudes</h4>
-          {% if user_solicitudes %}
-          <span style="font-size:0.78rem; color:#64748b;">{{ total }} registros</span>
-          {% endif %}
-        </div>
-
-        {% if user_solicitudes and user_solicitudes|length > 0 %}
-        <div class="sol-table-wrap">
-          <table class="sol-table">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Secretaría</th>
-                <th>Objeto</th>
-                <th>Valor</th>
-                <th>Estado</th>
-                <th style="text-align:center;">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for sol in user_solicitudes %}
-              <tr>
-                <td style="white-space:nowrap; color:#64748b;">{{ sol.fecha }}</td>
-                <td style="max-width:140px;">
-                  <span style="display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="{{ sol.secretaria }}">
-                    {{ sol.secretaria[:35] }}{% if sol.secretaria|length > 35 %}…{% endif %}
-                  </span>
-                </td>
-                <td style="max-width:200px;">
-                  <span style="display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="{{ sol.objeto }}">
-                    {{ sol.objeto[:50] }}{% if sol.objeto|length > 50 %}…{% endif %}
-                  </span>
-                </td>
-                <td style="white-space:nowrap; font-weight:600; color:#0f4c81;">
-                  ${{ sol.valor }}
-                </td>
-                <td>
-                  {% set e = sol.estado or 'borrador' %}
-                  <span class="sol-badge {{ e }}">
-                    {% if e == 'nuevo' %}<i class="bi bi-star-fill"></i> Nuevo
-                    {% elif e == 'editado' %}<i class="bi bi-pencil-fill"></i> Editado
-                    {% elif e == 'pendiente' %}<i class="bi bi-hourglass-split"></i> Pendiente
-                    {% elif e == 'generado' %}<i class="bi bi-check-circle-fill"></i> Generado
-                    {% else %}<i class="bi bi-file-earmark"></i> Borrador
-                    {% endif %}
-                  </span>
-                </td>
-                <td style="text-align:center; white-space:nowrap;">
-                  <button
-                    onclick="editarSolicitud({{ loop.index0 }})"
-                    class="sol-action-btn edit"
-                    title="Editar solicitud">
-                    <i class="bi bi-pencil-square"></i>
-                  </button>
-
-                  {% if sol.estado == 'editado' %}
-                  <form method="POST" action="{{ url_for('solicitudes.enviar_certificado') }}" style="display:inline;">
-                    <input type="hidden" name="indice" value="{{ loop.index0 }}">
-                    <button type="submit" class="sol-action-btn send" title="Enviar para generar certificado">
-                      <i class="bi bi-send-fill"></i>
-                    </button>
-                  </form>
-                  {% endif %}
-
-                  {% if is_admin %}
-                  <form method="POST" action="{{ url_for('solicitudes.eliminar_solicitud') }}" style="display:inline;"
-                        onsubmit="return confirm('¿Eliminar esta solicitud?');">
-                    <input type="hidden" name="indice" value="{{ loop.index0 }}">
-                    <button type="submit" class="sol-action-btn del" title="Eliminar">
-                      <i class="bi bi-trash3-fill"></i>
-                    </button>
-                  </form>
-                  {% endif %}
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-        {% else %}
-        <div class="sol-empty">
-          <i class="bi bi-inbox"></i>
-          <p>No tienes solicitudes registradas aún</p>
-          <p class="sol-empty-sub">Completa el formulario para crear tu primera solicitud</p>
-        </div>
-        {% endif %}
-      </div>
+  <!-- ===== FORMULARIO NUEVA SOLICITUD (PRIMERO) ===== -->
+  <div class="sol-section-title">
+    <div class="sol-section-title-left">
+      <i class="bi bi-plus-circle-fill"></i>
+      Nueva Solicitud
     </div>
+  </div>
 
-    <!-- ====== FORMULARIO ====== -->
-    <div class="sol-side">
-      <div class="sol-section-title">
-        <div class="sol-section-title-left">
-          <i class="bi bi-plus-circle-fill"></i>
-          Nueva Solicitud
-        </div>
+  <div class="sol-panel">
+    <div class="sol-panel-header">
+      <h4><i class="bi bi-file-earmark-plus"></i> Radicar solicitud</h4>
+    </div>
+    <div class="sol-panel-body">
+
+      <div class="sol-info-box">
+        <i class="bi bi-info-circle-fill"></i>
+        <span>Completa los campos con <strong>*</strong>. Podrás generar el PDF después de guardar.</span>
       </div>
 
-      <div class="sol-panel">
-        <div class="sol-panel-header">
-          <h4><i class="bi bi-file-earmark-plus"></i> Radicar solicitud</h4>
-        </div>
-        <div class="sol-panel-body">
+      <form method="POST" action="{{ url_for('solicitudes.index') }}">
+        <div class="sol-form-grid">
 
-          <div class="sol-info-box">
-            <i class="bi bi-info-circle-fill"></i>
-            <span>Completa los campos con <strong>*</strong>. Podrás generar el PDF después de guardar.</span>
+          <div class="sol-form-group">
+            <label class="sol-form-label">Municipio <span class="sol-required">*</span></label>
+            <input type="text" name="municipio" class="sol-form-control"
+                   value="Municipio de Supatá" readonly required>
           </div>
 
-          <form method="POST" action="{{ url_for('solicitudes.index') }}">
+          <div class="sol-form-group">
+            <label class="sol-form-label">NIT <span class="sol-required">*</span></label>
+            <input type="text" name="nit" class="sol-form-control"
+                   value="899999398-5" readonly required>
+          </div>
 
-            <div class="sol-form-row" style="grid-template-columns: 1fr 1fr;">
-              <div class="sol-form-group">
-                <label class="sol-form-label">Municipio <span class="sol-required">*</span></label>
-                <input type="text" name="municipio" class="sol-form-control"
-                       value="Municipio de Supatá" readonly required>
-              </div>
-              <div class="sol-form-group">
-                <label class="sol-form-label">NIT <span class="sol-required">*</span></label>
-                <input type="text" name="nit" class="sol-form-control"
-                       value="899999398-5" readonly required>
-              </div>
-            </div>
+          <div class="sol-form-group">
+            <label class="sol-form-label">Fecha <span class="sol-required">*</span></label>
+            <input type="date" name="fecha" class="sol-form-control" value="{{ today }}" required>
+          </div>
 
-            <div class="sol-form-group">
-              <label class="sol-form-label">Fecha <span class="sol-required">*</span></label>
-              <input type="date" name="fecha" class="sol-form-control" value="{{ today }}" required>
-            </div>
+          <div class="sol-form-group sol-form-span2">
+            <label class="sol-form-label">Secretaría Solicitante <span class="sol-required">*</span></label>
+            <select name="secretaria" class="sol-form-control" required>
+              <option value="">Selecciona una...</option>
+              {% for sec in secretarias %}
+              <option value="{{ sec }}">{{ sec }}</option>
+              {% endfor %}
+            </select>
+          </div>
 
-            <div class="sol-form-group">
-              <label class="sol-form-label">Secretaría Solicitante <span class="sol-required">*</span></label>
-              <select name="secretaria" class="sol-form-control" required>
-                <option value="">Selecciona una...</option>
-                {% for sec in secretarias %}
-                <option value="{{ sec }}">{{ sec }}</option>
-                {% endfor %}
-              </select>
-            </div>
+          <div class="sol-form-group sol-form-span3">
+            <label class="sol-form-label">Objeto del Proyecto <span class="sol-required">*</span></label>
+            <textarea name="objeto" class="sol-form-control"
+                      placeholder="Describe brevemente el objeto del proyecto..." required></textarea>
+          </div>
 
-            <div class="sol-form-group">
-              <label class="sol-form-label">Objeto del Proyecto <span class="sol-required">*</span></label>
-              <textarea name="objeto" class="sol-form-control"
-                        placeholder="Describe brevemente el objeto del proyecto..." required></textarea>
-            </div>
+          <div class="sol-form-group sol-form-span3">
+            <label class="sol-form-label">Justificación <span class="sol-required">*</span></label>
+            <textarea name="justificacion" class="sol-form-control"
+                      placeholder="Justifica la necesidad del proyecto..." required></textarea>
+          </div>
 
-            <div class="sol-form-group">
-              <label class="sol-form-label">Justificación <span class="sol-required">*</span></label>
-              <textarea name="justificacion" class="sol-form-control"
-                        placeholder="Justifica la necesidad del proyecto..." required></textarea>
-            </div>
+          <div class="sol-form-group">
+            <label class="sol-form-label">Valor (COP) <span class="sol-required">*</span></label>
+            <input type="text" name="valor" id="valorInput" class="sol-form-control"
+                   placeholder="Ej: 50000000" required>
+          </div>
 
-            <div class="sol-form-group">
-              <label class="sol-form-label">Valor (COP) <span class="sol-required">*</span></label>
-              <input type="text" name="valor" id="valorInput" class="sol-form-control"
-                     placeholder="Ej: 50000000" required>
-            </div>
+          <div class="sol-form-group sol-form-span2">
+            <label class="sol-form-label">Meta Producto</label>
+            <select name="meta_producto" class="sol-form-control select2-meta">
+              <option value="">Selecciona una meta...</option>
+              {% for item in plan_list %}
+              <option value="{{ item['meta de producto'] }}">{{ item['meta de producto'] }}</option>
+              {% endfor %}
+            </select>
+          </div>
 
-            <div class="sol-form-group">
-              <label class="sol-form-label">Meta Producto</label>
-              <select name="meta_producto" class="sol-form-control select2-meta">
-                <option value="">Selecciona una...</option>
-                {% for item in plan_list %}
-                <option value="{{ item['meta de producto'] }}">{{ item['meta de producto'] }}</option>
-                {% endfor %}
-              </select>
-            </div>
+          <div class="sol-form-group">
+            <label class="sol-form-label">Eje</label>
+            <input type="text" name="eje" id="ejeInput" class="sol-form-control" placeholder="Auto">
+          </div>
 
-            <div class="sol-form-row" style="grid-template-columns: 1fr 1fr;">
-              <div class="sol-form-group">
-                <label class="sol-form-label">Eje</label>
-                <input type="text" name="eje" id="ejeInput" class="sol-form-control"
-                       placeholder="Auto">
-              </div>
-              <div class="sol-form-group">
-                <label class="sol-form-label">Sector</label>
-                <input type="text" name="sector" id="sectorInput" class="sol-form-control"
-                       placeholder="Auto">
-              </div>
-            </div>
+          <div class="sol-form-group">
+            <label class="sol-form-label">Sector</label>
+            <input type="text" name="sector" id="sectorInput" class="sol-form-control" placeholder="Auto">
+          </div>
 
-            <div class="sol-form-group">
-              <label class="sol-form-label">Código BPIM</label>
-              <input type="text" name="codigo_bpim" id="bpimInput" class="sol-form-control"
-                     placeholder="Auto">
-            </div>
+          <div class="sol-form-group">
+            <label class="sol-form-label">Código BPIM</label>
+            <input type="text" name="codigo_bpim" id="bpimInput" class="sol-form-control" placeholder="Auto">
+          </div>
 
-            <div class="sol-form-actions">
-              <button type="submit" class="sol-btn-primary">
-                <i class="bi bi-check-circle-fill"></i> Radicar
-              </button>
-              <a href="{{ url_for('main.dashboard') }}" class="sol-btn-secondary">
-                <i class="bi bi-x"></i> Cancelar
-              </a>
-            </div>
-
-          </form>
         </div>
-      </div>
+
+        <div class="sol-form-actions">
+          <button type="submit" class="sol-btn-primary">
+            <i class="bi bi-check-circle-fill"></i> Radicar Solicitud
+          </button>
+          <a href="{{ url_for('main.dashboard') }}" class="sol-btn-secondary">
+            <i class="bi bi-x"></i> Cancelar
+          </a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== HISTORIAL (DEBAJO) ===== -->
+  <div class="sol-section-title">
+    <div class="sol-section-title-left">
+      <i class="bi bi-clipboard-check-fill"></i>
+      Mis Solicitudes
+    </div>
+    <button class="sol-collapse-btn" onclick="toggleHistorial()" id="collapseBtn">
+      <i class="bi bi-chevron-up" id="collapseIcon"></i>
+      Ocultar historial
+    </button>
+  </div>
+
+  <div id="historialPanel" class="sol-panel">
+    <div class="sol-panel-header">
+      <h4><i class="bi bi-table"></i> Registro de solicitudes</h4>
+      {% if user_solicitudes %}
+      <span class="sol-count-label">{{ total }} registros</span>
+      {% endif %}
     </div>
 
-  </div><!-- /sol-layout -->
+    {% if user_solicitudes and user_solicitudes|length > 0 %}
+    <div class="sol-table-wrap">
+      <table class="sol-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Secretaría</th>
+            <th>Objeto</th>
+            <th>Valor</th>
+            <th>Estado</th>
+            <th class="sol-th-actions">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sol in user_solicitudes %}
+          <tr>
+            <td class="sol-td-date">{{ sol.fecha }}</td>
+            <td class="sol-td-secretaria">
+              <span class="sol-truncate" title="{{ sol.secretaria }}">
+                {{ sol.secretaria[:35] }}{% if sol.secretaria|length > 35 %}…{% endif %}
+              </span>
+            </td>
+            <td class="sol-td-objeto">
+              <span class="sol-truncate" title="{{ sol.objeto }}">
+                {{ sol.objeto[:50] }}{% if sol.objeto|length > 50 %}…{% endif %}
+              </span>
+            </td>
+            <td class="sol-td-valor">${{ sol.valor }}</td>
+            <td>
+              {% set e = sol.estado or 'borrador' %}
+              <span class="sol-badge {{ e }}">
+                {% if e == 'nuevo' %}<i class="bi bi-star-fill"></i> Nuevo
+                {% elif e == 'editado' %}<i class="bi bi-pencil-fill"></i> Editado
+                {% elif e == 'pendiente' %}<i class="bi bi-hourglass-split"></i> Pendiente
+                {% elif e == 'generado' %}<i class="bi bi-check-circle-fill"></i> Generado
+                {% else %}<i class="bi bi-file-earmark"></i> Borrador
+                {% endif %}
+              </span>
+            </td>
+            <td class="sol-td-actions">
+              <button onclick="editarSolicitud({{ loop.index0 }})"
+                      class="sol-action-btn edit" title="Editar solicitud">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+
+              {% if sol.estado == 'editado' %}
+              <form method="POST" action="{{ url_for('solicitudes.enviar_certificado') }}" class="sol-form-inline">
+                <input type="hidden" name="indice" value="{{ loop.index0 }}">
+                <button type="submit" class="sol-action-btn send" title="Enviar para generar certificado">
+                  <i class="bi bi-send-fill"></i>
+                </button>
+              </form>
+              {% endif %}
+
+              {% if is_admin %}
+              <form method="POST" action="{{ url_for('solicitudes.eliminar_solicitud') }}" class="sol-form-inline"
+                    onsubmit="return confirm('¿Eliminar esta solicitud?');">
+                <input type="hidden" name="indice" value="{{ loop.index0 }}">
+                <button type="submit" class="sol-action-btn del" title="Eliminar">
+                  <i class="bi bi-trash3-fill"></i>
+                </button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="sol-empty">
+      <i class="bi bi-inbox"></i>
+      <p>No tienes solicitudes registradas aún</p>
+      <p class="sol-empty-sub">Completa el formulario para crear tu primera solicitud</p>
+    </div>
+    {% endif %}
+  </div>
+
 </div><!-- /sol-page -->
 
 <!-- ============================
@@ -721,24 +777,20 @@ textarea.sol-form-control {
      ============================ -->
 <div class="modal fade" id="editModal" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content" style="border-radius:16px; border:1.5px solid #e2e8f0; box-shadow:0 20px 60px rgba(0,0,0,0.15);">
+    <div class="modal-content sol-modal-content">
 
-      <!-- Header -->
-      <div class="modal-header" style="background:linear-gradient(130deg,#0f4c81 0%,#1565c0 60%,#0ea5e9 100%); border-radius:16px 16px 0 0; padding:1.25rem 1.5rem; border:none;">
+      <div class="modal-header sol-modal-header">
         <div class="d-flex align-items-center gap-2">
-          <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;">
-            <i class="bi bi-pencil-square"></i>
-          </div>
+          <div class="sol-modal-icon"><i class="bi bi-pencil-square"></i></div>
           <div>
-            <h5 class="modal-title mb-0" style="color:#fff;font-weight:700;font-size:1rem;">Editar Solicitud</h5>
-            <small style="color:rgba(255,255,255,0.7);font-size:0.75rem;">Modifica los datos y guarda los cambios</small>
+            <h5 class="modal-title mb-0 sol-modal-title">Editar Solicitud</h5>
+            <small class="sol-modal-subtitle">Modifica los datos y guarda los cambios</small>
           </div>
         </div>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
 
-      <!-- Body -->
-      <div class="modal-body" style="padding:1.5rem;">
+      <div class="modal-body sol-modal-body">
         <form id="editForm" method="POST" action="{{ url_for('solicitudes.editar_solicitud') }}">
           <input type="hidden" name="indice"      id="edit_indice">
           <input type="hidden" name="municipio"   id="edit_municipio">
@@ -747,19 +799,18 @@ textarea.sol-form-control {
           <input type="hidden" name="sector"      id="edit_sector">
           <input type="hidden" name="codigo_bpim" id="edit_codigo_bpim">
 
-          <!-- Estado actual -->
-          <div id="estadoActualBox" style="display:flex;align-items:center;gap:0.6rem;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.75rem 1rem;margin-bottom:1.25rem;">
-            <span style="font-size:0.78rem;font-weight:600;color:#64748b;">Estado actual:</span>
-            <span id="estadoSpan" style="padding:0.2rem 0.7rem;border-radius:999px;font-size:0.75rem;font-weight:700;"></span>
+          <div id="estadoActualBox" class="sol-state-box">
+            <span class="sol-state-label">Estado actual:</span>
+            <span id="estadoSpan" class="sol-state-pill"></span>
           </div>
 
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="sol-form-label"><i class="bi bi-calendar-event" style="color:#0f4c81;"></i> Fecha</label>
+              <label class="sol-form-label sol-label-icon"><i class="bi bi-calendar-event"></i> Fecha</label>
               <input type="date" name="fecha" id="edit_fecha" class="sol-form-control">
             </div>
             <div class="col-md-6">
-              <label class="sol-form-label"><i class="bi bi-building" style="color:#0f4c81;"></i> Secretaría</label>
+              <label class="sol-form-label sol-label-icon"><i class="bi bi-building"></i> Secretaría</label>
               <select name="secretaria" id="edit_secretaria" class="sol-form-control">
                 {% for sec in secretarias %}
                 <option value="{{ sec }}">{{ sec }}</option>
@@ -767,19 +818,19 @@ textarea.sol-form-control {
               </select>
             </div>
             <div class="col-12">
-              <label class="sol-form-label"><i class="bi bi-card-text" style="color:#0f4c81;"></i> Objeto</label>
+              <label class="sol-form-label sol-label-icon"><i class="bi bi-card-text"></i> Objeto</label>
               <textarea name="objeto" id="edit_objeto" class="sol-form-control" rows="2"></textarea>
             </div>
             <div class="col-12">
-              <label class="sol-form-label"><i class="bi bi-justify" style="color:#0f4c81;"></i> Justificación</label>
+              <label class="sol-form-label sol-label-icon"><i class="bi bi-justify"></i> Justificación</label>
               <textarea name="justificacion" id="edit_justificacion" class="sol-form-control" rows="3"></textarea>
             </div>
             <div class="col-md-6">
-              <label class="sol-form-label"><i class="bi bi-cash-coin" style="color:#0f4c81;"></i> Valor</label>
+              <label class="sol-form-label sol-label-icon"><i class="bi bi-cash-coin"></i> Valor</label>
               <input type="text" name="valor" id="edit_valor" class="sol-form-control">
             </div>
             <div class="col-md-6">
-              <label class="sol-form-label"><i class="bi bi-bullseye" style="color:#0f4c81;"></i> Meta Producto</label>
+              <label class="sol-form-label sol-label-icon"><i class="bi bi-bullseye"></i> Meta Producto</label>
               <select name="meta_producto" id="edit_meta" class="sol-form-control select2-edit-meta">
                 <option value="">Selecciona...</option>
                 {% for item in plan_list %}
@@ -791,16 +842,14 @@ textarea.sol-form-control {
         </form>
       </div>
 
-      <!-- Footer -->
-      <div class="modal-footer" style="padding:1rem 1.5rem; border-top:1.5px solid #f1f5f9; gap:0.6rem;">
+      <div class="modal-footer sol-modal-footer">
         <button type="button" class="sol-btn-secondary" data-bs-dismiss="modal">
           <i class="bi bi-x"></i> Cancelar
         </button>
         <button type="submit" form="editForm" class="sol-btn-primary">
           <i class="bi bi-save2-fill"></i> Guardar Cambios
         </button>
-        <button type="button" id="guardarYEnviarBtn" class="sol-btn-primary"
-                style="background:#d97706; display:none;">
+        <button type="button" id="guardarYEnviarBtn" class="sol-btn-primary sol-btn-send">
           <i class="bi bi-send-fill"></i> Guardar y Enviar
         </button>
       </div>
@@ -818,7 +867,6 @@ const planData        = {{ plan_list|tojson|safe }};
 
 $(document).ready(function () {
 
-  // Select2 formulario principal
   $('.select2-meta').select2({
     theme: 'bootstrap-5',
     placeholder: 'Selecciona una meta...',
@@ -826,7 +874,6 @@ $(document).ready(function () {
     width: '100%'
   });
 
-  // Select2 modal edición
   $('.select2-edit-meta').select2({
     theme: 'bootstrap-5',
     placeholder: 'Selecciona una meta...',
@@ -835,20 +882,16 @@ $(document).ready(function () {
     dropdownParent: $('#editModal')
   });
 
-  // Auto-fill al cambiar meta (formulario)
   $('.select2-meta').on('change', function () {
     autoFill($('#ejeInput'), $('#sectorInput'), $('#bpimInput'), $(this).val());
   });
 
-  // Auto-fill al cambiar meta (modal)
   $('.select2-edit-meta').on('change', function () {
     autoFill($('#edit_eje'), $('#edit_sector'), $('#edit_codigo_bpim'), $(this).val());
   });
 
-  // Guardar y Enviar
   $('#guardarYEnviarBtn').on('click', guardarYEnviar);
 
-  // Formateo de valor como moneda colombiana
   $('#valorInput').on('blur', function () {
     let v = $(this).val().replace(/\D/g, '');
     if (v) $(this).val(parseInt(v).toLocaleString('es-CO'));
@@ -881,7 +924,6 @@ function editarSolicitud(idx) {
   $('#edit_municipio').val(sol.municipio);
   $('#edit_nit').val(sol.nit);
 
-  // Badge de estado
   const e = sol.estado || 'borrador';
   const estadoConfig = {
     nuevo:    { bg:'#dbeafe', color:'#1d4ed8', label:'Nuevo' },
@@ -891,18 +933,12 @@ function editarSolicitud(idx) {
     borrador: { bg:'#f1f5f9', color:'#475569', label:'Borrador' }
   };
   const cfg = estadoConfig[e] || estadoConfig.borrador;
-  $('#estadoSpan').text(cfg.label).css({
-    background: cfg.bg,
-    color: cfg.color
-  });
+  $('#estadoSpan').text(cfg.label).css({ background: cfg.bg, color: cfg.color });
 
-  // Select2 meta
   $('.select2-edit-meta').val(sol.meta_producto).trigger('change');
   setTimeout(() => autoFill($('#edit_eje'), $('#edit_sector'), $('#edit_codigo_bpim'), sol.meta_producto), 150);
 
-  // Botón enviar
   $('#guardarYEnviarBtn').toggle(e === 'editado');
-
   new bootstrap.Modal(document.getElementById('editModal')).show();
 }
 
@@ -912,17 +948,27 @@ function guardarYEnviar() {
   fetch(form.action, { method: 'POST', body: new FormData(form) })
     .then(r => {
       if (r.ok) {
-        const f = document.createElement('form');
-        f.method = 'POST';
-        f.action = '{{ url_for("solicitudes.enviar_certificado") }}';
+        const f   = document.createElement('form');
+        f.method  = 'POST';
+        f.action  = '{{ url_for("solicitudes.enviar_certificado") }}';
         const inp = document.createElement('input');
-        inp.type = 'hidden'; inp.name = 'indice'; inp.value = idx;
+        inp.type  = 'hidden'; inp.name = 'indice'; inp.value = idx;
         f.appendChild(inp);
         document.body.appendChild(f);
         f.submit();
       }
     })
     .catch(err => console.error('Error:', err));
+}
+
+function toggleHistorial() {
+  const panel = document.getElementById('historialPanel');
+  const icon  = document.getElementById('collapseIcon');
+  const btn   = document.getElementById('collapseBtn');
+  const visible = panel.style.display !== 'none';
+  panel.style.display = visible ? 'none' : 'block';
+  icon.className = visible ? 'bi bi-chevron-down' : 'bi bi-chevron-up';
+  btn.innerHTML  = `<i class="bi ${visible ? 'bi-chevron-down' : 'bi-chevron-up'}" id="collapseIcon"></i> ${visible ? 'Mostrar historial' : 'Ocultar historial'}`;
 }
 </script>
 {% endblock %}

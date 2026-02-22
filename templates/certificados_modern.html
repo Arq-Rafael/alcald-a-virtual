@@ -1,326 +1,361 @@
 {% extends "base.html" %}
 
-{% block title %}Certificados - Alcaldía Virtual Supatá{% endblock %}
+{% block title %}Certificados — Alcaldía Virtual Supatá{% endblock %}
 
 {% block styles %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
 <style>
-/* ========================================
-   CERTIFICADOS - DISEÑO iOS 26 MODERNO
-   ======================================== */
+/* =====================================================
+   CERTIFICADOS — Diseño SaaS en armonía con dashboard
+   ===================================================== */
 
-.certificados-container {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-  color: white;
-  min-height: calc(100vh - 80px);
-  padding: 2.5rem 1.5rem;
-  position: relative;
-  overflow-x: hidden;
+.cert-page {
+  padding: 1.75rem 2rem;
+  max-width: 1380px;
+  margin: 0 auto;
+  animation: cert-fade-in 0.4s ease both;
 }
 
-.certificados-container::before {
+@keyframes cert-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Banner ---- */
+.cert-banner {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  background: linear-gradient(130deg, #0f4c81 0%, #1565c0 55%, #0ea5e9 100%);
+  padding: 1.75rem 2.25rem;
+  margin-bottom: 1.75rem;
+  box-shadow: 0 8px 32px rgba(15,76,129,0.22);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.cert-banner::before {
   content: '';
   position: absolute;
-  top: -100px;
-  right: -100px;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  right: -80px; top: -80px;
+  width: 280px; height: 280px;
+  background: rgba(255,255,255,0.07);
   border-radius: 50%;
   pointer-events: none;
 }
 
-.cert-header {
-  text-align: center;
-  margin-bottom: 2.5rem;
-  animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+.cert-banner-left { position: relative; z-index: 1; }
+
+.cert-banner-left h2 {
+  font-size: 1.5rem !important;
+  font-weight: 800 !important;
+  color: #fff !important;
+  margin: 0 0 0.25rem !important;
+  letter-spacing: -0.3px !important;
 }
 
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+.cert-banner-left p {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.72);
+  margin: 0;
 }
 
-.cert-header h1 {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: white;
-  margin-bottom: 0.5rem;
-  letter-spacing: -1px;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.cert-header p {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1.1rem;
-  font-weight: 500;
-}
-
-/* KPI Cards */
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2.5rem;
-}
-
-.kpi-card {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(25px);
-  border-radius: 24px;
-  padding: 2rem 1.5rem;
-  text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-}
-
-.kpi-card:nth-child(1) { animation-delay: 0.1s; }
-.kpi-card:nth-child(2) { animation-delay: 0.2s; }
-.kpi-card:nth-child(3) { animation-delay: 0.3s; }
-.kpi-card:nth-child(4) { animation-delay: 0.4s; }
-
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.kpi-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-}
-
-.kpi-icon {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 1rem;
-  display: flex;
+.cert-banner-btn {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 16px;
-  font-size: 1.5rem;
-  color: white;
-}
-
-.kpi-icon.total { background: linear-gradient(135deg, #558b2f, #7cb342); }
-.kpi-icon.generados { background: linear-gradient(135deg, #388e3c, #66bb6a); }
-.kpi-icon.pendientes { background: linear-gradient(135deg, #f57c00, #ffa726); }
-.kpi-icon.tiempo { background: linear-gradient(135deg, #0288d1, #29b6f6); }
-
-.kpi-label {
-  font-size: 0.9rem;
-  color: #558b2f;
+  gap: 0.4rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 10px;
+  font-size: 0.82rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none !important;
+  transition: all 0.18s ease;
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.3);
+  position: relative; z-index: 1;
 }
 
-.kpi-value {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: #2d5016;
+.cert-banner-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+/* ---- KPI Cards con degradado ---- */
+.cert-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+@media (max-width: 900px) {
+  .cert-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 500px) {
+  .cert-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.cert-kpi-card {
+  border-radius: 16px;
+  padding: 1.25rem 1.25rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  position: relative;
+  overflow: hidden;
+  animation: cert-fade-in 0.5s cubic-bezier(0.16,1,0.3,1) both;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cert-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+}
+
+.cert-kpi-card::after {
+  content: '';
+  position: absolute;
+  bottom: -16px; right: -16px;
+  width: 70px; height: 70px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+}
+
+.cert-kpi-card:nth-child(1) { animation-delay: 0.05s; background: linear-gradient(130deg, #0c3d6b, #0f4c81); }
+.cert-kpi-card:nth-child(2) { animation-delay: 0.09s; background: linear-gradient(130deg, #065f46, #059669); }
+.cert-kpi-card:nth-child(3) { animation-delay: 0.13s; background: linear-gradient(130deg, #9a3412, #ea580c); }
+.cert-kpi-card:nth-child(4) { animation-delay: 0.17s; background: linear-gradient(130deg, #0369a1, #0ea5e9); }
+
+.cert-kpi-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.18);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; color: #fff;
+  margin-bottom: 0.4rem;
+  flex-shrink: 0;
+  position: relative; z-index: 1;
+}
+
+.cert-kpi-num {
+  font-size: 2.1rem;
+  font-weight: 900;
+  color: #fff;
   line-height: 1;
+  letter-spacing: -1.5px;
+  position: relative; z-index: 1;
 }
 
-/* Content Cards */
-.content-grid {
+.cert-kpi-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.92);
+  margin-top: 0.1rem;
+  position: relative; z-index: 1;
+}
+
+/* ---- Content grid ---- */
+.cert-content-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 2rem;
-  margin-bottom: 2.5rem;
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
 }
 
-.content-card {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(25px);
-  border-radius: 24px;
-  padding: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-  animation-delay: 0.5s;
+@media (max-width: 992px) {
+  .cert-content-grid { grid-template-columns: 1fr; }
 }
 
-.content-card h2 {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #558b2f;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+/* ---- Card base ---- */
+.cert-card {
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
 }
 
-/* Filtros */
-.filter-group {
-  margin-bottom: 1.5rem;
-}
-
-.filter-label {
-  display: block;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #558b2f;
-  margin-bottom: 0.6rem;
-  letter-spacing: 0.3px;
-}
-
-.filter-select, .filter-input {
-  width: 100%;
-  padding: 0.9rem 1.2rem;
-  border: 2px solid #e8f5e9;
-  border-radius: 14px;
-  font-size: 0.95rem;
-  color: #2d5016;
-  background: white;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.filter-select:focus, .filter-input:focus {
-  outline: none;
-  border-color: #7cb342;
-  box-shadow: 0 0 0 4px rgba(124, 179, 66, 0.1);
-}
-
-.btn-generate {
-  width: 100%;
+.cert-card-header {
   padding: 1rem 1.5rem;
-  background: linear-gradient(135deg, #558b2f, #7cb342);
-  color: white;
-  border: none;
-  border-radius: 14px;
-  font-size: 1rem;
-  font-weight: 700;
+  border-bottom: 1px solid #f1f5f9;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 16px rgba(85, 139, 47, 0.3);
-}
-
-.btn-generate:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(85, 139, 47, 0.4);
-}
-
-.btn-generate:active {
-  transform: translateY(0);
-}
-
-/* Tabla */
-.table-card {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(25px);
-  border-radius: 24px;
-  padding: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-  animation-delay: 0.6s;
-}
-
-.table-header {
-  display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
+  background: #fafbfc;
 }
 
-.table-header h2 {
-  font-size: 1.4rem;
+.cert-card-header h3 {
+  font-size: 0.9rem;
   font-weight: 700;
-  color: #558b2f;
+  color: #1e293b;
   margin: 0;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.badge-count {
-  background: linear-gradient(135deg, #f57c00, #ffa726);
-  color: white;
-  padding: 0.4rem 1rem;
-  border-radius: 12px;
-  font-size: 0.85rem;
+.cert-card-header h3 i { color: #0f4c81; }
+.cert-card-body { padding: 1.5rem; }
+
+/* ---- Filtros ---- */
+.cert-filter-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.4rem;
+}
+
+.cert-filter-control {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  color: #1e293b;
+  background: #fff;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  margin-bottom: 1rem;
+}
+
+.cert-filter-control:focus {
+  outline: none;
+  border-color: #0f4c81;
+  box-shadow: 0 0 0 3px rgba(15,76,129,0.1);
+}
+
+/* ---- Botón generar ---- */
+.btn-generate {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(130deg, #0f4c81, #1565c0);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(15,76,129,0.25);
+}
+
+.btn-generate:hover {
+  background: linear-gradient(130deg, #0d3d6b, #0f4c81);
+  box-shadow: 0 6px 20px rgba(15,76,129,0.35);
+  transform: translateY(-1px);
+}
+
+.btn-generate:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ---- Tabla ---- */
+.cert-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fafbfc;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.cert-table-header h3 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cert-table-header h3 i { color: #0f4c81; }
+
+.cert-badge-count {
+  background: #ffedd5;
+  color: #ea580c;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
-.table-responsive {
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 16px;
-  padding: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+.btn-batch-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: linear-gradient(130deg, #0f4c81, #1565c0);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.45rem 1rem;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 3px 10px rgba(15,76,129,0.22);
+}
+
+.btn-batch-inline:hover { opacity: 0.9; transform: translateY(-1px); }
+
+.cert-table-wrap {
+  padding: 1rem 1.5rem;
+  overflow-x: auto;
 }
 
 .cert-table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  background: transparent;
+  border-collapse: collapse;
+  font-size: 0.82rem;
 }
 
 .cert-table thead th {
-  background: rgba(124, 179, 66, 0.15);
-  color: #558b2f;
+  padding: 0.75rem 0.9rem;
+  background: #f8fafc;
+  color: #64748b;
   font-weight: 700;
-  padding: 1rem;
-  font-size: 0.9rem;
-  border-bottom: 2px solid rgba(124, 179, 66, 0.3);
-  text-align: left;
-}
-
-.cert-table thead th:first-child {
-  border-radius: 12px 0 0 0;
-}
-
-.cert-table thead th:last-child {
-  border-radius: 0 12px 0 0;
-  text-align: center;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1.5px solid #e2e8f0;
+  white-space: nowrap;
 }
 
 .cert-table tbody td {
-  padding: 1rem;
-  border-bottom: 1px solid rgba(124, 179, 66, 0.1);
-  color: #2d5016;
-  font-size: 0.9rem;
+  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid #f1f5f9;
+  color: #374151;
+  vertical-align: middle;
 }
 
-.cert-table tbody tr:hover {
-  background: rgba(124, 179, 66, 0.05);
-}
+.cert-table tbody tr:hover td { background: #f8fafc; }
+.cert-table tbody tr:last-child td { border-bottom: none; }
 
 .cert-checkbox {
-  width: 18px;
-  height: 18px;
+  width: 16px; height: 16px;
   cursor: pointer;
-  accent-color: #7cb342;
-}
-
-#batchGenerate:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(85, 139, 47, 0.4) !important;
-}
-
-#batchGenerate:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  accent-color: #0f4c81;
 }
 
 .badge-sec {
   display: inline-block;
-  background: rgba(124, 179, 66, 0.15);
-  color: #558b2f;
-  padding: 0.4rem 0.8rem;
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 0.22rem 0.65rem;
   border-radius: 8px;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
@@ -328,199 +363,188 @@
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  background: linear-gradient(135deg, #f57c00, #ffa726);
-  color: white;
-  padding: 0.4rem 0.8rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  background: #ffedd5;
+  color: #ea580c;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
 }
 
-/* Chart Container */
-#chartSecretarias {
-  max-height: 280px;
-}
+.td-index { font-weight: 700; color: #0f4c81; }
+.td-center { text-align: center; }
+.th-check  { width: 46px; text-align: center; }
+.th-index  { width: 46px; }
+.td-ellipsis-200 { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.td-ellipsis-250 { max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* Responsive */
-@media (max-width: 992px) {
-  .content-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 576px) {
-  .kpi-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .cert-header h1 {
-    font-size: 2rem;
-  }
-  
-  .table-responsive {
-    overflow-x: auto;
-  }
-}
-
-/* DataTables custom styling */
+/* ---- DataTables overrides ---- */
 .dataTables_wrapper .dataTables_paginate .paginate_button {
-  padding: 0.4rem 0.8rem;
-  margin: 0 0.2rem;
-  border-radius: 8px;
-  border: none;
-  background: rgba(124, 179, 66, 0.1);
-  color: #558b2f !important;
-  font-weight: 600;
+  padding: 0.35rem 0.75rem !important;
+  margin: 0 0.15rem !important;
+  border-radius: 8px !important;
+  border: 1.5px solid #e2e8f0 !important;
+  background: #fff !important;
+  color: #0f4c81 !important;
+  font-weight: 600 !important;
+  font-size: 0.8rem !important;
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button.current {
-  background: linear-gradient(135deg, #558b2f, #7cb342);
-  color: white !important;
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+  background: linear-gradient(130deg, #0f4c81, #1565c0) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
+  background: #e0f2fe !important;
+  border-color: #0ea5e9 !important;
 }
 
 .dataTables_wrapper .dataTables_info {
-  color: #558b2f;
-  font-weight: 600;
-  padding: 1rem 0;
+  font-size: 0.8rem;
+  color: #64748b;
+  padding: 1rem 1.5rem !important;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+  padding: 0.75rem 1.5rem !important;
+  border-top: 1px solid #f1f5f9;
+}
+
+/* Chart container */
+#chartSecretarias { max-height: 260px; }
+
+@media (max-width: 768px) {
+  .cert-page { padding: 1.25rem 1rem; }
+  .cert-banner { padding: 1.25rem; }
+  .cert-banner-left h2 { font-size: 1.25rem !important; }
+  .cert-kpi-grid { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="certificados-container">
-  
-  <!-- Header -->
-  <div class="cert-header">
-    <h1><i class="bi bi-award-fill"></i> Gestión de Certificados</h1>
-    <p>Administración y generación de certificados municipales</p>
+<div class="cert-page">
+
+  <!-- ===== BANNER ===== -->
+  <div class="cert-banner">
+    <div class="cert-banner-left">
+      <h2><i class="bi bi-award-fill me-2"></i>Gestión de Certificados</h2>
+      <p>Administración y generación de certificados municipales</p>
+    </div>
+    <a href="{{ url_for('main.dashboard') }}" class="cert-banner-btn">
+      <i class="bi bi-arrow-left"></i> Dashboard
+    </a>
   </div>
 
-  <!-- KPI Cards -->
-  <div class="kpi-grid">
-    <div class="kpi-card">
-      <div class="kpi-icon total">
-        <i class="bi bi-file-earmark-text"></i>
-      </div>
-      <div class="kpi-label">Total Solicitudes</div>
-      <div class="kpi-value">{{ total_solicitudes }}</div>
+  <!-- ===== KPI CARDS ===== -->
+  <div class="cert-kpi-grid">
+    <div class="cert-kpi-card">
+      <div class="cert-kpi-icon"><i class="bi bi-file-earmark-text-fill"></i></div>
+      <div class="cert-kpi-num">{{ total_solicitudes }}</div>
+      <div class="cert-kpi-label">Total Solicitudes</div>
     </div>
-    
-    <div class="kpi-card">
-      <div class="kpi-icon generados">
-        <i class="bi bi-check-circle-fill"></i>
-      </div>
-      <div class="kpi-label">Generados</div>
-      <div class="kpi-value">{{ generados }}</div>
+    <div class="cert-kpi-card">
+      <div class="cert-kpi-icon"><i class="bi bi-check-circle-fill"></i></div>
+      <div class="cert-kpi-num">{{ generados }}</div>
+      <div class="cert-kpi-label">Generados</div>
     </div>
-    
-    <div class="kpi-card">
-      <div class="kpi-icon pendientes">
-        <i class="bi bi-hourglass-split"></i>
-      </div>
-      <div class="kpi-label">Pendientes</div>
-      <div class="kpi-value">{{ total_solicitudes - generados }}</div>
+    <div class="cert-kpi-card">
+      <div class="cert-kpi-icon"><i class="bi bi-hourglass-split"></i></div>
+      <div class="cert-kpi-num">{{ total_solicitudes - generados }}</div>
+      <div class="cert-kpi-label">Pendientes</div>
     </div>
-    
-    <div class="kpi-card">
-      <div class="kpi-icon tiempo">
-        <i class="bi bi-speedometer2"></i>
-      </div>
-      <div class="kpi-label">Tiempo Medio</div>
-      <div class="kpi-value">{{ tiempo_medio }}s</div>
+    <div class="cert-kpi-card">
+      <div class="cert-kpi-icon"><i class="bi bi-speedometer2"></i></div>
+      <div class="cert-kpi-num">{{ tiempo_medio }}s</div>
+      <div class="cert-kpi-label">Tiempo Medio</div>
     </div>
   </div>
 
-  <!-- Content Grid -->
-  <div class="content-grid">
-    <!-- Chart -->
-    <div class="content-card">
-      <h2><i class="bi bi-bar-chart-fill"></i> Estadísticas por Secretaría</h2>
-      <canvas id="chartSecretarias"></canvas>
+  <!-- ===== CONTENIDO (gráfica + filtros) ===== -->
+  <div class="cert-content-grid">
+
+    <!-- Gráfica -->
+    <div class="cert-card">
+      <div class="cert-card-header">
+        <h3><i class="bi bi-bar-chart-fill"></i> Estadísticas por Secretaría</h3>
+      </div>
+      <div class="cert-card-body">
+        <canvas id="chartSecretarias"></canvas>
+      </div>
     </div>
-    
+
     <!-- Filtros -->
-    <div class="content-card">
-      <h2><i class="bi bi-sliders"></i> Filtros y Acciones</h2>
-      
-      <div class="filter-group">
-        <label class="filter-label">Filtrar Secretaría</label>
-        <select id="filterSecretaria" class="filter-select">
+    <div class="cert-card">
+      <div class="cert-card-header">
+        <h3><i class="bi bi-sliders"></i> Filtros y Acciones</h3>
+      </div>
+      <div class="cert-card-body">
+
+        <label class="cert-filter-label">Filtrar Secretaría</label>
+        <select id="filterSecretaria" class="cert-filter-control">
           <option value="">Todas las Secretarías</option>
           {% for sec in secretarias %}
           <option value="{{ sec }}">{{ sec }}</option>
           {% endfor %}
         </select>
+
+        <label class="cert-filter-label">Buscar Texto</label>
+        <input type="text" id="searchText" class="cert-filter-control"
+               placeholder="Buscar por objeto o justificación...">
+
+        <button id="batchGenerate" class="btn-generate">
+          <i class="bi bi-lightning-charge-fill"></i>
+          Generar Seleccionados
+        </button>
+
       </div>
-      
-      <div class="filter-group">
-        <label class="filter-label">Buscar Texto</label>
-        <input 
-          type="text" 
-          id="searchText" 
-          class="filter-input" 
-          placeholder="Buscar por objeto o justificación...">
-      </div>
-      
-      <button id="batchGenerate" class="btn-generate">
-        <i class="bi bi-lightning-charge-fill"></i>
-        Generar Seleccionados
-      </button>
     </div>
+
   </div>
 
-  <!-- Tabla -->
-  <div class="table-card">
-    <div class="table-header">
-      <h2><i class="bi bi-list-check"></i> Solicitudes Pendientes</h2>
-      <div style="display: flex; gap: 1rem; align-items: center;">
-        <span class="badge-count">{{ pendientes_list|length }} Pendientes</span>
-        <button id="batchGenerate" type="button" style="background: linear-gradient(135deg, #558b2f, #7cb342); color: white; border: none; border-radius: 10px; padding: 0.6rem 1.5rem; font-weight: 700; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(85, 139, 47, 0.3);">
+  <!-- ===== TABLA ===== -->
+  <div class="cert-card">
+    <div class="cert-table-header">
+      <h3><i class="bi bi-list-check"></i> Solicitudes Pendientes</h3>
+      <div class="d-flex align-items-center gap-2">
+        <span class="cert-badge-count">{{ pendientes_list|length }} Pendientes</span>
+        <button id="batchGenerateTop" type="button" class="btn-batch-inline">
           <i class="bi bi-files"></i> Generar Seleccionados
         </button>
       </div>
     </div>
-    
-    <div class="table-responsive">
+
+    <div class="cert-table-wrap">
       <table id="tblPendientes" class="cert-table">
         <thead>
           <tr>
-            <th style="width: 50px; text-align: center;">
+            <th class="th-check">
               <input type="checkbox" id="selectAll" class="cert-checkbox">
             </th>
-            <th style="width: 50px;">#</th>
+            <th class="th-index">#</th>
             <th>Secretaría</th>
             <th>Objeto</th>
             <th>Justificación</th>
             <th>Fecha</th>
-            <th style="text-align: center;">Estado</th>
+            <th class="td-center">Estado</th>
           </tr>
         </thead>
         <tbody>
           {% for sol in pendientes_list %}
           <tr>
-            <td style="text-align: center;">
-              <input 
-                type="checkbox" 
-                class="cert-checkbox rowCheck" 
-                data-id="{{ sol.id }}">
+            <td class="td-center">
+              <input type="checkbox" class="cert-checkbox rowCheck" data-id="{{ sol.id }}">
             </td>
-            <td style="font-weight: 700; color: #7cb342;">{{ loop.index }}</td>
+            <td class="td-index">{{ loop.index }}</td>
             <td><span class="badge-sec">{{ sol.secretaria[:25] }}...</span></td>
-            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-              {{ sol.objeto }}
-            </td>
-            <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-              {{ sol.justificacion }}
-            </td>
+            <td class="td-ellipsis-200">{{ sol.objeto }}</td>
+            <td class="td-ellipsis-250">{{ sol.justificacion }}</td>
             <td>{{ sol.fecha }}</td>
-            <td style="text-align: center;">
-              <span class="badge-status">
-                <i class="bi bi-clock"></i> Pendiente
-              </span>
+            <td class="td-center">
+              <span class="badge-status"><i class="bi bi-clock-fill"></i> Pendiente</span>
             </td>
           </tr>
           {% endfor %}
@@ -529,7 +553,7 @@
     </div>
   </div>
 
-</div>
+</div><!-- /cert-page -->
 {% endblock %}
 
 {% block scripts %}
@@ -537,109 +561,62 @@
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
 $(document).ready(function() {
-  // Inicializar DataTable
+
   const table = $('#tblPendientes').DataTable({
     paging: true,
     info: true,
     lengthChange: false,
     pageLength: 10,
-    language: {
-      url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
-    },
+    language: { url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
     dom: 'rtip',
     order: [[1, 'asc']]
   });
 
-  // Filtro por Secretaría
   $('#filterSecretaria').on('change', function() {
     table.column(2).search(this.value).draw();
   });
 
-  // Búsqueda global
   $('#searchText').on('keyup', function() {
     table.search(this.value).draw();
   });
 
-  // Seleccionar todo
   $('#selectAll').on('click', function() {
     $('.rowCheck').prop('checked', this.checked);
   });
 
-  // Generar seleccionados - Nueva ruta de lote
-  $('#batchGenerate').on('click', function(e) {
-    e.preventDefault();
-    const btn = $(this);
+  function ejecutarGeneracion(btn) {
     const ids = $('.rowCheck:checked').map((_, el) => el.dataset.id).get();
-    
-    if (!ids.length) {
-      alert('⚠️ Por favor selecciona al menos una solicitud para generar.');
-      return;
-    }
-    
+    if (!ids.length) { alert('⚠️ Por favor selecciona al menos una solicitud.'); return; }
     const originalHtml = btn.html();
-    btn.html('<span class="spinner-border spinner-border-sm me-2"></span>Procesando ' + ids.length + ' certificados...').prop('disabled', true);
-
-    // Crear FormData para enviar múltiples IDs
+    btn.html('<span class="spinner-border spinner-border-sm me-2"></span>Procesando ' + ids.length + '...').prop('disabled', true);
     const formData = new FormData();
-    ids.forEach(id => {
-      formData.append('indices[]', id);
-    });
-    
-    // Generar en lote
-    fetch('{{ url_for("certificados.generar_lote") }}', {
-      method: 'POST',
-      body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (!data.success) {
-            throw new Error(data.error || data.mensaje || 'Error desconocido');
-        }
-        
-        btn.html(`<i class="bi bi-check-circle me-2"></i>✅ Éxito`);
-        
-        // Iniciar descargas de cada PDF generado
+    ids.forEach(id => formData.append('indices[]', id));
+    fetch('{{ url_for("certificados.generar_lote") }}', { method: 'POST', body: formData })
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(data => {
+        if (!data.success) throw new Error(data.error || 'Error desconocido');
+        btn.html('<i class="bi bi-check-circle me-2"></i>✅ Éxito');
         if (Array.isArray(data.download_urls)) {
           data.download_urls.forEach((url, i) => {
             const a = document.createElement('a');
-            a.href = url;
-            a.download = '';
-            a.style.display = 'none';
+            a.href = url; a.download = ''; a.style.display = 'none';
             document.body.appendChild(a);
-            setTimeout(() => {
-              a.click();
-              document.body.removeChild(a);
-            }, i * 150);
+            setTimeout(() => { a.click(); document.body.removeChild(a); }, i * 150);
           });
         }
-
-        // Mostrar alerta con el resultado
-        let mensaje = `✅ Se generaron ${data.generados} de ${data.total} certificados correctamente.`;
-        if (data.errores && data.errores.length > 0) {
-          mensaje += `\n\n⚠️ Errores encontrados:\n- ${data.errores.join('\n- ')}`;
-        }
-        mensaje += `\n\n📂 Los PDFs se descargan como archivos individuales (carpeta Descargas del navegador).`;
-        alert(mensaje);
-        
-        // Recargar tabla después de 2 segundos
+        let msg = '✅ ' + data.generados + ' de ' + data.total + ' certificados generados.';
+        if (data.errores?.length) msg += '\n\n⚠️ Errores:\n- ' + data.errores.join('\n- ');
+        alert(msg);
         setTimeout(() => location.reload(), 2000);
-    })
-    .catch(err => {
-        console.error('Error completo:', err);
-        btn.html(originalHtml).prop('disabled', false);
-        alert('❌ Error al generar certificados:\n' + err.message);
-    });
-  });
+      })
+      .catch(err => { btn.html(originalHtml).prop('disabled', false); alert('❌ Error:\n' + err.message); });
+  }
 
-  // Chart.js
+  $('#batchGenerate, #batchGenerateTop').on('click', function() { ejecutarGeneracion($(this)); });
+
+  // Chart.js — paleta institucional azul
   const ctx = document.getElementById('chartSecretarias');
   if (ctx) {
     new Chart(ctx, {
@@ -649,8 +626,8 @@ $(document).ready(function() {
         datasets: [{
           label: 'Certificados Generados',
           data: {{ sec_counts|tojson }},
-          backgroundColor: 'rgba(124, 179, 66, 0.7)',
-          borderColor: 'rgba(124, 179, 66, 1)',
+          backgroundColor: 'rgba(15,76,129,0.75)',
+          borderColor: 'rgba(15,76,129,1)',
           borderWidth: 2,
           borderRadius: 8
         }]
@@ -658,23 +635,16 @@ $(document).ready(function() {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false }
-        },
+        plugins: { legend: { display: false } },
         scales: {
-          y: { 
+          y: {
             beginAtZero: true,
-            grid: { color: 'rgba(0,0,0,0.05)' },
-            ticks: { color: '#558b2f', font: { weight: 600 } }
+            grid: { color: 'rgba(0,0,0,0.04)' },
+            ticks: { color: '#64748b', font: { weight: 600, size: 11 } }
           },
           x: {
             grid: { display: false },
-            ticks: { 
-              color: '#558b2f', 
-              font: { weight: 600, size: 10 },
-              maxRotation: 45,
-              minRotation: 45
-            }
+            ticks: { color: '#64748b', font: { weight: 600, size: 10 }, maxRotation: 40, minRotation: 40 }
           }
         }
       }

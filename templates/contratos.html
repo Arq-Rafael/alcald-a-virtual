@@ -107,6 +107,15 @@
     color: #666;
     margin-top: 10px;
   }
+  .ctr-flex-grow {
+    flex: 1;
+    min-width: 300px;
+  }
+  .ctr-error-cell {
+    text-align: center;
+    padding: 40px;
+    color: #d32f2f;
+  }
 
   /* Estadísticas */
   .stats-grid {
@@ -379,7 +388,7 @@
     <div class="import-section">
       <h3>🔗 Importar Contrato desde SECOP</h3>
       <form class="import-form" onsubmit="importarContrato(event)">
-        <div style="flex: 1; min-width: 300px;">
+        <div class="ctr-flex-grow">
           <input 
             type="text" 
             id="urlContrato" 
@@ -575,7 +584,7 @@ async function cargarContratos() {
   } catch (error) {
     console.error('Error cargando contratos:', error);
     document.getElementById('contratosTableBody').innerHTML = `
-      <tr><td colspan="8" style="text-align: center; padding: 40px; color: #d32f2f;">
+      <tr><td colspan="8" class="ctr-error-cell">
         Error al cargar contratos: ${error.message || 'Error desconocido'}
       </td></tr>
     `;

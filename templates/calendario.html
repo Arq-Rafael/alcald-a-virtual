@@ -983,12 +983,75 @@
             width: 95%;
         }
     }
+
+    /* Inline-to-class cleanup */
+    .cal-no-side-margins { margin-left: 0; margin-right: 0; }
+    .cal-layout-grid {
+        display: grid;
+        grid-template-columns: 1fr 420px;
+        gap: 2rem;
+        max-width: 100%;
+        align-items: start;
+        padding-right: 2rem;
+    }
+    .cal-main-width { max-width: 1000px; width: 100%; }
+    .cal-right-head { width: 100%; text-align: right; padding-bottom: 0.25rem; }
+    .cal-time-muted { font-size: 0.65rem; color: var(--text-muted); text-align: center; margin-top: 0.25rem; }
+    .cal-hidden { display: none; }
+    .cal-flex-list { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
+    .cal-event-box {
+        background: rgba(124, 179, 66, 0.08);
+        border: 1px solid rgba(124, 179, 66, 0.2);
+        border-radius: 12px;
+        padding: 1rem;
+        cursor: pointer;
+    }
+    .cal-event-title { font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem; }
+    .cal-event-sub { font-size: 0.85rem; color: var(--text-secondary); }
+    .cal-event-desc { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; }
+    .cal-empty {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-muted);
+    }
+    .cal-empty-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .cal-platform-wrap { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(124, 179, 66, 0.1); }
+    .cal-platform-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .cal-platform-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .cal-platform-btn {
+        padding: 0.7rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+    }
+    .cal-platform-btn i { margin-right: 0.3rem; }
+    .cal-platform-btn.meet { background: rgba(59, 89, 152, 0.15); border-color: rgba(59, 89, 152, 0.3); color: #3B5998; }
+    .cal-platform-btn.zoom { background: rgba(0, 102, 204, 0.15); border-color: rgba(0, 102, 204, 0.3); color: #0066CC; }
+    .cal-platform-btn.teams { background: rgba(31, 131, 255, 0.15); border-color: rgba(31, 131, 255, 0.3); color: #1F83FF; }
+    .cal-platform-btn.other { background: rgba(124, 179, 66, 0.15); border-color: rgba(124, 179, 66, 0.3); color: var(--primary-green); }
+    .cal-platform-btn.meet:hover { background: rgba(59, 89, 152, 0.25); }
+    .cal-platform-btn.zoom:hover { background: rgba(0, 102, 204, 0.25); }
+    .cal-platform-btn.teams:hover { background: rgba(31, 131, 255, 0.25); }
+    .cal-platform-btn.other:hover { background: rgba(124, 179, 66, 0.25); }
+    .fab-hidden { display: none; }
+    .mr-8 { margin-right: 0.5rem; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4" style="margin-left: 0; margin-right: 0;">
-<div class="calendar-container" style="display: grid; grid-template-columns: 1fr 420px; gap: 2rem; max-width: 100%; align-items: start; padding-right: 2rem;">
+<div class="container-fluid py-4 cal-no-side-margins">
+<div class="calendar-container cal-layout-grid">
     <div>
     <!-- Header con navegación -->
     <div class="calendar-header">
@@ -1007,7 +1070,7 @@
     </div>
     
     <!-- Calendario Principal -->
-    <div style="max-width: 1000px; width: 100%;">
+    <div class="cal-main-width">
         <div class="calendar-panel">
             <!-- Weekday labels -->
             <div class="weekdays">
@@ -1024,7 +1087,7 @@
                             <div class="day-cell empty"></div>
                         {% else %}
                             <div class="day-cell {% if eventos_por_dia.get(dia) %}has-events{% endif %}" onclick="abrirQuickModal({{ dia }})">
-                                <div style="width: 100%; text-align: right; padding-bottom: 0.25rem;">
+                                <div class="cal-right-head">
                                     <div class="day-number">{{ dia }}</div>
                                 </div>
                                 {% if eventos_por_dia.get(dia) %}
@@ -1036,7 +1099,7 @@
                                             </div>
                                         {% endfor %}
                                         {% if eventos_por_dia.get(dia)|length > 2 %}
-                                            <div style="font-size: 0.65rem; color: var(--text-muted); text-align: center; margin-top: 0.25rem;">
+                                            <div class="cal-time-muted">
                                                 +{{ eventos_por_dia.get(dia)|length - 2 }} más
                                             </div>
                                         {% endif %}
@@ -1054,7 +1117,7 @@
     <!-- Panel flotante para crear evento (derecha) -->
     <div class="create-event-panel" id="createEventPanel">
         <!-- TAB 1: Crear Evento -->
-        <div id="tabCrearEvento" style="display: none;">
+        <div id="tabCrearEvento" class="cal-hidden">
             <div class="create-event-header">
                 <h3>
                     <i class="bi bi-plus-circle"></i>
@@ -1123,14 +1186,14 @@
                     </div>
                     
                     <button type="submit" class="btn-create-event">
-                        <i class="bi bi-check2-circle" style="margin-right: 0.5rem;"></i>
+                        <i class="bi bi-check2-circle" class="mr-8"></i>
                         Crear Evento
                     </button>
             </form>
         </div>
         
         <!-- TAB 2: Historial y Próximos Eventos -->
-        <div id="tabHistorialEventos" style="display: block;">
+        <div id="tabHistorialEventos" >
             <div class="create-event-header">
                 <h3>
                     <i class="bi bi-clock-history"></i>
@@ -1139,49 +1202,49 @@
             </div>
             
             <!-- Próximos eventos -->
-            <div id="proximosEventosList" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
+            <div id="proximosEventosList" class="cal-flex-list">
                 {% if proximos_eventos %}
                     {% for evento in proximos_eventos %}
-                        <div style="background: rgba(124, 179, 66, 0.08); border: 1px solid rgba(124, 179, 66, 0.2); border-radius: 12px; padding: 1rem; cursor: pointer;" onclick="abrirDetalleEvento({{ evento.id }}, null)">
-                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">{{ evento.titulo }}</div>
-                            <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                        <div class="cal-event-box" onclick="abrirDetalleEvento({{ evento.id }}, null)">
+                            <div class="cal-event-title">{{ evento.titulo }}</div>
+                            <div class="cal-event-sub">
                                 <i class="bi bi-clock"></i> {{ evento.fecha_inicio_formato }}
                             </div>
                             {% if evento.descripcion %}
-                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">{{ evento.descripcion[:50] }}{% if evento.descripcion|length > 50 %}...{% endif %}</div>
+                                <div class="cal-event-desc">{{ evento.descripcion[:50] }}{% if evento.descripcion|length > 50 %}...{% endif %}</div>
                             {% endif %}
                         </div>
                     {% endfor %}
                 {% else %}
-                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📅</div>
+                    <div class="cal-empty">
+                        <div class="cal-empty-icon">📅</div>
                         <div>No hay eventos próximos</div>
                     </div>
                 {% endif %}
             </div>
             
             <!-- Opción para agregar reunión virtual -->
-            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(124, 179, 66, 0.1);">
-                <h4 style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+            <div class="cal-platform-wrap">
+                <h4 class="cal-platform-title">
                     <i class="bi bi-camera-video"></i>
                     Agregar Reunión Virtual
                 </h4>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                    <button type="button" style="padding: 0.7rem; background: rgba(59, 89, 152, 0.15); border: 1px solid rgba(59, 89, 152, 0.3); border-radius: 8px; color: #3B5998; font-weight: 600; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;" onmouseover="this.style.background='rgba(59, 89, 152, 0.25)'" onmouseout="this.style.background='rgba(59, 89, 152, 0.15)'" onclick="agregarPlataforma('meet')">
-                        <i class="bi bi-google" style="margin-right: 0.3rem;"></i>
+                <div class="cal-platform-grid">
+                    <button type="button" class="cal-platform-btn meet" onclick="agregarPlataforma('meet')">
+                        <i class="bi bi-google" ></i>
                         Google Meet
                     </button>
-                    <button type="button" style="padding: 0.7rem; background: rgba(0, 102, 204, 0.15); border: 1px solid rgba(0, 102, 204, 0.3); border-radius: 8px; color: #0066CC; font-weight: 600; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;" onmouseover="this.style.background='rgba(0, 102, 204, 0.25)'" onmouseout="this.style.background='rgba(0, 102, 204, 0.15)'" onclick="agregarPlataforma('zoom')">
-                        <i class="bi bi-camera-video" style="margin-right: 0.3rem;"></i>
+                    <button type="button" class="cal-platform-btn zoom" onclick="agregarPlataforma('zoom')">
+                        <i class="bi bi-camera-video" ></i>
                         Zoom
                     </button>
-                    <button type="button" style="padding: 0.7rem; background: rgba(31, 131, 255, 0.15); border: 1px solid rgba(31, 131, 255, 0.3); border-radius: 8px; color: #1F83FF; font-weight: 600; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;" onmouseover="this.style.background='rgba(31, 131, 255, 0.25)'" onmouseout="this.style.background='rgba(31, 131, 255, 0.15)'" onclick="agregarPlataforma('teams')">
-                        <i class="bi bi-microsoft" style="margin-right: 0.3rem;"></i>
+                    <button type="button" class="cal-platform-btn teams" onclick="agregarPlataforma('teams')">
+                        <i class="bi bi-microsoft" ></i>
                         Teams
                     </button>
-                    <button type="button" style="padding: 0.7rem; background: rgba(124, 179, 66, 0.15); border: 1px solid rgba(124, 179, 66, 0.3); border-radius: 8px; color: var(--primary-green); font-weight: 600; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;" onmouseover="this.style.background='rgba(124, 179, 66, 0.25)'" onmouseout="this.style.background='rgba(124, 179, 66, 0.15)'" onclick="agregarPlataforma('otra')">
-                        <i class="bi bi-plus-lg" style="margin-right: 0.3rem;"></i>
+                    <button type="button" class="cal-platform-btn other" onclick="agregarPlataforma('otra')">
+                        <i class="bi bi-plus-lg" ></i>
                         Otra
                     </button>
                 </div>
@@ -1190,7 +1253,7 @@
     </div>
 
 <!-- Botón flotante para abrir panel (solo en mobile) -->
-<button class="floating-action-btn" onclick="toggleCreatePanel()" title="Crear nuevo evento" style="display: none;">
+<button class="floating-action-btn" onclick="toggleCreatePanel()" title="Crear nuevo evento" class="cal-hidden">
     <i class="bi bi-plus-lg"></i>
 </button>
 
@@ -1231,7 +1294,7 @@
                     Cancelar
                 </button>
                 <button type="submit" class="quick-event-btn quick-event-btn-primary">
-                    <i class="bi bi-check-circle" style="margin-right: 0.5rem;"></i>
+                    <i class="bi bi-check-circle" class="mr-8"></i>
                     Crear
                 </button>
             </div>
@@ -1248,7 +1311,7 @@
         </button>
     </div>
     
-    <div id="detailContent" style="display: none;">
+    <div id="detailContent" class="cal-hidden">
         <div class="event-detail-item">
             <div class="event-detail-label">⏰ Hora</div>
             <div class="event-detail-value" id="detailTime">-</div>
@@ -1259,7 +1322,7 @@
             <div class="event-detail-value" id="detailDate">-</div>
         </div>
         
-        <div class="event-detail-item" id="detailDescContainer" style="display: none;">
+        <div class="event-detail-item" id="detailDescContainer" class="cal-hidden">
             <div class="event-detail-label">📝 Descripción</div>
             <div class="event-detail-value" id="detailDesc">-</div>
         </div>
@@ -1620,19 +1683,19 @@
             
             if (eventos.length === 0) {
                 container.innerHTML = `
-                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📅</div>
+                    <div class="cal-empty">
+                        <div class="cal-empty-icon">📅</div>
                         <div>No hay eventos próximos</div>
                     </div>
                 `;
             } else {
                 container.innerHTML = eventos.map(evento => `
-                    <div style="background: rgba(124, 179, 66, 0.08); border: 1px solid rgba(124, 179, 66, 0.2); border-radius: 12px; padding: 1rem; cursor: pointer;" onclick="abrirDetalleEvento(${evento.id}, null)">
-                        <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">${evento.titulo}</div>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                    <div class="cal-event-box" onclick="abrirDetalleEvento(${evento.id}, null)">
+                        <div class="cal-event-title">${evento.titulo}</div>
+                        <div class="cal-event-sub">
                             <i class="bi bi-clock"></i> ${evento.fecha_inicio_formato}
                         </div>
-                        ${evento.descripcion ? `<div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">${evento.descripcion.substring(0, 50)}${evento.descripcion.length > 50 ? '...' : ''}</div>` : ''}
+                        ${evento.descripcion ? `<div class="cal-event-desc">${evento.descripcion.substring(0, 50)}${evento.descripcion.length > 50 ? '...' : ''}</div>` : ''}
                     </div>
                 `).join('');
             }
@@ -1729,3 +1792,4 @@
 </script>
 
 {% endblock %}
+
