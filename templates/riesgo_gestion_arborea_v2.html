@@ -5,21 +5,21 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/gestion_riesgo.css') }}">
 <style>
   .wizard-container { max-width: 1000px; margin: 20px auto; background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
-  .wizard-header { background: linear-gradient(135deg, #2d5016 0%, #7cb342 100%); color: white; padding: 30px; border-radius: 12px 12px 0 0; }
+  .wizard-header { background: linear-gradient(130deg, #0f4c81 0%, #1565c0 55%, #0ea5e9 100%); color: white; padding: 30px; border-radius: 12px 12px 0 0; }
   .wizard-header h1 { margin: 0; font-size: 28px; }
   .wizard-steps { display: flex; justify-content: space-between; padding: 24px; border-bottom: 2px solid #f0f0f0; background: #fafafa; }
   .wizard-step { flex: 1; text-align: center; position: relative; }
   .wizard-step::after { content: ''; position: absolute; top: 20px; left: 50%; width: 100%; height: 2px; background: #ddd; z-index: -1; }
   .wizard-step:last-child::after { display: none; }
   .step-circle { width: 40px; height: 40px; border-radius: 50%; background: #ddd; color: #666; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 8px; transition: all 0.3s; }
-  .wizard-step.active .step-circle { background: #2d5016; color: white; transform: scale(1.1); }
-  .wizard-step.completed .step-circle { background: #7cb342; color: white; }
+  .wizard-step.active .step-circle { background: #0f4c81; color: white; transform: scale(1.1); }
+  .wizard-step.completed .step-circle { background: #1565c0; color: white; }
   .wizard-body { padding: 40px; }
   .form-section { display: none; }
   .form-section.active { display: block; animation: slideIn 0.3s ease-in; }
   @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  .btn-primary-custom { background: #2d5016; color: white; border: none; padding: 12px 28px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
-  .btn-primary-custom:hover { background: #7cb342; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .btn-primary-custom { background: #0f4c81; color: white; border: none; padding: 12px 28px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+  .btn-primary-custom:hover { background: #1565c0; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(15,76,129,0.3); }
   .btn-secondary-custom { background: #6c757d; color: white; border: none; padding: 12px 28px; border-radius: 6px; font-weight: 600; cursor: pointer; margin-right: 10px; transition: all 0.3s; }
   .btn-secondary-custom:hover { background: #5a6268; }
   .btn-danger-custom { background: #dc3545; color: white; border: none; padding: 12px 28px; border-radius: 6px; font-weight: 600; cursor: pointer; }
@@ -29,22 +29,22 @@
   .alert-error { background: #f8d7da; color: #721c24; border-left-color: #dc3545; }
   .alert-info { background: #d1ecf1; color: #0c5460; border-left-color: #17a2b8; }
   .alert-warning { background: #fff3cd; color: #856404; border-left-color: #ffc107; }
-  .radicado-badge { display: inline-block; background: #2d5016; color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold; font-size: 18px; margin: 12px 0; }
+  .radicado-badge { display: inline-block; background: linear-gradient(130deg, #0f4c81, #1565c0); color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold; font-size: 18px; margin: 12px 0; }
   .estado-badge { display: inline-block; padding: 6px 12px; border-radius: 16px; font-weight: 600; font-size: 12px; }
   .estado-radicada { background: #ffc107; color: #000; }
   .estado-pendiente { background: #17a2b8; color: white; }
   .estado-aprobada { background: #28a745; color: white; }
   .estado-negada { background: #dc3545; color: white; }
-  .data-summary { background: #f8f9fa; border-left: 4px solid #2d5016; padding: 16px; margin: 16px 0; border-radius: 4px; }
-  .data-summary strong { color: #2d5016; }
+  .data-summary { background: #f0f4ff; border-left: 4px solid #0f4c81; padding: 16px; margin: 16px 0; border-radius: 4px; }
+  .data-summary strong { color: #0f4c81; }
   .form-group-section { background: #f8f9fa; padding: 20px; margin: 20px 0; border-radius: 8px; border: 1px solid #e9ecef; }
-  .form-group-section h4 { margin-top: 0; color: #2d5016; font-size: 16px; }
+  .form-group-section h4 { margin-top: 0; color: #0f4c81; font-size: 16px; }
   .file-upload { border: 2px dashed #ddd; padding: 20px; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s; }
-  .file-upload:hover { border-color: #2d5016; background: #f8f9fa; }
-  .file-upload.dragover { border-color: #2d5016; background: #e8f5e9; }
+  .file-upload:hover { border-color: #0f4c81; background: #f0f4ff; }
+  .file-upload.dragover { border-color: #0f4c81; background: #e8f0fe; }
   .uploaded-files { margin-top: 12px; }
-  .file-item { background: white; padding: 10px; margin: 6px 0; border-radius: 4px; border-left: 3px solid #7cb342; display: flex; justify-content: space-between; align-items: center; }
-  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #f3f3f3; border-top: 2px solid #2d5016; border-radius: 50%; animation: spin 1s linear infinite; margin-left: 8px; }
+  .file-item { background: white; padding: 10px; margin: 6px 0; border-radius: 4px; border-left: 3px solid #1565c0; display: flex; justify-content: space-between; align-items: center; }
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #f3f3f3; border-top: 2px solid #0f4c81; border-radius: 50%; animation: spin 1s linear infinite; margin-left: 8px; }
   @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   .btn-small { padding: 4px 8px; font-size: 12px; }
   .table-sm td { padding: 8px; }
@@ -53,8 +53,8 @@
   .autocomplete-item { padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0; }
   .autocomplete-item:hover { background: #f8f9fa; }
   .autocomplete-item small { color: #6c757d; font-style: italic; display: block; margin-top: 2px; }
-  .compensacion-result { background: #e8f5e9; padding: 20px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #7cb342; text-align: center; }
-  .compensacion-numero { font-size: 36px; font-weight: bold; color: #2d5016; }
+  .compensacion-result { background: #e8f0fe; padding: 20px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #1565c0; text-align: center; }
+  .compensacion-numero { font-size: 36px; font-weight: bold; color: #0f4c81; }
   .historial-container { margin-top: 40px; padding-top: 40px; border-top: 2px solid #f0f0f0; }
   
   /* ESTILOS DE BOTONES MEJORADOS */
@@ -77,16 +77,16 @@
     gap: 4px;
   }
   
-  /* Botón CONTINUAR - Verde destacado */
-  .action-btn.btn-continue { 
-    background: linear-gradient(135deg, #7cb342 0%, #558b2f 100%);
+  /* Botón CONTINUAR - Azul institucional */
+  .action-btn.btn-continue {
+    background: linear-gradient(135deg, #1565c0 0%, #0f4c81 100%);
     color: white;
-    box-shadow: 0 2px 8px rgba(124, 179, 66, 0.3);
+    box-shadow: 0 2px 8px rgba(15, 76, 129, 0.3);
     min-width: 110px;
   }
-  .action-btn.btn-continue:hover { 
-    background: linear-gradient(135deg, #9ccc65 0%, #7cb342 100%);
-    box-shadow: 0 4px 12px rgba(124, 179, 66, 0.4);
+  .action-btn.btn-continue:hover {
+    background: linear-gradient(135deg, #0ea5e9 0%, #1565c0 100%);
+    box-shadow: 0 4px 12px rgba(15, 76, 129, 0.4);
     transform: translateY(-2px);
   }
   .action-btn.btn-continue:active { transform: translateY(0); }
@@ -432,7 +432,7 @@
           </p>
         </div>
         <div class="wz-section-gap">
-          <button class="btn-secondary-custom" onclick="descargarPDF()">
+          <button class="btn-secondary-custom" onclick="descargarPDF(radicadoActual && radicadoActual.id)">
             📥 Descargar Informe PDF
           </button>
           <button class="btn-primary-custom" onclick="showSection(3)">Siguiente: Dictamen CMGR →</button>
@@ -530,7 +530,7 @@
           <p class="wz-confirm-p">El expediente está completo y procesado.</p>
         </div>
         <div class="wz-section-gap">
-          <button class="btn-secondary-custom" onclick="descargarDictamenPDF()">📥 Descargar Permiso/Dictamen PDF</button>
+          <button class="btn-secondary-custom" onclick="descargarPermisoPDF(radicadoActual && radicadoActual.id)">📥 Descargar Permiso/Dictamen PDF</button>
         </div>
         <button class="btn-primary-custom" onclick="location.reload()">🔄 Nuevo Radicado</button>
         <button class="btn-secondary-custom" onclick="verHistorial()">📋 Ver Historial</button>
@@ -565,15 +565,20 @@
 <script>
 let radicadoActual = null;
 let fotosActuales = [];
+const isAdmin = "{{ session.get('role', '') }}" === "admin";
 
 // === NAVEGACIÓN WIZARD ===
 function showSection(step) {
   document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
-  
+
   document.getElementById(`section-${step}`).classList.add('active');
   document.querySelector(`[data-step="${step}"]`).classList.add('active');
-  
+
+  // Poblar resumen de datos cuando se entra al paso 2 o 3
+  if (step === 2 && radicadoActual) mostrarDatos2();
+  if (step === 3 && radicadoActual) prepararFase3();
+
   document.querySelector('.wizard-body').scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -903,11 +908,13 @@ async function cargarHistorial() {
     
     if (data.radicados && data.radicados.length > 0) {
       tbody.innerHTML = data.radicados.map(r => {
-        const isRadicada = r.estado === 'Radicada'; // Recién creado, sin informe
-        const isVisitada = r.estado === 'Visitada'; // Tiene informe, pendiente dictamen
-        const hasInforme = r.estado === 'Visitada' || r.estado === 'Aprobada' || r.estado === 'Negada';
-        const hasPermiso = r.estado === 'Aprobada' || r.estado === 'Negada';
-        
+        const isRadicada = r.estado === 'Radicada';
+        const isVisitada = r.estado === 'Visitada';
+        const isProcesada = r.estado === 'Aprobada' || r.estado === 'Negada';
+        const hasInforme = isVisitada || isProcesada;
+        const hasPermiso = isProcesada;
+        const canDelete = isRadicada || (isProcesada && isAdmin);
+
         return `
           <tr>
             <td><strong>${r.numero_radicado}</strong></td>
@@ -921,7 +928,7 @@ async function cargarHistorial() {
                 ${isVisitada ? `<button class="action-btn btn-dictamen" data-title="Continuar con Dictamen" onclick="continuarConDictamen(${r.id})">▶️ Dictamen</button>` : ''}
                 ${hasInforme ? `<button class="action-btn btn-info" data-title="Descargar Informe" onclick="descargarPDF(${r.id})">📄</button>` : ''}
                 ${hasPermiso ? `<button class="action-btn btn-info" data-title="Descargar Permiso" onclick="descargarPermisoPDF(${r.id})">📋</button>` : ''}
-                ${isRadicada ? `<button class="action-btn btn-delete" data-title="Eliminar" onclick="confirmarEliminar(${r.id}, '${r.numero_radicado}')">🗑️</button>` : ''}
+                ${canDelete ? `<button class="action-btn btn-delete" data-title="Eliminar" onclick="confirmarEliminar(${r.id}, '${r.numero_radicado}')">🗑️</button>` : ''}
               </div>
             </td>
           </tr>
@@ -1059,7 +1066,7 @@ async function confirmarEliminar(id, numeroRadicado) {
     try {
       const resp = await fetch(`/api/riesgo/arborea/${id}`, {
         method: 'DELETE',
-        headers: { 'X-Usuario-Actual': 'admin', 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' }
       });
       const result = await resp.json();
       

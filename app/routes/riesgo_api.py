@@ -2,7 +2,7 @@
 API Endpoints para Gestión Arbórea - Gestión del Riesgo
 IMPORTACIONES LAZY PARA EVITAR CIRCULAR IMPORTS
 """
-from flask import Blueprint, request, jsonify, send_file, render_template, current_app
+from flask import Blueprint, request, jsonify, send_file, render_template, current_app, session
 from datetime import datetime, timedelta
 import json
 import os
@@ -200,8 +200,36 @@ def crear_radicado():
             'id': radicado.id,
             'numero_radicado': radicado.numero_radicado,
             'estado': radicado.estado,
+            # Solicitante
+            'solicitante_nombre': radicado.solicitante_nombre,
+            'solicitante_documento': radicado.solicitante_documento,
+            'solicitante_contacto': radicado.solicitante_contacto,
+            'solicitante_correo': radicado.solicitante_correo,
+            'solicitante_rol': radicado.solicitante_rol,
+            # Ubicación
+            'ubicacion_direccion': radicado.ubicacion_direccion,
+            'ubicacion_vereda_sector': radicado.ubicacion_vereda_sector,
+            'ubicacion_lat': radicado.ubicacion_lat,
+            'ubicacion_lng': radicado.ubicacion_lng,
+            'matricula_catastral': radicado.matricula_catastral,
+            # Árbol
+            'arbol_especie_comun': radicado.arbol_especie_comun,
+            'arbol_especie_cientifico': radicado.arbol_especie_cientifico,
+            'arbol_dap_cm': radicado.arbol_dap_cm,
+            'arbol_altura_m': radicado.arbol_altura_m,
+            'arbol_copa_m': radicado.arbol_copa_m,
+            'arbol_fitosanitario': radicado.arbol_fitosanitario,
+            'arbol_inclinacion_raices': radicado.arbol_inclinacion_raices,
+            'arbol_riesgo_inicial': radicado.arbol_riesgo_inicial,
+            # Solicitud
+            'tipo_solicitud': radicado.tipo_solicitud,
+            'motivo_solicitud': radicado.motivo_solicitud,
+            # Compensación y permiso
+            'compensacion_metodo': radicado.compensacion_metodo,
+            'compensacion_coeficiente': radicado.compensacion_coeficiente,
             'compensacion_arboles_plantar': radicado.compensacion_arboles_plantar,
             'permiso_fecha_limite': radicado.permiso_fecha_limite.isoformat() if radicado.permiso_fecha_limite else None,
+            'created_at': radicado.created_at.isoformat(),
             'mensaje': f'Radicado {radicado.numero_radicado} creado exitosamente'
         }), 201
         
@@ -344,7 +372,7 @@ def _render_pdf(template_name, context, filename="documento.pdf"):
             fontName='Helvetica-Bold',
             fontSize=13,
             leading=16,
-            textColor=colors.HexColor('#2d5016'),
+            textColor=colors.HexColor('#0f4c81'),
             alignment=0,
             spaceAfter=6
         )
@@ -361,10 +389,10 @@ def _render_pdf(template_name, context, filename="documento.pdf"):
         
         # Título del documento
         c.setFont('Helvetica-Bold', 15)
-        c.setFillColor(colors.HexColor('#2d5016'))
+        c.setFillColor(colors.HexColor('#0f4c81'))
         c.drawString(margin, y_position, context.get('titulo', 'Documento'))
         y_position -= 18
-        
+
         # Metadatos
         c.setFont('Helvetica', 9)
         c.setFillColor(colors.HexColor('#6b7280'))
@@ -376,8 +404,8 @@ def _render_pdf(template_name, context, filename="documento.pdf"):
         c.drawString(margin, y_position, meta_text)
         y_position -= 4
         
-        # Línea de acento verde institucional
-        c.setStrokeColor(colors.HexColor('#7cb342'))
+        # Línea de acento azul institucional
+        c.setStrokeColor(colors.HexColor('#1565c0'))
         c.setLineWidth(2)
         c.line(margin, y_position, margin + (w - 2*margin), y_position)
         c.setLineWidth(1)
@@ -420,10 +448,10 @@ def _render_pdf(template_name, context, filename="documento.pdf"):
 
 def _render_informe_content(c, radicado, margin, y_position, w, h, style_title, style_body):
     """Renderiza el contenido del informe técnico."""
-    
+
     table_width = w - 2*margin
-    COLOR_PRIMARY = '#2d5016'  # Verde institucional oscuro
-    COLOR_HEADER_BG = '#5a8a3a'  # Verde medio profesional
+    COLOR_PRIMARY = '#0f4c81'  # Azul institucional
+    COLOR_HEADER_BG = '#1565c0'  # Azul medio institucional
     COLOR_GRID = '#d4d4d8'
     COLOR_TEXT = '#3d3d3d'  # Texto gris oscuro legible
     
@@ -652,10 +680,10 @@ def _render_informe_content(c, radicado, margin, y_position, w, h, style_title, 
 
 def _render_dictamen_content(c, radicado, margin, y_position, w, h, style_title, style_body):
     """Renderiza el contenido del dictamen CMGR."""
-    
+
     table_width = w - 2*margin
-    COLOR_PRIMARY = '#2d5016'  # Verde institucional oscuro
-    COLOR_HEADER_BG = '#5a8a3a'  # Verde medio profesional
+    COLOR_PRIMARY = '#0f4c81'  # Azul institucional
+    COLOR_HEADER_BG = '#1565c0'  # Azul medio institucional
     COLOR_GRID = '#d4d4d8'
     COLOR_TEXT = '#3d3d3d'  # Texto gris oscuro legible
     
@@ -998,19 +1026,22 @@ def actualizar_radicado(radicado_id):
 
 @riesgo_api.route('/arborea/<int:radicado_id>', methods=['DELETE'])
 def eliminar_radicado(radicado_id):
-    """Elimina un radicado (solo admin)"""
+    """Elimina un radicado. Radicados Aprobados/Negados: solo admin."""
     RadicadoArborea, _ = get_models()
     db = get_db()
-    
-    # Verificar permisos (simplificado)
-    usuario_actual = request.headers.get('X-Usuario-Actual')
-    if usuario_actual != 'admin':
+
+    # Verificar sesión activa
+    if not session.get('user'):
+        return jsonify({'success': False, 'mensaje': 'Sesión no válida'}), 401
+
+    radicado = RadicadoArborea.query.get_or_404(radicado_id)
+
+    # Radicados aprobados o negados: solo admin puede eliminar
+    if radicado.estado in ('Aprobada', 'Negada') and session.get('role') != 'admin':
         return jsonify({
             'success': False,
-            'mensaje': 'No tienes permisos para eliminar radicados'
+            'mensaje': 'Solo el administrador puede eliminar radicados ya procesados'
         }), 403
-    
-    radicado = RadicadoArborea.query.get_or_404(radicado_id)
     
     try:
         db.session.delete(radicado)

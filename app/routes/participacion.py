@@ -492,11 +492,45 @@ def constancia_pdf(id):
             as_attachment=True,
             download_name=nombre_archivo
         )
-    except ImportError:
-        return jsonify({'error': 'WeasyPrint no está instalado en el servidor'}), 500
     except Exception as e:
-        print(f'Error generando PDF constancia: {e}')
-        return jsonify({'error': f'Error al generar PDF: {str(e)}'}), 500
+        # Fallback: devolver HTML con auto-print para que el usuario guarde como PDF
+        # Funciona en Windows (dev) y en cualquier entorno sin GTK
+        print(f'WeasyPrint no disponible ({e}), usando fallback HTML/print')
+        print_html = html_content.replace(
+            '</style>',
+            '''
+  @media print {
+    body { padding: 1.5cm; }
+    .no-print { display: none !important; }
+  }
+  .print-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+    background: #0f4c81; color: white; padding: .75rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: Arial, sans-serif; font-size: .9rem; box-shadow: 0 2px 8px rgba(0,0,0,.3);
+  }
+  .print-bar button {
+    background: white; color: #0f4c81; border: none; padding: .5rem 1.2rem;
+    border-radius: 6px; font-weight: 700; cursor: pointer; font-size: .85rem;
+  }
+  @media print { .print-bar { display: none; } body { padding-top: 0; } }
+</style>'''
+        ).replace(
+            '<body>',
+            '''<body>
+  <div class="print-bar no-print">
+    <span>📄 Constancia de Radicación — Guardar como PDF</span>
+    <div style="display:flex;gap:.75rem;">
+      <button onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+      <button onclick="window.close()" style="background:rgba(255,255,255,.2);color:white;border:1px solid rgba(255,255,255,.4);">✕ Cerrar</button>
+    </div>
+  </div>
+  <div style="height:56px;" class="no-print"></div>'''
+        ).replace(
+            '</body>',
+            '<script>window.addEventListener("load",function(){setTimeout(function(){window.print();},600);});</script></body>'
+        )
+        return print_html, 200, {'Content-Type': 'text/html; charset=utf-8'}
 
 
 @participacion_bp.route('/eliminar/<int:id>', methods=['POST'], endpoint='eliminar')

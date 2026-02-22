@@ -159,12 +159,48 @@ class RadicadoArborea(db.Model):
         return {
             'id': self.id,
             'numero_radicado': self.numero_radicado,
-            'solicitante_nombre': self.solicitante_nombre,
-            'tipo_solicitud': self.tipo_solicitud,
             'estado': self.estado,
+            # Solicitante
+            'solicitante_nombre': self.solicitante_nombre,
+            'solicitante_documento': self.solicitante_documento,
+            'solicitante_contacto': self.solicitante_contacto,
+            'solicitante_correo': self.solicitante_correo,
+            'solicitante_rol': self.solicitante_rol,
+            # Ubicación
+            'ubicacion_direccion': self.ubicacion_direccion,
+            'ubicacion_vereda_sector': self.ubicacion_vereda_sector,
+            'ubicacion_lat': self.ubicacion_lat,
+            'ubicacion_lng': self.ubicacion_lng,
+            'matricula_catastral': self.matricula_catastral,
+            # Árbol
             'arbol_especie_comun': self.arbol_especie_comun,
+            'arbol_especie_cientifico': self.arbol_especie_cientifico,
+            'arbol_dap_cm': self.arbol_dap_cm,
+            'arbol_altura_m': self.arbol_altura_m,
+            'arbol_copa_m': self.arbol_copa_m,
+            'arbol_fitosanitario': self.arbol_fitosanitario,
+            'arbol_inclinacion_raices': self.arbol_inclinacion_raices,
+            'arbol_riesgo_inicial': self.arbol_riesgo_inicial,
+            # Solicitud
+            'tipo_solicitud': self.tipo_solicitud,
+            'motivo_solicitud': self.motivo_solicitud,
+            # Visita técnica
+            'visita_fecha': self.visita_fecha.isoformat() if self.visita_fecha else None,
+            'visita_tecnico': self.visita_tecnico,
+            'visita_riesgo_final': self.visita_riesgo_final,
+            'visita_observaciones': self.visita_observaciones,
+            'diagnostico_recomendaciones': self.diagnostico_recomendaciones,
+            # Dictamen y permiso
             'dictamen_decision': self.dictamen_decision,
-            'permiso_fecha_limite': self.permiso_fecha_limite.isoformat() if self.permiso_fecha_limite else None,
+            'dictamen_motivo_negacion': self.dictamen_motivo_negacion,
+            'compensacion_metodo': self.compensacion_metodo,
+            'compensacion_coeficiente': self.compensacion_coeficiente,
             'compensacion_arboles_plantar': self.compensacion_arboles_plantar,
-            'created_at': self.created_at.isoformat()
+            'compensacion_especie_recomendada': self.compensacion_especie_recomendada,
+            'compensacion_sitio': self.compensacion_sitio,
+            'permiso_fecha_limite': self.permiso_fecha_limite.isoformat() if self.permiso_fecha_limite else None,
+            'permiso_obligaciones': self.permiso_obligaciones,
+            'permiso_firmante1': self.permiso_firmante1,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }

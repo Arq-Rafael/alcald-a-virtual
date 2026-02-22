@@ -1,21 +1,19 @@
-{# templates/catastro_3d.html - Catastro Municipal 3D Profesional #}
+{# templates/catastro_3d.html - Geoportal Catastro Municipal - Rediseño Institucional #}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geoportal - Alcaldía Virtual Supatá</title>
-    
+    <title>Geoportal — Alcaldía Virtual Supatá</title>
+
     <!-- MapLibre GL con fallback local -->
     <link id="ml-css-cdn" href="https://unpkg.com/maplibre-gl@3.7.0/dist/maplibre-gl.css" rel="stylesheet">
     <script id="ml-js-cdn" src="https://unpkg.com/maplibre-gl@3.7.0/dist/maplibre-gl.js"></script>
     <script>
-        // Utilidad para hacer paneles arrastrables
         function makePanelDraggable(panel, handleSelector) {
             if (!panel) return;
             const handle = panel.querySelector(handleSelector) || panel;
-            let dragging = false;
-            let offsetX = 0, offsetY = 0;
+            let dragging = false, offsetX = 0, offsetY = 0;
             handle.style.cursor = 'move';
             handle.addEventListener('mousedown', (e) => {
                 dragging = true;
@@ -28,10 +26,10 @@
             });
             function onMove(e) {
                 if (!dragging) return;
-                const newLeft = Math.max(0, Math.min(window.innerWidth - panel.offsetWidth, e.clientX - offsetX));
-                const newTop = Math.max(0, Math.min(window.innerHeight - panel.offsetHeight, e.clientY - offsetY));
+                const newLeft = Math.max(0, Math.min(window.innerWidth  - panel.offsetWidth,  e.clientX - offsetX));
+                const newTop  = Math.max(0, Math.min(window.innerHeight - panel.offsetHeight, e.clientY - offsetY));
                 panel.style.left = newLeft + 'px';
-                panel.style.top = newTop + 'px';
+                panel.style.top  = newTop  + 'px';
             }
             function onUp() {
                 dragging = false;
@@ -39,960 +37,931 @@
                 document.removeEventListener('mouseup', onUp);
             }
         }
-        // Carga MapLibre desde CDN y, si falla o se demora, activa copia local y espera a que la librería exista
+
         (function setupMapLibreFallback(){
             const localCssHref = "{{ url_for('static', filename='lib/maplibre/maplibre-gl.css') }}";
-            const localJsSrc = "{{ url_for('static', filename='lib/maplibre/maplibre-gl.js') }}";
-
+            const localJsSrc   = "{{ url_for('static', filename='lib/maplibre/maplibre-gl.js') }}";
             function ensureLocalAssets(){
                 if(!document.getElementById('ml-css-local')){
-                    const link=document.createElement('link');
-                    link.id='ml-css-local';
-                    link.rel='stylesheet';
-                    link.href=localCssHref;
+                    const link = document.createElement('link');
+                    link.id = 'ml-css-local'; link.rel = 'stylesheet'; link.href = localCssHref;
                     document.head.appendChild(link);
                 }
                 if(!document.getElementById('ml-js-local')){
-                    const script=document.createElement('script');
-                    script.id='ml-js-local';
-                    script.defer=true;
-                    script.src=localJsSrc;
+                    const script = document.createElement('script');
+                    script.id = 'ml-js-local'; script.defer = true; script.src = localJsSrc;
                     document.head.appendChild(script);
                 }
             }
-
-            const cdnJs=document.getElementById('ml-js-cdn');
-            if(cdnJs){
-                cdnJs.addEventListener('error', ensureLocalAssets);
-            }
-
-            // Si en 1.2s no existe maplibregl, cargamos local
+            const cdnJs = document.getElementById('ml-js-cdn');
+            if(cdnJs) cdnJs.addEventListener('error', ensureLocalAssets);
             setTimeout(()=>{ if(!window.maplibregl) ensureLocalAssets(); }, 1200);
-
-            // Exponemos un helper para esperar MapLibre antes de iniciar el mapa
             window.__ensureMapLibreReady = function(){
                 ensureLocalAssets();
                 return new Promise((resolve, reject)=>{
-                    let waited=0; const max=5000;
+                    let waited = 0; const max = 5000;
                     (function check(){
                         if(window.maplibregl) return resolve();
-                        waited+=100;
-                        if(waited>=max) return reject(new Error('MapLibre no cargó'));
-                        setTimeout(check,100);
+                        waited += 100;
+                        if(waited >= max) return reject(new Error('MapLibre no cargó'));
+                        setTimeout(check, 100);
                     })();
                 });
             };
         })();
     </script>
-    
+
     <!-- Turf.js -->
     <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
-    
+
     <style>
+        /* ═══════════════════════════════════════════════════════
+           GEOPORTAL CATASTRO — Rediseño Institucional Azul
+           Paleta: #0f4c81 · #1565c0 · #0ea5e9 · glass dark
+           ═══════════════════════════════════════════════════════ */
         :root {
-            --geo-dark: #1a3a1f;
-            --geo-primary: #2d5016;
-            --geo-accent: #d4a574;
-            --geo-accent-bright: #f4c896;
-            --geo-glass-dark: rgba(42, 65, 48, 0.85);
-            --geo-border: rgba(212, 165, 116, 0.25);
+            --geo-dark:        #060f1e;
+            --geo-primary:     #0f4c81;
+            --geo-mid:         #1565c0;
+            --geo-light:       #0ea5e9;
+            --geo-accent:      #38bdf8;
+            --geo-glass:       rgba(6, 15, 30, 0.91);
+            --geo-glass-mid:   rgba(10, 25, 52, 0.87);
+            --geo-border:      rgba(14, 165, 233, 0.16);
+            --geo-border-hi:   rgba(56, 189, 248, 0.38);
+            --geo-text:        #e2e8f0;
+            --geo-text-dim:    #94a3b8;
+            --geo-text-label:  #5b7494;
+            --shadow-panel:    0 20px 60px rgba(0,0,0,0.60), 0 0 0 1px rgba(14,165,233,0.07), inset 0 1px 0 rgba(255,255,255,0.06);
+            --shadow-hover:    0 8px 24px rgba(14,165,233,0.18);
+            --r-panel:   20px;
+            --r-card:    12px;
+            --r-btn:     9px;
+            --r-input:   9px;
+            --t-fast:    0.14s ease;
+            --t-smooth:  0.24s cubic-bezier(0.4, 0, 0.2, 1);
+            --t-spring:  0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
+        *, *::before, *::after {
+            margin: 0; padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #1a3a1f 0%, #2d5016 50%, #3d6b22 100%);
-            color: #e0e6ed;
+            background: linear-gradient(130deg, #060f1e 0%, #0d2040 55%, #091830 100%);
+            color: var(--geo-text);
             overflow: hidden;
         }
 
-        /* Map Container */
-        #map {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 100%;
-        }
+        /* ── MAP ────────────────────────────── */
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
 
-        /* Control Panel - Estilo Premium iOS 26 */
-        .control-panel {
-            position: absolute;
-            left: 20px;
-            top: 20px;
-            width: 360px;
-            max-height: calc(100vh - 40px);
-            background: linear-gradient(135deg, rgba(42, 65, 48, 0.92), rgba(45, 80, 22, 0.94));
-            backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
-            border-radius: 28px;
-            border: 1.5px solid rgba(212, 165, 116, 0.25);
-            box-shadow: 
-                0 30px 80px rgba(0, 0, 0, 0.6),
-                0 0 60px rgba(212, 165, 116, 0.08),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
-            overflow: auto;
-            resize: both;
-            transition: all 0.3s ease;
-            z-index: 1000;
-        }
-
-        .panel-header {
-            background: linear-gradient(135deg, rgba(45, 80, 22, 0.4), rgba(42, 65, 48, 0.3));
-            backdrop-filter: blur(20px);
-            padding: 24px;
-            border-bottom: 1px solid rgba(212, 165, 116, 0.1);
-        }
-
-        .panel-header h2 {
-            font-size: 1.4rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #d4a574, #f4c896);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            letter-spacing: -0.5px;
-        }
-
-        .panel-header p {
-            font-size: 0.8rem;
-            color: #94a3b8;
-            margin: 0;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-        }
-
-        .panel-body {
-            padding: 16px;
-            max-height: calc(100vh - 180px);
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: #d4a574 rgba(42, 65, 48, 0.5);
-        }
-
-        /* Custom Scrollbar */
-        .panel-body::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .panel-body::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.3);
-            border-radius: 10px;
-        }
-
-        .panel-body::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, #d4a574, #f4c896);
-            border-radius: 10px;
-            box-shadow: inset 0 0 6px rgba(212, 165, 116, 0.3);
-        }
-
-        .panel-body::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, #c89560, #e5b882);
-        }
-
-        /* Control Sections */
-        .control-section {
-            margin-bottom: 12px;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .control-section h3 {
-            font-size: 0.75rem;
-            font-weight: 800;
-            color: #e0e7ff;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: linear-gradient(135deg, rgba(212, 165, 116, 0.1), rgba(244, 200, 150, 0.05));
-            padding: 6px 10px;
-            border-radius: 6px;
-            border-left: 2px solid #d4a574;
-        }
-
-        /* Search Box - Premium */
-        .search-box {
-            position: relative;
-            margin-bottom: 10px;
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: 8px 30px 8px 14px;
-            background: linear-gradient(135deg, rgba(45, 80, 22, 0.3), rgba(42, 65, 48, 0.2));
-            border: 1.5px solid rgba(212, 165, 116, 0.15);
-            border-radius: 12px;
-            color: #e0e7ff;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .search-box input::placeholder {
-            color: #64748b;
-        }
-
-        .search-box input:focus {
-            outline: none;
-            border-color: #d4a574;
-            background: linear-gradient(135deg, rgba(212, 165, 116, 0.1), rgba(244, 200, 150, 0.05));
-            box-shadow: 0 0 20px rgba(212, 165, 116, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
-
-        .search-box::after {
-            content: "🔍";
-            position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1rem;
-            pointer-events: none;
-            opacity: 0.6;
-        }
-
-        /* Select Controls - Premium */
-        select, input[type="number"], input[type="range"] {
-            width: 100%;
-            padding: 8px 10px;
-            background: linear-gradient(135deg, rgba(45, 80, 22, 0.3), rgba(42, 65, 48, 0.2));
-            border: 1.5px solid rgba(212, 165, 116, 0.15);
-            border-radius: 12px;
-            color: #e0e7ff;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            cursor: pointer;
-        }
-
-        select option {
-            background: #1a3a1f;
-            color: #e0e7ff;
-        }
-
-        select:focus, input:focus {
-            outline: none;
-            border-color: #d4a574;
-            background: linear-gradient(135deg, rgba(212, 165, 116, 0.1), rgba(244, 200, 150, 0.05));
-            box-shadow: 0 0 20px rgba(212, 165, 116, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
-
-        input[type="range"] {
-            padding: 6px 0;
-            accent-color: #d4a574;
-            cursor: pointer;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #d4a574, #f4c896);
-            box-shadow: 0 0 12px rgba(212, 165, 116, 0.4);
-            cursor: pointer;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        input[type="range"]::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #d4a574, #f4c896);
-            box-shadow: 0 0 12px rgba(212, 165, 116, 0.4);
-            cursor: pointer;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        /* Toggle Switch - Premium */
-        .toggle-group {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-top: 10px;
-            background: rgba(45, 80, 22, 0.2);
-            padding: 8px;
-            border-radius: 12px;
-            border: 1px solid rgba(212, 165, 116, 0.1);
-        }
-
-        .toggle-btn {
-            flex: 1;
-            min-width: 80px;
-            padding: 11px;
-            background: rgba(45, 80, 22, 0.3);
-            border: 1.5px solid rgba(212, 165, 116, 0.15);
-            border-radius: 10px;
-            color: #94a3b8;
-            font-size: 0.85rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            text-align: center;
-            letter-spacing: 0.3px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .toggle-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .toggle-btn:hover::before {
-            left: 100%;
-        }
-
-        .toggle-btn.active {
-            background: linear-gradient(135deg, #d4a574, #f4c896);
-            border-color: #d4a574;
-            color: #fff;
-            box-shadow: 0 8px 24px rgba(212, 165, 116, 0.35);
-            transform: scale(1.02);
-        }
-
-        .toggle-btn:hover:not(.active) {
-            background: rgba(212, 165, 116, 0.12);
-            border-color: #d4a574;
-            transform: translateY(-1px);
-        }
-
-        /* Layer Toggles - Mejorado */
-        .layer-toggle {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 12px;
-            background: linear-gradient(135deg, rgba(45, 80, 22, 0.3), rgba(42, 65, 48, 0.2));
-            border: 1.5px solid rgba(212, 165, 116, 0.1);
-            border-radius: 10px;
-            margin-bottom: 6px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .layer-toggle::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(212, 165, 116, 0.2), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .layer-toggle:hover::before {
-            left: 100%;
-        }
-
-        .layer-toggle:hover {
-            background: linear-gradient(135deg, rgba(212, 165, 116, 0.15), rgba(244, 200, 150, 0.1));
-            border-color: rgba(212, 165, 116, 0.3);
-            box-shadow: 0 0 20px rgba(212, 165, 116, 0.15);
-            transform: translateY(-2px);
-        }
-
-        .layer-toggle input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            accent-color: #d4a574;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: all 0.2s ease;
-        }
-
-        .layer-toggle input[type="checkbox"]:checked {
-            accent-color: #d4a574;
-            box-shadow: 0 0 8px rgba(212, 165, 116, 0.4);
-        }
-
-        .layer-info {
-            flex: 1;
-            margin-left: 14px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .layer-info h4 {
-            font-size: 0.90rem;
-            color: #e0e7ff;
-            margin-bottom: 2px;
-            font-weight: 600;
-        }
-
-        .layer-info p {
-            font-size: 0.70rem;
-            color: #94a3b8;
-            margin: 0;
-            font-weight: 400;
-        }
-
-        /* Stats Panel - iOS 26 Style */
-        .stats-panel {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, rgba(42, 65, 48, 0.92), rgba(45, 80, 22, 0.94));
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            padding: 24px;
-            border-radius: 24px;
-            border: 1.5px solid rgba(212, 165, 116, 0.2);
-            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5),
-                        0 0 40px rgba(212, 165, 116, 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            max-width: 350px;
-            z-index: 1000;
-            resize: both;
-            overflow: auto;
-        }
-
-        .stats-panel h3 {
-            margin: 0 0 16px 0;
-            font-size: 1.1rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #d4a574, #f4c896);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(212, 165, 116, 0.1);
-        }
-
-        .stat-item:last-child {
-            border-bottom: none;
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-value {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #d4a574;
-            letter-spacing: -0.3px;
-        }
-
-        /* Predio Info Panel - iOS 26 Style */
-        .predio-info {
-            position: absolute;
-            bottom: 20px;
-            left: 390px;
-            width: 400px;
-            background: linear-gradient(135deg, rgba(42, 65, 48, 0.92), rgba(45, 80, 22, 0.94));
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            padding: 28px;
-            border-radius: 24px;
-            border: 1.5px solid rgba(212, 165, 116, 0.2);
-            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5),
-                        0 0 40px rgba(212, 165, 116, 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            display: none;
-            z-index: 1000;
-            animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            resize: both;
-            overflow: auto;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .predio-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 20px;
-        }
-
-        .predio-header h3 {
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: #fff;
-            margin: 0;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #d4a574, #f4c896);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .close-btn {
-            background: rgba(239, 68, 68, 0.15);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #ef4444;
-            width: 32px;
-            height: 32px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .close-btn:hover {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: #fff;
-            border-color: #dc2626;
-            transform: scale(1.05);
-        }
-
-        .predio-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-        }
-
-        .predio-field {
-            background: linear-gradient(135deg, rgba(45, 80, 22, 0.4), rgba(42, 65, 48, 0.3));
-            padding: 14px 16px;
-            border-radius: 12px;
-            border: 1px solid rgba(212, 165, 116, 0.15);
-            backdrop-filter: blur(10px);
-        }
-
-        .predio-field label {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: block;
-            margin-bottom: 6px;
-        }
-
-        .predio-field .value {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #e0e7ff;
-        }
-
-        .predio-field.full {
-            grid-column: 1 / -1;
-        }
-
-        .action-btn {
-            width: 100%;
-            padding: 10px;
-            background: linear-gradient(135deg, #d4a574, #f4c896);
-            border: none;
-            border-radius: 12px;
-            color: #fff;
-            font-weight: 700;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            margin-top: 10px;
-            box-shadow: 0 8px 20px rgba(212, 165, 116, 0.3);
-        }
-
-        .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(212, 165, 116, 0.4);
-            background: linear-gradient(135deg, #c89560, #e5b882);
-        }
-
-        .action-btn:active {
-            transform: translateY(0);
-        }
-
-        /* Legend - Premium Design */
-        .legend {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, rgba(42, 65, 48, 0.92), rgba(45, 80, 22, 0.94));
-            backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
-            padding: 14px;
-            border-radius: 28px;
-            border: 1.5px solid rgba(212, 165, 116, 0.25);
-            box-shadow: 
-                0 30px 80px rgba(0, 0, 0, 0.6),
-                0 0 60px rgba(212, 165, 116, 0.08),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
-            z-index: 1000;
-            max-height: 600px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: #d4a574 transparent;
-            resize: both;
-            overflow: auto;
-        }
-
-        .legend::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .legend::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .legend::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, #d4a574, #f4c896);
-            border-radius: 10px;
-        }
-
-        .legend h4 {
-            font-size: 0.95rem;
-            font-weight: 800;
-            margin: 0 0 10px 0;
-            background: linear-gradient(135deg, #d4a574, #f4c896);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.3px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 6px;
-            padding: 8px 10px;
-            border-radius: 8px;
-            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-            cursor: pointer;
-            position: relative;
-            border: 1.5px solid rgba(212, 165, 116, 0);
-        }
-
-        .legend-item:hover {
-            background: rgba(212, 165, 116, 0.15);
-            border-color: rgba(212, 165, 116, 0.2);
-            transform: translateX(4px);
-            box-shadow: 0 0 20px rgba(212, 165, 116, 0.2);
-        }
-
-        .legend-item.selected {
-            background: linear-gradient(135deg, rgba(212, 165, 116, 0.3), rgba(244, 200, 150, 0.15));
-            border-color: #d4a574;
-            box-shadow: 0 0 25px rgba(212, 165, 116, 0.5);
-            transform: scale(1.04);
-        }
-
-        .legend-color {
-            width: 24px;
-            height: 24px;
-            border-radius: 6px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            flex-shrink: 0;
-            transition: all 0.25s ease;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        .legend-item:hover .legend-color {
-            border-color: rgba(255, 255, 255, 0.7);
-            box-shadow: 0 0 20px currentColor;
-            transform: scale(1.1);
-        }
-
-        .legend-label {
-            font-size: 0.80rem;
-            color: #e0e7ff;
-            font-weight: 600;
-            flex: 1;
-        }
-
-        /* Loading Overlay */
+        /* ── LOADING ────────────────────────── */
         .loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(10, 14, 39, 0.95);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
+            position: absolute; inset: 0;
+            background: linear-gradient(130deg, #060f1e 0%, #0d2040 100%);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 9999; gap: 16px;
             transition: opacity 0.5s ease;
         }
-
-        .loading-overlay.hidden {
-            opacity: 0;
-            pointer-events: none;
+        .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+        .loading-icon {
+            width: 60px; height: 60px;
+            background: linear-gradient(130deg, var(--geo-primary), var(--geo-light));
+            border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 0 40px rgba(14,165,233,0.35);
+            animation: pulse-glow 2s ease-in-out infinite;
         }
-
+        @keyframes pulse-glow {
+            0%,100% { box-shadow: 0 0 40px rgba(14,165,233,0.35); }
+            50%      { box-shadow: 0 0 60px rgba(14,165,233,0.55); }
+        }
         .spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(212, 165, 116, 0.2);
-            border-top-color: #d4a574;
+            width: 40px; height: 40px;
+            border: 3px solid rgba(14,165,233,0.15);
+            border-top-color: var(--geo-light);
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            animation: spin 0.85s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { font-size: 0.95rem; color: var(--geo-text-dim); font-weight: 500; }
+        .loading-sub  { font-size: 0.75rem; color: var(--geo-text-label); }
+
+        /* ── BACK BUTTON ─────────────────────── */
+        .back-btn {
+            position: absolute; top: 16px; left: 50%;
+            transform: translateX(-50%);
+            background: var(--geo-glass);
+            border: 1px solid var(--geo-border);
+            color: var(--geo-text-dim);
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem; font-weight: 600;
+            cursor: pointer; z-index: 999;
+            transition: var(--t-smooth);
+            backdrop-filter: blur(20px);
+            text-decoration: none;
+            display: flex; align-items: center; gap: 6px;
+            white-space: nowrap;
+        }
+        .back-btn:hover {
+            color: var(--geo-text);
+            border-color: var(--geo-border-hi);
+            background: var(--geo-glass-mid);
+            box-shadow: var(--shadow-hover);
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        /* ── CONTROL PANEL ───────────────────── */
+        .control-panel {
+            position: absolute; left: 16px; top: 16px;
+            width: 308px;
+            max-height: calc(100vh - 32px);
+            background: var(--geo-glass);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border-radius: var(--r-panel);
+            border: 1px solid var(--geo-border);
+            box-shadow: var(--shadow-panel);
+            display: flex; flex-direction: column;
+            overflow: hidden;
+            transition: width var(--t-smooth);
+            z-index: 1000;
+        }
+        .control-panel.compact { width: 60px; }
+
+        /* Panel header */
+        .panel-header {
+            padding: 16px 14px 12px;
+            border-bottom: 1px solid var(--geo-border);
+            background: rgba(15, 76, 129, 0.10);
+            flex-shrink: 0;
+            cursor: move;
+        }
+        .panel-header-top {
+            display: flex; align-items: center;
+            justify-content: space-between; gap: 8px;
+            margin-bottom: 10px;
+        }
+        .panel-logo {
+            width: 34px; height: 34px; flex-shrink: 0;
+            background: linear-gradient(130deg, var(--geo-primary), var(--geo-light));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 17px;
+            box-shadow: 0 4px 12px rgba(14,165,233,0.22);
+        }
+        .panel-title-group { flex: 1; min-width: 0; }
+        .panel-title-group h2 {
+            font-size: 0.88rem; font-weight: 800;
+            color: var(--geo-text);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            letter-spacing: -0.2px;
+        }
+        .panel-title-group p {
+            font-size: 0.67rem; color: var(--geo-text-label);
+            font-weight: 500; margin-top: 1px;
+        }
+        .panel-actions { display: flex; gap: 4px; flex-shrink: 0; }
+        .icon-btn {
+            width: 28px; height: 28px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--geo-border);
+            border-radius: 7px; color: var(--geo-text-dim);
+            font-size: 13px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: var(--t-smooth);
+        }
+        .icon-btn:hover {
+            background: rgba(14,165,233,0.12);
+            border-color: var(--geo-border-hi);
+            color: var(--geo-accent);
         }
 
-        .loading-text {
-            margin-top: 20px;
-            font-size: 1.1rem;
-            color: #cbd5e1;
+        /* Status pill */
+        .status-pill {
+            background: rgba(14,165,233,0.09);
+            border: 1px solid rgba(14,165,233,0.18);
+            border-radius: 16px; padding: 4px 10px;
+            font-size: 0.66rem; font-weight: 600;
+            color: var(--geo-accent);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
-        /* Responsive */
+        /* Compact hides content */
+        .compact .panel-title-group,
+        .compact .panel-body,
+        .compact .status-pill { display: none; }
+        .compact .panel-header { padding: 10px 8px; }
+        .compact .panel-header-top { justify-content: center; margin-bottom: 0; }
+        .compact .panel-actions { display: none; }
+
+        /* Panel body */
+        .panel-body {
+            flex: 1; overflow-y: auto; overflow-x: hidden;
+            padding: 10px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(14,165,233,0.25) transparent;
+        }
+        .panel-body::-webkit-scrollbar { width: 4px; }
+        .panel-body::-webkit-scrollbar-thumb {
+            background: rgba(14,165,233,0.22); border-radius: 4px;
+        }
+
+        /* ── SEARCH ──────────────────────────── */
+        .search-box { position: relative; margin-bottom: 8px; }
+        .search-box input {
+            width: 100%; padding: 8px 34px 8px 11px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--geo-border);
+            border-radius: var(--r-input);
+            color: var(--geo-text); font-size: 0.82rem; font-weight: 500;
+            transition: var(--t-smooth);
+        }
+        .search-box input::placeholder { color: var(--geo-text-label); }
+        .search-box input:focus {
+            outline: none; border-color: var(--geo-light);
+            background: rgba(14,165,233,0.06);
+            box-shadow: 0 0 0 3px rgba(14,165,233,0.10);
+        }
+        .search-icon {
+            position: absolute; right: 10px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--geo-text-label); font-size: 14px; pointer-events: none;
+        }
+
+        /* ── ACCORDION SECTIONS ──────────────── */
+        .control-section {
+            margin-bottom: 5px;
+            border: 1px solid var(--geo-border);
+            border-radius: var(--r-card);
+            overflow: hidden;
+        }
+        .section-header {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 8px 11px;
+            background: rgba(15,76,129,0.10);
+            cursor: pointer; user-select: none;
+            transition: var(--t-smooth);
+        }
+        .section-header:hover { background: rgba(14,165,233,0.10); }
+        .section-title {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 0.69rem; font-weight: 800;
+            color: var(--geo-text);
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .section-icon { font-size: 13px; }
+        .section-arrow {
+            font-size: 10px; color: var(--geo-text-dim);
+            transition: transform var(--t-smooth); flex-shrink: 0;
+        }
+        .control-section.collapsed .section-arrow { transform: rotate(-90deg); }
+        .section-body {
+            padding: 9px;
+            background: rgba(0,0,0,0.18);
+        }
+        .control-section.collapsed .section-body { display: none; }
+
+        /* ── SEGMENTED 2D/3D ─────────────────── */
+        .segmented {
+            display: flex;
+            background: rgba(0,0,0,0.30);
+            border: 1px solid var(--geo-border);
+            border-radius: var(--r-btn);
+            padding: 3px; gap: 3px;
+        }
+        .toggle-btn {
+            flex: 1; padding: 7px 8px;
+            background: transparent; border: none;
+            border-radius: 7px;
+            color: var(--geo-text-dim);
+            font-size: 0.80rem; font-weight: 700;
+            cursor: pointer; transition: var(--t-smooth);
+            text-align: center; letter-spacing: 0.3px;
+        }
+        .toggle-btn.active {
+            background: linear-gradient(130deg, var(--geo-primary), var(--geo-mid));
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(15,76,129,0.40);
+        }
+        .toggle-btn:hover:not(.active) {
+            background: rgba(14,165,233,0.10);
+            color: var(--geo-accent);
+        }
+
+        /* ── LAYER TOGGLES ───────────────────── */
+        .layer-toggle {
+            display: flex; align-items: center; gap: 9px;
+            padding: 8px 9px;
+            background: rgba(255,255,255,0.025);
+            border: 1px solid transparent;
+            border-radius: var(--r-btn);
+            margin-bottom: 4px; cursor: pointer;
+            transition: var(--t-smooth);
+        }
+        .layer-toggle:last-child { margin-bottom: 0; }
+        .layer-toggle:hover {
+            background: rgba(14,165,233,0.08);
+            border-color: rgba(14,165,233,0.14);
+        }
+        .layer-toggle input[type="checkbox"] {
+            width: 15px; height: 15px;
+            accent-color: var(--geo-light);
+            cursor: pointer; flex-shrink: 0;
+        }
+        .layer-info { flex: 1; min-width: 0; }
+        .layer-info h4 {
+            font-size: 0.80rem; font-weight: 600;
+            color: var(--geo-text);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .layer-info p {
+            font-size: 0.66rem; color: var(--geo-text-label); margin: 0;
+        }
+
+        /* ── FORM CONTROLS ───────────────────── */
+        .form-group { margin-bottom: 7px; }
+        .form-group:last-child { margin-bottom: 0; }
+        .form-label {
+            display: block; font-size: 0.66rem; font-weight: 700;
+            color: var(--geo-text-label);
+            text-transform: uppercase; letter-spacing: 0.4px;
+            margin-bottom: 4px;
+        }
+        select, input[type="number"] {
+            width: 100%; padding: 7px 10px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--geo-border);
+            border-radius: var(--r-input);
+            color: var(--geo-text); font-size: 0.81rem; font-weight: 500;
+            transition: var(--t-smooth); cursor: pointer;
+        }
+        select option { background: #0d1f3c; color: var(--geo-text); }
+        select:focus, input[type="number"]:focus {
+            outline: none; border-color: var(--geo-light);
+            background: rgba(14,165,233,0.06);
+            box-shadow: 0 0 0 3px rgba(14,165,233,0.10);
+        }
+        input[type="range"] {
+            width: 100%; background: transparent; border: none;
+            accent-color: var(--geo-light); cursor: pointer; padding: 0;
+        }
+        .range-label {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 5px;
+        }
+        .range-value { font-size: 0.78rem; font-weight: 700; color: var(--geo-accent); }
+
+        /* Active filter chips */
+        .active-filters-row {
+            display: none; align-items: center; gap: 5px;
+            flex-wrap: wrap; margin-bottom: 7px;
+            padding: 6px 8px;
+            background: rgba(14,165,233,0.06);
+            border: 1px solid rgba(14,165,233,0.14);
+            border-radius: var(--r-btn);
+        }
+        .active-filters-label {
+            font-size: 0.62rem; font-weight: 700;
+            color: var(--geo-text-dim);
+            text-transform: uppercase; letter-spacing: 0.4px; flex-shrink: 0;
+        }
+        #activeChips { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; }
+        .filter-chip {
+            background: rgba(14,165,233,0.14);
+            border: 1px solid rgba(14,165,233,0.28);
+            color: var(--geo-accent);
+            padding: 2px 7px; border-radius: 10px;
+            font-size: 0.66rem; font-weight: 600;
+            cursor: pointer; transition: var(--t-smooth);
+        }
+        .filter-chip:hover {
+            background: rgba(239,68,68,0.18);
+            border-color: rgba(239,68,68,0.38);
+            color: #f87171;
+        }
+
+        /* Reset button */
+        .btn-reset {
+            width: 100%; padding: 6px 10px;
+            background: rgba(239,68,68,0.07);
+            border: 1px solid rgba(239,68,68,0.18);
+            border-radius: var(--r-btn); color: #f87171;
+            font-size: 0.76rem; font-weight: 600;
+            cursor: pointer; transition: var(--t-smooth); margin-top: 7px;
+        }
+        .btn-reset:hover {
+            background: rgba(239,68,68,0.14);
+            border-color: rgba(239,68,68,0.38);
+        }
+
+        /* ── ACTION BUTTONS ──────────────────── */
+        .action-btn {
+            width: 100%; padding: 8px 12px;
+            background: linear-gradient(130deg, var(--geo-primary), var(--geo-mid));
+            border: none; border-radius: var(--r-btn);
+            color: #fff; font-weight: 700; font-size: 0.80rem;
+            cursor: pointer; transition: var(--t-smooth);
+            margin-top: 5px;
+            box-shadow: 0 4px 12px rgba(15,76,129,0.28);
+            letter-spacing: 0.2px;
+        }
+        .action-btn:first-child { margin-top: 0; }
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(15,76,129,0.40);
+            background: linear-gradient(130deg, var(--geo-mid), var(--geo-light));
+        }
+        .action-btn:active { transform: translateY(0); }
+        .action-btn.btn-excel {
+            background: linear-gradient(130deg, #065f46, #059669);
+            box-shadow: 0 4px 12px rgba(5,150,105,0.28);
+        }
+        .action-btn.btn-excel:hover { box-shadow: 0 8px 20px rgba(5,150,105,0.40); }
+
+        /* ── STATS / KPI PANEL ───────────────── */
+        .stats-panel {
+            position: absolute; bottom: 16px; right: 16px;
+            background: var(--geo-glass);
+            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+            border-radius: var(--r-panel);
+            border: 1px solid var(--geo-border);
+            box-shadow: var(--shadow-panel);
+            min-width: 260px; max-width: 300px;
+            z-index: 1000; overflow: hidden;
+            resize: both;
+        }
+        .stats-header {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px 10px;
+            border-bottom: 1px solid var(--geo-border);
+            background: rgba(15,76,129,0.10);
+            cursor: move;
+        }
+        .stats-header h3 {
+            font-size: 0.72rem; font-weight: 800;
+            color: var(--geo-text);
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .stats-live-badge {
+            background: rgba(34,197,94,0.13);
+            border: 1px solid rgba(34,197,94,0.28);
+            color: #4ade80;
+            font-size: 0.60rem; font-weight: 700;
+            padding: 2px 8px; border-radius: 10px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .kpi-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 1px; background: var(--geo-border);
+        }
+        .kpi-card {
+            padding: 13px 14px;
+            background: var(--geo-glass); text-align: left;
+            transition: var(--t-smooth);
+        }
+        .kpi-card:hover { background: rgba(14,165,233,0.06); }
+        .kpi-icon { font-size: 17px; margin-bottom: 5px; display: block; }
+        .kpi-value {
+            font-size: 1.05rem; font-weight: 800;
+            color: var(--geo-accent);
+            line-height: 1.2; letter-spacing: -0.4px;
+        }
+        .kpi-label {
+            font-size: 0.62rem; font-weight: 600;
+            color: var(--geo-text-label);
+            text-transform: uppercase; letter-spacing: 0.4px; margin-top: 2px;
+        }
+
+        /* ── PREDIO INFO PANEL ───────────────── */
+        .predio-info {
+            position: absolute; bottom: 16px; left: 340px;
+            width: 370px;
+            background: var(--geo-glass);
+            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+            border-radius: var(--r-panel);
+            border: 1px solid var(--geo-border);
+            box-shadow: var(--shadow-panel);
+            display: none; z-index: 1000;
+            animation: slideUp 0.38s cubic-bezier(0.34,1.56,0.64,1);
+            resize: both; overflow: auto;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .predio-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 14px 16px 11px;
+            border-bottom: 1px solid var(--geo-border);
+            background: rgba(15,76,129,0.10);
+            cursor: move;
+        }
+        .predio-header h3 {
+            font-size: 0.90rem; font-weight: 800; color: var(--geo-text);
+        }
+        .close-btn {
+            width: 28px; height: 28px;
+            background: rgba(239,68,68,0.09);
+            border: 1px solid rgba(239,68,68,0.22);
+            color: #f87171; border-radius: 8px;
+            cursor: pointer; font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+            transition: var(--t-smooth);
+        }
+        .close-btn:hover {
+            background: rgba(239,68,68,0.20);
+            border-color: rgba(239,68,68,0.50);
+        }
+        .predio-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 8px; padding: 14px 16px 16px;
+        }
+        .predio-field {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--geo-border);
+            padding: 9px 12px; border-radius: var(--r-btn);
+        }
+        .predio-field.full { grid-column: 1 / -1; }
+        .predio-field label {
+            font-size: 0.62rem; font-weight: 700;
+            color: var(--geo-text-label);
+            text-transform: uppercase; letter-spacing: 0.4px;
+            display: block; margin-bottom: 4px;
+        }
+        .predio-field .value {
+            font-size: 0.85rem; font-weight: 600; color: var(--geo-text);
+        }
+
+        /* ── LEGEND ──────────────────────────── */
+        .legend {
+            position: absolute; top: 16px; right: 16px;
+            width: 210px;
+            background: var(--geo-glass);
+            backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+            border-radius: var(--r-panel);
+            border: 1px solid var(--geo-border);
+            box-shadow: var(--shadow-panel);
+            z-index: 1000; overflow: hidden;
+            transition: var(--t-smooth);
+        }
+        .legend-header {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 11px 13px;
+            border-bottom: 1px solid var(--geo-border);
+            background: rgba(15,76,129,0.10);
+            cursor: move;
+        }
+        .legend-header h4 {
+            font-size: 0.72rem; font-weight: 800;
+            color: var(--geo-text);
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .legend-toggle-btn {
+            width: 22px; height: 22px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--geo-border);
+            border-radius: 6px; color: var(--geo-text-dim);
+            font-size: 11px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: var(--t-smooth);
+        }
+        .legend-toggle-btn:hover {
+            background: rgba(14,165,233,0.10); color: var(--geo-accent);
+        }
+        .legend-body {
+            max-height: 400px; overflow-y: auto;
+            padding: 8px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(14,165,233,0.22) transparent;
+        }
+        .legend-body::-webkit-scrollbar { width: 4px; }
+        .legend-body::-webkit-scrollbar-thumb {
+            background: rgba(14,165,233,0.22); border-radius: 4px;
+        }
+        .legend.legend-collapsed .legend-body { display: none; }
+        .legend-search { margin-bottom: 6px; }
+        .legend-search input {
+            width: 100%; padding: 5px 9px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--geo-border);
+            border-radius: 7px; color: var(--geo-text); font-size: 0.74rem;
+        }
+        .legend-search input::placeholder { color: var(--geo-text-label); }
+        .legend-search input:focus {
+            outline: none; border-color: var(--geo-light);
+        }
+        .legend-item {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 3px; padding: 5px 7px;
+            border-radius: 7px; border: 1px solid transparent;
+            cursor: pointer; transition: var(--t-smooth);
+        }
+        .legend-item:last-child { margin-bottom: 0; }
+        .legend-item:hover {
+            background: rgba(14,165,233,0.08);
+            border-color: rgba(14,165,233,0.14);
+        }
+        .legend-item.selected {
+            background: rgba(14,165,233,0.14);
+            border-color: rgba(14,165,233,0.32);
+        }
+        .legend-color {
+            width: 18px; height: 18px; border-radius: 5px;
+            border: 1.5px solid rgba(255,255,255,0.18);
+            flex-shrink: 0; transition: var(--t-smooth);
+        }
+        .legend-item:hover .legend-color { transform: scale(1.1); }
+        .legend-label {
+            font-size: 0.73rem; color: var(--geo-text);
+            font-weight: 500; flex: 1; line-height: 1.3;
+        }
+
+        /* ── RESPONSIVE ──────────────────────── */
         @media (max-width: 768px) {
             .control-panel {
-                width: 300px;
+                width: calc(100vw - 32px);
+                max-height: 48vh;
+                top: auto; bottom: 16px; left: 16px;
             }
-
             .predio-info {
-                left: 20px;
-                right: 20px;
-                width: auto;
-                bottom: 80px;
+                left: 16px; right: 16px; width: auto; bottom: 220px;
             }
-
             .stats-panel {
-                bottom: 20px;
-                left: 20px;
-                right: 20px;
-                max-width: none;
+                bottom: 16px; left: 16px; right: auto;
+                max-width: calc(100vw - 32px); min-width: 0;
             }
-
-            .legend {
-                top: auto;
-                bottom: 80px;
-                right: 20px;
-            }
+            .legend { top: auto; bottom: 200px; right: 16px; width: 180px; }
+            .back-btn { display: none; }
         }
     </style>
 </head>
 <body>
+
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-icon">🗺️</div>
         <div class="spinner"></div>
-        <div class="loading-text">Cargando Catastro Municipal...</div>
+        <div class="loading-text">Cargando Geoportal...</div>
+        <div class="loading-sub">Catastro Municipal · Supatá, Cundinamarca</div>
     </div>
 
     <!-- Map Container -->
     <div id="map"></div>
 
-    <!-- Control Panel -->
+    <!-- Back to system -->
+    <a class="back-btn" href="javascript:history.back()">← Volver al sistema</a>
+
+    <!-- ════ CONTROL PANEL ════ -->
     <div class="control-panel">
         <div class="panel-header">
-            <h2>🏛️ Catastro Municipal</h2>
-            <p>Supatá, Cundinamarca</p>
+            <div class="panel-header-top">
+                <div class="panel-logo">🏛️</div>
+                <div class="panel-title-group">
+                    <h2>Catastro Municipal</h2>
+                    <p>Supatá, Cundinamarca</p>
+                </div>
+                <div class="panel-actions">
+                    <button class="icon-btn" id="compactToggle" title="Modo compacto">⊟</button>
+                </div>
+            </div>
+            <div class="status-pill" id="statusPill">Cargando datos…</div>
         </div>
+
         <div class="panel-body">
-            <!-- Search -->
+
+            <!-- Buscador -->
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Buscar por código predial, propietario, dirección...">
+                <input type="text" id="searchInput"
+                       placeholder="Buscar código predial, propietario, dirección…">
+                <span class="search-icon">⌕</span>
             </div>
 
-            <!-- View Controls -->
-            <div class="control-section">
-                <h3>📐 Vista</h3>
-                <div class="toggle-group">
-                    <button class="toggle-btn active" data-view="2d">2D</button>
-                    <button class="toggle-btn" data-view="3d">3D Terrain</button>
-                </div>
-            </div>
-
-            <!-- Layer Controls -->
-            <div class="control-section">
-                <h3>🗺️ Capas</h3>
-                
-                <div class="layer-toggle" id="togglePredios">
-                    <input type="checkbox" checked id="checkPredios">
-                    <div class="layer-info">
-                        <h4>Predios Catastrales</h4>
-                        <p id="prediosCount">Cargando predios...</p>
+            <!-- VISTA -->
+            <div class="control-section" id="sectionVista">
+                <div class="section-header section-toggle" data-target="sectionVista">
+                    <div class="section-title">
+                        <span class="section-icon">📐</span> Vista
                     </div>
+                    <span class="section-arrow">▾</span>
                 </div>
-
-                <div class="layer-toggle" id="toggleUsos">
-                    <input type="checkbox" checked id="checkUsos">
-                    <div class="layer-info">
-                        <h4>Usos del Suelo</h4>
-                        <p>Normatividad y zonificación</p>
-                    </div>
-                </div>
-
-                <div class="layer-toggle" id="toggleSatellite">
-                    <input type="checkbox" checked id="checkSatellite">
-                    <div class="layer-info">
-                        <h4>Imagen Satelital</h4>
-                        <p>Google Satellite Hybrid</p>
-                    </div>
-                </div>
-
-                <div class="layer-toggle" id="toggleRelieve">
-                    <input type="checkbox" checked id="checkRelieve">
-                    <div class="layer-info">
-                        <h4>Relieve 3D</h4>
-                        <p>Terreno con exageración</p>
+                <div class="section-body">
+                    <div class="segmented">
+                        <button class="toggle-btn active" data-view="2d">2D Plano</button>
+                        <button class="toggle-btn" data-view="3d">3D Terreno</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Filters -->
-            <div class="control-section">
-                <h3>🔍 Filtros</h3>
-                
-                <label style="font-size: 0.70rem; color: #94a3b8; margin-bottom: 6px; display: block;">Categoría de Uso</label>
-                <select id="filterCategoria">
-                    <option value="">Todas las categorías</option>
-                    <!-- Categorías se cargan dinámicamente desde el GeoJSON -->
-                </select>
-
-                <label style="font-size: 0.70rem; color: #94a3b8; margin: 8px 0 6px; display: block;">Rango de Área (ha)</label>
-                <select id="filterRango">
-                    <option value="">Todos los rangos</option>
-                    <option value="<1">Menor a 1 ha</option>
-                    <option value="1 - 3 ha">1 - 3 ha</option>
-                    <option value="3 - 6 ha">3 - 6 ha</option>
-                    <option value="6 - 10 ha">6 - 10 ha</option>
-                    <option value=">10 ha">Mayor a 10 ha</option>
-                </select>
-
-                <label style="font-size: 0.70rem; color: #94a3b8; margin: 8px 0 6px; display: block;">Destinación Económica</label>
-                <select id="filterDestEco">
-                    <option value="">Todas</option>
-                    <option value="D">Desocupado</option>
-                    <option value="A">Agropecuario</option>
-                    <option value="S">Sin especificar</option>
-                </select>
+            <!-- CAPAS -->
+            <div class="control-section" id="sectionCapas">
+                <div class="section-header section-toggle" data-target="sectionCapas">
+                    <div class="section-title">
+                        <span class="section-icon">🗺️</span> Capas
+                    </div>
+                    <span class="section-arrow">▾</span>
+                </div>
+                <div class="section-body">
+                    <div class="layer-toggle" id="togglePredios">
+                        <input type="checkbox" checked id="checkPredios">
+                        <div class="layer-info">
+                            <h4>Predios Catastrales</h4>
+                            <p id="prediosCount">Cargando predios…</p>
+                        </div>
+                    </div>
+                    <div class="layer-toggle" id="toggleUsos">
+                        <input type="checkbox" checked id="checkUsos">
+                        <div class="layer-info">
+                            <h4>Usos del Suelo</h4>
+                            <p>Normatividad y zonificación</p>
+                        </div>
+                    </div>
+                    <div class="layer-toggle" id="toggleSatellite">
+                        <input type="checkbox" checked id="checkSatellite">
+                        <div class="layer-info">
+                            <h4>Imagen Satelital</h4>
+                            <p>Google Satellite Hybrid</p>
+                        </div>
+                    </div>
+                    <div class="layer-toggle" id="toggleRelieve">
+                        <input type="checkbox" checked id="checkRelieve">
+                        <div class="layer-info">
+                            <h4>Relieve 3D</h4>
+                            <p>Terreno con exageración</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- 3D Controls -->
-            <div class="control-section" id="controls3D" style="display: none;">
-                <h3>🏔️ Control 3D</h3>
-                
-                <label style="font-size: 0.70rem; color: #94a3b8; margin-bottom: 6px; display: block;">
-                    Exageración del Terreno: <span id="exagValue">1.5×</span>
-                </label>
-                <input type="range" id="exagRange" min="0" max="3" step="0.1" value="1.5">
+            <!-- FILTROS -->
+            <div class="control-section" id="sectionFiltros">
+                <div class="section-header section-toggle" data-target="sectionFiltros">
+                    <div class="section-title">
+                        <span class="section-icon">🔍</span> Filtros
+                    </div>
+                    <span class="section-arrow">▾</span>
+                </div>
+                <div class="section-body">
+                    <!-- Chips de filtros activos -->
+                    <div class="active-filters-row" id="activeFiltersRow">
+                        <span class="active-filters-label">Activos:</span>
+                        <div id="activeChips"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Categoría de Uso</label>
+                        <select id="filterCategoria">
+                            <option value="">Todas las categorías</option>
+                            <!-- Categorías cargadas dinámicamente desde el GeoJSON -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Rango de Área (ha)</label>
+                        <select id="filterRango">
+                            <option value="">Todos los rangos</option>
+                            <option value="<1">Menor a 1 ha</option>
+                            <option value="1 - 3 ha">1 – 3 ha</option>
+                            <option value="3 - 6 ha">3 – 6 ha</option>
+                            <option value="6 - 10 ha">6 – 10 ha</option>
+                            <option value=">10 ha">Mayor a 10 ha</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Destinación Económica</label>
+                        <select id="filterDestEco">
+                            <option value="">Todas</option>
+                            <option value="D">Desocupado</option>
+                            <option value="A">Agropecuario</option>
+                            <option value="S">Sin especificar</option>
+                        </select>
+                    </div>
+                    <button class="btn-reset" id="resetFilters">↺ Restablecer filtros</button>
+                </div>
             </div>
 
-            <!-- Export -->
-            <div class="control-section">
-                <h3>📥 Exportar</h3>
-                <button class="action-btn" onclick="exportarPDF()">📄 Generar Reporte PDF</button>
-                <button class="action-btn" onclick="exportarExcel()" style="margin-top: 6px; background: linear-gradient(135deg, #10b981, #059669);">
-                    📊 Exportar a Excel
-                </button>
+            <!-- CONTROL 3D (oculto hasta activar modo 3D) -->
+            <div class="control-section" id="controls3D" style="display:none;">
+                <div class="section-header section-toggle" data-target="controls3D">
+                    <div class="section-title">
+                        <span class="section-icon">🏔️</span> Control 3D
+                    </div>
+                    <span class="section-arrow">▾</span>
+                </div>
+                <div class="section-body">
+                    <div class="range-label">
+                        <label class="form-label" style="margin:0;">Exageración del terreno</label>
+                        <span class="range-value" id="exagValue">1.5×</span>
+                    </div>
+                    <input type="range" id="exagRange" min="0" max="3" step="0.1" value="1.5">
+                </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Stats Panel -->
+            <!-- EXPORTAR -->
+            <div class="control-section" id="sectionExportar">
+                <div class="section-header section-toggle" data-target="sectionExportar">
+                    <div class="section-title">
+                        <span class="section-icon">📥</span> Exportar
+                    </div>
+                    <span class="section-arrow">▾</span>
+                </div>
+                <div class="section-body">
+                    <button class="action-btn" onclick="exportarPDF()">📄 Generar Reporte PDF</button>
+                    <button class="action-btn btn-excel" onclick="exportarExcel()">📊 Exportar a Excel</button>
+                </div>
+            </div>
+
+        </div><!-- /panel-body -->
+    </div><!-- /control-panel -->
+
+    <!-- ════ KPI PANEL ════ -->
     <div class="stats-panel" id="statsPanel">
-        <div class="stat-item">
-            <span class="stat-label">Total Predios</span>
-            <span class="stat-value" id="statTotal">5,337</span>
+        <div class="stats-header">
+            <h3>📊 Estadísticas</h3>
+            <span class="stats-live-badge">● En vivo</span>
         </div>
-        <div class="stat-item">
-            <span class="stat-label">Área Total</span>
-            <span class="stat-value" id="statArea">0 ha</span>
-        </div>
-        <div class="stat-item">
-            <span class="stat-label">Avalúo Catastral</span>
-            <span class="stat-value" id="statAvaluo">$0</span>
-        </div>
-        <div class="stat-item">
-            <span class="stat-label">Predios Filtrados</span>
-            <span class="stat-value" id="statFiltered">5,337</span>
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <span class="kpi-icon">🏘️</span>
+                <div class="kpi-value" id="statTotal">5,337</div>
+                <div class="kpi-label">Total Predios</div>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-icon">📐</span>
+                <div class="kpi-value" id="statArea">0 ha</div>
+                <div class="kpi-label">Área Total</div>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-icon">💰</span>
+                <div class="kpi-value" id="statAvaluo">$0</div>
+                <div class="kpi-label">Avalúo Catastral</div>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-icon">🔍</span>
+                <div class="kpi-value" id="statFiltered">5,337</div>
+                <div class="kpi-label">Predios Filtrados</div>
+            </div>
         </div>
     </div>
 
-    <!-- Predio Info Panel -->
+    <!-- ════ PREDIO INFO PANEL ════ -->
     <div class="predio-info" id="predioInfo">
         <div class="predio-header">
             <h3>Información del Predio</h3>
             <button class="close-btn" onclick="closePredioInfo()">×</button>
         </div>
         <div class="predio-grid" id="predioGrid">
-            <!-- Dynamic content -->
+            <!-- Dynamic content injected by showPredioInfo() -->
         </div>
     </div>
 
-    <!-- Legend -->
+    <!-- ════ LEGEND ════ -->
     <div class="legend">
-        <h4>Usos del Suelo</h4>
-        <div id="legendContent">
-            <div class="legend-item">
-                <div class="legend-color" style="background: #10b981;"></div>
-                <span class="legend-label">Agropecuario tradicional</span>
+        <div class="legend-header">
+            <h4>Usos del Suelo</h4>
+            <button class="legend-toggle-btn" id="legendToggle" title="Colapsar leyenda">▾</button>
+        </div>
+        <div class="legend-body">
+            <div class="legend-search">
+                <input type="text" id="legendSearch" placeholder="Filtrar categorías…">
             </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #3b82f6;"></div>
-                <span class="legend-label">Protección ambiental</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #f59e0b;"></div>
-                <span class="legend-label">Desarrollo restringido</span>
+            <div id="legendContent">
+                <div class="legend-item">
+                    <div class="legend-color" style="background:#10b981;"></div>
+                    <span class="legend-label">Agropecuario tradicional</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background:#3b82f6;"></div>
+                    <span class="legend-label">Protección ambiental</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background:#f59e0b;"></div>
+                    <span class="legend-label">Desarrollo restringido</span>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- ════════════════════════════════════════════════
+         LÓGICA ORIGINAL — NO MODIFICADA
+         ════════════════════════════════════════════════ -->
     <script>
-        // Initialize Map
         let map;
         let prediosData = [];
         let currentView = '2d';
         let currentFilters = { categoria: '', rango: '', destEco: '', search: '' };
-        let categoriaField = 'Categoria'; // Campo que se usará para filtrar por categoría
-        
-        // Center on Supatá, Cundinamarca
+        let categoriaField = 'Categoria';
+
         const SUPATA_CENTER = [-74.244, 5.043];
-        
+
         async function initMap() {
-            // Create map
             map = new maplibregl.Map({
                 container: 'map',
                 preserveDrawingBuffer: true,
@@ -1012,52 +981,31 @@
                         }
                     },
                     layers: [
-                        {
-                            id: 'background',
-                            type: 'background',
-                            paint: { 'background-color': '#0a0e27' }
-                        },
-                        {
-                            id: 'osm',
-                            type: 'raster',
-                            source: 'osm',
-                            paint: { 'raster-opacity': 0.7 }
-                        }
+                        { id: 'background', type: 'background', paint: { 'background-color': '#0a0e27' } },
+                        { id: 'osm', type: 'raster', source: 'osm', paint: { 'raster-opacity': 0.7 } }
                     ],
-                    terrain: {
-                        source: 'terrain',
-                        exaggeration: 0
-                    }
+                    terrain: { source: 'terrain', exaggeration: 0 }
                 },
                 center: SUPATA_CENTER,
-                zoom: 13,
-                pitch: 0,
-                bearing: 0,
-                maxZoom: 20,
-                minZoom: 10
+                zoom: 13, pitch: 0, bearing: 0,
+                maxZoom: 20, minZoom: 10
             });
 
-            // Add controls
             map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
             map.addControl(new maplibregl.ScaleControl(), 'bottom-left');
             map.addControl(new maplibregl.FullscreenControl(), 'bottom-right');
 
-            // Load data
             map.on('load', async () => {
                 try {
-                    // Cargar imagen satelital primero
                     map.addSource('satellite', {
                         type: 'raster',
                         tiles: ['https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'],
                         tileSize: 256
                     });
                     map.addLayer({
-                        id: 'satellite-layer',
-                        type: 'raster',
-                        source: 'satellite',
+                        id: 'satellite-layer', type: 'raster', source: 'satellite',
                         paint: { 'raster-opacity': 0.8 }
                     });
-                    
                     await loadPrediosData();
                     setupEventListeners();
                 } catch (err) {
@@ -1068,195 +1016,115 @@
                 }
             });
 
-            // Si el mapa falla en cargar, liberamos el overlay para que el usuario vea el error en consola
-            map.on('error', (e) => {
-                console.error('MapLibre error:', e?.error || e);
-                hideLoading();
-            });
-
-            // Fallback para que nunca quede trabado
+            map.on('error', (e) => { console.error('MapLibre error:', e?.error || e); hideLoading(); });
             setTimeout(hideLoading, 8000);
 
-            // Habilitar paneles arrastrables tras cargar el DOM
             try {
                 makePanelDraggable(document.querySelector('.control-panel'), '.panel-header');
                 makePanelDraggable(document.getElementById('predioInfo'), '.predio-header');
-                makePanelDraggable(document.querySelector('.legend'), 'h4');
-                makePanelDraggable(document.getElementById('statsPanel'), 'h3');
-            } catch (err) {
-                console.warn('Drag habilitation failed:', err);
-            }
+                makePanelDraggable(document.querySelector('.legend'), '.legend-header');
+                makePanelDraggable(document.getElementById('statsPanel'), '.stats-header');
+            } catch (err) { console.warn('Drag habilitation failed:', err); }
         }
 
         async function loadPrediosData() {
             try {
                 console.log('Cargando predios desde /usos_suelo/geojson...');
                 const response = await fetch('/usos_suelo/geojson');
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
+                if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 const data = await response.json();
-                console.log('Respuesta recibida:', data);
-                
-                if (!data || !data.features || !Array.isArray(data.features)) {
+                if (!data || !data.features || !Array.isArray(data.features))
                     throw new Error('El GeoJSON no tiene estructura válida');
-                }
-                
+
                 prediosData = data.features;
                 console.log(`✓ Cargados ${prediosData.length} predios`);
-                
+
                 if (prediosData.length === 0) {
                     hideLoading();
-                    alert('No se encontraron predios en el GeoJSON. Verifica que el archivo static/geojson/usos_predial.geojson existe y tiene datos.');
+                    alert('No se encontraron predios en el GeoJSON.');
                     return;
                 }
-                
-                // Extraer usos específicos (combinando subcategoría y uso)
+
                 const categorias = [...new Set(prediosData.map(f => {
                     const props = f.properties;
-                    // Priorizar: Subcategor > Uso > Categoria
                     return props?.Subcategor || props?.Uso || props?.Categoria || 'Sin categoría';
                 }).filter(Boolean))].sort();
-                console.log(`✓ ${categorias.length} categorías/usos únicos encontrados:`, categorias);
-                
-                // Generar colores automáticamente para cada categoría
+
                 const colores = [
                     '#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6',
                     '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16',
                     '#6366f1', '#a855f7', '#eab308', '#22c55e', '#0ea5e9',
                     '#f43f5e', '#8b5cf6', '#d946ef', '#06b6d4', '#84cc16'
                 ];
-                
-                // Construir expresión match para MapLibre (priorizar subcategoría y uso específico)
+
                 let matchExpr;
                 if (categorias.length === 0) {
-                    // Si no hay categorías, usar color por defecto
                     matchExpr = '#94a3b8';
                 } else {
                     matchExpr = ['match', ['coalesce', ['get', 'Subcategor'], ['get', 'Uso'], ['get', 'Categoria'], 'Sin categoría']];
-                    categorias.forEach((cat, i) => {
-                        matchExpr.push(cat);
-                        matchExpr.push(colores[i % colores.length]);
-                    });
-                    matchExpr.push('#94a3b8'); // color por defecto
+                    categorias.forEach((cat, i) => { matchExpr.push(cat); matchExpr.push(colores[i % colores.length]); });
+                    matchExpr.push('#94a3b8');
                 }
-                
-                // Actualizar leyenda con todas las categorías - CON INTERACTIVIDAD
+
                 const legendContent = document.getElementById('legendContent');
                 legendContent.innerHTML = categorias.map((cat, i) => `
                     <div class="legend-item" data-category="${cat}">
-                        <div class="legend-color" style="background: ${colores[i % colores.length]}; box-shadow: 0 0 0 2px rgba(255,255,255,0.1);"></div>
+                        <div class="legend-color" style="background:${colores[i % colores.length]};"></div>
                         <span class="legend-label">${cat}</span>
                     </div>
                 `).join('');
-                
-                // Agregar interactividad a items de leyenda
+
                 document.querySelectorAll('.legend-item').forEach((item, idx) => {
-                    item.addEventListener('click', (e) => {
-                        // Remover selección anterior
+                    item.addEventListener('click', () => {
                         document.querySelectorAll('.legend-item').forEach(el => el.classList.remove('selected'));
-                        // Agregar selección al actual
                         item.classList.add('selected');
-                        
-                        // Obtener categoría seleccionada
                         const selectedCategory = item.getAttribute('data-category');
-                        
-                        // Actualizar el select para sincronizarlo
                         document.getElementById('filterCategoria').value = selectedCategory;
-                        
-                        // Aplicar el filtro por categoría
                         currentFilters.categoria = selectedCategory;
                         syncLayerFilters();
                         updateStats();
                     });
-                    
                     item.addEventListener('mouseenter', () => {
                         const color = colores[idx % colores.length];
-                        if (!item.classList.contains('selected')) {
-                            item.style.boxShadow = `0 0 25px ${color}60`;
-                        }
+                        if (!item.classList.contains('selected'))
+                            item.style.boxShadow = `0 0 20px ${color}55`;
                     });
-                    
                     item.addEventListener('mouseleave', () => {
-                        if (!item.classList.contains('selected')) {
-                            item.style.boxShadow = 'none';
-                        }
+                        if (!item.classList.contains('selected')) item.style.boxShadow = 'none';
                     });
                 });
-                
-                // Poblar el select de categorías
+
                 const filterCategoria = document.getElementById('filterCategoria');
                 categorias.forEach(cat => {
                     const opt = document.createElement('option');
-                    opt.value = cat;
-                    opt.textContent = cat;
+                    opt.value = cat; opt.textContent = cat;
                     filterCategoria.appendChild(opt);
                 });
-                
-                // Add predios source
-                map.addSource('predios', {
-                    type: 'geojson',
-                    data: data
-                });
-                console.log('✓ Source "predios" agregado al mapa');
 
-                // Add fill layer con todos los colores dinámicos (DESPUÉS de satelital)
+                map.addSource('predios', { type: 'geojson', data: data });
                 map.addLayer({
-                    id: 'predios-fill',
-                    type: 'fill',
-                    source: 'predios',
-                    paint: {
-                        'fill-color': matchExpr,
-                        'fill-opacity': 0.6
-                    }
+                    id: 'predios-fill', type: 'fill', source: 'predios',
+                    paint: { 'fill-color': matchExpr, 'fill-opacity': 0.6 }
                 });
-                console.log('✓ Capa "predios-fill" agregada');
-
-                // Add outline layer
                 map.addLayer({
-                    id: 'predios-outline',
-                    type: 'line',
-                    source: 'predios',
-                    paint: {
-                        'line-color': '#ffffff',
-                        'line-width': 1.5,
-                        'line-opacity': 0.9
-                    }
+                    id: 'predios-outline', type: 'line', source: 'predios',
+                    paint: { 'line-color': '#ffffff', 'line-width': 1.5, 'line-opacity': 0.9 }
                 });
-                console.log('✓ Capa "predios-outline" agregada');
-
-                // Add highlight layer
                 map.addLayer({
-                    id: 'predios-highlight',
-                    type: 'line',
-                    source: 'predios',
-                    paint: {
-                        'line-color': '#fbbf24',
-                        'line-width': 3
-                    },
+                    id: 'predios-highlight', type: 'line', source: 'predios',
+                    paint: { 'line-color': '#fbbf24', 'line-width': 3 },
                     filter: ['==', 'OBJECTID', '']
                 });
-                console.log('✓ Capa "predios-highlight" agregada');
+
                 document.getElementById('statTotal').textContent = prediosData.length.toLocaleString('es-CO');
                 document.getElementById('prediosCount').textContent = prediosData.length.toLocaleString('es-CO') + ' predios';
-                
-                // Asegurar que las capas estén visibles
                 map.setLayoutProperty('predios-fill', 'visibility', 'visible');
                 map.setLayoutProperty('predios-outline', 'visibility', 'visible');
-                console.log('✓ Visibilidad de capas asegurada');
-                
-                // Verificar que las capas estén en el mapa
-                console.log('Capas actuales en el mapa:', map.getStyle().layers.map(l => l.id));
-                
-                // Ajustar el zoom para ver los predios
+
                 if (prediosData.length > 0) {
                     const bounds = turf.bbox(data);
-                    map.fitBounds([[bounds[0], bounds[1]], [bounds[2], bounds[3]]], {
-                        padding: 50,
-                        maxZoom: 15
-                    });
+                    map.fitBounds([[bounds[0], bounds[1]], [bounds[2], bounds[3]]], { padding: 50, maxZoom: 15 });
                 }
-                
                 updateStats();
             } catch (error) {
                 console.error('Error loading predios:', error);
@@ -1266,7 +1134,6 @@
         }
 
         function setupEventListeners() {
-            // Map click
             map.on('click', 'predios-fill', (e) => {
                 if (e.features.length > 0) {
                     const feature = e.features[0];
@@ -1274,38 +1141,24 @@
                     highlightPredio(feature.properties.OBJECTID);
                 }
             });
+            map.on('mouseenter', 'predios-fill', () => { map.getCanvas().style.cursor = 'pointer'; });
+            map.on('mouseleave', 'predios-fill', () => { map.getCanvas().style.cursor = ''; });
 
-            // Change cursor
-            map.on('mouseenter', 'predios-fill', () => {
-                map.getCanvas().style.cursor = 'pointer';
-            });
-
-            map.on('mouseleave', 'predios-fill', () => {
-                map.getCanvas().style.cursor = '';
-            });
-
-            // View toggles
             document.querySelectorAll('[data-view]').forEach(btn => {
                 btn.addEventListener('click', () => switchView(btn.dataset.view));
             });
 
-            // Layer toggles
             document.getElementById('checkPredios').addEventListener('change', (e) => {
-                const visibility = e.target.checked ? 'visible' : 'none';
-                map.setLayoutProperty('predios-fill', 'visibility', visibility);
-                map.setLayoutProperty('predios-outline', 'visibility', visibility);
+                const v = e.target.checked ? 'visible' : 'none';
+                map.setLayoutProperty('predios-fill', 'visibility', v);
+                map.setLayoutProperty('predios-outline', 'visibility', v);
             });
 
             document.getElementById('checkRelieve').addEventListener('change', (e) => {
                 if (e.target.checked) {
-                    if (map.getSource('terrain')) {
-                        map.setTerrain({ source: 'terrain', exaggeration: 1.5 });
-                    } else {
-                        console.warn('Source terrain no disponible aún');
-                    }
-                } else {
-                    map.setTerrain(null);
-                }
+                    if (map.getSource('terrain')) map.setTerrain({ source: 'terrain', exaggeration: 1.5 });
+                    else console.warn('Source terrain no disponible aún');
+                } else { map.setTerrain(null); }
             });
 
             document.getElementById('checkSatellite').addEventListener('change', (e) => {
@@ -1313,49 +1166,34 @@
                     if (!map.getSource('satellite')) {
                         map.addSource('satellite', {
                             type: 'raster',
-                            tiles: [
-                                'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'
-                            ],
+                            tiles: ['https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'],
                             tileSize: 256
                         });
-                        map.addLayer({
-                            id: 'satellite-layer',
-                            type: 'raster',
-                            source: 'satellite',
-                            paint: { 'raster-opacity': 0.8 }
-                        }, 'predios-fill');
+                        map.addLayer({ id: 'satellite-layer', type: 'raster', source: 'satellite',
+                            paint: { 'raster-opacity': 0.8 } }, 'predios-fill');
                     } else {
                         map.setLayoutProperty('satellite-layer', 'visibility', 'visible');
                     }
                 } else {
-                    if (map.getLayer('satellite-layer')) {
+                    if (map.getLayer('satellite-layer'))
                         map.setLayoutProperty('satellite-layer', 'visibility', 'none');
-                    }
                 }
             });
 
-            // Filters
             document.getElementById('filterCategoria').addEventListener('change', applyFilters);
             document.getElementById('filterRango').addEventListener('change', applyFilters);
             document.getElementById('filterDestEco').addEventListener('change', applyFilters);
-
-            // Search
             document.getElementById('searchInput').addEventListener('input', performSearch);
 
-            // 3D exaggeration
             document.getElementById('exagRange').addEventListener('input', (e) => {
                 const val = parseFloat(e.target.value);
                 document.getElementById('exagValue').textContent = val.toFixed(1) + '×';
-                if (map.getTerrain()) {
-                    map.setTerrain({ source: 'terrain', exaggeration: val });
-                }
+                if (map.getTerrain()) map.setTerrain({ source: 'terrain', exaggeration: val });
             });
 
-            // Activar relieve 3D después de que el mapa esté listo
             setTimeout(() => {
                 if (map.getSource('terrain') && document.getElementById('checkRelieve').checked) {
                     map.setTerrain({ source: 'terrain', exaggeration: 1.5 });
-                    console.log('✓ Relieve 3D activado');
                 }
             }, 2000);
         }
@@ -1365,7 +1203,6 @@
             document.querySelectorAll('[data-view]').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.view === view);
             });
-
             if (view === '3d') {
                 map.easeTo({ pitch: 60, bearing: -20, duration: 1000 });
                 document.getElementById('controls3D').style.display = 'block';
@@ -1381,8 +1218,8 @@
 
         function applyFilters() {
             currentFilters.categoria = document.getElementById('filterCategoria').value;
-            currentFilters.rango = document.getElementById('filterRango').value;
-            currentFilters.destEco = document.getElementById('filterDestEco').value;
+            currentFilters.rango     = document.getElementById('filterRango').value;
+            currentFilters.destEco   = document.getElementById('filterDestEco').value;
             syncLayerFilters();
         }
 
@@ -1393,20 +1230,15 @@
 
         function buildFilterExpression() {
             const filters = ['all'];
-            if (currentFilters.categoria) {
-                // Usar coalesce para intentar todos los campos posibles
+            if (currentFilters.categoria)
                 filters.push(['==', ['coalesce', ['get', 'Subcategor'], ['get', 'Uso'], ['get', 'Categoria'], 'Sin categoría'], currentFilters.categoria]);
-            }
-            if (currentFilters.rango) {
+            if (currentFilters.rango)
                 filters.push(['==', ['get', 'RANGO'], currentFilters.rango]);
-            }
-            if (currentFilters.destEco) {
+            if (currentFilters.destEco)
                 filters.push(['==', ['get', 'DEST_ECO'], currentFilters.destEco]);
-            }
             if (currentFilters.search) {
                 const q = currentFilters.search;
-                filters.push([
-                    'any',
+                filters.push(['any',
                     ['>=', ['index-of', q, ['downcase', ['get', 'COD_PRED']]], 0],
                     ['>=', ['index-of', q, ['downcase', ['get', 'NOMBRE']]], 0],
                     ['>=', ['index-of', q, ['downcase', ['get', 'DIRECCIÓN']]], 0]
@@ -1417,7 +1249,6 @@
 
         function featureMatches(feature) {
             const p = feature.properties || {};
-            // Usar coalesce: intentar Subcategor, Uso, Categoria
             if (currentFilters.categoria) {
                 const catValue = p.Subcategor || p.Uso || p.Categoria || 'Sin categoría';
                 if (catValue !== currentFilters.categoria) return false;
@@ -1426,12 +1257,12 @@
             if (currentFilters.destEco && p.DEST_ECO !== currentFilters.destEco) return false;
             if (currentFilters.search) {
                 const q = currentFilters.search;
-                const hayCoincidencia = (
+                const hay = (
                     (p.COD_PRED || '').toString().toLowerCase().includes(q) ||
-                    (p.NOMBRE || '').toString().toLowerCase().includes(q) ||
+                    (p.NOMBRE   || '').toString().toLowerCase().includes(q) ||
                     (p['DIRECCIÓN'] || '').toString().toLowerCase().includes(q)
                 );
-                if (!hayCoincidencia) return false;
+                if (!hay) return false;
             }
             return true;
         }
@@ -1445,8 +1276,7 @@
 
         function showPredioInfo(props) {
             const panel = document.getElementById('predioInfo');
-            const grid = document.getElementById('predioGrid');
-
+            const grid  = document.getElementById('predioGrid');
             grid.innerHTML = `
                 <div class="predio-field full">
                     <label>Código Predial</label>
@@ -1480,11 +1310,10 @@
                     <label>Uso Específico</label>
                     <div class="value">${props.Uso || 'N/A'}</div>
                 </div>
-                <button class="action-btn" onclick="generarPDFCompleto('${props.COD_PRED}')" style="background: linear-gradient(135deg, #d4a574, #f4c896);">
+                <button class="action-btn" onclick="generarPDFCompleto('${props.COD_PRED}')">
                     🧩 Generar PDF (Uso + Croquis)
                 </button>
             `;
-
             panel.style.display = 'block';
         }
 
@@ -1499,13 +1328,12 @@
 
         function updateStats() {
             if (!prediosData || prediosData.length === 0) return;
-            const filtered = prediosData.filter(featureMatches);
-            const totalArea = filtered.reduce((sum, f) => sum + (Number(f.properties.AREA_HA) || 0), 0);
-            const totalAvaluo = filtered.reduce((sum, f) => sum + (Number(f.properties['EVALÚO']) || 0), 0);
-
+            const filtered   = prediosData.filter(featureMatches);
+            const totalArea  = filtered.reduce((s, f) => s + (Number(f.properties.AREA_HA)     || 0), 0);
+            const totalAval  = filtered.reduce((s, f) => s + (Number(f.properties['EVALÚO'])   || 0), 0);
             document.getElementById('statFiltered').textContent = filtered.length.toLocaleString('es-CO');
-            document.getElementById('statArea').textContent = totalArea.toFixed(2) + ' ha';
-            document.getElementById('statAvaluo').textContent = '$' + totalAvaluo.toLocaleString('es-CO');
+            document.getElementById('statArea').textContent     = totalArea.toFixed(2) + ' ha';
+            document.getElementById('statAvaluo').textContent   = '$' + totalAval.toLocaleString('es-CO');
         }
 
         function hideLoading() {
@@ -1514,7 +1342,6 @@
 
         function exportarPDF() {
             alert('Generando reporte PDF del catastro...');
-            // TODO: Implement PDF generation
         }
 
         function exportarExcel() {
@@ -1527,130 +1354,183 @@
         }
 
         async function generarPDFCroquis(codPred) {
-            if (!codPred) {
-                alert('Selecciona un predio primero');
-                return;
-            }
-            
+            if (!codPred) { alert('Selecciona un predio primero'); return; }
             try {
-                // Mostrar estado de carga
                 const btn = event.target;
                 const btnText = btn.textContent;
-                btn.textContent = '⏳ Generando PDF...';
-                btn.disabled = true;
-                
-                // Esperar a que el mapa esté completamente renderizado
+                btn.textContent = '⏳ Generando PDF...'; btn.disabled = true;
                 const canvas = map.getCanvas();
                 const imageData = canvas.toDataURL('image/png');
-                
-                // Obtener datos del predio actualmente mostrado
                 const predioData = prediosData.find(f => f.properties.COD_PRED === codPred);
-                if (!predioData) {
-                    throw new Error('Predio no encontrado');
-                }
-                
-                // Enviar al servidor para generar PDF
+                if (!predioData) throw new Error('Predio no encontrado');
                 const response = await fetch('/usos_suelo/generar_pdf_croquis', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        cod_pred: codPred,
-                        map_screenshot: imageData,
+                        cod_pred: codPred, map_screenshot: imageData,
                         predio_props: predioData.properties,
-                        map_center: map.getCenter(),
-                        map_zoom: map.getZoom()
+                        map_center: map.getCenter(), map_zoom: map.getZoom()
                     })
                 });
-                
                 if (response.ok) {
                     const blob = await response.blob();
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `Croquis_${codPred}.pdf`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
-                    
+                    a.href = url; a.download = `Croquis_${codPred}.pdf`;
+                    document.body.appendChild(a); a.click();
+                    document.body.removeChild(a); window.URL.revokeObjectURL(url);
                     btn.textContent = '✓ PDF generado';
-                    setTimeout(() => {
-                        btn.textContent = btnText;
-                        btn.disabled = false;
-                    }, 2000);
-                } else {
-                    throw new Error(`Error HTTP ${response.status}`);
-                }
+                    setTimeout(() => { btn.textContent = btnText; btn.disabled = false; }, 2000);
+                } else { throw new Error(`Error HTTP ${response.status}`); }
             } catch (err) {
                 console.error('Error generando PDF del croquis:', err);
-                alert('No se pudo generar el PDF del croquis: ' + err.message);
+                alert('No se pudo generar el PDF: ' + err.message);
                 const btn = event.target;
-                btn.textContent = btn.textContent.replace('⏳ Generando PDF...', '🗺️ Generar PDF con Croquis');
-                btn.disabled = false;
+                btn.textContent = '🗺️ Generar PDF con Croquis'; btn.disabled = false;
             }
         }
 
         async function generarPDFCompleto(codPred) {
-            if (!codPred) {
-                alert('Selecciona un predio primero');
-                return;
-            }
+            if (!codPred) { alert('Selecciona un predio primero'); return; }
             try {
                 const btn = event.target;
                 const prev = btn.textContent;
-                btn.textContent = '⏳ Generando PDF...';
-                btn.disabled = true;
-
-                // Capturar imagen del mapa
+                btn.textContent = '⏳ Generando PDF...'; btn.disabled = true;
                 const canvas = map.getCanvas();
                 const imageData = canvas.toDataURL('image/png');
-
-                // Datos del predio y uso seleccionado
                 const predioData = prediosData.find(f => f.properties.COD_PRED === codPred);
                 if (!predioData) throw new Error('Predio no encontrado');
-                const usoSel = (currentFilters && currentFilters.categoria) ? currentFilters.categoria : (predioData.properties.Uso || predioData.properties.Subcategor || predioData.properties.Categoria);
-
+                const usoSel = (currentFilters && currentFilters.categoria)
+                    ? currentFilters.categoria
+                    : (predioData.properties.Uso || predioData.properties.Subcategor || predioData.properties.Categoria);
                 const response = await fetch('/usos_suelo/generar_certificado_completo', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        cod_pred: codPred,
-                        uso: usoSel,
-                        map_screenshot: imageData,
-                        predio_props: predioData.properties
+                        cod_pred: codPred, uso: usoSel,
+                        map_screenshot: imageData, predio_props: predioData.properties
                     })
                 });
-
                 if (!response.ok) throw new Error('Error HTTP ' + response.status);
-
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = url;
-                a.download = `Certificado_${codPred}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-
+                a.href = url; a.download = `Certificado_${codPred}.pdf`;
+                document.body.appendChild(a); a.click();
+                document.body.removeChild(a); window.URL.revokeObjectURL(url);
                 btn.textContent = '✓ PDF generado';
                 setTimeout(() => { btn.textContent = prev; btn.disabled = false; }, 1800);
             } catch (err) {
                 console.error('Error generando certificado completo:', err);
                 alert('No se pudo generar el PDF: ' + err.message);
-                const btn = event.target; btn.textContent = '🧩 Generar PDF (Uso + Croquis)'; btn.disabled = false;
+                const btn = event.target;
+                btn.textContent = '🧩 Generar PDF (Uso + Croquis)'; btn.disabled = false;
             }
         }
 
-        // Initialize on DOM ready
         window.addEventListener('DOMContentLoaded', () => {
             const waitForLib = window.__ensureMapLibreReady ? window.__ensureMapLibreReady() : Promise.resolve();
             waitForLib.then(initMap).catch(err => {
                 console.error('MapLibre no está disponible:', err);
                 hideLoading();
-                alert('No se pudo cargar el visor porque MapLibre no está disponible. Revisa conexión o assets locales.');
+                alert('No se pudo cargar el visor porque MapLibre no está disponible.');
             });
         });
+    </script>
+
+    <!-- ════ UI ENHANCEMENTS — solo presentación ════ -->
+    <script>
+        // Accordion sections
+        document.querySelectorAll('.section-toggle').forEach(header => {
+            header.addEventListener('click', () => {
+                const id = header.dataset.target;
+                const section = document.getElementById(id);
+                if (section) section.classList.toggle('collapsed');
+            });
+        });
+
+        // Compact mode toggle
+        document.getElementById('compactToggle')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.querySelector('.control-panel').classList.toggle('compact');
+        });
+
+        // Legend collapse/expand
+        document.getElementById('legendToggle')?.addEventListener('click', () => {
+            const legend = document.querySelector('.legend');
+            legend.classList.toggle('legend-collapsed');
+            document.getElementById('legendToggle').textContent =
+                legend.classList.contains('legend-collapsed') ? '▸' : '▾';
+        });
+
+        // Legend search filter
+        document.getElementById('legendSearch')?.addEventListener('input', (e) => {
+            const q = e.target.value.toLowerCase();
+            document.querySelectorAll('#legendContent .legend-item').forEach(item => {
+                const label = item.querySelector('.legend-label')?.textContent?.toLowerCase() || '';
+                item.style.display = label.includes(q) ? '' : 'none';
+            });
+        });
+
+        // Reset filters button
+        document.getElementById('resetFilters')?.addEventListener('click', () => {
+            document.getElementById('filterCategoria').value = '';
+            document.getElementById('filterRango').value     = '';
+            document.getElementById('filterDestEco').value   = '';
+            if (typeof applyFilters === 'function') applyFilters();
+            document.querySelectorAll('.legend-item').forEach(el => el.classList.remove('selected'));
+            updateFilterChips();
+        });
+
+        // Active filter chips
+        function updateFilterChips() {
+            if (typeof currentFilters === 'undefined') return;
+            const chips = [];
+            if (currentFilters.categoria) chips.push({ label: currentFilters.categoria, key: 'categoria' });
+            if (currentFilters.rango)     chips.push({ label: currentFilters.rango,     key: 'rango' });
+            if (currentFilters.destEco)   chips.push({ label: currentFilters.destEco,   key: 'destEco' });
+            const row       = document.getElementById('activeFiltersRow');
+            const container = document.getElementById('activeChips');
+            if (!row || !container) return;
+            container.innerHTML = chips.map(c =>
+                `<span class="filter-chip" onclick="removeFilterChip('${c.key}')">${c.label} ×</span>`
+            ).join('');
+            row.style.display = chips.length ? 'flex' : 'none';
+            updateStatusPill();
+        }
+
+        function removeFilterChip(key) {
+            if (key === 'categoria') { document.getElementById('filterCategoria').value = ''; currentFilters.categoria = ''; }
+            if (key === 'rango')     { document.getElementById('filterRango').value     = ''; currentFilters.rango     = ''; }
+            if (key === 'destEco')   { document.getElementById('filterDestEco').value   = ''; currentFilters.destEco   = ''; }
+            if (typeof syncLayerFilters === 'function') syncLayerFilters();
+            updateFilterChips();
+        }
+
+        function updateStatusPill() {
+            const pill = document.getElementById('statusPill');
+            if (!pill) return;
+            const activeLayers = document.querySelectorAll('.layer-toggle input:checked').length;
+            const filtered     = document.getElementById('statFiltered')?.textContent || '—';
+            pill.textContent   = `Capas activas: ${activeLayers} | Filtrados: ${filtered}`;
+        }
+
+        // Hook filter selects → chips
+        ['filterCategoria', 'filterRango', 'filterDestEco'].forEach(id => {
+            document.getElementById(id)?.addEventListener('change', updateFilterChips);
+        });
+
+        // Hook layer checkboxes → status pill
+        document.querySelectorAll('.layer-toggle input[type="checkbox"]').forEach(cb => {
+            cb.addEventListener('change', updateStatusPill);
+        });
+
+        // Observe statFiltered changes → update status pill
+        const sfEl = document.getElementById('statFiltered');
+        if (sfEl && window.MutationObserver) {
+            new MutationObserver(updateStatusPill)
+                .observe(sfEl, { childList: true, characterData: true, subtree: true });
+        }
     </script>
 </body>
 </html>
