@@ -190,20 +190,33 @@ def listar():
     """API para obtener lista de radicados (JSON)"""
     if 'user' not in session:
         return jsonify({'success': False, 'error': 'No autenticado'}), 401
-    
+
     user = session.get('user')
     secretaria = session.get('secretaria', '')
-    
-    # Filtrar según permisos
+
+    # Mismo filtro que el index: admin/gobierno ve todo; otros solo los de su oficina
     if can_radicar():
         radicados = Radicado.query.order_by(Radicado.fecha_radicacion.desc()).all()
     else:
-        radicados = Radicado.query.filter(
-            (Radicado.asignado_a == user) | (Radicado.asignado_a == secretaria)
-        ).order_by(Radicado.fecha_radicacion.desc()).all()
-    
+        oficinas_dict = get_oficinas()
+        codigo_oficina = None
+        for codigo, nombre in oficinas_dict.items():
+            if secretaria and (nombre.lower() in secretaria.lower() or secretaria.lower() in nombre.lower()):
+                codigo_oficina = codigo
+                break
+
+        if codigo_oficina:
+            radicados = Radicado.query.filter(
+                Radicado.oficina_destino == codigo_oficina
+            ).order_by(Radicado.fecha_radicacion.desc()).all()
+        else:
+            # Fallback: radicados creados por el usuario o asignados directamente
+            radicados = Radicado.query.filter(
+                (Radicado.creado_por == user) | (Radicado.asignado_a == user)
+            ).order_by(Radicado.fecha_radicacion.desc()).all()
+
     radicados_json = [radicado_to_dict(r) for r in radicados]
-    
+
     return jsonify({
         'success': True,
         'radicados': radicados_json
