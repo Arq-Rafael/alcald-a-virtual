@@ -44,6 +44,18 @@ def can_access(feature_name: str) -> bool:
 
     return bool(tokens & allowed)
 
+def is_admin() -> bool:
+    """True si el usuario en sesión tiene rol admin o superadmin."""
+    return session.get('role', '').lower() in ('admin', 'superadmin')
+
+def current_session_user() -> str:
+    """Username del usuario actualmente en sesión."""
+    return session.get('user', '')
+
+def current_session_secretaria() -> str:
+    """Dependencia/secretaría del usuario actualmente en sesión."""
+    return session.get('secretaria', '')
+
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):

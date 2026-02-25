@@ -10,6 +10,7 @@ from datetime import datetime
 from flask import Blueprint, render_template, request, flash, redirect, url_for, send_file, current_app, abort, jsonify
 from app import db
 from app.models.metas import MetaPlan
+from app.utils import is_admin, current_session_secretaria
 
 logger = logging.getLogger(__name__)
 seguimiento_bp = Blueprint('seguimiento', __name__)
@@ -189,7 +190,16 @@ def api_seguimiento_metas():
     sector = (request.args.get('sector') or '').strip()
     ano = (request.args.get('ano') or '').strip()
 
+    # Control de acceso: usuarios no-admin solo ven metas de su secretaría
+    _admin_view = is_admin()
+    _user_secr  = current_session_secretaria()
+
     def matches(meta):
+        # Filtro por secretaría para usuarios no-admin
+        if not _admin_view and _user_secr:
+            meta_secr = (meta.get('secretaria') or '').strip()
+            if meta_secr and meta_secr != _user_secr:
+                return False
         if q:
             texto = ' '.join(str(v) for v in [
                 meta.get('meta_producto'),

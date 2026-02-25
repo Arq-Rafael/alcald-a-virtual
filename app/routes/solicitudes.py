@@ -7,7 +7,7 @@ import datetime as dt
 from datetime import timedelta
 from flask import Blueprint, render_template, request, flash, redirect, url_for, send_file, session, abort, current_app, jsonify
 from werkzeug.utils import secure_filename
-from app.utils import get_sqlite, dias_restantes, color_semaforo_dias, admin_required, load_plan_desarrollo
+from app.utils import get_sqlite, dias_restantes, color_semaforo_dias, admin_required, load_plan_desarrollo, is_admin, current_session_user, current_session_secretaria
 from app import db
 
 solicitudes_bp = Blueprint('solicitudes', __name__)
@@ -62,17 +62,19 @@ def solicitudes():
     # Load Plan de Desarrollo data
     plan_list = load_plan_desarrollo()
     
-    # Cargar solicitudes del usuario actual
+    # Cargar solicitudes — admin ve todo; usuarios normales solo su secretaría
     user_solicitudes = []
-    current_user = session.get('user', 'invitado')
-    
+    _admin_user  = is_admin()
+    _user_secr   = current_session_secretaria()
+
     try:
         if os.path.exists(path):
             with open(path, 'r', encoding='utf-8') as f:
                 reader = csv.DictReader(f)
                 for row in reader:
-                    # Filtrar por municipio (asumiendo que es el identificador del usuario)
-                    # Ajusta esto según tu lógica de autenticación
+                    # Si no es admin, mostrar solo las de la misma secretaría
+                    if not _admin_user and row.get('secretaria', '') != _user_secr:
+                        continue
                     user_solicitudes.append({
                         'municipio': row.get('municipio', ''),
                         'nit': row.get('nit', ''),
@@ -90,15 +92,13 @@ def solicitudes():
     except Exception as e:
         print(f"Error cargando solicitudes: {e}")
 
-    is_admin = session.get('user_role') == 'admin' or session.get('user') == 'admin'
-
     return render_template(
         'solicitudes_modern.html',
         secretarias=secretarias,
         plan_list=plan_list,
         user_solicitudes=user_solicitudes,
         today=dt.date.today().isoformat(),
-        is_admin=is_admin
+        is_admin=_admin_user
     )
 
 
@@ -288,6 +288,9 @@ def tala_list():
 
     base = "SELECT * FROM tala_solicitudes WHERE eliminado=0"
     params = []
+    # Control de acceso: admin ve todo; usuarios normales solo sus solicitudes
+    if not is_admin():
+        base += " AND creado_por=?"; params.append(current_session_user())
     if estado:
         base += " AND estado=?"; params.append(estado)
     if q:

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, session, redirect, url_for, current_app, request, flash, jsonify
-from app.utils import can_access, normalize_features
+from app.utils import can_access, normalize_features, is_admin, current_session_user, current_session_secretaria
 import json
 import os
 import csv as csv_mod
@@ -30,61 +30,75 @@ def dashboard_stats():
         return jsonify({'error': 'unauthorized'}), 401
 
     stats = {}
+    _admin   = is_admin()
+    _user    = current_session_user()
+    _secr    = current_session_secretaria()
 
-    # Solicitudes (CSV)
+    # Solicitudes (CSV) — admin ve todo; otros solo los de su secretaría
     if can_access('solicitudes'):
         try:
             path = current_app.config.get('SOLICITUDES_PATH', '')
             total, pendientes = 0, 0
             if os.path.exists(path):
                 with open(path, 'r', encoding='utf-8') as f:
-                    for row in csv_mod.reader(f):
-                        if row:
-                            total += 1
-                            if len(row) > 11 and row[11].strip().lower() == 'nuevo':
-                                pendientes += 1
+                    reader = csv_mod.reader(f)
+                    for row in reader:
+                        if not row:
+                            continue
+                        if not _admin:
+                            # columna 1 → secretaría (ajustar índice si cambia el CSV)
+                            row_secr = row[1].strip() if len(row) > 1 else ''
+                            row_user = row[0].strip() if row else ''
+                            if row_secr != _secr and row_user != _user:
+                                continue
+                        total += 1
+                        if len(row) > 11 and row[11].strip().lower() == 'nuevo':
+                            pendientes += 1
             stats['solicitudes'] = {'total': total, 'pendientes': pendientes}
         except Exception as e:
             print(f"Stats error (solicitudes): {e}")
 
-    # PQRS / Participación
+    # PQRS / Participación — admin ve todo; otros solo los suyos
     if can_access('participacion'):
         try:
             from app.models.participacion import Radicado
+            base_q = Radicado.query if _admin else Radicado.query.filter_by(creado_por=_user)
             stats['pqrs'] = {
-                'pendiente': Radicado.query.filter_by(estado='PENDIENTE').count(),
-                'en_tramite': Radicado.query.filter_by(estado='EN_TRAMITE').count(),
-                'total':      Radicado.query.count(),
+                'pendiente': base_q.filter_by(estado='PENDIENTE').count(),
+                'en_tramite': base_q.filter_by(estado='EN_TRAMITE').count(),
+                'total':      base_q.count(),
             }
         except Exception as e:
             print(f"Stats error (pqrs): {e}")
 
-    # Contratos
+    # Contratos — admin ve todo; otros solo los de su secretaría
     if can_access('contratos'):
         try:
             from app.models.contrato import Contrato
+            base_q = Contrato.query if _admin else Contrato.query.filter_by(dependencia=_secr)
             stats['contratos'] = {
-                'total': Contrato.query.count(),
-                'alerta': Contrato.query.filter_by(alerta_vencimiento=True).count(),
+                'total': base_q.count(),
+                'alerta': base_q.filter_by(alerta_vencimiento=True).count(),
             }
         except Exception as e:
             print(f"Stats error (contratos): {e}")
 
-    # Gestión del Riesgo (Arbórea)
+    # Gestión del Riesgo (Arbórea) — admin ve todo; otros solo los suyos
     if can_access('riesgo'):
         try:
             from app.models.riesgo_arborea import RadicadoArborea
+            base_q = RadicadoArborea.query if _admin else RadicadoArborea.query.filter_by(usuario_creador=_user)
             stats['riesgo'] = {
-                'total':      RadicadoArborea.query.count(),
-                'pendientes': RadicadoArborea.query.filter(
+                'total':      base_q.count(),
+                'pendientes': base_q.filter(
                                   RadicadoArborea.dictamen_decision.is_(None)
                               ).count(),
             }
         except Exception as e:
             print(f"Stats error (riesgo): {e}")
 
-    # Admin: usuarios del sistema
-    if session.get('user_role') in ('admin', 'superadmin'):
+    # Admin: usuarios del sistema (solo admin/superadmin)
+    if _admin:
         try:
             from app.models.usuario import Usuario
             stats['usuarios'] = {

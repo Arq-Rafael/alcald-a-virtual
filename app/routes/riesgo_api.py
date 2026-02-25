@@ -3,6 +3,7 @@ API Endpoints para Gestión Arbórea - Gestión del Riesgo
 IMPORTACIONES LAZY PARA EVITAR CIRCULAR IMPORTS
 """
 from flask import Blueprint, request, jsonify, send_file, render_template, current_app, session
+from app.utils import is_admin, current_session_user
 from datetime import datetime, timedelta
 import json
 import os
@@ -321,7 +322,11 @@ def listar_radicados():
         per_page = request.args.get('per_page', 20, type=int)
         
         query = RadicadoArborea.query
-        
+
+        # Control de acceso: admin ve todo; usuarios normales solo sus radicados
+        if not is_admin():
+            query = query.filter_by(usuario_creador=current_session_user())
+
         if estado:
             query = query.filter_by(estado=estado)
         if tipo_solicitud:
