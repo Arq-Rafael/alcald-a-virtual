@@ -551,14 +551,19 @@
         <div class="wz-section-gap">
           <button class="btn-secondary-custom" onclick="descargarPermisoPDF(radicadoActual && radicadoActual.id)">📥 Descargar Permiso/Dictamen PDF</button>
         </div>
-        <button class="btn-primary-custom" onclick="location.reload()">🔄 Nuevo Radicado</button>
+        <button class="btn-primary-custom" onclick="nuevaPeticion()">➕ Nueva Petición</button>
         <button class="btn-secondary-custom" onclick="verHistorial()">📋 Ver Historial</button>
       </div>
     </div>
 
     <!-- HISTORIAL -->
     <div class="historial-container">
-      <h4>📋 Radicados Recientes</h4>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <h4 style="margin:0;">📋 Radicados Recientes</h4>
+        <button class="btn-primary-custom" onclick="nuevaPeticion()" style="padding:8px 20px;font-size:0.9rem;">
+          ➕ Nueva Petición
+        </button>
+      </div>
       <div class="table-responsive">
         <table class="table table-sm align-middle">
           <thead>
@@ -983,6 +988,36 @@ document.getElementById('form-permiso').addEventListener('submit', async (e) => 
   }
 });
 
+// === NUEVA PETICIÓN ===
+function nuevaPeticion() {
+  // Liberar radicado activo
+  radicadoActual = null;
+  fotosActuales  = [];
+
+  // Resetear Fase 1
+  document.getElementById('form-radicacion').reset();
+  document.getElementById('radicado-confirmacion').style.display = 'none';
+  document.getElementById('form-radicacion').style.display = 'block';
+
+  // Resetear Fase 2
+  document.getElementById('form-visita').style.display = 'block';
+  document.getElementById('visita-confirmacion').style.display = 'none';
+  document.getElementById('uploaded-files').innerHTML = '';
+
+  // Resetear Fase 3
+  document.getElementById('form-permiso').style.display = 'block';
+  document.getElementById('permiso-confirmacion').style.display = 'none';
+  document.getElementById('compensacion-section').style.display = 'none';
+
+  // Limpiar marcas de completado en los pasos
+  document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('completed'));
+
+  // Ir a Fase 1
+  showSection(1);
+  document.querySelector('.wizard-container').scrollIntoView({ behavior: 'smooth' });
+  showAlert('📝 Formulario listo para una nueva petición.', 'success');
+}
+
 // === HISTORIAL ===
 async function cargarHistorial() {
   try {
@@ -992,12 +1027,15 @@ async function cargarHistorial() {
     
     if (data.radicados && data.radicados.length > 0) {
       tbody.innerHTML = data.radicados.map(r => {
-        const isRadicada  = r.estado === 'Radicada' && !r.visita_fecha;
-        const isVisitada  = r.estado === 'Visitada' || (r.estado === 'Radicada' && !!r.visita_fecha);
+        // ── Máquina de estados limpia ──────────────────────────────────
+        // Radicada → Phase 2 pendiente  |  Visitada → Phase 3 pendiente
+        // Aprobada / Negada → cerrado
+        const isRadicada  = r.estado === 'Radicada';
+        const isVisitada  = r.estado === 'Visitada';
         const isProcesada = r.estado === 'Aprobada' || r.estado === 'Negada';
         const hasInforme  = isVisitada || isProcesada;
         const hasPermiso  = isProcesada;
-        const canDelete = isRadicada || (isProcesada && isAdmin);
+        const canDelete   = isRadicada || (isProcesada && isAdmin);
 
         return `
           <tr>
@@ -1007,12 +1045,12 @@ async function cargarHistorial() {
             <td><span class="badge badge-${r.estado.toLowerCase()}">${r.estado}</span></td>
             <td class="actions-cell">
               <div class="btn-group-actions">
-                ${isRadicada ? `<button class="action-btn btn-continue" data-title="Continuar con Informe" onclick="continuarConRadicado(${r.id})">▶️ Continuar</button>` : ''}
-                ${isRadicada ? `<button class="action-btn btn-edit" data-title="Editar Radicado" onclick="editarRadicado(${r.id})">✏️</button>` : ''}
-                ${isVisitada ? `<button class="action-btn btn-dictamen" data-title="Continuar con Dictamen" onclick="continuarConDictamen(${r.id})">▶️ Dictamen</button>` : ''}
-                ${hasInforme ? `<button class="action-btn btn-info" data-title="Descargar Informe" onclick="descargarPDF(${r.id})">📄</button>` : ''}
-                ${hasPermiso ? `<button class="action-btn btn-info" data-title="Descargar Permiso" onclick="descargarPermisoPDF(${r.id})">📋</button>` : ''}
-                ${canDelete ? `<button class="action-btn btn-delete" data-title="Eliminar" onclick="confirmarEliminar(${r.id}, '${r.numero_radicado}')">🗑️</button>` : ''}
+                ${isRadicada  ? `<button class="action-btn btn-continue" data-title="Registrar Visita Técnica" onclick="continuarConRadicado(${r.id})">▶️ Continuar</button>` : ''}
+                ${isVisitada  ? `<button class="action-btn btn-dictamen" data-title="Emitir Dictamen CMGR" onclick="continuarConDictamen(${r.id})">▶️ Dictamen</button>` : ''}
+                <button class="action-btn btn-edit" data-title="Editar datos del radicado" onclick="editarRadicado(${r.id})">✏️</button>
+                ${hasInforme  ? `<button class="action-btn btn-info" data-title="Descargar Informe Técnico" onclick="descargarPDF(${r.id})">📄</button>` : ''}
+                ${hasPermiso  ? `<button class="action-btn btn-info" data-title="Descargar Permiso/Dictamen" onclick="descargarPermisoPDF(${r.id})">📋</button>` : ''}
+                ${canDelete   ? `<button class="action-btn btn-delete" data-title="Eliminar radicado" onclick="confirmarEliminar(${r.id}, '${r.numero_radicado}')">🗑️</button>` : ''}
               </div>
             </td>
           </tr>
