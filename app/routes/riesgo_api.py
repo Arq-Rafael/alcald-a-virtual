@@ -963,9 +963,11 @@ def actualizar_radicado(radicado_id):
     data = request.get_json()
     
     try:
-        # Actualizar campos de visita técnica
+        # ── Visita técnica (Fase 2) ──────────────────────────────────────
+        fase2_actualizada = False
         if 'visita_fecha' in data:
             radicado.visita_fecha = datetime.fromisoformat(data['visita_fecha'])
+            fase2_actualizada = True
         if 'visita_tecnico' in data:
             radicado.visita_tecnico = data['visita_tecnico']
         if 'visita_riesgo_final' in data:
@@ -976,25 +978,34 @@ def actualizar_radicado(radicado_id):
             radicado.diagnostico_recomendaciones = data['diagnostico_recomendaciones']
         if 'arbol_fitosanitario' in data:
             radicado.arbol_fitosanitario = data['arbol_fitosanitario']
-        
-        # Actualizar campos de dictamen y permiso
+        if 'arbol_inclinacion_raices' in data:
+            radicado.arbol_inclinacion_raices = data['arbol_inclinacion_raices']
+        if 'arbol_afectacion' in data:
+            radicado.arbol_afectacion = data['arbol_afectacion']
+
+        # Transición de estado: Radicada → Visitada al guardar Fase 2
+        if fase2_actualizada and radicado.estado == 'Radicada':
+            radicado.estado = 'Visitada'
+
+        # ── Dictamen y permiso (Fase 3) ───────────────────────────────────
         if 'dictamen_decision' in data:
             radicado.dictamen_decision = data['dictamen_decision']
-            # Actualizar estado según decisión
             if data['dictamen_decision'] == 'Aprobado':
                 radicado.estado = 'Aprobada'
             elif data['dictamen_decision'] == 'Negado':
                 radicado.estado = 'Negada'
-        
+
         if 'permiso_vigencia_dias' in data:
             radicado.permiso_vigencia_dias = data['permiso_vigencia_dias']
             radicado.permiso_fecha_emision = datetime.utcnow()
             radicado.calcular_fecha_limite()
-        
+
         if 'permiso_obligaciones' in data:
             radicado.permiso_obligaciones = data['permiso_obligaciones']
-        
-        # Actualizar campos de compensación
+        if 'permiso_firmante1' in data:
+            radicado.permiso_firmante1 = data['permiso_firmante1']
+
+        # ── Compensación ──────────────────────────────────────────────────
         if 'compensacion_coeficiente' in data:
             radicado.compensacion_coeficiente = data['compensacion_coeficiente']
         if 'compensacion_metodo' in data:
@@ -1003,17 +1014,17 @@ def actualizar_radicado(radicado_id):
             radicado.compensacion_especie_recomendada = data['compensacion_especie_recomendada']
         if 'compensacion_sitio' in data:
             radicado.compensacion_sitio = data['compensacion_sitio']
-        
-        # Recalcular compensación si es automático
+
+        # Recalcular compensación automática
         if radicado.compensacion_metodo == 'Automático' and radicado.arbol_dap_cm and radicado.compensacion_coeficiente:
             radicado.calcular_compensacion_automatica()
-        
+
         radicado.updated_at = datetime.utcnow()
-        
         db.session.commit()
-        
+
         return jsonify({
             'success': True,
+            'radicado': radicado.to_dict(),   # ← full payload para actualizar radicadoActual en JS
             'numero_radicado': radicado.numero_radicado,
             'estado': radicado.estado,
             'mensaje': 'Radicado actualizado exitosamente'

@@ -384,6 +384,21 @@
                 <option value="Muy Alto">Muy Alto</option>
               </select>
             </div>
+            <div class="col-md-6">
+              <label class="form-label">Inclinación / Raíces</label>
+              <select class="form-select" id="arbol_inclinacion_raices">
+                <option value="Normal">Normal</option>
+                <option value="Inclinación leve">Inclinación leve</option>
+                <option value="Inclinación grave">Inclinación grave</option>
+                <option value="Raíces superficiales">Raíces superficiales</option>
+                <option value="Raíces con daño">Raíces con daño</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Afectación observada</label>
+              <input type="text" class="form-control" id="arbol_afectacion"
+                     placeholder="Ej: Daño en infraestructura, cables, redes…">
+            </div>
           </div>
         </div>
 
@@ -435,6 +450,10 @@
           <button class="btn-secondary-custom" onclick="descargarPDF(radicadoActual && radicadoActual.id)">
             📥 Descargar Informe PDF
           </button>
+          <button class="btn-secondary-custom" onclick="
+            document.getElementById('form-visita').style.display='block';
+            document.getElementById('visita-confirmacion').style.display='none';
+          ">✏️ Editar Visita</button>
           <button class="btn-primary-custom" onclick="showSection(3)">Siguiente: Dictamen CMGR →</button>
         </div>
       </div>
@@ -684,12 +703,39 @@ document.getElementById('form-radicacion').addEventListener('submit', async (e) 
 
 // === PREPARAR FASE 2 ===
 function mostrarDatos2() {
+  // Resumen siempre visible
   document.getElementById('radicado-numero-2').textContent = radicadoActual.numero_radicado;
   document.getElementById('solicitante-resumen').textContent = radicadoActual.solicitante_nombre;
   document.getElementById('arbol-resumen').textContent = radicadoActual.arbol_especie_comun;
   document.getElementById('dap-resumen').textContent = radicadoActual.arbol_dap_cm;
   document.getElementById('radicado_id_visita').value = radicadoActual.id;
-  document.getElementById('visita_fecha').valueAsDate = new Date();
+
+  // Determinar si Fase 2 ya fue guardada (visita_fecha existe en DB)
+  const fase2Guardada = !!radicadoActual.visita_fecha;
+
+  // Poblar SIEMPRE los campos del formulario con los datos guardados
+  if (radicadoActual.visita_fecha) {
+    document.getElementById('visita_fecha').value = radicadoActual.visita_fecha.substring(0, 10);
+  } else {
+    document.getElementById('visita_fecha').valueAsDate = new Date();
+  }
+  document.getElementById('visita_tecnico').value              = radicadoActual.visita_tecnico || '';
+  document.getElementById('arbol_fitosanitario').value         = radicadoActual.arbol_fitosanitario || 'Buen estado';
+  document.getElementById('arbol_inclinacion_raices').value    = radicadoActual.arbol_inclinacion_raices || 'Normal';
+  document.getElementById('arbol_afectacion').value            = radicadoActual.arbol_afectacion || '';
+  document.getElementById('visita_riesgo_final').value         = radicadoActual.visita_riesgo_final || 'Bajo';
+  document.getElementById('visita_observaciones').value        = radicadoActual.visita_observaciones || '';
+  document.getElementById('diagnostico_recomendaciones').value = radicadoActual.diagnostico_recomendaciones || '';
+
+  // Mostrar confirmación u ocultar según estado
+  document.getElementById('form-visita').style.display          = fase2Guardada ? 'none'  : 'block';
+  document.getElementById('visita-confirmacion').style.display  = fase2Guardada ? 'block' : 'none';
+
+  // Marcar paso 1 como completado
+  document.querySelector('[data-step="1"]').classList.add('completed');
+  if (fase2Guardada) {
+    document.querySelector('[data-step="2"]').classList.add('completed');
+  }
 }
 
 // === SUBIDA DE FOTOS ===
@@ -761,22 +807,25 @@ document.getElementById('form-visita').addEventListener('submit', async (e) => {
     visita_fecha: document.getElementById('visita_fecha').value,
     visita_tecnico: document.getElementById('visita_tecnico').value,
     arbol_fitosanitario: document.getElementById('arbol_fitosanitario').value,
+    arbol_inclinacion_raices: document.getElementById('arbol_inclinacion_raices').value,
+    arbol_afectacion: document.getElementById('arbol_afectacion').value,
     visita_riesgo_final: document.getElementById('visita_riesgo_final').value,
     visita_observaciones: document.getElementById('visita_observaciones').value,
     diagnostico_recomendaciones: document.getElementById('diagnostico_recomendaciones').value
   };
-  
+
   try {
     const resp = await fetch(`/api/riesgo/arborea/${radicadoActual.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
-    
+
     const result = await resp.json();
-    
+
     if (resp.ok && result.success) {
-      radicadoActual.estado = 'Pendiente';
+      // Actualizar radicadoActual con datos reales del servidor
+      if (result.radicado) radicadoActual = result.radicado;
       document.getElementById('visita-confirmacion').style.display = 'block';
       document.getElementById('form-visita').style.display = 'none';
       document.querySelector('[data-step="2"]').classList.add('completed');
@@ -794,10 +843,43 @@ document.getElementById('form-visita').addEventListener('submit', async (e) => {
 
 // === PREPARAR FASE 3 ===
 function prepararFase3() {
-  document.getElementById('radicado-numero-3').textContent = radicadoActual.numero_radicado;
+  // Resumen siempre visible
+  document.getElementById('radicado-numero-3').textContent    = radicadoActual.numero_radicado;
   document.getElementById('solicitante-resumen-3').textContent = radicadoActual.solicitante_nombre;
-  document.getElementById('arbol-resumen-3').textContent = radicadoActual.arbol_especie_comun;
-  document.getElementById('radicado_id_permiso').value = radicadoActual.id;
+  document.getElementById('arbol-resumen-3').textContent       = radicadoActual.arbol_especie_comun;
+  document.getElementById('radicado_id_permiso').value         = radicadoActual.id;
+
+  // Determinar si Fase 3 ya fue guardada
+  const fase3Guardada = !!radicadoActual.dictamen_decision;
+
+  // Poblar SIEMPRE los campos del formulario
+  document.getElementById('dictamen_decision').value                = radicadoActual.dictamen_decision || '';
+  document.getElementById('permiso_firmante1').value                = radicadoActual.permiso_firmante1 || '';
+  document.getElementById('permiso_obligaciones').value             = radicadoActual.permiso_obligaciones || '';
+  document.getElementById('compensacion_coeficiente').value         = radicadoActual.compensacion_coeficiente || 1.5;
+  document.getElementById('compensacion_especie_recomendada').value = radicadoActual.compensacion_especie_recomendada || '';
+  document.getElementById('compensacion_sitio').value               = radicadoActual.compensacion_sitio || '';
+
+  // Mostrar/ocultar sección compensación según decisión guardada
+  toggleCompensacion();
+
+  // Actualizar badge de estado
+  const estadoBadge = document.getElementById('estado-resumen-3');
+  if (radicadoActual.estado) {
+    estadoBadge.textContent = radicadoActual.estado.toUpperCase();
+    estadoBadge.className   = `estado-badge estado-${radicadoActual.estado.toLowerCase()}`;
+  }
+
+  // Mostrar confirmación u ocultar según estado
+  document.getElementById('form-permiso').style.display          = fase3Guardada ? 'none'  : 'block';
+  document.getElementById('permiso-confirmacion').style.display  = fase3Guardada ? 'block' : 'none';
+
+  // Marcar pasos 1 y 2 como completados
+  document.querySelector('[data-step="1"]').classList.add('completed');
+  document.querySelector('[data-step="2"]').classList.add('completed');
+  if (fase3Guardada) {
+    document.querySelector('[data-step="3"]').classList.add('completed');
+  }
 }
 
 function toggleCompensacion() {
@@ -871,6 +953,8 @@ document.getElementById('form-permiso').addEventListener('submit', async (e) => 
     const result = await resp.json();
     
     if (resp.ok && result.success) {
+      // Actualizar radicadoActual con datos reales del servidor
+      if (result.radicado) radicadoActual = result.radicado;
       document.getElementById('permiso-confirmacion').style.display = 'block';
       document.getElementById('form-permiso').style.display = 'none';
       document.querySelector('[data-step="3"]').classList.add('completed');
@@ -908,11 +992,11 @@ async function cargarHistorial() {
     
     if (data.radicados && data.radicados.length > 0) {
       tbody.innerHTML = data.radicados.map(r => {
-        const isRadicada = r.estado === 'Radicada';
-        const isVisitada = r.estado === 'Visitada';
+        const isRadicada  = r.estado === 'Radicada' && !r.visita_fecha;
+        const isVisitada  = r.estado === 'Visitada' || (r.estado === 'Radicada' && !!r.visita_fecha);
         const isProcesada = r.estado === 'Aprobada' || r.estado === 'Negada';
-        const hasInforme = isVisitada || isProcesada;
-        const hasPermiso = isProcesada;
+        const hasInforme  = isVisitada || isProcesada;
+        const hasPermiso  = isProcesada;
         const canDelete = isRadicada || (isProcesada && isAdmin);
 
         return `
