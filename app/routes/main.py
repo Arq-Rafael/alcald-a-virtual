@@ -110,6 +110,11 @@ def dashboard_stats():
 
     return jsonify(stats)
 
+@main_bp.route('/politica-privacidad')
+def politica_privacidad():
+    """Página pública — no requiere sesión activa."""
+    return render_template('politica_privacidad.html')
+
 @main_bp.route('/geoportal')
 def geoportal():
     """Catastro Municipal 3D Profesional - Vista unificada estilo Google Maps"""
