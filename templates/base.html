@@ -767,10 +767,11 @@
       <div class="av-nav-section">
         <span class="av-nav-section-label">Información</span>
       </div>
-      <button class="av-nav-item" onclick="showWeatherDetails()" type="button">
+      <a href="/clima"
+         class="av-nav-item {% if request.endpoint == 'weather.clima' %}active{% endif %}">
         <i class="bi bi-cloud-sun av-nav-icon"></i>
         Clima Supatá
-      </button>
+      </a>
 
     </nav><!-- /nav -->
 
@@ -801,28 +802,31 @@
     </div>
   </aside>
 
-  <!-- Weather Bubble Modal (se mantiene igual) -->
+  <!-- Weather Bubble Modal — datos dinámicos via weather.js -->
   <div id="weatherBubble" class="weather-bubble-modal" style="display: none;">
     <div class="weather-bubble-content">
       <div class="weather-bubble-header">
         <i class="bi bi-cloud-sun-fill" style="font-size: 3rem; color: #fbbf24;"></i>
-        <h3 style="margin: 0.5rem 0; font-weight: 700;">22°C</h3>
-        <p style="margin: 0; opacity: 0.8;">Parcialmente nublado</p>
+        <h3 style="margin: 0.5rem 0; font-weight: 700;">—</h3>
+        <p style="margin: 0; opacity: 0.8;">Cargando...</p>
       </div>
       <div class="weather-bubble-details">
         <div class="weather-detail-item">
           <i class="bi bi-droplet-fill"></i>
-          <span>Humedad: 65%</span>
+          <span>Humedad: —</span>
         </div>
         <div class="weather-detail-item">
           <i class="bi bi-wind"></i>
-          <span>Viento: 12 km/h</span>
+          <span>Viento: —</span>
         </div>
         <div class="weather-detail-item">
           <i class="bi bi-thermometer-half"></i>
-          <span>Sensación: 21°C</span>
+          <span>Sensación: —</span>
         </div>
       </div>
+      <a href="/clima" class="weather-bubble-more" style="display:block;text-align:center;margin-bottom:.5rem;font-size:.78rem;color:#1565c0;font-weight:600;text-decoration:none;">
+        <i class="bi bi-arrow-right-circle-fill"></i> Ver módulo completo
+      </a>
       <button onclick="hideWeatherBubble()" class="weather-bubble-close">Cerrar</button>
     </div>
   </div>
@@ -1586,15 +1590,12 @@
       console.log('💡 TIP: Usa testChatNotification() para probar la notificación');
       console.log('💡 TIP: Usa localStorage.clear() para limpiar historial de notificaciones');
       
-      // Weather Widget Function
+      // Weather Widget Function — abre bubble con datos reales
       window.showWeatherDetails = function() {
-        alert('🌤️ Clima en Supatá\n\n' +
-              '📊 Temperatura: 22°C\n' +
-              '💨 Viento: 12 km/h\n' +
-              '💧 Humedad: 65%\n' +
-              '☁️ Condición: Parcialmente nublado\n' +
-              '👁️ Visibilidad: 10 km\n' +
-              '⬇️ Presión: 1013 mb');
+        const bubble = document.getElementById('weatherBubble');
+        if (bubble) bubble.style.display = 'block';
+        // Actualizar widget si ya está disponible
+        if (window.WeatherWidget) WeatherWidget.refresh();
       };
       
       {% else %}
@@ -1804,34 +1805,51 @@
   <script src="{{ url_for('static', filename='js/chat-bubble.js') }}"></script>
   {% endif %}
 
-  <!-- Weather Bubble Script -->
+  <!-- Weather Bubble Script + Widget -->
+  {% if session.user %}
+  <script src="{{ url_for('static', filename='js/weather.js') }}"></script>
   <script>
     function showWeatherDetails() {
       const bubble = document.getElementById('weatherBubble');
-      if (bubble) {
-        bubble.style.display = 'block';
-      }
+      if (bubble) bubble.style.display = 'block';
+      if (window.WeatherWidget) WeatherWidget.refresh();
     }
-    
+
     function hideWeatherBubble() {
       const bubble = document.getElementById('weatherBubble');
-      if (bubble) {
-        bubble.style.display = 'none';
-      }
+      if (bubble) bubble.style.display = 'none';
     }
-    
-    // Cerrar con click fuera del contenido
+
     document.addEventListener('click', function(e) {
       const bubble = document.getElementById('weatherBubble');
-      const widget = document.querySelector('.weather-widget-sidebar');
-      
-      if (bubble && bubble.style.display === 'block' && 
-          !e.target.closest('.weather-bubble-content') && 
-          !e.target.closest('.weather-widget-sidebar')) {
+      if (bubble && bubble.style.display === 'block' &&
+          !e.target.closest('.weather-bubble-content') &&
+          !e.target.closest('.weather-widget-sidebar') &&
+          !e.target.closest('.db-weather-card') &&
+          !e.target.closest('.av-nav-item[onclick]')) {
         hideWeatherBubble();
       }
     });
+
+    // Iniciar widget en sidebar (no en la página /clima donde se usa WeatherModule)
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.WeatherWidget && !window.location.pathname.startsWith('/clima')) {
+        WeatherWidget.init();
+      }
+    });
   </script>
+  {% else %}
+  <script>
+    function showWeatherDetails() {
+      const bubble = document.getElementById('weatherBubble');
+      if (bubble) bubble.style.display = 'block';
+    }
+    function hideWeatherBubble() {
+      const bubble = document.getElementById('weatherBubble');
+      if (bubble) bubble.style.display = 'none';
+    }
+  </script>
+  {% endif %}
 
   <!-- Splash Screen & Screen Saver Script -->
   <script src="{{ url_for('static', filename='js/splash-screen.js') }}"></script>

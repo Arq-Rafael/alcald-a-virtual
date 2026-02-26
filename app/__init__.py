@@ -54,7 +54,8 @@ def create_app(config_class=Config):
     from .routes.admin_fix import admin_fix_bp
     from .routes.totp_setup import totp_bp
     from .routes.backup_api import backup_api
-    
+    from .routes.weather_api import weather_bp
+
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(solicitudes_bp)
@@ -78,6 +79,7 @@ def create_app(config_class=Config):
     app.register_blueprint(admin_fix_bp)
     app.register_blueprint(totp_bp)
     app.register_blueprint(backup_api)
+    app.register_blueprint(weather_bp)
 
     
     # Context Processors (for templates)

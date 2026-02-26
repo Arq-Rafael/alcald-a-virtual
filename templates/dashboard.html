@@ -795,4 +795,10 @@ body.has-sidebar {
   });
 })();
 </script>
+<script src="{{ url_for('static', filename='js/weather.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.WeatherWidget) WeatherWidget.init();
+  });
+</script>
 {% endblock %}

@@ -1,0 +1,416 @@
+{% extends "base.html" %}
+
+{% block title %}Clima Supatá — Alcaldía Virtual{% endblock %}
+
+{% block styles %}
+<style>
+/* ═══════════════════════════════════════════════════════
+   CLIMA SUPATÁ — Módulo completo
+   Paleta institucional azul
+   ═══════════════════════════════════════════════════════ */
+
+body.has-sidebar { background: #f1f5f9 !important; }
+
+.cl-page {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 3rem;
+}
+
+/* ── Banner ─────────────────────────────────────────────── */
+.cl-banner {
+  background: linear-gradient(130deg, #0f4c81 0%, #1565c0 55%, #0ea5e9 100%);
+  border-radius: 20px;
+  padding: 2rem 2rem 1.6rem;
+  color: #fff;
+  margin-bottom: 1.75rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(15,76,129,0.18);
+}
+.cl-banner::before {
+  content: '';
+  position: absolute;
+  right: -60px; top: -60px;
+  width: 240px; height: 240px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
+}
+.cl-banner-icon { font-size: 3.5rem; line-height: 1; flex-shrink: 0; }
+.cl-banner h1   { font-size: 1.6rem; font-weight: 800; margin: 0 0 0.25rem; }
+.cl-banner p    { font-size: 0.85rem; opacity: 0.8; margin: 0; }
+.cl-banner-right {
+  margin-left: auto;
+  text-align: center;
+  flex-shrink: 0;
+}
+.cl-temp-big {
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #fde68a;
+}
+.cl-temp-desc {
+  font-size: 0.78rem;
+  opacity: 0.75;
+  margin-top: 0.15rem;
+}
+.cl-updated {
+  font-size: 0.7rem;
+  opacity: 0.5;
+  margin-top: 0.3rem;
+}
+
+/* ── KPI cards actuales ────────────────────────────────── */
+.cl-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+.cl-kpi {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.2rem 1rem 1rem;
+  box-shadow: 0 2px 12px rgba(15,76,129,0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  border-top: 3px solid #0f4c81;
+  transition: transform .15s;
+}
+.cl-kpi:hover { transform: translateY(-2px); }
+.cl-kpi-icon {
+  font-size: 1.6rem;
+  color: #1565c0;
+}
+.cl-kpi-val {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1;
+}
+.cl-kpi-label {
+  font-size: 0.73rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ── Sección títulos ───────────────────────────────────── */
+.cl-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+}
+.cl-section-title i { color: #1565c0; }
+
+/* ── Pronóstico por hora ───────────────────────────────── */
+.cl-hourly-wrap {
+  background: #fff;
+  border-radius: 18px;
+  padding: 1.25rem 1rem;
+  box-shadow: 0 2px 12px rgba(15,76,129,0.07);
+  margin-bottom: 1.75rem;
+  overflow-x: auto;
+}
+.cl-hourly-scroll {
+  display: flex;
+  gap: 0.75rem;
+  width: max-content;
+  padding-bottom: 0.25rem;
+}
+.cl-hour-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 0.75rem 0.85rem;
+  min-width: 72px;
+  transition: background .15s;
+}
+.cl-hour-card:hover { background: #e8f0fe; }
+.cl-hour-card.now {
+  background: linear-gradient(160deg, #0f4c81, #1565c0);
+  color: #fff;
+}
+.cl-hour-time { font-size: 0.68rem; font-weight: 600; color: #94a3b8; }
+.cl-hour-card.now .cl-hour-time { color: rgba(255,255,255,0.75); }
+.cl-hour-icon { font-size: 1.35rem; }
+.cl-hour-temp { font-size: 0.85rem; font-weight: 700; color: #1e293b; }
+.cl-hour-card.now .cl-hour-temp { color: #fff; }
+.cl-hour-pp { font-size: 0.65rem; color: #0ea5e9; font-weight: 600; }
+.cl-hour-card.now .cl-hour-pp { color: #bae6fd; }
+
+/* ── Pronóstico 7 días ─────────────────────────────────── */
+.cl-daily-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+.cl-day-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1rem 0.85rem;
+  box-shadow: 0 2px 12px rgba(15,76,129,0.07);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  text-align: center;
+  transition: transform .15s;
+}
+.cl-day-card:hover { transform: translateY(-3px); }
+.cl-day-card.today { border-top: 3px solid #0f4c81; }
+.cl-day-name { font-size: 0.78rem; font-weight: 700; color: #1e293b; }
+.cl-day-icon { font-size: 1.75rem; margin: 0.15rem 0; }
+.cl-day-desc { font-size: 0.65rem; color: #64748b; }
+.cl-day-temps { display: flex; gap: 0.4rem; font-size: 0.78rem; font-weight: 700; }
+.cl-day-max { color: #ef4444; }
+.cl-day-min { color: #3b82f6; }
+.cl-day-rain { font-size: 0.65rem; color: #0ea5e9; font-weight: 600; }
+
+/* ── Recomendaciones ───────────────────────────────────── */
+.cl-recs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 1.75rem;
+}
+.cl-rec-item {
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  box-shadow: 0 2px 8px rgba(15,76,129,0.06);
+  font-size: 0.85rem;
+  color: #374151;
+}
+.cl-rec-icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+/* ── Recursos IDEAM ────────────────────────────────────── */
+.cl-resources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+.cl-resource-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.1rem;
+  display: flex;
+  gap: 0.85rem;
+  box-shadow: 0 2px 12px rgba(15,76,129,0.07);
+  text-decoration: none;
+  transition: transform .15s, box-shadow .15s;
+}
+.cl-resource-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(15,76,129,0.13);
+}
+.cl-resource-icon {
+  font-size: 1.5rem;
+  color: #1565c0;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+.cl-resource-title { font-size: 0.85rem; font-weight: 700; color: #1e293b; }
+.cl-resource-desc  { font-size: 0.72rem; color: #64748b; margin-top: 0.2rem; }
+
+/* ── Skeleton loader ───────────────────────────────────── */
+.cl-skeleton {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: cl-shimmer 1.4s infinite;
+  border-radius: 8px;
+  display: inline-block;
+}
+@keyframes cl-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Error state ───────────────────────────────────────── */
+.cl-error {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  color: #b91c1c;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+/* ── Badge actualización ───────────────────────────────── */
+.cl-cache-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  padding: 0.15rem 0.5rem;
+  border-radius: 99px;
+  margin-left: 0.4rem;
+}
+
+@media (max-width: 576px) {
+  .cl-banner { flex-direction: column; text-align: center; }
+  .cl-banner-right { margin-left: 0; }
+  .cl-page { padding: 1rem 0.75rem 2rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cl-page">
+
+  <!-- BANNER -->
+  <div class="cl-banner" id="clBanner">
+    <div class="cl-banner-icon" id="clBannerEmoji">⛅</div>
+    <div>
+      <h1><i class="bi bi-cloud-sun-fill"></i> Clima Supatá</h1>
+      <p>Supatá, Cundinamarca · Alt. 1.930 m s.n.m.</p>
+      <p style="margin-top:.35rem;font-size:0.75rem;opacity:.6;">
+        Datos: Open-Meteo API · Actualización automática cada 15 min
+      </p>
+    </div>
+    <div class="cl-banner-right">
+      <div class="cl-temp-big" id="clTempBig">
+        <span class="cl-skeleton" style="width:80px;height:3rem;">&nbsp;</span>
+      </div>
+      <div class="cl-temp-desc" id="clTempDesc">Cargando...</div>
+      <div class="cl-updated" id="clUpdatedAt"></div>
+    </div>
+  </div>
+
+  <!-- ERROR (oculto por defecto) -->
+  <div class="cl-error" id="clErrorBox" style="display:none;">
+    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+    <span id="clErrorMsg">Error al obtener datos del clima.</span>
+  </div>
+
+  <!-- KPI ACTUALES -->
+  <div class="cl-section-title">
+    <i class="bi bi-thermometer-half"></i> Condiciones Actuales
+  </div>
+  <div class="cl-kpi-row" id="clKpiRow">
+    <div class="cl-kpi">
+      <i class="bi bi-thermometer-half cl-kpi-icon"></i>
+      <div class="cl-kpi-val"><span class="cl-skeleton" style="width:60px;height:1.35rem;">&nbsp;</span></div>
+      <div class="cl-kpi-label">Sensación térmica</div>
+    </div>
+    <div class="cl-kpi">
+      <i class="bi bi-droplet-fill cl-kpi-icon"></i>
+      <div class="cl-kpi-val"><span class="cl-skeleton" style="width:60px;height:1.35rem;">&nbsp;</span></div>
+      <div class="cl-kpi-label">Humedad relativa</div>
+    </div>
+    <div class="cl-kpi">
+      <i class="bi bi-wind cl-kpi-icon"></i>
+      <div class="cl-kpi-val"><span class="cl-skeleton" style="width:60px;height:1.35rem;">&nbsp;</span></div>
+      <div class="cl-kpi-label">Viento</div>
+    </div>
+    <div class="cl-kpi">
+      <i class="bi bi-cloud-rain-fill cl-kpi-icon"></i>
+      <div class="cl-kpi-val"><span class="cl-skeleton" style="width:60px;height:1.35rem;">&nbsp;</span></div>
+      <div class="cl-kpi-label">Precipitación</div>
+    </div>
+    <div class="cl-kpi">
+      <i class="bi bi-speedometer2 cl-kpi-icon"></i>
+      <div class="cl-kpi-val"><span class="cl-skeleton" style="width:60px;height:1.35rem;">&nbsp;</span></div>
+      <div class="cl-kpi-label">Presión atmosférica</div>
+    </div>
+    <div class="cl-kpi">
+      <i class="bi bi-eye-fill cl-kpi-icon"></i>
+      <div class="cl-kpi-val"><span class="cl-skeleton" style="width:60px;height:1.35rem;">&nbsp;</span></div>
+      <div class="cl-kpi-label">Visibilidad</div>
+    </div>
+  </div>
+
+  <!-- PRONÓSTICO 24 HORAS -->
+  <div class="cl-section-title">
+    <i class="bi bi-clock-history"></i> Próximas 24 Horas
+  </div>
+  <div class="cl-hourly-wrap">
+    <div class="cl-hourly-scroll" id="clHourlyScroll">
+      <!-- Skeleton cards -->
+      <div style="display:flex;gap:.75rem;">
+        {% for _ in range(12) %}
+        <div class="cl-hour-card">
+          <span class="cl-skeleton" style="width:36px;height:.8rem;">&nbsp;</span>
+          <span class="cl-skeleton" style="width:28px;height:28px;border-radius:50%;">&nbsp;</span>
+          <span class="cl-skeleton" style="width:32px;height:.85rem;">&nbsp;</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- PRONÓSTICO 7 DÍAS -->
+  <div class="cl-section-title">
+    <i class="bi bi-calendar-week-fill"></i> Pronóstico 7 Días
+  </div>
+  <div class="cl-daily-grid" id="clDailyGrid">
+    {% for _ in range(7) %}
+    <div class="cl-day-card">
+      <span class="cl-skeleton" style="width:40px;height:.8rem;">&nbsp;</span>
+      <span class="cl-skeleton" style="width:44px;height:44px;border-radius:50%;">&nbsp;</span>
+      <span class="cl-skeleton" style="width:70px;height:.65rem;">&nbsp;</span>
+      <span class="cl-skeleton" style="width:55px;height:.78rem;">&nbsp;</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- RECOMENDACIONES OPERATIVAS -->
+  <div class="cl-section-title">
+    <i class="bi bi-shield-check-fill"></i> Recomendaciones Operativas
+  </div>
+  <div class="cl-recs-list" id="clRecsList">
+    <div class="cl-rec-item">
+      <i class="bi bi-hourglass-split cl-rec-icon" style="color:#94a3b8;"></i>
+      <span style="color:#94a3b8;">Cargando recomendaciones...</span>
+    </div>
+  </div>
+
+  <!-- ALERTAS Y RECURSOS IDEAM -->
+  <div class="cl-section-title">
+    <i class="bi bi-link-45deg"></i> Recursos Oficiales — IDEAM / UNGRD
+  </div>
+  <div class="cl-resources-grid" id="clResourcesGrid">
+    {% for _ in range(4) %}
+    <div class="cl-resource-card" style="pointer-events:none;">
+      <span class="cl-skeleton" style="width:24px;height:24px;border-radius:6px;">&nbsp;</span>
+      <div style="flex:1;">
+        <div class="cl-skeleton" style="width:80%;height:.85rem;margin-bottom:.4rem;">&nbsp;</div>
+        <div class="cl-skeleton" style="width:95%;height:.72rem;">&nbsp;</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div><!-- /.cl-page -->
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/weather.js') }}"></script>
+<script>
+  // Inicializar módulo clima completo
+  document.addEventListener('DOMContentLoaded', () => {
+    WeatherModule.init();
+  });
+</script>
+{% endblock %}
