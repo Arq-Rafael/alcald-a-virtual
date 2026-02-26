@@ -93,20 +93,25 @@ def create_app(config_class=Config):
 
         prefs = get_user_preferences(session)
 
-        # Foto de perfil del usuario actual (si disponible)
-        current_user_foto = None
+        # Foto y nombre del usuario actual (si disponible)
+        current_user_foto    = None
+        current_user_nombre  = session.get('user', '')
         if Usuario and 'user' in session:
             try:
                 u = Usuario.query.filter_by(usuario=session['user']).first()
-                if u and getattr(u, 'foto_perfil', None):
-                    current_user_foto = u.foto_perfil
+                if u:
+                    if getattr(u, 'foto_perfil', None):
+                        current_user_foto = u.foto_perfil
+                    if getattr(u, 'nombre_completo', None):
+                        current_user_nombre = u.nombre_completo
             except Exception:
-                current_user_foto = None
+                pass
 
         return dict(
             can=can_access,
             user_preferences=prefs,
-            current_user_foto=current_user_foto
+            current_user_foto=current_user_foto,
+            current_user_nombre=current_user_nombre,
         )
         
     # Create database tables if they don't exist

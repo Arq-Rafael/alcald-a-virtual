@@ -223,11 +223,18 @@
       const initials    = getInitials(displayName);
       const subtitle    = user.secretaria || user.rol || 'Funcionario';
 
+      // Mostrar foto real si existe, si no iniciales
+      const avatarHtml = user.foto
+        ? `<img src="/${user.foto}?t={{ range(1000,9999)|random if false else '' }}" class="chat-contact-avatar-img" alt="${escapeHtml(initials)}" onerror="this.outerHTML='<div class=\\'chat-contact-avatar\\'>${escapeHtml(initials)}</div>'">`
+        : `<div class="chat-contact-avatar">${escapeHtml(initials)}</div>`;
+
       const item = document.createElement('div');
       item.className = 'chat-contact-item';
       item.dataset.username = user.usuario;
+      item.dataset.foto     = user.foto || '';
+      item.dataset.nombre   = displayName;
       item.innerHTML = `
-        <div class="chat-contact-avatar">${escapeHtml(initials)}</div>
+        ${avatarHtml}
         <div class="chat-contact-info">
           <div class="chat-contact-name">${escapeHtml(displayName)}</div>
           <div class="chat-contact-role">${escapeHtml(subtitle)}</div>
@@ -237,7 +244,7 @@
           : `<i class="bi bi-chevron-right"></i>`
         }
       `;
-      item.addEventListener('click', () => openChat(user.usuario, displayName));
+      item.addEventListener('click', () => openChat(user.usuario, displayName, user.foto || ''));
       list.appendChild(item);
     });
   }
@@ -265,14 +272,28 @@
   // ══════════════════════════════════════════════════════════════════════════
   //  ABRIR CONVERSACIÓN
   // ══════════════════════════════════════════════════════════════════════════
-  async function openChat(contactUsername, contactDisplayName) {
+  async function openChat(contactUsername, contactDisplayName, contactFoto) {
     currentContact     = contactUsername;
     currentContactName = contactDisplayName || contactUsername;
 
-    const initials = getInitials(currentContactName);
+    const initials    = getInitials(currentContactName);
+    const avatarEl    = document.getElementById('modalAvatar');
     document.getElementById('modalContactName').textContent   = currentContactName;
     document.getElementById('modalContactStatus').textContent = 'Funcionario';
-    document.getElementById('modalAvatar').textContent        = initials;
+
+    if (contactFoto && avatarEl) {
+      avatarEl.innerHTML = '';
+      avatarEl.style.overflow = 'hidden';
+      avatarEl.style.padding  = '0';
+      const img = document.createElement('img');
+      img.src = '/' + contactFoto;
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+      img.onerror = () => { avatarEl.innerHTML = ''; avatarEl.textContent = initials; avatarEl.style.overflow = ''; };
+      avatarEl.appendChild(img);
+    } else if (avatarEl) {
+      avatarEl.textContent = initials;
+      avatarEl.style.overflow = '';
+    }
     document.getElementById('backToContactsBtn').style.display = 'flex';
     document.getElementById('contactsPanel').style.display    = 'none';
     document.getElementById('messagesPanel').style.display    = 'flex';

@@ -880,105 +880,129 @@
   <!-- Global notifications container -->
   <div id="notificationsContainer"></div>
 
-  <!-- iOS26 Floating Profile Panel -->
+  <!-- iOS26 Floating Profile Panel — Paleta institucional azul -->
   {% if session.user %}
   <div id="profileQuickPanel" style="display:none; position:fixed; inset:0; z-index:1200;">
-    <div id="profileQuickBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,0.3); backdrop-filter:blur(8px);"></div>
-    <div id="profileQuickCard" style="position:absolute; width:420px; max-width:95vw; border-radius:24px; padding:1.75rem; z-index:1210; background:linear-gradient(135deg, rgba(255,255,255,0.92), rgba(248,250,252,0.88)); -webkit-backdrop-filter: blur(40px) saturate(200%); backdrop-filter: blur(40px) saturate(200%); border: 1.5px solid rgba(255,255,255,0.7); box-shadow: 0 20px 60px rgba(0,0,0,0.12), 0 6px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 2px rgba(0,0,0,0.04);">
-      <div class="d-flex align-items-center justify-content-between mb-3">
-        <div class="d-flex align-items-center gap-2">
-          <div style="width:40px; height:40px; border-radius:14px; background:linear-gradient(135deg, #7cb342, #9ccc65); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; box-shadow:0 4px 12px rgba(124,179,66,0.3);"><i class="bi bi-person-fill"></i></div>
-          <div class="fw-bold" style="font-size:1.1rem;">Personaliza tu Avatar</div>
+    <div id="profileQuickBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,0.35); backdrop-filter:blur(10px);"></div>
+    <div id="profileQuickCard" style="position:absolute; width:440px; max-width:96vw; border-radius:24px; padding:0; z-index:1210; background:linear-gradient(160deg, rgba(255,255,255,0.97), rgba(240,247,255,0.95)); -webkit-backdrop-filter:blur(40px) saturate(200%); backdrop-filter:blur(40px) saturate(200%); border:1.5px solid rgba(21,101,192,0.18); box-shadow:0 20px 60px rgba(15,76,129,0.18), 0 6px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95); overflow:hidden;">
+
+      <!-- ── Cabecera ── -->
+      <div style="background:linear-gradient(130deg,#0f4c81 0%,#1565c0 55%,#0ea5e9 100%); padding:1.25rem 1.5rem; display:flex; align-items:center; justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:0.85rem;">
+          <div id="avatarPreviewMini" style="width:46px; height:46px; border-radius:50%; overflow:hidden; border:2.5px solid rgba(255,255,255,0.6); flex-shrink:0; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; color:white; font-size:1.3rem;">
+            {% if current_user_foto %}<img src="/{{ current_user_foto }}" style="width:100%;height:100%;object-fit:cover;" alt="">
+            {% else %}<i class="bi bi-person-fill"></i>{% endif %}
+          </div>
+          <div>
+            <div style="color:white; font-weight:700; font-size:1rem; line-height:1.2;">{{ current_user_nombre }}</div>
+            <div style="color:rgba(255,255,255,0.75); font-size:0.76rem;">{{ session.user_role|title if session.user_role else 'Funcionario' }}</div>
+          </div>
         </div>
-        <button id="profileQuickClose" type="button" class="btn btn-sm btn-outline-secondary">Cerrar</button>
+        <button id="profileQuickClose" type="button" style="background:rgba(255,255,255,0.15); border:none; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; color:white; cursor:pointer; transition:background 0.2s;" title="Cerrar"><i class="bi bi-x-lg" style="font-size:0.95rem;"></i></button>
       </div>
-      <div class="mb-3" style="border-top:1px solid rgba(124,179,66,0.2); padding-top:1rem;"></div>
-      <div class="d-flex flex-column gap-3">
-        <!-- Avatar Preview -->
-        <div style="text-align:center;">
-          <div class="fw-semibold mb-2" style="font-size:0.95rem; color:#1a1a1a;">Tu Avatar Actual</div>
-          <div style="display:flex; align-items:center; justify-content:center; padding:1rem;">
-            {% if current_user_foto %}
-            <img id="avatarPreview" src="/{{ current_user_foto }}" alt="Foto" style="width:100px; height:100px; object-fit:cover; border-radius:50%; border:3px solid #7cb342; box-shadow: 0 8px 24px rgba(124,179,66,0.3);">
-            {% else %}
-            <div id="avatarPreview" class="avatar-wave" style="width:100px; height:100px; border-radius:50%; border:3px solid rgba(124,179,66,0.3); display:flex; align-items:center; justify-content:center; color:white; font-size:2.5rem;">
-              <i class="bi bi-person-fill"></i>
+
+      <!-- ── Cuerpo scrollable ── -->
+      <div style="padding:1.25rem 1.5rem 1.5rem; max-height:calc(100vh - 200px); overflow-y:auto;">
+
+        <!-- Avatar grande + estado -->
+        <div style="text-align:center; margin-bottom:1.25rem;">
+          <div style="display:inline-block; position:relative;">
+            <div id="avatarPreview" style="width:90px; height:90px; border-radius:50%; overflow:hidden; border:3px solid #1565c0; box-shadow:0 6px 20px rgba(15,76,129,0.25); margin:0 auto; background:linear-gradient(135deg,#0f4c81,#1565c0); display:flex; align-items:center; justify-content:center; color:white; font-size:2.2rem;">
+              {% if current_user_foto %}<img src="/{{ current_user_foto }}" style="width:100%;height:100%;object-fit:cover;" alt="Foto perfil">
+              {% else %}<i class="bi bi-person-fill"></i>{% endif %}
             </div>
-            {% endif %}
+          </div>
+          <div id="avatarStatus" style="margin-top:0.6rem; font-size:0.76rem; color:#6b7280; font-weight:500;">
+            {% if current_user_foto %}✅ Foto guardada{% else %}Sin foto — elige un avatar{% endif %}
           </div>
         </div>
 
-        <!-- Upload Photo Form -->
-        <div>
-          <form id="formSubirFoto" enctype="multipart/form-data" class="w-100">
-            <label style="display:block; font-size:0.85rem; color:#6b7280; margin-bottom:0.5rem; font-weight:600;">📸 Subir foto personal</label>
-            <input type="file" name="foto" accept="image/png,image/jpeg" class="form-control form-control-sm mb-2" style="font-size:0.85rem;">
-            <button type="submit" class="btn btn-sm btn-success w-100"><i class="bi bi-upload"></i> Guardar foto</button>
+        <!-- Nombre visible -->
+        <div style="margin-bottom:1rem;">
+          <label style="display:block; font-size:0.8rem; color:#374151; font-weight:600; margin-bottom:0.4rem;">👤 Nombre visible</label>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="text" id="inputNombreVisible" value="{{ current_user_nombre }}" placeholder="Tu nombre completo" style="flex:1; padding:0.5rem 0.75rem; border:1.5px solid rgba(15,76,129,0.2); border-radius:10px; font-size:0.875rem; outline:none; font-family:inherit; transition:border-color 0.2s;" onfocus="this.style.borderColor='#1565c0'" onblur="this.style.borderColor='rgba(15,76,129,0.2)'">
+            <button id="btnGuardarNombre" title="Guardar nombre" style="padding:0.5rem 0.9rem; background:linear-gradient(135deg,#1565c0,#0f4c81); color:white; border:none; border-radius:10px; cursor:pointer; font-size:0.85rem; transition:opacity 0.2s;"><i class="bi bi-check-lg"></i></button>
+          </div>
+        </div>
+
+        <!-- Subir foto -->
+        <div style="margin-bottom:1.25rem;">
+          <label style="display:block; font-size:0.8rem; color:#374151; font-weight:600; margin-bottom:0.5rem;">📸 Subir foto personal</label>
+          <form id="formSubirFoto" enctype="multipart/form-data">
+            <div id="dropZone" style="border:2px dashed rgba(21,101,192,0.3); border-radius:12px; padding:0.85rem; text-align:center; cursor:pointer; transition:all 0.2s; background:rgba(21,101,192,0.03);" onclick="document.getElementById('fotoInput').click()">
+              <i class="bi bi-cloud-upload" style="font-size:1.4rem; color:#1565c0; display:block; margin-bottom:0.3rem;"></i>
+              <div style="font-size:0.8rem; color:#6b7280;">Haz clic o arrastra una imagen aquí</div>
+              <div style="font-size:0.72rem; color:#9ca3af; margin-top:0.2rem;">JPG, PNG, WEBP · Máx 2 MB</div>
+            </div>
+            <input type="file" id="fotoInput" name="foto" accept="image/png,image/jpeg,image/webp" style="display:none;">
+            <div id="fotoNombre" style="display:none; margin-top:0.4rem; font-size:0.8rem; color:#374151; padding:0 0.2rem;"></div>
+            <div id="fotoError" style="display:none; margin-top:0.4rem; font-size:0.8rem; color:#ef4444; padding:0 0.2rem;"></div>
+            <button type="submit" id="btnSubirFoto" style="display:none; width:100%; margin-top:0.6rem; padding:0.55rem; background:linear-gradient(135deg,#1565c0,#0f4c81); color:white; border:none; border-radius:10px; cursor:pointer; font-size:0.875rem; font-weight:600; transition:opacity 0.2s;">
+              <i class="bi bi-upload"></i> Subir foto
+            </button>
           </form>
         </div>
 
         <!-- Avatares Predefinidos -->
-        <div>
-          <div class="fw-semibold mb-2" style="font-size:0.95rem; color:#1a1a1a; display:flex; align-items:center; gap:0.5rem;">🎨 Avatares Alternativos</div>
-          <div id="avatarCollections" style="max-height:280px; overflow-y:auto; padding-right:0.5rem;">
-            <!-- Se llena dinámicamente -->
-          </div>
+        <div style="margin-bottom:1.25rem;">
+          <div style="font-size:0.8rem; color:#374151; font-weight:600; margin-bottom:0.6rem;">🎨 Avatares alternativos</div>
+          <div id="avatarCollections" style="max-height:240px; overflow-y:auto; padding-right:0.4rem;"></div>
         </div>
 
-        <!-- Tema oscuro -->
-        <div style="padding-top:1rem; border-top:1px solid rgba(124,179,66,0.2);">
-          <div class="fw-semibold mb-2" style="font-size:0.95rem; color:#1a1a1a;">Preferencias Visuales</div>
+        <!-- Preferencias -->
+        <div style="padding-top:1rem; border-top:1px solid rgba(15,76,129,0.1);">
+          <div style="font-size:0.8rem; color:#374151; font-weight:600; margin-bottom:0.75rem;">⚙️ Preferencias visuales</div>
           <div class="form-check form-switch">
             <input class="form-check-input" type="checkbox" id="toggleTema" {% if user_preferences and user_preferences.tema=='dark' %}checked{% endif %}>
-            <label class="form-check-label" for="toggleTema" style="font-size:0.9rem;">🌙 Modo oscuro</label>
+            <label class="form-check-label" for="toggleTema" style="font-size:0.875rem; color:#374151;">🌙 Modo oscuro</label>
           </div>
         </div>
 
-        <button type="button" id="btnIrPerfil" class="btn btn-outline-secondary w-100" style="margin-top:1rem;"><i class="bi bi-gear"></i> Ir a Perfil Completo</button>
-      </div>
-    </div>
-  </div>
+        <button type="button" id="btnIrPerfil" style="width:100%; margin-top:1rem; padding:0.6rem; background:transparent; border:1.5px solid rgba(15,76,129,0.25); border-radius:12px; color:#0f4c81; font-size:0.875rem; font-weight:600; cursor:pointer; transition:all 0.2s;">
+          <i class="bi bi-gear"></i> Ir a Perfil Completo
+        </button>
+
+      </div><!-- /body -->
+    </div><!-- /card -->
+  </div><!-- /panel -->
 
   <style>
-    /* Premium Glassmorphism Avatar Gallery */
+    /* ── Avatar Gallery ── */
     .avatar-gallery {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.75rem;
-      margin: 0.75rem 0;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.6rem;
+      margin: 0.5rem 0;
     }
     .avatar-item {
       cursor: pointer;
-      border-radius: 12px;
-      padding: 0.5rem;
+      border-radius: 10px;
+      padding: 0.45rem;
       background: #fff;
       border: 2px solid #e5e7eb;
-      transition: all 0.25s ease;
+      transition: all 0.22s ease;
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 70px;
-      position: relative;
+      min-height: 60px;
       overflow: hidden;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     }
     .avatar-item:hover {
-      border-color: #7cb342;
-      transform: scale(1.08);
-      box-shadow: 0 4px 12px rgba(124,179,66,0.25);
+      border-color: #1565c0;
+      transform: scale(1.06);
+      box-shadow: 0 4px 12px rgba(15,76,129,0.2);
     }
     .avatar-item.selected {
-      border-color: #7cb342;
-      background: linear-gradient(135deg, rgba(124, 179, 66, 0.1), rgba(156, 204, 101, 0.08));
-      box-shadow: 0 0 0 3px rgba(124,179,66,0.15), 0 4px 12px rgba(124,179,66,0.2);
+      border-color: #1565c0;
+      background: linear-gradient(135deg, rgba(21,101,192,0.08), rgba(14,165,233,0.06));
+      box-shadow: 0 0 0 3px rgba(21,101,192,0.15), 0 4px 10px rgba(15,76,129,0.18);
     }
-    .avatar-item img, .avatar-item svg {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
+    .avatar-item img, .avatar-item svg { width:100%; height:100%; object-fit:contain; }
+    /* ── Ripple default avatar ── */
     .avatar-wave {
-      background: linear-gradient(135deg, #1b5e20, #4caf50);
+      background: linear-gradient(135deg, #0f4c81, #1565c0);
       color: #fff;
       border-radius: 50%;
       position: relative;
@@ -987,24 +1011,30 @@
     .avatar-wave::before, .avatar-wave::after {
       content: '';
       position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 100%;
-      height: 100%;
+      left: 50%; top: 50%;
+      width: 100%; height: 100%;
       border-radius: 50%;
       transform: translate(-50%, -50%);
-      border: 2px solid rgba(124, 179, 66, 0.5);
+      border: 2px solid rgba(21, 101, 192, 0.5);
       animation: ripple 2.8s ease-out infinite;
     }
     .avatar-wave::after {
-      border-color: rgba(124, 179, 66, 0.25);
+      border-color: rgba(14, 165, 233, 0.3);
       animation-delay: 1.2s;
     }
     @keyframes ripple {
-      0% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
-      70% { opacity: 0.15; transform: translate(-50%, -50%) scale(1.8); }
-      100% { opacity: 0; transform: translate(-50%, -50%) scale(2.1); }
+      0%   { opacity: 0.7; transform: translate(-50%,-50%) scale(1);   }
+      70%  { opacity: 0.15; transform: translate(-50%,-50%) scale(1.8); }
+      100% { opacity: 0;   transform: translate(-50%,-50%) scale(2.1); }
     }
+    /* ── Drop zone drag-over ── */
+    #dropZone.dragover {
+      border-color: #1565c0;
+      background: rgba(21,101,192,0.06);
+    }
+    /* ── Avatar collections scrollbar ── */
+    #avatarCollections::-webkit-scrollbar { width: 4px; }
+    #avatarCollections::-webkit-scrollbar-thumb { background: rgba(15,76,129,0.2); border-radius: 2px; }
   </style>
   {% endif %}
 
@@ -1024,253 +1054,256 @@
       });
     });
   </script>
-  <style>
-    /* Ripple/Wave avatar animation for default state */
-    .avatar-wave {
-      background: linear-gradient(135deg, #1b5e20, #4caf50);
-      color: #fff;
-      border-radius: 50%;
-      position: relative;
-      box-shadow: 0 4px 12px rgba(27, 94, 32, 0.2);
-      overflow: visible;
-    }
-    .avatar-wave::before, .avatar-wave::after {
-      content: '';
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      border: 2px solid rgba(124, 179, 66, 0.6);
-      animation: ripple 2.8s ease-out infinite;
-    }
-    .avatar-wave::after {
-      border-color: rgba(124, 179, 66, 0.35);
-      animation-delay: 1.2s;
-    }
-    @keyframes ripple {
-      0% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
-      70% { opacity: 0.15; transform: translate(-50%, -50%) scale(1.8); }
-      100% { opacity: 0; transform: translate(-50%, -50%) scale(2.1); }
-    }
-  </style>
+  <!-- ripple CSS already declared in profileQuickPanel block -->
 
-  <!-- Quick Profile Panel Logic -->
+  <!-- Quick Profile Panel Logic — versión corregida -->
   {% if session.user %}
   <script>
-    (function(){
-      const btn = document.getElementById('avatarQuickButton');
-      const panel = document.getElementById('profileQuickPanel');
-      const closeBtn = document.getElementById('profileQuickClose');
-      const backdrop = document.getElementById('profileQuickBackdrop');
-      const formFoto = document.getElementById('formSubirFoto');
-      const avatarPreview = document.getElementById('avatarPreview');
-      const toggleTema = document.getElementById('toggleTema');
+  (function(){
+    'use strict';
 
-      if (!btn || !panel) return;
+    const btn     = document.getElementById('avatarQuickButton');
+    const panel   = document.getElementById('profileQuickPanel');
+    const closeBtn= document.getElementById('profileQuickClose');
+    const backdrop= document.getElementById('profileQuickBackdrop');
 
-      function openPanel(){
-        panel.style.display = 'block';
-        // Position card centered on screen
-        const card = document.getElementById('profileQuickCard');
-        const rect = btn.getBoundingClientRect();
-        // Temporarily show card to measure height
-        card.style.visibility = 'hidden';
-        card.style.left = '0px';
-        card.style.top = '0px';
-        const cardRect = card.getBoundingClientRect();
-        const spacing = 12;
-        
-        // Center horizontally
-        let left = (window.innerWidth - cardRect.width) / 2;
-        
-        // Position vertically: prefer above avatar, fallback below
-        let top = rect.top - cardRect.height - spacing;
-        if (top < 20) {
-          top = Math.max(20, rect.bottom + spacing);
-        }
-        
-        // Ensure not going off screen horizontally
-        if (left < 10) left = 10;
-        if (left + cardRect.width > window.innerWidth - 10) {
-          left = window.innerWidth - cardRect.width - 10;
-        }
-        
-        // Keep within viewport vertically
-        if (top + cardRect.height > window.innerHeight - 20) {
-          top = window.innerHeight - cardRect.height - 20;
-        }
-        
-        card.style.top = `${top}px`;
-        card.style.left = `${left}px`;
-        card.style.visibility = 'visible';
+    if (!btn || !panel) return;
+
+    /* ── Abrir / Cerrar ── */
+    function openPanel() {
+      panel.style.display = 'block';
+      const card    = document.getElementById('profileQuickCard');
+      const btnRect = btn.getBoundingClientRect();
+      card.style.visibility = 'hidden';
+      card.style.left = '0px'; card.style.top = '0px';
+      const cw = card.offsetWidth, ch = card.offsetHeight;
+      const sp = 12;
+      let left = (window.innerWidth - cw) / 2;
+      let top  = btnRect.top - ch - sp;
+      if (top < 20) top = Math.max(20, btnRect.bottom + sp);
+      left = Math.max(10, Math.min(left, window.innerWidth  - cw - 10));
+      top  = Math.max(10, Math.min(top,  window.innerHeight - ch - 10));
+      card.style.left = left + 'px';
+      card.style.top  = top  + 'px';
+      card.style.visibility = 'visible';
+    }
+    function closePanel() { panel.style.display = 'none'; }
+
+    btn.addEventListener('click', openPanel);
+    closeBtn  && closeBtn.addEventListener('click', closePanel);
+    backdrop  && backdrop.addEventListener('click', closePanel);
+
+    /* ── Ir a perfil ── */
+    const btnIrPerfil = document.getElementById('btnIrPerfil');
+    btnIrPerfil && btnIrPerfil.addEventListener('click', () => {
+      window.location.href = '{{ url_for("perfil.perfil") }}';
+    });
+
+    /* ── Helpers: actualizar preview + thumbnail ── */
+    function _setPreviewImg(src) {
+      const box = document.getElementById('avatarPreview');
+      if (!box) return;
+      box.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = src; img.alt = 'Avatar';
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+      box.appendChild(img);
+    }
+    function _setMiniImg(src) {
+      const mini = document.getElementById('avatarPreviewMini');
+      if (!mini) return;
+      mini.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = src; img.alt = '';
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+      mini.appendChild(img);
+    }
+    function _setThumb(src) {
+      const thumb = document.getElementById('avatarThumb');
+      if (!thumb) return;
+      if (thumb.tagName === 'IMG') {
+        thumb.src = src;
+      } else {
+        const img = document.createElement('img');
+        img.id = 'avatarThumb';
+        img.src = src; img.alt = 'Foto';
+        img.className = 'av-user-avatar';
+        thumb.parentNode.replaceChild(img, thumb);
       }
-      function closePanel(){ panel.style.display = 'none'; }
-      btn.addEventListener('click', openPanel);
-      closeBtn && closeBtn.addEventListener('click', closePanel);
-      backdrop && backdrop.addEventListener('click', closePanel);
+    }
 
-      // Ir a página de perfil completa
-      const btnIrPerfil = document.getElementById('btnIrPerfil');
-      btnIrPerfil && btnIrPerfil.addEventListener('click', function(){ window.location.href = '{{ url_for("perfil.perfil") }}'; });
+    /* ── Drag & drop en la zona de subida ── */
+    const dropZone  = document.getElementById('dropZone');
+    const fotoInput = document.getElementById('fotoInput');
+    const fotoNombreEl = document.getElementById('fotoNombre');
+    const fotoErrorEl  = document.getElementById('fotoError');
+    const btnSubir     = document.getElementById('btnSubirFoto');
 
-      // Subir foto vía fetch
-      if (formFoto) {
-        formFoto.addEventListener('submit', async function(e){
-          e.preventDefault();
-          const fd = new FormData(formFoto);
-          try {
-            const res = await fetch('{{ url_for("perfil.perfil") }}', {
-              method: 'POST',
-              body: fd,
-              headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            });
-            let data = null;
-            try { data = await res.json(); } catch {}
-            if (data && data.success && data.foto_perfil) {
-              const newSrc = '/' + data.foto_perfil + `?t=${Date.now()}`;
-              if (avatarPreview && avatarPreview.tagName === 'IMG') {
-                avatarPreview.src = newSrc;
-              }
-              const thumb = document.getElementById('avatarThumb');
-              if (thumb) {
-                if (thumb.tagName === 'IMG') {
-                  thumb.src = newSrc;
-                } else {
-                  // Replace default icon with image
-                  const img = document.createElement('img');
-                  img.id = 'avatarThumb';
-                  img.src = newSrc;
-                  img.alt = 'Foto';
-                  img.style.width = '40px';
-                  img.style.height = '40px';
-                  img.style.objectFit = 'cover';
-                  img.style.borderRadius = '50%';
-                  img.style.border = '2px solid #e5e7eb';
-                  thumb.parentNode.replaceChild(img, thumb);
-                }
-              }
-              window.showNotification && window.showNotification('Foto subida', 'Tu foto fue actualizada.', 'success');
-            } else {
-              window.showNotification && window.showNotification('Guardado', 'Tu foto fue cargada. Si no ves cambios, recarga.', 'info');
-            }
-          } catch(err) {
-            console.error('Error subiendo foto', err);
-            window.showNotification && window.showNotification('Error', 'No fue posible subir la foto.', 'error');
-          }
-        });
+    function _validarArchivo(file) {
+      fotoNombreEl.style.display = 'none';
+      fotoErrorEl.style.display  = 'none';
+      btnSubir.style.display     = 'none';
+      if (!file) return false;
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (!['jpg','jpeg','png','webp'].includes(ext)) {
+        fotoErrorEl.textContent = 'Formato no permitido. Usa JPG, PNG o WEBP.';
+        fotoErrorEl.style.display = 'block';
+        return false;
       }
-
-      // Toggle de tema: guarda y aplica CSS dinámico sin recargar
-      if (toggleTema) {
-        toggleTema.addEventListener('change', async function(){
-          const tema = toggleTema.checked ? 'dark' : 'light';
-          const fd = new FormData();
-          fd.append('accion', 'guardar_prefs');
-          fd.append('tema', tema);
-          fd.append('tamano_fuente', '{{ user_preferences and user_preferences.tamano_fuente or "medium" }}');
-          fd.append('tipo_fuente', '{{ user_preferences and user_preferences.tipo_fuente or "system" }}');
-          fd.append('idioma', '{{ user_preferences and user_preferences.idioma or "es" }}');
-          fd.append('notificaciones', '{{ (user_preferences and user_preferences.notificaciones) and "on" or "" }}');
-          try {
-            const saveRes = await fetch('{{ url_for("perfil.perfil") }}', { method: 'POST', body: fd, redirect: 'follow' });
-            // Cargar CSS dinámico
-            const cssRes = await fetch('{{ url_for("api_prefs.get_preferences_css") }}', { cache: 'no-store' });
-            if (cssRes.ok) {
-              const css = await cssRes.text();
-              let styleTag = document.getElementById('dynamicPrefs');
-              if (!styleTag) {
-                styleTag = document.createElement('style');
-                styleTag.id = 'dynamicPrefs';
-                document.head.appendChild(styleTag);
-              }
-              styleTag.textContent = css;
-              window.showNotification && window.showNotification('Tema actualizado', 'Preferencia aplicada: ' + (tema==='dark'?'Oscuro':'Claro'), 'success');
-            } else {
-              window.showNotification && window.showNotification('Guardado', 'Tema guardado. Recarga para ver cambios.', 'info');
-            }
-          } catch(err) {
-            console.error('Error guardando tema', err);
-            window.showNotification && window.showNotification('Error', 'No fue posible cambiar el tema.', 'error');
-          }
-        });
+      if (file.size > 2 * 1024 * 1024) {
+        fotoErrorEl.textContent = 'El archivo supera 2 MB.';
+        fotoErrorEl.style.display = 'block';
+        return false;
       }
+      fotoNombreEl.textContent = '📎 ' + file.name + ' (' + (file.size / 1024).toFixed(0) + ' KB)';
+      fotoNombreEl.style.display = 'block';
+      btnSubir.style.display = 'block';
+      return true;
+    }
 
-      // Cargar y mostrar colecciones de avatares
-      let currentAvatarStyle = '{{ user_preferences.get("avatar_style", "siluetas") if user_preferences else "siluetas" }}';
-      let currentAvatarCollection = '{{ user_preferences.get("avatar_collection", "") if user_preferences else "" }}';
-      
-      async function loadAvatarCollections(){
+    if (dropZone) {
+      dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+      dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+      dropZone.addEventListener('drop', e => {
+        e.preventDefault(); dropZone.classList.remove('dragover');
+        const f = e.dataTransfer.files[0];
+        if (f && fotoInput) { fotoInput.files = e.dataTransfer.files; _validarArchivo(f); }
+      });
+    }
+    fotoInput && fotoInput.addEventListener('change', () => _validarArchivo(fotoInput.files[0]));
+
+    /* ── Subir foto — FIX: usa /perfil/avatar/upload (endpoint dedicado) ── */
+    const formFoto = document.getElementById('formSubirFoto');
+    if (formFoto) {
+      formFoto.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        if (!fotoInput || !fotoInput.files[0]) return;
+        btnSubir.disabled = true;
+        btnSubir.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Subiendo...';
+        const fd = new FormData();
+        fd.append('foto', fotoInput.files[0]);
         try {
-          const res = await fetch('{{ url_for("avatares.list_collections") }}');
-          const collections = await res.json();
-          const container = document.getElementById('avatarCollections');
-          if (!container) return;
-          container.innerHTML = '';
-          
-          for (const [key, collection] of Object.entries(collections)) {
-            const div = document.createElement('div');
-            div.className = 'mb-3';
-            div.innerHTML = `<div style="font-size:0.8rem; font-weight:600; color:#7cb342; margin-bottom:0.75rem;">${collection.name}</div>`;
-            
-            const gallery = document.createElement('div');
-            gallery.className = 'avatar-gallery';
-            
-            collection.avatars.forEach(avatar => {
-              const item = document.createElement('div');
-              item.className = 'avatar-item';
-              if (currentAvatarCollection === avatar.id) item.classList.add('selected');
-              
-              const img = document.createElement('img');
-              img.src = `{{ url_for("avatares.avatar_dinamico", usuario=session.user) }}?style=${key}&collection=${avatar.id}`;
-              img.alt = avatar.id;
-              item.appendChild(img);
-              
-              item.addEventListener('click', async function(){
-                document.querySelectorAll('.avatar-item').forEach(e => e.classList.remove('selected'));
-                item.classList.add('selected');
-                currentAvatarStyle = key;
-                currentAvatarCollection = avatar.id;
-                
-                // Actualizar preview
-                const preview = document.getElementById('avatarPreview');
-                if (preview && preview.tagName === 'IMG') {
-                  preview.remove();
-                }
-                const newImg = document.createElement('img');
-                newImg.id = 'avatarPreview';
-                newImg.src = `{{ url_for("avatares.avatar_dinamico", usuario=session.user) }}?style=${key}&collection=${avatar.id}`;
-                newImg.style.cssText = 'width:100px; height:100px; object-fit:cover; border-radius:50%; border:3px solid #7cb342; box-shadow: 0 8px 24px rgba(124,179,66,0.3);';
-                
-                const thumb = document.getElementById('avatarThumb');
-                if (thumb && thumb.tagName === 'IMG') {
-                  thumb.src = newImg.src;
-                } else if (thumb) {
-                  thumb.parentNode.replaceChild(newImg, thumb);
-                }
-                
-                // Guardar preferencia
-                const fd = new FormData();
-                fd.append('accion', 'guardar_prefs');
-                fd.append('avatar_style', key);
-                fd.append('avatar_collection', avatar.id);
-                fd.append('tema', '{{ user_preferences.get("tema", "light") if user_preferences else "light" }}');
-                fd.append('tamano_fuente', '{{ user_preferences.get("tamano_fuente", "medium") if user_preferences else "medium" }}');
-                fd.append('tipo_fuente', '{{ user_preferences.get("tipo_fuente", "system") if user_preferences else "system" }}');
-                fd.append('idioma', '{{ user_preferences.get("idioma", "es") if user_preferences else "es" }}');
-                await fetch('{{ url_for("perfil.perfil") }}', { method: 'POST', body: fd });
-              });
-              gallery.appendChild(item);
-            });
-            div.appendChild(gallery);
-            container.appendChild(div);
+          const res  = await fetch('/perfil/avatar/upload', { method: 'POST', body: fd });
+          const data = await res.json();
+          if (data.success && data.url) {
+            const src = data.url + '?t=' + Date.now();
+            _setPreviewImg(src); _setMiniImg(src); _setThumb(src);
+            const statusEl = document.getElementById('avatarStatus');
+            if (statusEl) statusEl.textContent = '✅ Foto guardada';
+            fotoNombreEl.style.display = 'none';
+            btnSubir.style.display     = 'none';
+            fotoInput.value = '';
+            window.showNotification && window.showNotification('Foto actualizada', 'Tu foto de perfil fue guardada.', 'success');
+          } else {
+            fotoErrorEl.textContent = data.error || 'Error al subir la foto.';
+            fotoErrorEl.style.display = 'block';
           }
-        } catch(e) { console.error('Error cargando avatares:', e); }
-      }
-      loadAvatarCollections();
-    })();
+        } catch(err) {
+          fotoErrorEl.textContent = 'Error de conexión. Intenta de nuevo.';
+          fotoErrorEl.style.display = 'block';
+        } finally {
+          btnSubir.disabled = false;
+          btnSubir.innerHTML = '<i class="bi bi-upload"></i> Subir foto';
+        }
+      });
+    }
+
+    /* ── Guardar nombre visible ── */
+    const btnGuardarNombre = document.getElementById('btnGuardarNombre');
+    btnGuardarNombre && btnGuardarNombre.addEventListener('click', async () => {
+      const nombre = (document.getElementById('inputNombreVisible') || {}).value || '';
+      if (!nombre.trim()) return;
+      try {
+        const res  = await fetch('/perfil/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre_completo: nombre.trim() }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          window.showNotification && window.showNotification('Nombre guardado', 'Tu nombre fue actualizado.', 'success');
+        }
+      } catch(err) { console.error('Error guardando nombre', err); }
+    });
+
+    /* ── Toggle de tema oscuro — usa /perfil/update ── */
+    const toggleTema = document.getElementById('toggleTema');
+    toggleTema && toggleTema.addEventListener('change', async function() {
+      const tema = this.checked ? 'dark' : 'light';
+      try {
+        await fetch('/perfil/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tema }),
+        });
+        const cssRes = await fetch('{{ url_for("api_prefs.get_preferences_css") }}', { cache: 'no-store' });
+        if (cssRes.ok) {
+          const css = await cssRes.text();
+          let tag = document.getElementById('dynamicPrefs');
+          if (!tag) { tag = document.createElement('style'); tag.id = 'dynamicPrefs'; document.head.appendChild(tag); }
+          tag.textContent = css;
+        }
+        window.showNotification && window.showNotification(
+          'Tema ' + (tema === 'dark' ? 'oscuro' : 'claro'),
+          'Preferencia guardada y aplicada.', 'success'
+        );
+      } catch(err) { console.error('Error tema', err); }
+    });
+
+    /* ── Colecciones de avatares — usa /perfil/avatar/select ── */
+    let selStyle = '{{ user_preferences.get("avatar_style", "siluetas") if user_preferences else "siluetas" }}';
+    let selColl  = '{{ user_preferences.get("avatar_collection", "") if user_preferences else "" }}';
+
+    async function loadAvatarCollections() {
+      try {
+        const res  = await fetch('{{ url_for("avatares.list_collections") }}');
+        const cols = await res.json();
+        const container = document.getElementById('avatarCollections');
+        if (!container) return;
+        container.innerHTML = '';
+
+        for (const [key, col] of Object.entries(cols)) {
+          const label = document.createElement('div');
+          label.style.cssText = 'font-size:0.76rem;font-weight:600;color:#0f4c81;margin:0.6rem 0 0.4rem;';
+          label.textContent = col.name;
+          container.appendChild(label);
+
+          const gallery = document.createElement('div');
+          gallery.className = 'avatar-gallery';
+
+          col.avatars.forEach(av => {
+            const item = document.createElement('div');
+            item.className = 'avatar-item';
+            if (selColl === av.id) item.classList.add('selected');
+            const img = document.createElement('img');
+            img.src = `{{ url_for("avatares.avatar_dinamico", usuario=session.user) }}?style=${key}&collection=${av.id}`;
+            img.alt = av.id;
+            item.appendChild(img);
+
+            item.addEventListener('click', async () => {
+              container.querySelectorAll('.avatar-item').forEach(x => x.classList.remove('selected'));
+              item.classList.add('selected');
+              selStyle = key; selColl = av.id;
+              const src = img.src;
+              _setPreviewImg(src); _setMiniImg(src); _setThumb(src);
+              const statusEl = document.getElementById('avatarStatus');
+              if (statusEl) statusEl.textContent = '✅ Avatar guardado';
+              try {
+                await fetch('/perfil/avatar/select', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ avatar_style: key, avatar_key: av.id }),
+                });
+              } catch(err) { console.error('Error seleccionando avatar', err); }
+            });
+            gallery.appendChild(item);
+          });
+          container.appendChild(gallery);
+        }
+      } catch(e) { console.error('Error cargando avatares:', e); }
+    }
+    loadAvatarCollections();
+  })();
   </script>
   {% endif %}
 
