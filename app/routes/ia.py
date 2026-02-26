@@ -1,4 +1,5 @@
 import os
+import uuid
 import datetime
 import csv
 import io
@@ -38,27 +39,92 @@ def internal():
 # CHAT APIs - iMessage Style
 # ============================================
 
+# ─── Helpers para tracking de mensajes leídos ────────────────────────────────
+_READ_FIELDS = ['reader', 'sender', 'last_read']
+
+def _leidos_path():
+    return os.path.join(current_app.config['DATA_DIR'], 'mensajes_leidos.csv')
+
+def _get_last_read(path, reader_user, sender_user):
+    """Retorna el timestamp del último mensaje leído de sender hacia reader."""
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            for row in csv.DictReader(f):
+                if row.get('reader') == reader_user and row.get('sender') == sender_user:
+                    return row.get('last_read', '')
+    except Exception:
+        pass
+    return None
+
+def _set_last_read(path, reader_user, sender_user, timestamp):
+    """Actualiza o inserta el timestamp de último leído."""
+    rows = []
+    found = False
+    if os.path.exists(path):
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                for row in csv.DictReader(f):
+                    if row.get('reader') == reader_user and row.get('sender') == sender_user:
+                        row['last_read'] = timestamp
+                        found = True
+                    rows.append(row)
+        except Exception:
+            pass
+    if not found:
+        rows.append({'reader': reader_user, 'sender': sender_user, 'last_read': timestamp})
+    with open(path, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=_READ_FIELDS)
+        writer.writeheader()
+        writer.writerows(rows)
+# ─────────────────────────────────────────────────────────────────────────────
+
 @ia_bp.route('/api/chat/users', methods=['GET'])
 def get_chat_users():
-    """Obtener lista de usuarios para el chat"""
+    """Obtener lista de usuarios para el chat (desde Usuario model, excluyendo al actual)"""
     if 'user' not in session:
         return jsonify({'error': 'Not authenticated'}), 401
-    
+
+    current_user = session['user']
+    try:
+        from app.models.usuario import Usuario
+        usuarios = (Usuario.query
+                    .filter(Usuario.usuario != current_user,
+                            Usuario.bloqueado == False)
+                    .order_by(Usuario.nombre_completo)
+                    .all())
+        users = []
+        for u in usuarios:
+            users.append({
+                'usuario':    u.usuario,
+                'nombre':     u.nombre_completo or u.usuario,
+                'rol':        u.role or 'Funcionario',
+                'secretaria': u.secretaria or '',
+                'foto':       u.foto_perfil or None,
+            })
+        return jsonify(users)
+    except Exception as e:
+        print(f"Error loading users from DB: {e}")
+
+    # Fallback: CSV
     try:
         users_path = os.path.join(current_app.config['DATA_DIR'], 'usuarios.csv')
         users = []
-        
         with open(users_path, 'r', encoding='utf-8') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
+            for row in csv.DictReader(f):
+                if row.get('usuario', '') == current_user:
+                    continue
                 users.append({
-                    'usuario': row.get('usuario', ''),
-                    'rol': row.get('rol', 'Usuario')
+                    'usuario':    row.get('usuario', ''),
+                    'nombre':     row.get('nombre_completo', '') or row.get('usuario', ''),
+                    'rol':        row.get('rol', 'Funcionario'),
+                    'secretaria': row.get('secretaria', ''),
+                    'foto':       None,
                 })
-        
         return jsonify(users)
-    except Exception as e:
-        print(f"Error loading users: {e}")
+    except Exception as e2:
+        print(f"Error loading users from CSV: {e2}")
         return jsonify([])
 
 @ia_bp.route('/api/chat/messages', methods=['GET'])
@@ -314,6 +380,109 @@ def get_chat_conversations():
     except Exception as e:
         print(f'Error al obtener conversaciones: {e}')
         return jsonify({'error': str(e)}), 500
+
+@ia_bp.route('/api/chat/unread-count', methods=['GET'])
+def chat_unread_count():
+    """Retorna mensajes no leídos totales y por contacto para el usuario actual."""
+    if 'user' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+
+    current_user = session['user']
+    try:
+        messages_path = os.path.join(current_app.config['DATA_DIR'], 'mensajes.csv')
+        leidos_path = _leidos_path()
+        unread_by_contact = {}
+
+        if os.path.exists(messages_path):
+            with open(messages_path, 'r', encoding='utf-8') as f:
+                for row in csv.DictReader(f):
+                    if row.get('recipient') != current_user:
+                        continue
+                    sender = row.get('sender', '')
+                    ts = row.get('timestamp', '')
+                    last_read = _get_last_read(leidos_path, current_user, sender)
+                    if last_read is None or ts > last_read:
+                        unread_by_contact[sender] = unread_by_contact.get(sender, 0) + 1
+
+        total = sum(unread_by_contact.values())
+        return jsonify({'total': total, 'by_contact': unread_by_contact})
+    except Exception as e:
+        print(f"Error getting unread count: {e}")
+        return jsonify({'total': 0, 'by_contact': {}})
+
+
+@ia_bp.route('/api/chat/mark-read', methods=['POST'])
+def chat_mark_read():
+    """Marca como leídos todos los mensajes de un contacto hacia el usuario actual."""
+    if 'user' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+
+    data = request.get_json(silent=True) or {}
+    contact = data.get('contact', '')
+    if not contact:
+        return jsonify({'error': 'Missing contact'}), 400
+
+    current_user = session['user']
+    timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    _set_last_read(_leidos_path(), current_user, contact, timestamp)
+    return jsonify({'success': True})
+
+
+@ia_bp.route('/api/chat/upload', methods=['POST'])
+def chat_upload():
+    """Sube un archivo adjunto en el chat y lo registra como mensaje."""
+    if 'user' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
+
+    file = request.files['file']
+    recipient = request.form.get('to', '')
+
+    if not file.filename or not recipient:
+        return jsonify({'error': 'Datos incompletos'}), 400
+
+    # Validar extensión
+    allowed_exts = {'pdf', 'png', 'jpg', 'jpeg', 'gif', 'docx', 'xlsx'}
+    ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
+    if ext not in allowed_exts:
+        return jsonify({'error': 'Tipo de archivo no permitido'}), 400
+
+    # Validar tamaño (≤ 5 MB)
+    file.seek(0, 2)
+    size = file.tell()
+    file.seek(0)
+    if size > 5 * 1024 * 1024:
+        return jsonify({'error': 'El archivo supera 5 MB'}), 400
+
+    # Guardar archivo
+    base_dir = current_app.config.get('BASE_DIR', os.path.join(current_app.root_path, '..'))
+    uploads_dir = os.path.join(base_dir, 'static', 'chat_uploads')
+    os.makedirs(uploads_dir, exist_ok=True)
+
+    safe_name = f"{uuid.uuid4().hex[:10]}_{file.filename}"
+    file.save(os.path.join(uploads_dir, safe_name))
+
+    # Registrar como mensaje
+    current_user = session['user']
+    messages_path = os.path.join(current_app.config['DATA_DIR'], 'mensajes.csv')
+    timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    msg_text = f"[FILE:{safe_name}|{file.filename}|{ext}]"
+
+    if not os.path.exists(messages_path):
+        with open(messages_path, 'w', encoding='utf-8', newline='') as f:
+            csv.DictWriter(f, fieldnames=['timestamp', 'sender', 'recipient', 'message']).writeheader()
+
+    with open(messages_path, 'a', encoding='utf-8', newline='') as f:
+        csv.DictWriter(f, fieldnames=['timestamp', 'sender', 'recipient', 'message']).writerow({
+            'timestamp': timestamp, 'sender': current_user,
+            'recipient': recipient, 'message': msg_text,
+        })
+
+    return jsonify({'status': 'success', 'filename': safe_name,
+                    'original': file.filename, 'timestamp': timestamp})
+
 
 # ============================================
 # OTROS MÓDULOS
