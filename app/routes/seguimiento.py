@@ -71,9 +71,12 @@ def _to_iso_date(value):
     if value is None:
         return None
     if hasattr(value, "strftime"):
-        return value.strftime("%Y-%m-%d")
+        try:
+            return value.strftime("%Y-%m-%d")
+        except (ValueError, TypeError):
+            return None
     text = _safe_str(value)
-    if not text:
+    if not text or text.lower() in ("nat", "nan", "none"):
         return None
     if len(text) >= 10 and text[4] == "-":
         return text[:10]
