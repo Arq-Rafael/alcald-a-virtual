@@ -709,7 +709,11 @@ def charts_data(metas: List[Dict[str, Any]], all_years: List[Dict[str, Any]]) ->
     ranking = ranking_secretarias(metas)[:10]
     by_eje: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
     for meta in metas:
-        by_eje[_text(meta.get("eje") or "Sin eje")].append(meta)
+        eje_name = _text(meta.get("eje") or "Sin eje")
+        # Clean up long eje names
+        eje_name = eje_name.replace("POR EL SUPATÁ SOÑADO AVANZAMOS JUNTOS EN LA LÍNEA ESTRATÉGICA ", "")
+        eje_name = eje_name.replace("POR EL SUPATA SOÑADO AVANZAMOS JUNTOS EN LA LINEA ESTRATEGICA ", "")
+        by_eje[eje_name].append(meta)
 
     eje_rows = []
     for eje, rows in by_eje.items():

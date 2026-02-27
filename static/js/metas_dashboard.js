@@ -289,10 +289,17 @@ window.MD = (function () {
     });
 
     destroyChart('axis');
+    
+    // Clean up long axis labels
+    const cleanLabels = (eje.labels || []).map(label => {
+      return label.replace(/POR EL SUPATÁ SOÑADO AVANZAMOS JUNTOS EN LA LÍNEA ESTRATÉGICA /i, '')
+                  .replace(/POR EL SUPATA SOÑADO AVANZAMOS JUNTOS EN LA LINEA ESTRATEGICA /i, '');
+    });
+
     state.charts.axis = new Chart(el('mdChartAxis').getContext('2d'), {
       type: 'bar',
       data: {
-        labels: eje.labels || [],
+        labels: cleanLabels,
         datasets: [
           { label: 'Avance', data: eje.avance || [], backgroundColor: '#0ea5e9' },
           { label: 'Score', data: eje.score || [], backgroundColor: '#334155' },

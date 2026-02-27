@@ -999,14 +999,16 @@ def _svg_donut(labels, values, title):
 def _render_pdf_response(html_str, filename):
     try:
         from weasyprint import HTML
+        import io
+        from flask import send_file, request
 
         pdf_bytes = HTML(string=html_str, base_url=request.host_url).write_pdf()
         return send_file(io.BytesIO(pdf_bytes), as_attachment=True, download_name=filename, mimetype="application/pdf")
-    except ImportError:
-        return html_str, 200, {"Content-Type": "text/html; charset=utf-8"}
     except Exception as exc:
-        logger.error(f"[METAS PDF] Error: {exc}", exc_info=True)
-        abort(500, f"Error al generar PDF: {exc}")
+        logger.error(f"[METAS PDF] Error con WeasyPrint: {exc}. Usando fallback HTML.", exc_info=True)
+        # Fallback: return HTML with auto-print script
+        fallback_html = html_str.replace('</body>', '<script>window.onload = function() { window.print(); }</script></body>')
+        return fallback_html, 200, {"Content-Type": "text/html; charset=utf-8"}
 
 
 @seguimiento_bp.route("/metas/export/pdf")
