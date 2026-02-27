@@ -36,11 +36,31 @@ window.MD = (function () {
 
   async function fetchJson(url, params = null) {
     const query = params ? `?${new URLSearchParams(params).toString()}` : '';
-    const resp = await fetch(`${url}${query}`, { cache: 'no-store' });
+    const resp = await fetch(`${url}${query}`, { cache: 'no-store', credentials: 'same-origin' });
+    if (resp.status === 401) {
+      window.location.href = '/login';
+      throw new Error('unauthorized');
+    }
     if (!resp.ok) {
-      throw new Error(`${resp.status} ${resp.statusText}`);
+      let msg = `Error ${resp.status}`;
+      try { const j = await resp.json(); msg = j.error || msg; } catch (_) {}
+      throw new Error(msg);
     }
     return resp.json();
+  }
+
+  function _showSectionError(elementId, cols, msg) {
+    const e = el(elementId);
+    if (!e) return;
+    e.innerHTML = `<tr><td colspan="${cols}" class="md-empty" style="color:#ef4444">
+      ⚠ ${msg || 'Error al cargar datos. Recarga la página.'}
+    </td></tr>`;
+  }
+
+  function _showDivError(elementId, msg) {
+    const e = el(elementId);
+    if (!e) return;
+    e.innerHTML = `<p style="color:#ef4444;font-size:0.76rem;padding:0.5rem">⚠ ${msg || 'Error al cargar.'}</p>`;
   }
 
   function bindEvents() {
@@ -359,13 +379,24 @@ window.MD = (function () {
   }
 
   async function loadSummary() {
-    const data = await fetchJson('/api/metas/summary');
+    let data;
+    try {
+      data = await fetchJson('/api/metas/summary');
+    } catch (err) {
+      if (el('mdSubtitle')) el('mdSubtitle').innerText = 'Error al cargar resumen — ' + err.message;
+      _showSectionError('mdShockBody', 5, err.message);
+      _showSectionError('mdPriorityBody', 8, err.message);
+      _showDivError('mdRecommendations', err.message);
+      _showDivError('mdMethodology', err.message);
+      _showDivError('mdKpiRow', err.message);
+      throw err;
+    }
     const k = data.kpis || {};
     state.kpis = k;
-    el('mdSubtitle').innerText = `Plan de Desarrollo 2024-2027 · ${fmtNum(k.total)} metas`;
-    el('mdChipTime').innerText = `Tiempo transcurrido: ${fmtPct(k.pct_tiempo)}`;
-    el('mdChipScore').innerText = `Score promedio: ${Number(k.score_prom || 0).toFixed(1)}/100`;
-    el('mdChipUpdated').innerText = `Actualizadas <=45d: ${fmtNum(k.actualizadas_45d)}`;
+    if (el('mdSubtitle')) el('mdSubtitle').innerText = `Plan de Desarrollo 2024-2027 · ${fmtNum(k.total)} metas`;
+    if (el('mdChipTime')) el('mdChipTime').innerText = `Tiempo transcurrido: ${fmtPct(k.pct_tiempo)}`;
+    if (el('mdChipScore')) el('mdChipScore').innerText = `Score promedio: ${Number(k.score_prom || 0).toFixed(1)}/100`;
+    if (el('mdChipUpdated')) el('mdChipUpdated').innerText = `Desactualizadas (>45d): ${fmtNum(k.desactualizadas)}`;
 
     renderFilterOptions(data.filtros || {});
     renderMethodology(data.metodologia || {});
@@ -376,23 +407,35 @@ window.MD = (function () {
   }
 
   async function loadCharts() {
-    const data = await fetchJson('/api/metas/charts');
-    renderCharts(data);
+    try {
+      const data = await fetchJson('/api/metas/charts');
+      renderCharts(data);
+    } catch (err) {
+      console.warn('Charts no disponibles:', err.message);
+    }
   }
 
   async function loadList() {
-    const data = await fetchJson('/api/metas/list', {
-      q: state.filters.q,
-      sec: state.filters.secretaria,
-      eje: state.filters.eje,
-      estado: state.filters.estado,
-      riesgo: state.filters.riesgo,
-      page: state.page,
-      per_page: state.perPage,
-      sort: state.sort,
-      order: state.order,
-    });
-
+    const listBody = el('mdListBody');
+    if (listBody) listBody.innerHTML = '<tr><td colspan="11" class="md-empty">Cargando...</td></tr>';
+    let data;
+    try {
+      data = await fetchJson('/api/metas/list', {
+        q: state.filters.q,
+        sec: state.filters.secretaria,
+        eje: state.filters.eje,
+        estado: state.filters.estado,
+        riesgo: state.filters.riesgo,
+        page: state.page,
+        per_page: state.perPage,
+        sort: state.sort,
+        order: state.order,
+      });
+    } catch (err) {
+      _showSectionError('mdListBody', 11, err.message);
+      if (el('mdPaginationInfo')) el('mdPaginationInfo').innerText = 'Error al cargar';
+      return;
+    }
     renderFilterOptions(data.filtros || {});
     renderTable(data.metas || []);
     renderCards(data.metas || []);
@@ -440,7 +483,24 @@ window.MD = (function () {
   }
 
   async function openDetail(metaId) {
-    const data = await fetchJson(`/api/metas/${encodeURIComponent(metaId)}`);
+    el('mdDetailModal').classList.add('open');
+    el('mdDetailTitle').innerText = 'Cargando...';
+    el('mdDetailMeta').innerText = '';
+    el('mdDetailSummary').innerText = '';
+    el('mdDetailTimelineBody').innerHTML = '<tr><td colspan="5" class="md-empty">Cargando...</td></tr>';
+    el('mdDetailEvidence').innerHTML = '';
+    el('mdDetailCauses').innerHTML = '<li>Cargando...</li>';
+    el('mdDetailPlan').innerHTML = '<li>Cargando...</li>';
+
+    let data;
+    try {
+      data = await fetchJson(`/api/metas/${encodeURIComponent(metaId)}`);
+    } catch (err) {
+      el('mdDetailTitle').innerText = 'Error al cargar';
+      el('mdDetailSummary').innerText = err.message;
+      el('mdDetailTimelineBody').innerHTML = '<tr><td colspan="5" class="md-empty" style="color:#ef4444">Error al cargar detalle</td></tr>';
+      return;
+    }
     state.currentMetaId = metaId;
     el('mdDetailTitle').innerText = `${data.id_meta || ''} · ${data.meta_producto || 'Meta'}`;
     el('mdDetailMeta').innerText = `${data.secretaria || '-'} · Estado: ${data.estado || '-'} · Score: ${Number(data.score || 0).toFixed(1)}`;
@@ -501,13 +561,16 @@ window.MD = (function () {
   async function init() {
     bindEvents();
     setView('table');
+    // Mostrar estado inicial de carga
+    if (el('mdSubtitle')) el('mdSubtitle').innerText = 'Cargando datos del Plan de Desarrollo...';
     try {
       await loadSummary();
-      await Promise.all([loadCharts(), loadList()]);
     } catch (err) {
-      console.error('Error inicializando dashboard de metas', err);
-      el('mdSubtitle').innerText = 'No se pudo cargar el dashboard de metas';
+      console.error('Error cargando resumen:', err);
+      // loadSummary ya mostró los errores en la UI
     }
+    // Cargar gráficas y lista en paralelo, independientemente del resumen
+    await Promise.allSettled([loadCharts(), loadList()]);
   }
 
   return {
