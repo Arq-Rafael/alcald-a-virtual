@@ -83,12 +83,93 @@ def _to_iso_date(value):
     return text
 
 
-def _build_status_from_avance(avance):
-    if avance >= 100:
+def _nan_to_none(value):
+    """Convierte NaN/Inf a None para serialización JSON válida."""
+    if value is None:
+        return None
+    try:
+        import math
+        if isinstance(value, float) and (math.isnan(value) or math.isinf(value)):
+            return None
+    except Exception:
+        pass
+    return value
+
+
+def _safe_float_clean(value, default=0.0):
+    """safe_float que garantiza salida JSON-serializable (nunca NaN)."""
+    result = _safe_float(value, default)
+    import math
+    if math.isnan(result) or math.isinf(result):
+        return default
+    return result
+
+
+def _sanitize_dict(d):
+    """Recorre un dict y reemplaza NaN/Inf por None o 0 según tipo."""
+    import math
+    out = {}
+    for k, v in d.items():
+        if isinstance(v, float) and (math.isnan(v) or math.isinf(v)):
+            out[k] = None
+        elif isinstance(v, list):
+            out[k] = [_sanitize_dict(i) if isinstance(i, dict) else i for i in v]
+        elif isinstance(v, dict):
+            out[k] = _sanitize_dict(v)
+        else:
+            out[k] = v
+    return out
+
+
+def _normalize_estado(raw):
+    """Mapea valores de ESTADO del Excel a valores canónicos del sistema."""
+    s = _safe_str(raw).lower().strip()
+    if not s or s in ("nan", "none", ""):
+        return None
+    if "cumplid" in s:
         return "Cumplida"
-    if avance <= 0.1:
+    if "ejec" in s or "curso" in s or "proceso" in s or "ejecucion" in s:
+        return "En curso"
+    if "no inici" in s:
+        return "No iniciada"
+    if "riesgo" in s:
+        return "En riesgo"
+    return raw.strip()
+
+
+def _derive_estado(avance_pct):
+    """Deriva el estado a partir del % de avance (0-100)."""
+    if avance_pct >= 100:
+        return "Cumplida"
+    if avance_pct <= 0:
         return "No iniciada"
     return "En curso"
+
+
+def _calc_avance_pct(row_avance_ratio, meta_prog, avance_ejec):
+    """
+    Calcula % de avance (0-100) a partir de los datos del Excel.
+    %_AVANCE_FISICO está en escala 0-1 (ratio = EJECUTADO/PROGRAMADO).
+    Puede superar 1 si se ejecutó más de lo programado.
+    """
+    if row_avance_ratio is not None and not (isinstance(row_avance_ratio, float) and
+                                               (row_avance_ratio != row_avance_ratio)):  # NaN check
+        ratio = _safe_float_clean(row_avance_ratio)
+        return round(min(100.0, ratio * 100.0), 1)
+    if meta_prog > 0:
+        return round(min(100.0, (avance_ejec / meta_prog) * 100.0), 1)
+    return 0.0
+
+
+def _calc_fin_pct(presup_asig, presup_ejec):
+    """
+    Calcula % ejecución financiera (0-100) desde los montos en pesos.
+    Maneja tanto 2024 (pesos brutos) como 2025 (fracción 0-1 en algunos registros).
+    Siempre usa presupuesto_asig/ejecutado para consistencia.
+    """
+    if presup_asig > 0:
+        return round(min(100.0, (presup_ejec / presup_asig) * 100.0), 1)
+    return 0.0
 
 
 def _load_plan_excel():
@@ -101,9 +182,16 @@ def _load_plan_excel():
         return None
 
     base_dir = os.path.join(str(current_app.config["BASE_DIR"]), "documentos_generados", "plan de desarollo")
-    file_path = os.path.join(base_dir, "BASE_RENDICION_PLAN_DESARROLLO_SUPATA.xlsx")
-    if not os.path.exists(file_path):
-        logger.error(f"Excel no encontrado: {file_path}")
+    # Preferir el archivo con indicadores; caer al original si no existe
+    for fname in [
+        "BASE_RENDICION_PLAN_DESARROLLO_SUPATA_con_indicadores.xlsx",
+        "BASE_RENDICION_PLAN_DESARROLLO_SUPATA.xlsx",
+    ]:
+        file_path = os.path.join(base_dir, fname)
+        if os.path.exists(file_path):
+            break
+    else:
+        logger.error(f"Excel de metas no encontrado en: {base_dir}")
         return None
 
     try:
@@ -113,31 +201,30 @@ def _load_plan_excel():
         logger.error(f"Error leyendo excel de metas: {exc}", exc_info=True)
         return None
 
-    avances_map = {_normalize_col(col): col for col in avances_df.columns}
+    reg_map = {_normalize_col(col): col for col in avances_df.columns}
     plan_map = {_normalize_col(col): col for col in plan_df.columns}
 
-    c_id = _pick_col(avances_map, "ID_META")
-    c_bpim = _pick_col(avances_map, "BPIM")
-    c_eje = _pick_col(avances_map, "EJE")
-    c_sector = _pick_col(avances_map, "SECTOR")
-    c_meta = _pick_col(avances_map, "META_PRODUCTO")
-    c_ano = _pick_col(avances_map, "ANO", "AÑO")
-    c_secretaria = _pick_col(avances_map, "SECRETARIA")
-    c_estado = _pick_col(avances_map, "ESTADO")
-    c_meta_prog = _pick_col(avances_map, "META_PROGRAMADA_ANO", "META_PROGRAMADA_AÑO")
-    c_avance_ejec = _pick_col(avances_map, "AVANCE_EJECUTADO_ANO", "AVANCE_EJECUTADO_AÑO")
-    c_avance_pct = _pick_col(avances_map, "%_AVANCE_FISICO", "PCT_AVANCE_FISICO")
-    c_presup_asig = _pick_col(avances_map, "PRESUPUESTO_ASIGNADO")
-    c_presup_ejec = _pick_col(avances_map, "PRESUPUESTO_EJECUTADO")
-    c_fin_pct = _pick_col(avances_map, "%_EJEC_FINANCIERA", "PCT_EJEC_FINANCIERA")
-    c_proyecto = _pick_col(avances_map, "PROYECTO_ASOCIADO")
-    c_fuente = _pick_col(avances_map, "FUENTE_FINANCIACION")
-    c_fecha = _pick_col(avances_map, "FECHA_REGISTRO", "FECHA_ACTUALIZACION", "FECHA_CORTE")
-    c_criticidad = _pick_col(avances_map, "CRITICIDAD", "NIVEL_CRITICIDAD", "IMPACTO")
-    c_responsable = _pick_col(avances_map, "RESPONSABLE")
+    # Columnas de REGISTRO_AVANCES
+    c_id        = _pick_col(reg_map, "ID_META")
+    c_ano       = _pick_col(reg_map, "ANO", "AÑO")
+    c_sec       = _pick_col(reg_map, "SECRETARIA")
+    c_bpim      = _pick_col(reg_map, "BPIM")
+    c_eje       = _pick_col(reg_map, "EJE")
+    c_sector    = _pick_col(reg_map, "SECTOR")
+    c_meta      = _pick_col(reg_map, "META_PRODUCTO")
+    c_prog      = _pick_col(reg_map, "META_PROGRAMADA_ANO", "META_PROGRAMADA_AÑO")
+    c_ejec      = _pick_col(reg_map, "AVANCE_EJECUTADO_ANO", "AVANCE_EJECUTADO_AÑO")
+    c_av_ratio  = _pick_col(reg_map, "PCT_AVANCE_FISICO")   # %_AVANCE_FISICO → ratio 0-1
+    c_p_asig    = _pick_col(reg_map, "PRESUPUESTO_ASIGNADO")
+    c_p_ejec    = _pick_col(reg_map, "PRESUPUESTO_EJECUTADO")
+    c_estado    = _pick_col(reg_map, "ESTADO")
+    c_fecha     = _pick_col(reg_map, "FECHA_REGISTRO", "FECHA_ACTUALIZACION")
+    c_resp      = _pick_col(reg_map, "RESPONSABLE")
+    c_obs       = _pick_col(reg_map, "OBSERVACIONES")
+    c_tipo_ev   = _pick_col(reg_map, "TIPO_EVIDENCIA")
 
     if not c_id:
-        logger.error("La hoja REGISTRO_AVANCES no tiene columna ID_META")
+        logger.error("REGISTRO_AVANCES no tiene columna ID_META")
         return None
 
     metas_anuales = []
@@ -146,123 +233,172 @@ def _load_plan_excel():
         if not meta_id:
             continue
 
-        avance_pct = _safe_float(row.get(c_avance_pct))
-        estado = _safe_str(row.get(c_estado))
-        if not estado:
-            estado = _build_status_from_avance(avance_pct)
-
-        ano = None
+        # Año
         ano_raw = row.get(c_ano) if c_ano else None
-        if ano_raw is not None and not pd.isna(ano_raw):
+        ano = None
+        if ano_raw is not None:
             try:
-                ano = int(ano_raw)
+                if not (isinstance(ano_raw, float) and ano_raw != ano_raw):  # not NaN
+                    ano = int(ano_raw)
             except Exception:
-                ano = None
+                pass
 
-        metas_anuales.append(
-            {
-                "id_meta": meta_id,
-                "bpim": _safe_str(row.get(c_bpim)),
-                "eje": _safe_str(row.get(c_eje)),
-                "sector": _safe_str(row.get(c_sector)),
-                "meta_producto": _safe_str(row.get(c_meta)),
-                "ano": ano,
-                "secretaria": _safe_str(row.get(c_secretaria)) or None,
-                "estado": estado,
-                "meta_programada": _safe_float(row.get(c_meta_prog)),
-                "avance_ejecutado": _safe_float(row.get(c_avance_ejec)),
-                "avance_fisico_pct": avance_pct,
-                "presupuesto_asig": _safe_float(row.get(c_presup_asig)),
-                "presupuesto_ejec": _safe_float(row.get(c_presup_ejec)),
-                "ejec_fin_pct": _safe_float(row.get(c_fin_pct)),
-                "proyecto": _safe_str(row.get(c_proyecto)) or None,
-                "fuente": _safe_str(row.get(c_fuente)) or None,
-                "fecha_actualizacion": _to_iso_date(row.get(c_fecha)) if c_fecha else None,
-                "criticidad": _safe_str(row.get(c_criticidad)) or None,
-                "responsable": _safe_str(row.get(c_responsable)) or None,
-            }
-        )
+        # Cantidades programadas y ejecutadas
+        meta_prog  = _safe_float_clean(row.get(c_prog) if c_prog else None)
+        av_ejec    = _safe_float_clean(row.get(c_ejec) if c_ejec else None)
+        p_asig     = _safe_float_clean(row.get(c_p_asig) if c_p_asig else None)
+        p_ejec_raw = _safe_float_clean(row.get(c_p_ejec) if c_p_ejec else None)
 
-    plan_id_col = _pick_col(plan_map, "ID_META")
-    plan_bpim_col = _pick_col(plan_map, "BPIM")
-    plan_eje_col = _pick_col(plan_map, "EJE")
-    plan_sector_col = _pick_col(plan_map, "SECTOR")
-    plan_meta_col = _pick_col(plan_map, "META_PRODUCTO")
+        # % Avance físico: el Excel guarda ratio 0-1, convertimos a 0-100
+        av_ratio_raw = row.get(c_av_ratio) if c_av_ratio else None
+        avance_pct = _calc_avance_pct(av_ratio_raw, meta_prog, av_ejec)
+
+        # % Financiero: siempre desde pesos para consistencia entre años
+        ejec_fin_pct = _calc_fin_pct(p_asig, p_ejec_raw)
+
+        # Estado normalizado
+        estado_raw = _normalize_estado(row.get(c_estado) if c_estado else None)
+        estado = estado_raw if estado_raw else _derive_estado(avance_pct)
+
+        metas_anuales.append({
+            "id_meta":          meta_id,
+            "ano":              ano,
+            "secretaria":       _safe_str(row.get(c_sec)) if c_sec else "",
+            "bpim":             _safe_str(row.get(c_bpim)) if c_bpim else "",
+            "eje":              _safe_str(row.get(c_eje)) if c_eje else "",
+            "sector":           _safe_str(row.get(c_sector)) if c_sector else "",
+            "meta_producto":    _safe_str(row.get(c_meta)) if c_meta else "",
+            "meta_programada":  meta_prog,
+            "avance_ejecutado": av_ejec,
+            "avance_fisico_pct": avance_pct,   # 0-100
+            "presupuesto_asig": p_asig,
+            "presupuesto_ejec": p_ejec_raw,
+            "ejec_fin_pct":     ejec_fin_pct,  # 0-100
+            "estado":           estado,
+            "tipo_evidencia":   _safe_str(row.get(c_tipo_ev)) if c_tipo_ev else "",
+            "responsable":      _safe_str(row.get(c_resp)) if c_resp else "",
+            "observaciones":    _safe_str(row.get(c_obs)) if c_obs else "",
+            "fecha_actualizacion": _to_iso_date(row.get(c_fecha)) if c_fecha else None,
+        })
+
+    # Columnas de PLAN_DESARROLLO
+    p_id     = _pick_col(plan_map, "ID_META")
+    p_bpim   = _pick_col(plan_map, "BPIM")
+    p_eje    = _pick_col(plan_map, "EJE")
+    p_sector = _pick_col(plan_map, "SECTOR")
+    p_meta   = _pick_col(plan_map, "META_PRODUCTO")
 
     plan_rows = {}
-    if plan_id_col:
+    if p_id:
         for _, row in plan_df.iterrows():
-            rid = _safe_str(row.get(plan_id_col))
+            rid = _safe_str(row.get(p_id))
             if rid:
                 plan_rows[rid] = row
 
     all_ids = sorted(set(plan_rows.keys()) | {m["id_meta"] for m in metas_anuales})
+
     metas_consolidado = []
     for meta_id in all_ids:
-        rows = [m for m in metas_anuales if m["id_meta"] == meta_id]
-        if rows:
-            rows.sort(key=lambda item: (item.get("ano") or 0, item.get("fecha_actualizacion") or ""), reverse=True)
-            current = dict(rows[0])
-            current["ano"] = f"CONSOLIDADO ({rows[0].get('ano') or 'N/D'})"
-            current["anos_disponibles"] = sorted({r.get("ano") for r in rows if r.get("ano")})
-            metas_consolidado.append(current)
-            continue
+        rows_meta = [m for m in metas_anuales if m["id_meta"] == meta_id]
 
-        plan_row = plan_rows.get(meta_id)
-        metas_consolidado.append(
-            {
+        if rows_meta:
+            rows_meta.sort(key=lambda x: x.get("ano") or 0)  # ascendente para acumular
+
+            # Avance total del plan = sum(ejecutado) / sum(programado) * 100
+            total_prog = sum(r["meta_programada"] for r in rows_meta)
+            total_ejec = sum(r["avance_ejecutado"] for r in rows_meta)
+            if total_prog > 0:
+                avance_total = round(min(100.0, (total_ejec / total_prog) * 100.0), 1)
+            else:
+                # Sin programado: promedio de avances por año
+                vals = [r["avance_fisico_pct"] for r in rows_meta if r["avance_fisico_pct"] > 0]
+                avance_total = round(sum(vals) / max(1, len(vals)), 1) if vals else 0.0
+
+            # Ejecución financiera: suma total de presupuestos
+            total_asig = sum(r["presupuesto_asig"] for r in rows_meta)
+            total_ejec_fin = sum(r["presupuesto_ejec"] for r in rows_meta)
+            fin_total = _calc_fin_pct(total_asig, total_ejec_fin)
+
+            # Estado final: usa el último año con estado explícito, o derive
+            latest = rows_meta[-1]  # año más reciente
+            estado_final = latest["estado"]
+            # Si la meta superó el 100%, marcar como cumplida
+            if avance_total >= 100 and estado_final != "Cumplida":
+                estado_final = "Cumplida"
+            # Si el último año tiene estado Cumplida pero el acumulado < 100%,
+            # puede ser que ese año específico esté cumplido (meta anual)
+            # Respetar el estado del Excel cuando es explícito
+            if latest["estado"] == "Cumplida" and avance_total < 100:
+                # Verificar si todos los años están cumplidos
+                todos_cumplidos = all(r["estado"] == "Cumplida" for r in rows_meta)
+                if todos_cumplidos:
+                    estado_final = "Cumplida"
+                    avance_total = max(avance_total, 100.0)
+
+            base = dict(latest)
+            base.update({
+                "avance_fisico_pct": avance_total,
+                "ejec_fin_pct": fin_total,
+                "estado": estado_final,
+                "presupuesto_asig": round(total_asig, 0),
+                "presupuesto_ejec": round(total_ejec_fin, 0),
+                "total_meta_programada": round(total_prog, 2),
+                "total_avance_ejecutado": round(total_ejec, 2),
+                "anos_disponibles": sorted({r["ano"] for r in rows_meta if r.get("ano")}),
+            })
+            metas_consolidado.append(base)
+
+        else:
+            # Meta en plan pero sin registros de avance
+            plan_row = plan_rows.get(meta_id)
+            metas_consolidado.append({
                 "id_meta": meta_id,
-                "bpim": _safe_str(plan_row.get(plan_bpim_col)) if plan_row is not None else None,
-                "eje": _safe_str(plan_row.get(plan_eje_col)) if plan_row is not None else None,
-                "sector": _safe_str(plan_row.get(plan_sector_col)) if plan_row is not None else None,
-                "meta_producto": _safe_str(plan_row.get(plan_meta_col)) if plan_row is not None else None,
-                "ano": "CONSOLIDADO (Sin datos)",
-                "secretaria": None,
-                "estado": "No iniciada",
+                "ano": None,
+                "secretaria": "",
+                "bpim": _safe_str(plan_row.get(p_bpim)) if (plan_row is not None and p_bpim) else "",
+                "eje": _safe_str(plan_row.get(p_eje)) if (plan_row is not None and p_eje) else "",
+                "sector": _safe_str(plan_row.get(p_sector)) if (plan_row is not None and p_sector) else "",
+                "meta_producto": _safe_str(plan_row.get(p_meta)) if (plan_row is not None and p_meta) else "",
                 "meta_programada": 0.0,
                 "avance_ejecutado": 0.0,
                 "avance_fisico_pct": 0.0,
                 "presupuesto_asig": 0.0,
                 "presupuesto_ejec": 0.0,
                 "ejec_fin_pct": 0.0,
-                "proyecto": None,
-                "fuente": None,
+                "estado": "No iniciada",
+                "responsable": "",
                 "fecha_actualizacion": None,
-                "criticidad": None,
-                "responsable": None,
                 "anos_disponibles": [],
-            }
-        )
+                "total_meta_programada": 0.0,
+                "total_avance_ejecutado": 0.0,
+            })
 
     total = len(metas_consolidado)
-    cumplidas = sum(1 for m in metas_consolidado if "cumplid" in _safe_str(m.get("estado")).lower() or _safe_float(m.get("avance_fisico_pct")) >= 100)
-    no_iniciadas = sum(1 for m in metas_consolidado if "no inici" in _safe_str(m.get("estado")).lower() or _safe_float(m.get("avance_fisico_pct")) <= 0.1)
-    en_riesgo = sum(1 for m in metas_consolidado if "riesgo" in _safe_str(m.get("estado")).lower())
-    en_curso = max(0, total - cumplidas - no_iniciadas - en_riesgo)
+    cumplidas   = sum(1 for m in metas_consolidado if m.get("estado") == "Cumplida")
+    no_inic     = sum(1 for m in metas_consolidado if m.get("estado") == "No iniciada")
+    en_riesgo   = sum(1 for m in metas_consolidado if m.get("estado") == "En riesgo")
+    en_curso    = max(0, total - cumplidas - no_inic - en_riesgo)
 
-    avance_prom = round(sum(_safe_float(m.get("avance_fisico_pct")) for m in metas_consolidado) / total, 1) if total else 0.0
-    fin_prom = round(sum(_safe_float(m.get("ejec_fin_pct")) for m in metas_consolidado) / total, 1) if total else 0.0
-    presupuesto_total = round(sum(_safe_float(m.get("presupuesto_asig")) for m in metas_consolidado), 0)
-    presupuesto_ejec = round(sum(_safe_float(m.get("presupuesto_ejec")) for m in metas_consolidado), 0)
+    avance_prom = round(sum(_safe_float_clean(m.get("avance_fisico_pct")) for m in metas_consolidado) / max(1, total), 1)
+    fin_prom    = round(sum(_safe_float_clean(m.get("ejec_fin_pct")) for m in metas_consolidado) / max(1, total), 1)
+    pres_total  = round(sum(_safe_float_clean(m.get("presupuesto_asig")) for m in metas_consolidado), 0)
+    pres_ejec   = round(sum(_safe_float_clean(m.get("presupuesto_ejec")) for m in metas_consolidado), 0)
 
     kpis = {
-        "total_metas": total,
+        "total_metas":   total,
         "metas_cumplidas": cumplidas,
         "metas_en_curso": en_curso,
         "metas_en_riesgo": en_riesgo,
-        "metas_sin_iniciar": no_iniciadas,
-        "avance_prom": avance_prom,
+        "metas_sin_iniciar": no_inic,
+        "avance_prom":   avance_prom,
         "ejec_fin_prom": fin_prom,
-        "presupuesto_total": presupuesto_total,
-        "presupuesto_ejec": presupuesto_ejec,
+        "presupuesto_total": pres_total,
+        "presupuesto_ejec": pres_ejec,
     }
     distrib_estados = {
-        "Cumplida": cumplidas,
-        "En curso": en_curso,
-        "En riesgo": en_riesgo,
-        "No iniciada": no_iniciadas,
+        "Cumplida": cumplidas, "En curso": en_curso,
+        "En riesgo": en_riesgo, "No iniciada": no_inic,
     }
-
     by_eje = {}
     for meta in metas_consolidado:
         eje = _safe_str(meta.get("eje")) or "Sin eje"
@@ -270,10 +406,12 @@ def _load_plan_excel():
     resumen_eje = [
         {
             "EJE": eje,
-            "TOTAL_METAS": len(rows),
-            "AVANCE_MEDIO": round(sum(_safe_float(r.get("avance_fisico_pct")) for r in rows) / max(1, len(rows)), 1),
+            "TOTAL_METAS": len(rs),
+            "AVANCE_MEDIO": round(
+                sum(_safe_float_clean(r.get("avance_fisico_pct")) for r in rs) / max(1, len(rs)), 1
+            ),
         }
-        for eje, rows in by_eje.items()
+        for eje, rs in by_eje.items()
     ]
 
     _plan_cache = {
@@ -386,6 +524,31 @@ def _api_login_guard():
     if "user" not in session:
         return jsonify({"error": "unauthorized"}), 401
     return None
+
+
+def _jresp(data, status=200):
+    """Serializa a JSON garantizando que NaN/Inf no rompen el cliente."""
+    import json as _json
+    import math
+
+    def _fix(obj):
+        if isinstance(obj, dict):
+            return {k: _fix(v) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [_fix(i) for i in obj]
+        if isinstance(obj, float):
+            if math.isnan(obj) or math.isinf(obj):
+                return None
+            return obj
+        return obj
+
+    safe = _fix(data)
+    from flask import Response
+    return Response(
+        _json.dumps(safe, ensure_ascii=False),
+        status=status,
+        mimetype="application/json",
+    )
 
 
 def _available_filters(metas):
@@ -610,17 +773,15 @@ def api_metas_summary():
     rezagadas = [_clean(m) for m in svc.top_rezagadas(metas, 15)]
     planes_secretaria = [svc.plan_choque_secretaria(row["secretaria"], metas) for row in ranking[:8]]
 
-    return jsonify(
-        {
-            "kpis": kpis,
-            "ranking": ranking,
-            "recomendaciones": recomendaciones,
-            "rezagadas": rezagadas,
-            "planes_secretaria": planes_secretaria,
-            "metodologia": svc.score_methodology(),
-            "filtros": _available_filters(metas),
-        }
-    )
+    return _jresp({
+        "kpis": kpis,
+        "ranking": ranking,
+        "recomendaciones": recomendaciones,
+        "rezagadas": rezagadas,
+        "planes_secretaria": planes_secretaria,
+        "metodologia": svc.score_methodology(),
+        "filtros": _available_filters(metas),
+    })
 
 
 @seguimiento_bp.route("/api/metas/charts")
@@ -634,7 +795,7 @@ def api_metas_charts():
     from app.services import metas_service as svc
     metas = _scope_metas(ec["metas"])
     all_years = _scope_all_years(ec["all_years"])
-    return jsonify(svc.charts_data(metas, all_years))
+    return _jresp(svc.charts_data(metas, all_years))
 
 
 @seguimiento_bp.route("/api/metas/list")
@@ -694,16 +855,14 @@ def api_metas_list():
     end = start + per_page
     page_rows = [_clean(m) for m in filtered[start:end]]
 
-    return jsonify(
-        {
-            "metas": page_rows,
-            "total": total,
-            "page": page,
-            "pages": pages,
-            "per_page": per_page,
-            "filtros": _available_filters(metas),
-        }
-    )
+    return _jresp({
+        "metas": page_rows,
+        "total": total,
+        "page": page,
+        "pages": pages,
+        "per_page": per_page,
+        "filtros": _available_filters(metas),
+    })
 
 
 @seguimiento_bp.route("/api/metas/<string:meta_id>")
@@ -719,7 +878,7 @@ def api_meta_detail(meta_id):
     if not meta:
         return jsonify({"error": "Meta no encontrada"}), 404
     detail = _build_meta_detail(meta, _scope_all_years(ec["all_years"]))
-    return jsonify(detail)
+    return _jresp(detail)
 
 
 def _svg_escape(text):
