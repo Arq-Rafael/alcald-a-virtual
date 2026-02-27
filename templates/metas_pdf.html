@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>{{ titulo }}</title>
+  <style>
+    @page { size: A4; margin: 18mm 14mm 16mm 14mm; }
+    body { font-family: "Segoe UI", Arial, sans-serif; color: #0f172a; font-size: 11px; }
+    .head { border-bottom: 2px solid #0f4c81; padding-bottom: 10px; margin-bottom: 12px; }
+    .head h1 { margin: 0 0 4px; color: #0f4c81; font-size: 20px; }
+    .meta { color: #475569; font-size: 10px; }
+    .section { margin-top: 14px; }
+    .section h2 { margin: 0 0 8px; color: #0f4c81; font-size: 14px; border-left: 4px solid #0f4c81; padding-left: 7px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .kpi { border: 1px solid #dbe4f0; border-radius: 8px; padding: 8px; background: #f8fafc; }
+    .kpi .val { font-size: 17px; font-weight: 800; color: #0f172a; }
+    .kpi .lbl { font-size: 10px; color: #475569; }
+    .chart { border: 1px solid #dbe4f0; border-radius: 8px; padding: 6px; margin-bottom: 8px; }
+    .chart svg { width: 100%; height: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 10px; }
+    th, td { border: 1px solid #dbe4f0; padding: 5px; vertical-align: top; }
+    th { background: #f1f5f9; text-align: left; color: #334155; }
+    .list { margin: 0; padding-left: 16px; }
+    .list li { margin-bottom: 6px; }
+    .firmas { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .firma { border-top: 1px solid #334155; padding-top: 5px; font-size: 10px; color: #334155; }
+    .pill { display: inline-block; border-radius: 999px; padding: 2px 7px; font-size: 9px; font-weight: 700; }
+    .pill.alta { background: #fee2e2; color: #991b1b; }
+    .pill.media { background: #ffedd5; color: #9a3412; }
+    .pill.baja { background: #dbeafe; color: #1e40af; }
+  </style>
+</head>
+<body>
+  <header class="head">
+    <h1>{{ titulo }}</h1>
+    <div class="meta">Alcaldia Virtual Supata · Fecha/hora: {{ fecha }}</div>
+    <div class="meta">Alcance: {{ 'General' if scope == 'general' else 'Secretaria: ' ~ sec }}</div>
+  </header>
+
+  <section class="section">
+    <h2>Resumen ejecutivo</h2>
+    <p>
+      El presente informe sintetiza el estado de ejecucion del Plan de Desarrollo a partir del
+      score de rendimiento, la brecha frente al tiempo transcurrido y la frecuencia de actualizacion.
+      Las metas en riesgo se priorizan para decision directiva y seguimiento.
+    </p>
+  </section>
+
+  <section class="section">
+    <h2>KPIs institucionales</h2>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="val">{{ kpis.total }}</div><div class="lbl">Total metas</div></div>
+      <div class="kpi"><div class="val">{{ kpis.cumplidas }}</div><div class="lbl">Cumplidas</div></div>
+      <div class="kpi"><div class="val">{{ kpis.en_curso }}</div><div class="lbl">En curso</div></div>
+      <div class="kpi"><div class="val">{{ kpis.no_iniciadas }}</div><div class="lbl">No iniciadas</div></div>
+      <div class="kpi"><div class="val">{{ kpis.en_riesgo }}</div><div class="lbl">En riesgo</div></div>
+      <div class="kpi"><div class="val">{{ '%.1f'|format(kpis.avance_prom) }}%</div><div class="lbl">Avance fisico</div></div>
+      <div class="kpi"><div class="val">{{ '%.1f'|format(kpis.fin_prom) }}%</div><div class="lbl">Avance financiero</div></div>
+      <div class="kpi"><div class="val">{{ '%.1f'|format(kpis.score_prom) }}/100</div><div class="lbl">Indice de rendimiento</div></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Graficos institucionales</h2>
+    <div class="chart">{{ chart_estado_svg }}</div>
+    <div class="chart">{{ chart_evol_svg }}</div>
+    {% if scope == 'general' %}
+    <div class="chart">{{ chart_ranking_svg }}</div>
+    {% endif %}
+  </section>
+
+  {% if scope == 'general' %}
+  <section class="section">
+    <h2>Ranking de secretarias</h2>
+    <table>
+      <thead>
+        <tr><th>Secretaria</th><th>Score</th><th>Avance</th><th>Riesgo</th><th>No iniciadas</th><th>Recomendacion</th></tr>
+      </thead>
+      <tbody>
+      {% for row in ranking %}
+        <tr>
+          <td>{{ row.secretaria }}</td>
+          <td>{{ '%.1f'|format(row.score_avg) }}</td>
+          <td>{{ '%.1f'|format(row.avance_avg) }}%</td>
+          <td>{{ row.en_riesgo }}</td>
+          <td>{{ row.no_iniciadas }}</td>
+          <td>{{ row.recomendacion }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  {% endif %}
+
+  <section class="section">
+    <h2>Top metas rezagadas</h2>
+    <table>
+      <thead>
+        <tr><th>Codigo</th><th>Meta</th><th>Secretaria</th><th>Estado</th><th>Avance</th><th>Score</th><th>Motivo</th></tr>
+      </thead>
+      <tbody>
+      {% for row in rezagadas %}
+        <tr>
+          <td>{{ row.id_meta }}</td>
+          <td>{{ row.meta_producto }}</td>
+          <td>{{ row.secretaria }}</td>
+          <td>{{ row.estado }}</td>
+          <td>{{ '%.1f'|format(row.avance_fisico_pct|float) }}%</td>
+          <td>{{ '%.1f'|format(row.score|float) }}</td>
+          <td>{{ row.resumen_rezago }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section">
+    <h2>Recomendaciones y plan de mejora</h2>
+    <ol class="list">
+      {% for rec in recomendaciones %}
+        <li>
+          <span class="pill {{ rec.prioridad }}">{{ rec.prioridad|capitalize }}</span>
+          <strong>{{ rec.titulo }}</strong><br>
+          {{ rec.detalle }}
+        </li>
+      {% endfor %}
+    </ol>
+    {% if plan_choque %}
+      <p><strong>Plan de choque por secretaria ({{ plan_choque.secretaria }}):</strong></p>
+      <ul class="list">
+        {% for accion in plan_choque.acciones %}
+          <li><strong>[{{ accion.prioridad|capitalize }}]</strong> {{ accion.accion }} (Plazo: {{ accion.plazo }})</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+
+  <section class="section">
+    <h2>Conclusiones</h2>
+    <p>
+      El analisis evidencia que las metas con mayor brecha tiempo-avance y baja actualizacion concentran
+      el riesgo operativo. Se recomienda ejecutar de inmediato las acciones priorizadas y mantener
+      seguimiento mensual para asegurar recuperacion y cumplimiento institucional.
+    </p>
+  </section>
+
+  <section class="section">
+    <h2>Metodologia de calculo</h2>
+    <p><strong>Formula:</strong> {{ metodologia.formula }}</p>
+    <p><strong>Regla de riesgo:</strong> {{ metodologia.riesgo_regla }}</p>
+    <ul class="list">
+      {% for key, val in metodologia.componentes.items() %}
+      <li><strong>{{ key }}:</strong> {{ val }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="firmas">
+    <div class="firma">Firma responsable de planeacion</div>
+    <div class="firma">Firma jefe de secretaria</div>
+  </section>
+</body>
+</html>

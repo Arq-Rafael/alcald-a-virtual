@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% block title %}Seguimiento de Metas - Plan de Desarrollo{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="md-page">
+  <div class="md-header">
+    <div class="md-header-left">
+      <h1>Seguimiento de Metas</h1>
+      <p id="mdSubtitle">Plan de Desarrollo 2024-2027 · Cargando resumen...</p>
+      <div class="md-header-chips">
+        <span class="md-chip" id="mdChipTime">Tiempo transcurrido: --</span>
+        <span class="md-chip" id="mdChipScore">Score promedio: --</span>
+        <span class="md-chip" id="mdChipUpdated">Ultimo corte: --</span>
+      </div>
+    </div>
+    <div class="md-header-right">
+      <button class="md-btn md-btn-primary" id="mdBtnExportPdf">Exportar PDF</button>
+    </div>
+  </div>
+
+  <div class="md-filter-bar">
+    <input type="text" id="mdFilterQ" placeholder="Buscar meta, codigo, secretaria..." />
+    <select id="mdFilterSecretaria"><option value="">Todas las secretarias</option></select>
+    <select id="mdFilterEje"><option value="">Todos los ejes</option></select>
+    <select id="mdFilterEstado">
+      <option value="">Todos los estados</option>
+      <option value="cumplida">Cumplida</option>
+      <option value="en curso">En curso</option>
+      <option value="en riesgo">En riesgo</option>
+      <option value="no iniciada">No iniciada</option>
+    </select>
+    <select id="mdFilterRiesgo">
+      <option value="">Todos los riesgos</option>
+      <option value="alto">Alto</option>
+      <option value="medio">Medio</option>
+      <option value="bajo">Bajo</option>
+      <option value="ninguno">Ninguno</option>
+    </select>
+    <button class="md-btn" id="mdBtnApplyFilters">Filtrar</button>
+    <button class="md-btn md-btn-ghost" id="mdBtnClearFilters">Limpiar</button>
+  </div>
+
+  <div class="md-kpi-grid" id="mdKpiRow"></div>
+
+  <div class="md-grid md-grid-2">
+    <article class="md-card">
+      <h3>Evolucion del avance (2024-2025)</h3>
+      <canvas id="mdChartEvolution" height="130"></canvas>
+    </article>
+    <article class="md-card">
+      <h3>Distribucion por estado</h3>
+      <canvas id="mdChartStatus" height="130"></canvas>
+    </article>
+  </div>
+
+  <article class="md-card">
+    <h3>Plan de choque por secretaria</h3>
+    <div class="md-table-wrap">
+      <table class="md-table">
+        <thead>
+          <tr><th>Secretaria</th><th>Score</th><th>En riesgo</th><th>No iniciadas</th><th>Accion prioritaria</th></tr>
+        </thead>
+        <tbody id="mdShockBody">
+          <tr><td colspan="5" class="md-empty">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <div class="md-grid md-grid-2">
+    <article class="md-card">
+      <h3>Ranking de secretarias por score</h3>
+      <canvas id="mdChartRanking" height="150"></canvas>
+    </article>
+    <article class="md-card">
+      <h3>Rendimiento por eje</h3>
+      <canvas id="mdChartAxis" height="150"></canvas>
+    </article>
+  </div>
+
+  <div class="md-grid md-grid-2">
+    <article class="md-card">
+      <h3>Metodologia de score y riesgo</h3>
+      <div id="mdMethodology" class="md-methodology">Cargando metodologia...</div>
+    </article>
+    <article class="md-card">
+      <h3>Decisiones recomendadas</h3>
+      <div id="mdRecommendations" class="md-recommendations"></div>
+    </article>
+  </div>
+
+  <article class="md-card">
+    <div class="md-card-title-row">
+      <h3>Metas prioritarias (Top rezagadas)</h3>
+    </div>
+    <div class="md-table-wrap">
+      <table class="md-table">
+        <thead>
+          <tr>
+            <th>Semaforo</th>
+            <th>Score</th>
+            <th>Codigo</th>
+            <th>Meta</th>
+            <th>Secretaria</th>
+            <th>Avance</th>
+            <th>Motivo</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="mdPriorityBody">
+          <tr><td colspan="8" class="md-empty">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article class="md-card">
+    <div class="md-card-title-row">
+      <h3>Listado de metas</h3>
+      <div class="md-view-toggle">
+        <button class="md-btn md-btn-sm active" id="mdViewTableBtn">Tabla</button>
+        <button class="md-btn md-btn-sm" id="mdViewCardsBtn">Tarjetas</button>
+      </div>
+    </div>
+
+    <div id="mdTableWrap" class="md-table-wrap">
+      <table class="md-table">
+        <thead>
+          <tr>
+            <th>Codigo</th>
+            <th>Meta</th>
+            <th>Eje / Sector</th>
+            <th>Secretaria</th>
+            <th>Estado</th>
+            <th>Avance</th>
+            <th>Tendencia</th>
+            <th>Semaforo</th>
+            <th>Ult. actualizacion</th>
+            <th>Score</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="mdListBody">
+          <tr><td colspan="11" class="md-empty">Cargando metas...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div id="mdCardsWrap" class="md-cards" style="display:none;">
+      <div id="mdCardsGrid" class="md-cards-grid"></div>
+    </div>
+
+    <div class="md-pagination">
+      <span id="mdPaginationInfo">-</span>
+      <div id="mdPaginationBtns"></div>
+    </div>
+  </article>
+</section>
+
+<div class="md-modal-overlay" id="mdDetailModal">
+  <div class="md-modal">
+    <div class="md-modal-header">
+      <h2 id="mdDetailTitle">Detalle de meta</h2>
+      <button class="md-close" id="mdDetailClose">×</button>
+    </div>
+    <div class="md-modal-body">
+      <p id="mdDetailMeta" class="md-muted"></p>
+      <section class="md-modal-section">
+        <h4>Resumen ejecutivo</h4>
+        <p id="mdDetailSummary"></p>
+      </section>
+      <section class="md-modal-section">
+        <h4>Linea de tiempo de avances</h4>
+        <div class="md-table-wrap">
+          <table class="md-table md-table-sm">
+            <thead><tr><th>Periodo</th><th>Estado</th><th>Avance</th><th>Financiero</th><th>Fecha</th></tr></thead>
+            <tbody id="mdDetailTimelineBody"></tbody>
+          </table>
+        </div>
+      </section>
+      <section class="md-modal-section">
+        <h4>Evidencias</h4>
+        <div id="mdDetailEvidence" class="md-evidence-grid"></div>
+      </section>
+      <section class="md-modal-section">
+        <h4>Causas probables de rezago</h4>
+        <ul id="mdDetailCauses" class="md-list"></ul>
+      </section>
+      <section class="md-modal-section">
+        <h4>Plan de mejora recomendado</h4>
+        <ul id="mdDetailPlan" class="md-list"></ul>
+      </section>
+    </div>
+    <div class="md-modal-footer">
+      <button class="md-btn md-btn-primary" id="mdDetailExportBtn">Exportar PDF de esta meta</button>
+    </div>
+  </div>
+</div>
+
+<div class="md-modal-overlay" id="mdPdfModal">
+  <div class="md-modal md-modal-sm">
+    <div class="md-modal-header">
+      <h2>Exportar reporte institucional</h2>
+      <button class="md-close" id="mdPdfClose">×</button>
+    </div>
+    <div class="md-modal-body">
+      <button class="md-btn md-btn-primary md-btn-block" id="mdPdfGeneralBtn">Reporte general</button>
+      <label for="mdPdfSecSelect">Reporte por secretaria</label>
+      <select id="mdPdfSecSelect"><option value="">Seleccionar secretaria</option></select>
+      <button class="md-btn md-btn-block" id="mdPdfSecBtn">Exportar por secretaria</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/metas_dashboard.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() { MD.init(); });
+</script>
+{% endblock %}
