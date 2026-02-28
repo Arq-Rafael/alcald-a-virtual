@@ -421,7 +421,20 @@ def _render_pdf(template_name, context, filename="documento.pdf"):
             y_position = _render_informe_content(c, radicado, margin, y_position, w, h, style_title, style_body)
         else:
             y_position = _render_dictamen_content(c, radicado, margin, y_position, w, h, style_title, style_body)
-        
+
+        # ── Marca de agua BORRADOR (diagonal) ──────────────────────────────
+        if context.get('es_borrador'):
+            import math as _math
+            c.saveState()
+            c.setFillColorRGB(0.85, 0.15, 0.15, alpha=0.13)   # rojo muy tenue
+            c.setFont('Helvetica-Bold', 72)
+            c.translate(w / 2, h / 2)
+            c.rotate(45)
+            c.drawCentredString(0, 0, 'BORRADOR')
+            c.rotate(-45)
+            c.translate(-w / 2, -h / 2)
+            c.restoreState()
+
         c.save()
         overlay_buffer.seek(0)
         
@@ -1249,35 +1262,129 @@ def generar_numero():
 def get_stats():
     """
     Retorna KPIs reales del módulo Gestión del Riesgo.
-    GET /api/riesgo/stats
+    GET /api/riesgo/stats?desde=YYYY-MM-DD&hasta=YYYY-MM-DD
     """
     try:
         RadicadoArborea, _ = get_models()
-        db = get_db()
 
-        total       = RadicadoArborea.query.count()
-        radicadas   = RadicadoArborea.query.filter_by(estado='Radicada').count()
-        visitadas   = RadicadoArborea.query.filter_by(estado='Visitada').count()
-        en_planeacion = RadicadoArborea.query.filter_by(estado='En revisión Planeación').count()
-        aprobadas   = RadicadoArborea.query.filter_by(estado='Aprobada').count()
-        negadas     = RadicadoArborea.query.filter_by(estado='Negada').count()
-        cerradas    = RadicadoArborea.query.filter_by(estado='Cerrada').count()
-        pendientes  = total - aprobadas - negadas - cerradas
+        # Filtro de fecha opcional
+        desde_str = request.args.get('desde', '')
+        hasta_str = request.args.get('hasta', '')
+        query_base = RadicadoArborea.query
+
+        if desde_str:
+            try:
+                desde_dt = datetime.strptime(desde_str, '%Y-%m-%d')
+                query_base = query_base.filter(RadicadoArborea.created_at >= desde_dt)
+            except ValueError:
+                pass
+        if hasta_str:
+            try:
+                hasta_dt = datetime.strptime(hasta_str, '%Y-%m-%d') + timedelta(days=1)
+                query_base = query_base.filter(RadicadoArborea.created_at < hasta_dt)
+            except ValueError:
+                pass
+
+        total         = query_base.count()
+        radicadas     = query_base.filter(RadicadoArborea.estado == 'Radicada').count()
+        visitadas     = query_base.filter(RadicadoArborea.estado == 'Visitada').count()
+        en_comite     = query_base.filter(RadicadoArborea.estado == 'En revisión Comité').count()
+        en_planeacion = query_base.filter(RadicadoArborea.estado == 'En revisión Planeación').count()
+        aprobadas     = query_base.filter(RadicadoArborea.estado == 'Aprobada').count()
+        negadas       = query_base.filter(RadicadoArborea.estado == 'Negada').count()
+        cerradas      = query_base.filter(RadicadoArborea.estado == 'Cerrada').count()
+        pendientes    = total - aprobadas - negadas - cerradas
+
+        # Críticos: riesgo final alto o crítico, no resueltos
+        criticos = query_base.filter(
+            RadicadoArborea.visita_riesgo_final.in_(['Alto', 'Crítico', 'Critico']),
+            RadicadoArborea.estado.notin_(['Aprobada', 'Negada', 'Cerrada', 'Rechazada'])
+        ).count()
+
+        # Vencidos SLA: radicados activos con más de 15 días sin cierre
+        sla_limite = datetime.utcnow() - timedelta(days=15)
+        vencidos_sla = query_base.filter(
+            RadicadoArborea.estado.notin_(['Aprobada', 'Negada', 'Cerrada', 'Rechazada']),
+            RadicadoArborea.created_at < sla_limite
+        ).count()
+
+        # Pendientes visita (estado Radicada = todavía no se ha visitado)
+        pendientes_visita = radicadas
+
+        # Pendientes comité (visitadas pero no en planeación ni cerradas)
+        pendientes_comite = visitadas + en_comite
 
         return jsonify({
             'arborea': {
-                'total': total,
-                'radicadas': radicadas,
-                'en_visita': visitadas,
-                'en_planeacion': en_planeacion,
-                'aprobadas': aprobadas,
-                'negadas': negadas,
-                'cerradas': cerradas,
-                'pendientes': pendientes,
+                'total':              total,
+                'radicadas':          radicadas,
+                'en_visita':          visitadas,
+                'en_comite':          en_comite,
+                'en_planeacion':      en_planeacion,
+                'aprobadas':          aprobadas,
+                'negadas':            negadas,
+                'cerradas':           cerradas,
+                'pendientes':         pendientes,
+                'criticos':           criticos,
+                'vencidos_sla':       vencidos_sla,
+                'pendientes_visita':  pendientes_visita,
+                'pendientes_comite':  pendientes_comite,
             }
         }), 200
     except Exception as e:
         logger.error(f"Error get_stats: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@riesgo_api.route('/kanban', methods=['GET'])
+def get_kanban():
+    """
+    Retorna radicados agrupados por estado para el tablero Kanban.
+    GET /api/riesgo/kanban?limite=10
+    Columnas: Radicada | Visitada | En revisión Planeación | Aprobada | Negada/Cerrada
+    """
+    try:
+        RadicadoArborea, _ = get_models()
+        limite = int(request.args.get('limite', 10))
+
+        estados_columnas = [
+            ('Radicada',                ['Radicada']),
+            ('Visita',                  ['Visitada']),
+            ('Comité / Planeación',     ['En revisión Comité', 'En revisión Planeación']),
+            ('Aprobada',                ['Aprobada']),
+            ('Cerrado',                 ['Negada', 'Rechazada', 'Cerrada']),
+        ]
+
+        columnas = []
+        for titulo, estados in estados_columnas:
+            items = (RadicadoArborea.query
+                     .filter(RadicadoArborea.estado.in_(estados))
+                     .order_by(RadicadoArborea.created_at.desc())
+                     .limit(limite).all())
+            total_col = (RadicadoArborea.query
+                         .filter(RadicadoArborea.estado.in_(estados)).count())
+
+            columnas.append({
+                'titulo':  titulo,
+                'estados': estados,
+                'total':   total_col,
+                'items': [{
+                    'id':               r.id,
+                    'numero_radicado':  r.numero_radicado,
+                    'solicitante':      r.solicitante_nombre,
+                    'tipo_solicitud':   r.tipo_solicitud,
+                    'estado':           r.estado,
+                    'arbol_especie':    r.arbol_especie_comun,
+                    'riesgo':           r.visita_riesgo_final or r.arbol_riesgo_inicial,
+                    'vereda':           r.ubicacion_vereda_sector,
+                    'dias_abierto':     (datetime.utcnow() - r.created_at).days if r.created_at else 0,
+                    'created_at':       r.created_at.isoformat() if r.created_at else None,
+                } for r in items]
+            })
+
+        return jsonify({'columnas': columnas}), 200
+    except Exception as e:
+        logger.error(f"Error get_kanban: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 

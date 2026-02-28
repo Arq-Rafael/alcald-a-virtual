@@ -1,259 +1,726 @@
 {% extends "base.html" %}
-{% block title %}Gestión del Riesgo - Alcaldía Virtual Supatá{% endblock %}
+{% block title %}Centro de Control — Gestión del Riesgo{% endblock %}
 
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/gestion_riesgo.css') }}">
+<style>
+/* Layout overrides for control center */
+.riesgo-surface { padding: 16px 20px 40px; max-width: 1600px; }
+.view-section { display: none; }
+.view-section.active { display: block; }
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="riesgo-wrapper">
-    <div class="riesgo-surface">
-    <!-- HERO SECTION -->
-    <section class="riesgo-hero">
-        <div class="riesgo-hero-bg"></div>
-        <div class="riesgo-hero-content">
-            <div class="riesgo-hero-badge">🛡️ SISTEMA INTEGRADO</div>
-            <h1 class="riesgo-hero-title">Gestión del Riesgo</h1>
-            <p class="riesgo-hero-subtitle">Gestión arbórea, actas del comité y planes de contingencia municipal</p>
-        </div>
-    </section>
+<div class="riesgo-surface">
 
-    <!-- KPI CARDS -->
-    <section class="riesgo-kpis-container">
-        <!-- Solicitudes Arbóreas: total clickeable -->
-        <a href="/riesgo/gestion-arborea" style="text-decoration:none;">
-        <div class="riesgo-kpi-card" data-tooltip="Ver solicitudes arbóreas">
-            <div class="riesgo-kpi-icon">🌳</div>
-            <div class="riesgo-kpi-content">
-                <div class="riesgo-kpi-value" id="kpi-solicitudes">—</div>
-                <div class="riesgo-kpi-label">Solicitudes Arbóreas</div>
-                <div style="font-size:11px;color:#1565c0;margin-top:2px;" id="kpi-arborea-detalle">cargando...</div>
-            </div>
+<!-- ════════════════════════════════════════════════
+     ALERTA MENSUAL (solo planeación / admin)
+     Inyectada via JS si /api/actas/cmgr/alerta-mensual lo indica
+     ════════════════════════════════════════════════ -->
+<div id="alerta-mensual" class="op-alert-banner" style="display:none;">
+    ⚠️ <span id="alerta-mensual-texto">No hay acta del CMGR registrada este mes.</span>
+    <a href="/riesgo/actas-cmgr" class="ms-auto" style="color:#92400e;font-weight:700;text-decoration:underline;">Registrar acta</a>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     OP-HEADER
+     ════════════════════════════════════════════════ -->
+<div class="op-header">
+    <div>
+        <div class="op-header-breadcrumb">
+            <i class="bi bi-house-fill"></i>
+            <span>Inicio</span>
+            <span>›</span>
+            <span>Gestión del Riesgo</span>
         </div>
+        <div class="op-header-title">🛡️ Centro de Control — Gestión del Riesgo</div>
+    </div>
+    <div class="ms-auto d-flex align-items-center gap-2 flex-wrap">
+        <span class="op-role-badge" id="role-badge">cargando...</span>
+        <button class="op-filter-btn" onclick="abrirCmdPalette()" title="Ctrl+K">
+            <i class="bi bi-search"></i> Buscar &nbsp;<kbd style="font-size:10px;opacity:.7;">Ctrl+K</kbd>
+        </button>
+        <a href="/riesgo/gestion-arborea" class="op-filter-btn" style="text-decoration:none;">
+            <i class="bi bi-plus-lg"></i> Nuevo Radicado
         </a>
-
-        <!-- Pendientes Planeación (solo visibles si hay) -->
-        <a href="/riesgo/gestion-arborea" style="text-decoration:none;">
-        <div class="riesgo-kpi-card" data-tooltip="Pendientes de Visto Bueno – Planeación" id="kpi-card-planeacion">
-            <div class="riesgo-kpi-icon">🏛️</div>
-            <div class="riesgo-kpi-content">
-                <div class="riesgo-kpi-value" id="kpi-planeacion">—</div>
-                <div class="riesgo-kpi-label">Pendientes Planeación</div>
-                <div style="font-size:11px;color:#e07b00;margin-top:2px;">Requieren visto bueno</div>
-            </div>
-        </div>
-        </a>
-
-        <!-- Planes de contingencia -->
-        <a href="/riesgo/planes-contingencia" style="text-decoration:none;">
-        <div class="riesgo-kpi-card" data-tooltip="Ver planes de contingencia">
-            <div class="riesgo-kpi-icon">📑</div>
-            <div class="riesgo-kpi-content">
-                <div class="riesgo-kpi-value" id="kpi-planes">—</div>
-                <div class="riesgo-kpi-label">Planes Contingencia</div>
-                <div style="font-size:11px;color:#0f4c81;margin-top:2px;" id="kpi-planes-detalle">cargando...</div>
-            </div>
-        </div>
-        </a>
-    </section>
-
-    <!-- MODULE CARDS -->
-    <section class="riesgo-modules">
-        <div class="riesgo-modules-header">
-            <h2>Módulos del Sistema</h2>
-            <p>Seleccione el módulo para gestionar</p>
-        </div>
-
-        <div class="riesgo-modules-grid">
-            <!-- MÓDULO 1: Gestión Arbórea -->
-            <div class="riesgo-module-card riesgo-card-green">
-                <span class="riesgo-module-chip">Nuevo</span>
-                <div class="riesgo-module-header">
-                    <div class="riesgo-module-icon">
-                        <i class="bi bi-tree-fill"></i>
-                    </div>
-                    <span class="riesgo-module-badge">Gestión Arbórea</span>
-                </div>
-                
-                <div class="riesgo-module-body">
-                    <h3>Solicitudes de Tala y Poda</h3>
-                    <p>Radicación y seguimiento de solicitudes de intervención del arbolado urbano y rural.</p>
-                    
-                    <div class="riesgo-module-features">
-                        <div class="riesgo-feature-item">
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Radicación de solicitudes</span>
-                        </div>
-                        <div class="riesgo-feature-item">
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Gestión de autorizaciones</span>
-                        </div>
-                        <div class="riesgo-feature-item">
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Seguimiento de estado</span>
-                        </div>
-                        <div class="riesgo-feature-item">
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Historial y reportes</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="riesgo-module-footer">
-                    <a href="/riesgo/gestion-arborea" class="riesgo-btn riesgo-btn-green">
-                        <i class="bi bi-box-arrow-in-right"></i>
-                        ACCEDER AL MÓDULO
-                    </a>
-                </div>
-            </div>
-
-            <!-- MÓDULO 2: Actas CMGR -->
-            <div class="riesgo-module-card riesgo-card-blue">
-                <span class="riesgo-module-chip">Nuevo</span>
-                <div class="riesgo-module-header">
-                    <div class="riesgo-module-icon">
-                        <i class="bi bi-journal-text"></i>
-                    </div>
-                    <span class="riesgo-module-badge">Actas CMGR</span>
-                </div>
-                
-                <div class="riesgo-module-body">
-                    <h3>Actas del Comité Municipal</h3>
-                    <p>Transcripción, generación y archivo de actas del Comité Municipal de Gestión del Riesgo.</p>
-                    
-                    <div class="riesgo-module-features">
-                        <div class="riesgo-feature-item">
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Transcribir actas de sesión</span>
-                        </div>
-                        <div class="riesgo-feature-item">
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Generar documentos oficiales</span>
-                        </div>
-                        <div class="riesgo-feature-item">
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Archivo digital organizado</span>
-                        </div>
-                        <div class="riesgo-feature-item">
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Búsqueda y consulta</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="riesgo-module-footer">
-                    <a href="/riesgo/actas-cmgr" class="riesgo-btn riesgo-btn-blue">
-                        <i class="bi bi-box-arrow-in-right"></i>
-                        ACCEDER AL MÓDULO
-                    </a>
-                </div>
-            </div>
-
-            <!-- MÓDULO 3: Planes de Contingencia -->
-            <div class="riesgo-module-card riesgo-card-orange">
-                <span class="riesgo-module-chip">Nuevo</span>
-                <div class="riesgo-module-header">
-                    <div class="riesgo-module-icon">
-                        <i class="bi bi-shield-fill-exclamation"></i>
-                    </div>
-                    <span class="riesgo-module-badge">Planes de Contingencia</span>
-                </div>
-                
-                <div class="riesgo-module-body">
-                    <h3>Planes de Contingencia Municipal</h3>
-                    <p>Creación y gestión de planes de contingencia en formato oficial de la alcaldía.</p>
-                    
-                    <div class="riesgo-module-features">
-                        <div class="riesgo-feature-item">
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Crear planes de contingencia</span>
-                        </div>
-                        <div class="riesgo-feature-item">
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Formato oficial de la alcaldía</span>
-                        </div>
-                        <div class="riesgo-feature-item">
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Gestión de versiones</span>
-                        </div>
-                        <div class="riesgo-feature-item">
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Exportación a PDF</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="riesgo-module-footer">
-                    <a href="/riesgo/planes-contingencia" class="riesgo-btn riesgo-btn-orange">
-                        <i class="bi bi-box-arrow-in-right"></i>
-                        ACCEDER AL MÓDULO
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
     </div>
 </div>
 
+<!-- ════════════════════════════════════════════════
+     KPI BAR — 5 chips clickeables
+     ════════════════════════════════════════════════ -->
+<div class="op-kpi-bar" id="kpi-bar">
+    <a class="op-kpi-chip info" href="/riesgo/gestion-arborea" style="text-decoration:none;">
+        <div>
+            <div class="op-kpi-chip__num" id="kpi-total">—</div>
+            <div class="op-kpi-chip__label">Total Arbórea</div>
+        </div>
+        <span style="margin-left:auto;font-size:18px;">🌳</span>
+    </a>
+    <div class="op-kpi-chip" onclick="setFiltroEstado('Radicada')" style="cursor:pointer;">
+        <div>
+            <div class="op-kpi-chip__num" id="kpi-pend-visita">—</div>
+            <div class="op-kpi-chip__label">Pend. Visita</div>
+        </div>
+        <span style="margin-left:auto;font-size:18px;">📋</span>
+    </div>
+    <div class="op-kpi-chip" onclick="setFiltroEstado('Visitada')" style="cursor:pointer;">
+        <div>
+            <div class="op-kpi-chip__num" id="kpi-pend-comite">—</div>
+            <div class="op-kpi-chip__label">Pend. Comité</div>
+        </div>
+        <span style="margin-left:auto;font-size:18px;">⚖️</span>
+    </div>
+    <div class="op-kpi-chip warning" onclick="setFiltroEstado('En revisión Planeación')" style="cursor:pointer;">
+        <div>
+            <div class="op-kpi-chip__num" id="kpi-planeacion">—</div>
+            <div class="op-kpi-chip__label">Planeación</div>
+        </div>
+        <span style="margin-left:auto;font-size:18px;">🏛️</span>
+    </div>
+    <div class="op-kpi-chip danger" onclick="filtrarCriticos()" style="cursor:pointer;">
+        <div>
+            <div class="op-kpi-chip__num" id="kpi-criticos">—</div>
+            <div class="op-kpi-chip__label">Críticos</div>
+        </div>
+        <span style="margin-left:auto;font-size:18px;">🔴</span>
+    </div>
+    <div class="op-kpi-chip danger" onclick="filtrarVencidos()" style="cursor:pointer;">
+        <div>
+            <div class="op-kpi-chip__num" id="kpi-vencidos">—</div>
+            <div class="op-kpi-chip__label">Vencidos SLA</div>
+        </div>
+        <span style="margin-left:auto;font-size:18px;">⏰</span>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     VIEW TOGGLE + FILTER BAR
+     ════════════════════════════════════════════════ -->
+<div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+    <div class="op-view-toggle">
+        <button class="op-view-btn active" id="btn-view-operativa" onclick="switchView('operativa')">
+            <i class="bi bi-kanban"></i> Operativa
+        </button>
+        <button class="op-view-btn" id="btn-view-analitica" onclick="switchView('analitica')">
+            <i class="bi bi-bar-chart-line"></i> Analítica
+        </button>
+        <button class="op-view-btn" id="btn-view-modulos" onclick="switchView('modulos')">
+            <i class="bi bi-grid-3x3-gap"></i> Módulos
+        </button>
+    </div>
+    <div class="op-filter-bar flex-grow-1">
+        <i class="bi bi-funnel" style="color:#94a3b8;"></i>
+        <input type="text" id="f-texto" placeholder="Buscar radicado, nombre..." onkeyup="aplicarFiltros()" style="min-width:160px;flex:1;">
+        <select id="f-tipo" onchange="aplicarFiltros()">
+            <option value="">Tipo solicitud</option>
+            <option>Poda</option>
+            <option>Tala</option>
+            <option>Trasplante</option>
+            <option>Emergencia</option>
+        </select>
+        <select id="f-estado" onchange="aplicarFiltros()">
+            <option value="">Estado</option>
+            <option>Radicada</option>
+            <option>Visitada</option>
+            <option>En revisión Planeación</option>
+            <option>Aprobada</option>
+            <option>Negada</option>
+            <option>Cerrada</option>
+        </select>
+        <select id="f-criticidad" onchange="aplicarFiltros()">
+            <option value="">Criticidad</option>
+            <option>Alto</option>
+            <option>Medio</option>
+            <option>Bajo</option>
+        </select>
+        <input type="date" id="f-desde" onchange="aplicarFiltros()" title="Desde">
+        <input type="date" id="f-hasta" onchange="aplicarFiltros()" title="Hasta">
+        <button class="op-filter-btn secondary" onclick="resetFiltros()">✕ Limpiar</button>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     VISTA OPERATIVA — KANBAN
+     ════════════════════════════════════════════════ -->
+<div class="view-section active" id="view-operativa">
+    <div id="kanban-loading" style="text-align:center;padding:40px;color:#94a3b8;">
+        <div class="spinner-border spinner-border-sm me-2" role="status"></div> Cargando tablero...
+    </div>
+    <div class="kanban-board" id="kanban-board" style="display:none;"></div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     VISTA ANALÍTICA
+     ════════════════════════════════════════════════ -->
+<div class="view-section" id="view-analitica">
+    <div class="analytics-grid">
+        <div class="analytics-card">
+            <h6>📊 Distribución por Estado</h6>
+            <canvas id="chart-estados" height="180"></canvas>
+        </div>
+        <div class="analytics-card">
+            <h6>🌿 Por Tipo de Solicitud</h6>
+            <canvas id="chart-tipos" height="180"></canvas>
+        </div>
+        <div class="analytics-card">
+            <h6>⚠️ Por Nivel de Riesgo</h6>
+            <canvas id="chart-riesgo" height="180"></canvas>
+        </div>
+        <div class="analytics-card">
+            <h6>📅 Actas CMGR — Resumen Mes</h6>
+            <div id="actas-stats-panel" style="font-size:13px;color:#475569;line-height:2;">Cargando...</div>
+        </div>
+        <div class="analytics-card">
+            <h6>🏘️ Damnificados</h6>
+            <canvas id="chart-damnificados" height="180"></canvas>
+        </div>
+        <div class="analytics-card">
+            <h6>🔴 Daños por Criticidad</h6>
+            <canvas id="chart-danos" height="180"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     VISTA MÓDULOS
+     ════════════════════════════════════════════════ -->
+<div class="view-section" id="view-modulos">
+    <div class="row g-3">
+        <!-- Gestión Arbórea -->
+        <div class="col-md-4">
+            <div class="op-module-card">
+                <div class="op-module-card__icon">🌳</div>
+                <div class="op-module-card__title">Gestión Arbórea</div>
+                <div class="op-module-card__desc">
+                    Radicación, visita técnica, dictamen CMGR, visto bueno Planeación y permiso oficial.
+                    Wizard completo con 4 fases.
+                </div>
+                <ul style="font-size:12px;color:#64748b;padding-left:16px;margin:0;">
+                    <li>Solicitudes de tala, poda, trasplante</li>
+                    <li>Galería de fotos de campo</li>
+                    <li>Cálculo de compensación arbórea</li>
+                    <li>PDF borrador + PDF final oficial</li>
+                    <li>Flujo Planeación bloqueante</li>
+                </ul>
+                <div class="op-module-card__actions">
+                    <a href="/riesgo/gestion-arborea" class="op-module-action-btn primary">
+                        <i class="bi bi-plus-lg"></i> Nuevo Radicado
+                    </a>
+                    <a href="/riesgo/gestion-arborea" class="op-module-action-btn">
+                        <i class="bi bi-list-ul"></i> Historial
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actas CMGR -->
+        <div class="col-md-4">
+            <div class="op-module-card" style="border-top-color:#8b5cf6;">
+                <div class="op-module-card__icon" style="background:linear-gradient(130deg,#7c3aed,#a78bfa);">📋</div>
+                <div class="op-module-card__title">Actas CMGR</div>
+                <div class="op-module-card__desc">
+                    Actas del Comité Municipal, registro de damnificados, daños en infraestructura y mapa de riesgos.
+                </div>
+                <ul style="font-size:12px;color:#64748b;padding-left:16px;margin:0;">
+                    <li>Actas con compromisos y asistentes</li>
+                    <li>Registro de damnificados</li>
+                    <li>Inventario de daños (Vía, Vivienda, etc.)</li>
+                    <li>Mapa interactivo de riesgos</li>
+                    <li>Alerta si falta acta del mes</li>
+                </ul>
+                <div class="op-module-card__actions">
+                    <a href="/riesgo/actas-cmgr" class="op-module-action-btn primary" style="border-color:#7c3aed;background:#7c3aed;">
+                        <i class="bi bi-plus-lg"></i> Nueva Acta
+                    </a>
+                    <a href="/riesgo/actas-cmgr" class="op-module-action-btn" style="border-color:#7c3aed;color:#7c3aed;">
+                        <i class="bi bi-map"></i> Mapa
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Planes de Contingencia -->
+        <div class="col-md-4">
+            <div class="op-module-card" style="border-top-color:#f59e0b;">
+                <div class="op-module-card__icon" style="background:linear-gradient(130deg,#d97706,#fbbf24);">📑</div>
+                <div class="op-module-card__title">Planes de Contingencia</div>
+                <div class="op-module-card__desc">
+                    Creación y gestión de planes de contingencia en formato oficial de la alcaldía municipal.
+                </div>
+                <ul style="font-size:12px;color:#64748b;padding-left:16px;margin:0;">
+                    <li>Formato oficial de la alcaldía</li>
+                    <li>Gestión de versiones</li>
+                    <li>Exportación a PDF</li>
+                    <li id="kpi-planes-modulo">Cargando planes...</li>
+                </ul>
+                <div class="op-module-card__actions">
+                    <a href="/riesgo/planes-contingencia" class="op-module-action-btn primary" style="border-color:#d97706;background:#d97706;">
+                        <i class="bi bi-plus-lg"></i> Nuevo Plan
+                    </a>
+                    <a href="/riesgo/planes-contingencia" class="op-module-action-btn" style="border-color:#d97706;color:#d97706;">
+                        <i class="bi bi-list-ul"></i> Ver todos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div><!-- riesgo-surface -->
+</div><!-- riesgo-wrapper -->
+
+<!-- ════════════════════════════════════════════════
+     COMMAND PALETTE  (Ctrl+K)
+     ════════════════════════════════════════════════ -->
+<div class="cmd-overlay" id="cmd-overlay" style="display:none;" onclick="cerrarCmdPalette(event)">
+    <div class="cmd-palette" onclick="event.stopPropagation()">
+        <div class="cmd-input-wrap">
+            <i class="bi bi-search" style="color:#94a3b8;font-size:18px;"></i>
+            <input class="cmd-input" id="cmd-input" type="text"
+                   placeholder="Ir a radicado 2026-001 · Pendientes Planeación · Nueva acta..."
+                   oninput="cmdBuscar(this.value)" onkeydown="cmdNavegar(event)">
+            <kbd style="font-size:11px;color:#94a3b8;border:1px solid #e2e8f0;padding:2px 6px;border-radius:4px;">ESC</kbd>
+        </div>
+        <div class="cmd-results" id="cmd-results"></div>
+        <div class="cmd-hint">↑↓ navegar · Enter seleccionar · Esc cerrar</div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-function animarNumero(eleId, target, duration) {
-    const ele = document.getElementById(eleId);
-    if (!ele) return;
-    const increment = target / Math.max(1, duration / 16);
-    let current = 0;
-    const timer = setInterval(() => {
-        current += increment;
-        if (current >= target) { ele.textContent = Math.round(target); clearInterval(timer); }
-        else { ele.textContent = Math.round(current); }
-    }, 16);
+// ─────────────────────────────────────────────────────────────
+// GLOBAL STATE
+// ─────────────────────────────────────────────────────────────
+let statsData    = {};
+let kanbanData   = [];
+let chartsInited = false;
+let filtros = { texto: '', tipo: '', estado: '', criticidad: '', desde: '', hasta: '' };
+
+// ─────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+    document.getElementById('role-badge').textContent =
+        '{{ session.get("role","usuario") | upper }}';
+
+    await Promise.all([cargarStats(), cargarKanban(), verificarAlertaMensual()]);
+    cargarPlanesContingencia();
+});
+
+// ─────────────────────────────────────────────────────────────
+// STATS — KPI bar
+// ─────────────────────────────────────────────────────────────
+async function cargarStats() {
+    try {
+        const r = await fetch('/api/riesgo/stats');
+        if (!r.ok) return;
+        const d = await r.json();
+        statsData = d.arborea || {};
+
+        animarNumero('kpi-total',       statsData.total          || 0);
+        animarNumero('kpi-pend-visita', statsData.pendientes_visita || 0);
+        animarNumero('kpi-pend-comite', statsData.pendientes_comite || 0);
+        animarNumero('kpi-planeacion',  statsData.en_planeacion  || 0);
+        animarNumero('kpi-criticos',    statsData.criticos        || 0);
+        animarNumero('kpi-vencidos',    statsData.vencidos_sla   || 0);
+    } catch(e) { console.warn('stats:', e); }
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-    // ── Estadísticas Arbóreas reales ───────────────────────────────────────
+function animarNumero(id, target) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    let cur = 0;
+    const step = Math.max(1, Math.ceil(target / 30));
+    const timer = setInterval(() => {
+        cur = Math.min(cur + step, target);
+        el.textContent = cur;
+        if (cur >= target) clearInterval(timer);
+    }, 20);
+}
+
+// ─────────────────────────────────────────────────────────────
+// KANBAN
+// ─────────────────────────────────────────────────────────────
+async function cargarKanban() {
     try {
-        const res = await fetch('/api/riesgo/stats');
-        if (res.ok) {
-            const data = await res.json();
-            const a = data.arborea || {};
-            animarNumero('kpi-solicitudes', a.total || 0, 600);
-            animarNumero('kpi-planeacion', a.en_planeacion || 0, 600);
+        const r = await fetch('/api/riesgo/kanban?limite=10');
+        if (!r.ok) return;
+        const d = await r.json();
+        kanbanData = d.columnas || [];
+        renderKanban(kanbanData);
+    } catch(e) {
+        document.getElementById('kanban-loading').textContent = 'Error al cargar tablero.';
+    }
+}
 
-            const detalleEl = document.getElementById('kpi-arborea-detalle');
-            if (detalleEl) {
-                const partes = [];
-                if (a.radicadas)    partes.push(`${a.radicadas} radicadas`);
-                if (a.en_visita)    partes.push(`${a.en_visita} en visita`);
-                if (a.aprobadas)    partes.push(`${a.aprobadas} aprobadas`);
-                if (a.negadas)      partes.push(`${a.negadas} negadas`);
-                detalleEl.textContent = partes.join(' · ') || 'Sin datos';
-            }
+function renderKanban(columnas) {
+    const board = document.getElementById('kanban-board');
+    const loading = document.getElementById('kanban-loading');
 
-            // Ocultar tarjeta de Planeación si no hay pendientes
-            const cardPlan = document.getElementById('kpi-card-planeacion');
-            if (cardPlan && (a.en_planeacion || 0) === 0) {
-                cardPlan.style.opacity = '0.5';
-            }
-        }
-    } catch (e) {
-        console.warn('KPI arborea error:', e);
-        ['kpi-solicitudes','kpi-planeacion'].forEach(id => {
-            const el = document.getElementById(id); if (el) el.textContent = '?';
+    const colColors = {
+        'Radicada':              '#2563eb',
+        'Visita':                '#d97706',
+        'Comité / Planeación':   '#7c3aed',
+        'Aprobada':              '#059669',
+        'Cerrado':               '#64748b',
+    };
+
+    board.innerHTML = columnas.map(col => `
+        <div class="kanban-col">
+            <div class="kanban-col-header">
+                <span class="kanban-col-title" style="color:${colColors[col.titulo]||'#475569'}">
+                    ${col.titulo}
+                </span>
+                <span class="kanban-col-count" style="color:${colColors[col.titulo]||'#475569'}">
+                    ${col.total}
+                </span>
+            </div>
+            <div class="kanban-cards" data-col="${col.titulo}">
+                ${col.items.length === 0
+                    ? '<div style="font-size:11px;color:#94a3b8;text-align:center;padding:20px 0;">Sin registros</div>'
+                    : col.items.map(item => renderKanbanCard(item)).join('')
+                }
+                ${col.total > col.items.length
+                    ? `<div style="font-size:11px;color:#94a3b8;text-align:center;margin-top:4px;">+${col.total - col.items.length} más</div>`
+                    : ''}
+            </div>
+        </div>
+    `).join('');
+
+    loading.style.display = 'none';
+    board.style.display   = 'grid';
+}
+
+function renderKanbanCard(item) {
+    const riesgo = (item.riesgo || '').toLowerCase();
+    const vencido = item.dias_abierto > 15 && !['Aprobada','Negada','Cerrada','Rechazada'].includes(item.estado);
+    const tagClass = riesgo.includes('alt') || riesgo.includes('crít') ? 'alto'
+                   : riesgo.includes('med') ? 'medio'
+                   : riesgo.includes('baj') ? 'bajo' : '';
+    const cardClass = vencido ? 'vencido' : (tagClass ? `riesgo-${tagClass}` : '');
+
+    return `
+    <div class="kanban-card ${cardClass}" onclick="irARadicado(${item.id})" title="${item.solicitante}">
+        <div class="kanban-card__num">AR-${item.numero_radicado || item.id}</div>
+        <div class="kanban-card__name">${item.solicitante || '—'}</div>
+        <div class="kanban-card__meta">
+            ${item.tipo_solicitud ? `<span class="kanban-card__tag">${item.tipo_solicitud}</span>` : ''}
+            ${item.riesgo ? `<span class="kanban-card__tag ${tagClass}">${item.riesgo}</span>` : ''}
+        </div>
+        <div class="kanban-card__days ${vencido ? 'vencido' : ''}">
+            ${item.vereda ? `📍 ${item.vereda} · ` : ''}${item.dias_abierto}d
+            ${vencido ? ' ⚠️' : ''}
+        </div>
+    </div>`;
+}
+
+function irARadicado(id) {
+    window.location.href = `/riesgo/gestion-arborea?radicado=${id}`;
+}
+
+// ─────────────────────────────────────────────────────────────
+// FILTERS
+// ─────────────────────────────────────────────────────────────
+function aplicarFiltros() {
+    filtros.texto      = document.getElementById('f-texto').value.trim().toLowerCase();
+    filtros.tipo       = document.getElementById('f-tipo').value;
+    filtros.estado     = document.getElementById('f-estado').value;
+    filtros.criticidad = document.getElementById('f-criticidad').value;
+    filtros.desde      = document.getElementById('f-desde').value;
+    filtros.hasta      = document.getElementById('f-hasta').value;
+
+    // Filtrar kanban localmente por texto/tipo/estado
+    if (!kanbanData.length) return;
+    const filtradas = kanbanData.map(col => {
+        let items = col.items;
+        if (filtros.texto)  items = items.filter(i =>
+            (i.numero_radicado||'').toLowerCase().includes(filtros.texto) ||
+            (i.solicitante||'').toLowerCase().includes(filtros.texto));
+        if (filtros.tipo)   items = items.filter(i => i.tipo_solicitud === filtros.tipo);
+        if (filtros.estado) items = items.filter(i => i.estado === filtros.estado);
+        if (filtros.criticidad) items = items.filter(i =>
+            (i.riesgo||'').toLowerCase().includes(filtros.criticidad.toLowerCase()));
+        return { ...col, items };
+    });
+    renderKanban(filtradas);
+}
+
+function resetFiltros() {
+    ['f-texto','f-tipo','f-estado','f-criticidad','f-desde','f-hasta'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    filtros = { texto:'', tipo:'', estado:'', criticidad:'', desde:'', hasta:'' };
+    renderKanban(kanbanData);
+}
+
+function setFiltroEstado(estado) {
+    document.getElementById('f-estado').value = estado;
+    switchView('operativa');
+    aplicarFiltros();
+}
+
+function filtrarCriticos() {
+    document.getElementById('f-criticidad').value = 'Alto';
+    switchView('operativa');
+    aplicarFiltros();
+}
+
+function filtrarVencidos() {
+    // No hay filtro directo para vencidos en kanban local — ir a arborea filtrado
+    window.location.href = '/riesgo/gestion-arborea?filtro=vencidos';
+}
+
+// ─────────────────────────────────────────────────────────────
+// VIEW TOGGLE
+// ─────────────────────────────────────────────────────────────
+function switchView(view) {
+    ['operativa','analitica','modulos'].forEach(v => {
+        document.getElementById(`view-${v}`).classList.toggle('active', v === view);
+        document.getElementById(`btn-view-${v}`).classList.toggle('active', v === view);
+    });
+    if (view === 'analitica' && !chartsInited) {
+        initCharts();
+    }
+}
+
+// ─────────────────────────────────────────────────────────────
+// ANALYTICS CHARTS
+// ─────────────────────────────────────────────────────────────
+function initCharts() {
+    chartsInited = true;
+    const a = statsData;
+
+    // Chart estados
+    new Chart(document.getElementById('chart-estados'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Radicadas', 'En Visita', 'Planeación', 'Aprobadas', 'Negadas', 'Cerradas'],
+            datasets: [{
+                data: [a.radicadas||0, a.en_visita||0, a.en_planeacion||0, a.aprobadas||0, a.negadas||0, a.cerradas||0],
+                backgroundColor: ['#2563eb','#d97706','#7c3aed','#059669','#dc2626','#64748b'],
+                borderWidth: 0
+            }]
+        },
+        options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+    });
+
+    // Chart tipos (placeholder — desde kanban data)
+    const tiposCount = {};
+    kanbanData.forEach(col => col.items.forEach(item => {
+        if (item.tipo_solicitud) tiposCount[item.tipo_solicitud] = (tiposCount[item.tipo_solicitud]||0)+1;
+    }));
+    new Chart(document.getElementById('chart-tipos'), {
+        type: 'bar',
+        data: {
+            labels: Object.keys(tiposCount),
+            datasets: [{
+                label: 'Solicitudes',
+                data: Object.values(tiposCount),
+                backgroundColor: '#0f4c81',
+                borderRadius: 6
+            }]
+        },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+
+    // Chart riesgo
+    const riesgoCount = { Alto:0, Medio:0, Bajo:0 };
+    kanbanData.forEach(col => col.items.forEach(item => {
+        const r = item.riesgo || '';
+        if (r.toLowerCase().includes('alt') || r.toLowerCase().includes('crít')) riesgoCount.Alto++;
+        else if (r.toLowerCase().includes('med')) riesgoCount.Medio++;
+        else if (r.toLowerCase().includes('baj')) riesgoCount.Bajo++;
+    }));
+    new Chart(document.getElementById('chart-riesgo'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Alto', 'Medio', 'Bajo'],
+            datasets: [{
+                data: [riesgoCount.Alto, riesgoCount.Medio, riesgoCount.Bajo],
+                backgroundColor: ['#dc2626','#d97706','#059669'],
+                borderWidth: 0
+            }]
+        },
+        options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+    });
+
+    // Charts Actas / Damnificados / Daños
+    cargarStatsActas();
+}
+
+async function cargarStatsActas() {
+    try {
+        const r = await fetch('/api/actas/stats');
+        if (!r.ok) return;
+        const d = await r.json();
+
+        document.getElementById('actas-stats-panel').innerHTML = `
+            <b>${d.actas_mes}</b> acta(s) este mes · <b>${d.actas_total}</b> total<br>
+            Damnificados: <b>${d.damnificados_total}</b>
+                (${d.damnificados_pendientes} pend · ${d.damnificados_en_proceso} proceso · ${d.damnificados_atendidos} atend.)<br>
+            Daños: <b>${d.danos_total}</b> reportados · <b>${d.danos_criticos}</b> críticos`;
+
+        new Chart(document.getElementById('chart-damnificados'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Pendiente', 'En proceso', 'Atendido'],
+                datasets: [{
+                    data: [d.damnificados_pendientes, d.damnificados_en_proceso, d.damnificados_atendidos],
+                    backgroundColor: ['#dc2626','#d97706','#059669'],
+                    borderWidth: 0
+                }]
+            },
+            options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
         });
+
+        new Chart(document.getElementById('chart-danos'), {
+            type: 'bar',
+            data: {
+                labels: ['Crítica','Alta','Media','Baja'],
+                datasets: [{
+                    label: 'Daños',
+                    data: [d.danos_criticos, d.danos_altos||0, 0, 0],
+                    backgroundColor: ['#dc2626','#ea580c','#ca8a04','#16a34a'],
+                    borderRadius: 6
+                }]
+            },
+            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+        });
+    } catch(e) { console.warn('stats actas:', e); }
+}
+
+// ─────────────────────────────────────────────────────────────
+// ALERTA MENSUAL
+// ─────────────────────────────────────────────────────────────
+async function verificarAlertaMensual() {
+    try {
+        const r = await fetch('/api/actas/cmgr/alerta-mensual');
+        if (!r.ok) return;
+        const d = await r.json();
+        if (d.alerta) {
+            const banner = document.getElementById('alerta-mensual');
+            document.getElementById('alerta-mensual-texto').textContent =
+                `⚠️ No hay acta del CMGR registrada para ${d.mes}. Se recomienda registrarla.`;
+            banner.style.display = 'flex';
+        }
+    } catch(e) {}
+}
+
+// ─────────────────────────────────────────────────────────────
+// PLANES CONTINGENCIA — KPI módulo
+// ─────────────────────────────────────────────────────────────
+async function cargarPlanesContingencia() {
+    try {
+        const r = await fetch('/api/contingencia?per_page=1');
+        if (!r.ok) return;
+        const d = await r.json();
+        const el = document.getElementById('kpi-planes-modulo');
+        if (el) el.textContent = `${d.total || 0} plan(es) registrado(s)`;
+    } catch(e) {}
+}
+
+// ─────────────────────────────────────────────────────────────
+// COMMAND PALETTE
+// ─────────────────────────────────────────────────────────────
+const CMD_ACCIONES = [
+    { icon:'🌳', label:'Nueva solicitud arbórea', sub:'Gestión Arbórea', href:'/riesgo/gestion-arborea' },
+    { icon:'📋', label:'Nueva acta CMGR', sub:'Actas CMGR', href:'/riesgo/actas-cmgr' },
+    { icon:'📑', label:'Nuevo plan de contingencia', sub:'Contingencia', href:'/riesgo/planes-contingencia' },
+    { icon:'🏛️', label:'Pendientes Planeación', sub:'Gestión Arbórea', action: () => { setFiltroEstado('En revisión Planeación'); cerrarCmdPalette(); } },
+    { icon:'🔴', label:'Ver solicitudes críticas', sub:'Gestión Arbórea', action: () => { filtrarCriticos(); cerrarCmdPalette(); } },
+    { icon:'⏰', label:'Ver vencidos SLA (>15 días)', sub:'Gestión Arbórea', action: () => { filtrarVencidos(); cerrarCmdPalette(); } },
+    { icon:'📊', label:'Vista Analítica', sub:'Dashboard', action: () => { switchView('analitica'); cerrarCmdPalette(); } },
+    { icon:'🗺️', label:'Mapa de riesgos y daños', sub:'Actas CMGR', href:'/riesgo/actas-cmgr' },
+    { icon:'🏘️', label:'Registro de damnificados', sub:'Actas CMGR', href:'/riesgo/actas-cmgr' },
+];
+
+let cmdSelected = -1;
+
+function abrirCmdPalette() {
+    document.getElementById('cmd-overlay').style.display = 'flex';
+    setTimeout(() => document.getElementById('cmd-input').focus(), 50);
+    cmdBuscar('');
+}
+
+function cerrarCmdPalette(e) {
+    if (!e || e.target === document.getElementById('cmd-overlay')) {
+        document.getElementById('cmd-overlay').style.display = 'none';
+        document.getElementById('cmd-input').value = '';
+        cmdSelected = -1;
+    }
+}
+
+function cmdBuscar(q) {
+    const ql = q.toLowerCase();
+    const resultados = CMD_ACCIONES.filter(a =>
+        a.label.toLowerCase().includes(ql) || a.sub.toLowerCase().includes(ql)
+    );
+
+    // Si parece un número de radicado, agregar opción de ir directo
+    if (/\d{4}-?\d+/.test(q)) {
+        const num = q.replace(/[^0-9-]/g,'');
+        resultados.unshift({ icon:'🔍', label:`Ir a radicado AR-${num}`, sub:'Gestión Arbórea', href:`/riesgo/gestion-arborea?num=${num}` });
     }
 
-    // ── Planes de contingencia ─────────────────────────────────────────────
-    try {
-        const resP = await fetch('/api/contingencia?per_page=1');
-        if (resP.ok) {
-            const dp = await resP.json();
-            animarNumero('kpi-planes', dp.total || 0, 600);
-            const detalleP = document.getElementById('kpi-planes-detalle');
-            if (detalleP) detalleP.textContent = `${dp.total || 0} plan(es) registrado(s)`;
-        }
-    } catch (e) {
-        console.warn('KPI planes error:', e);
-        const el = document.getElementById('kpi-planes'); if (el) el.textContent = '?';
+    const el = document.getElementById('cmd-results');
+    el.innerHTML = resultados.length
+        ? resultados.map((a, i) => `
+            <div class="cmd-result-item${i===cmdSelected?' selected':''}" onclick="cmdEjecutar(${i})" data-idx="${i}">
+                <div class="cmd-result-icon">${a.icon}</div>
+                <div>
+                    <div class="cmd-result-label">${a.label}</div>
+                    <div class="cmd-result-sub">${a.sub}</div>
+                </div>
+            </div>`).join('')
+        : '<div style="text-align:center;color:#94a3b8;padding:20px;font-size:13px;">Sin resultados</div>';
+
+    cmdSelected = resultados.length ? 0 : -1;
+    actualizarSeleccion(resultados);
+}
+
+function actualizarSeleccion(resultados) {
+    document.querySelectorAll('.cmd-result-item').forEach((el, i) => {
+        el.classList.toggle('selected', i === cmdSelected);
+    });
+}
+
+function cmdNavegar(e) {
+    const items = document.querySelectorAll('.cmd-result-item');
+    if (e.key === 'Escape') { cerrarCmdPalette({}); return; }
+    if (e.key === 'ArrowDown') { e.preventDefault(); cmdSelected = Math.min(cmdSelected+1, items.length-1); }
+    if (e.key === 'ArrowUp')   { e.preventDefault(); cmdSelected = Math.max(cmdSelected-1, 0); }
+    if (e.key === 'Enter' && cmdSelected >= 0) { cmdEjecutar(cmdSelected); return; }
+    actualizarSeleccion();
+}
+
+function cmdEjecutar(idx) {
+    const q = document.getElementById('cmd-input').value;
+    const ql = q.toLowerCase();
+    const resultados = CMD_ACCIONES.filter(a =>
+        a.label.toLowerCase().includes(ql) || a.sub.toLowerCase().includes(ql)
+    );
+    if (/\d{4}-?\d+/.test(q)) {
+        const num = q.replace(/[^0-9-]/g,'');
+        resultados.unshift({ icon:'🔍', label:`Ir a radicado AR-${num}`, sub:'', href:`/riesgo/gestion-arborea?num=${num}` });
     }
+    const item = resultados[idx];
+    if (!item) return;
+    if (item.action) { item.action(); }
+    else if (item.href) { window.location.href = item.href; }
+    cerrarCmdPalette({});
+}
+
+// Ctrl+K global
+document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        abrirCmdPalette();
+    }
+    if (e.key === 'Escape') cerrarCmdPalette({});
 });
 </script>
 {% endblock %}

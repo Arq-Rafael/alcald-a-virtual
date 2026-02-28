@@ -1,79 +1,985 @@
 {% extends "base.html" %}
-{% block title %}Actas CMGR - Gestión del Riesgo{% endblock %}
+{% block title %}Actas CMGR — Gestión del Riesgo{% endblock %}
 
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/gestion_riesgo.css') }}">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+/* ── Actas page layout ── */
+.actas-nav { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:20px; }
+.actas-nav-btn {
+  padding:9px 18px; border-radius:10px; border:1.5px solid #e2e8f0;
+  background:#fff; font-size:13px; font-weight:600; cursor:pointer; transition:all .2s;
+  color:#64748b;
+}
+.actas-nav-btn.active { background:#0f4c81; color:#fff; border-color:#0f4c81; }
+.actas-nav-btn:hover:not(.active) { border-color:#0f4c81; color:#0f4c81; }
+
+.tab-pane { display:none; }
+.tab-pane.active { display:block; }
+
+/* ── Table ── */
+.actas-table { width:100%; border-collapse:collapse; font-size:13px; }
+.actas-table th { background:#f1f5fb; color:#475569; font-weight:700; font-size:11px;
+  text-transform:uppercase; letter-spacing:.4px; padding:9px 12px; text-align:left; }
+.actas-table td { padding:9px 12px; border-bottom:1px solid #f0f4f8; vertical-align:middle; }
+.actas-table tr:hover td { background:#f8fafc; }
+
+/* ── Criticidad chips ── */
+.chip-critica  { background:#fee2e2; color:#991b1b; }
+.chip-alta     { background:#fef3c7; color:#92400e; }
+.chip-media    { background:#dbeafe; color:#1d4ed8; }
+.chip-baja     { background:#d1fae5; color:#065f46; }
+.chip-estado   { display:inline-block; padding:2px 8px; border-radius:6px;
+  font-size:10px; font-weight:700; text-transform:uppercase; }
+
+/* ── Map ── */
+#mapa-riesgos { height:480px; border-radius:14px; overflow:hidden; }
+
+/* ── Summary chips ── */
+.stats-chips { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.stats-chip { padding:8px 14px; border-radius:10px; background:#fff;
+  box-shadow:0 1px 4px rgba(0,0,0,.06); font-size:12px; font-weight:700;
+  display:flex; align-items:center; gap:6px; }
+
+/* ── Search+action bar ── */
+.list-bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:14px; }
+.list-bar input, .list-bar select {
+  border:1.5px solid #e2e8f0; border-radius:8px; padding:7px 11px;
+  font-size:13px; background:#f8fafc; outline:none; }
+.list-bar input:focus, .list-bar select:focus { border-color:#0ea5e9; background:#fff; }
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="riesgo-wrapper">
-  <div class="riesgo-surface">
-    <section class="riesgo-hero">
-      <div class="riesgo-hero-content">
-        <div class="riesgo-hero-badge">Nuevo</div>
-        <h1 class="riesgo-hero-title">Actas del CMGR</h1>
-        <p class="riesgo-hero-subtitle">Transcribe, genera y archiva actas del Comité Municipal de Gestión del Riesgo.</p>
-      </div>
-    </section>
+<div class="riesgo-surface">
 
-    <section class="riesgo-modules-grid" style="margin-top: 10px;">
-      <div class="riesgo-module-card riesgo-card-blue">
-        <span class="riesgo-module-chip">Crear</span>
-        <div class="riesgo-module-header">
-          <div class="riesgo-module-icon"><i class="bi bi-journal-text"></i></div>
-          <span class="riesgo-module-badge">Nueva Acta</span>
-        </div>
-        <div class="riesgo-module-body">
-          <h3>Generar acta</h3>
-          <p>Captura la información de la sesión y genera el acta en formato oficial.</p>
-          <form>
-            <div class="mb-2">
-              <label class="form-label">Fecha</label>
-              <input type="date" class="form-control" />
-            </div>
-            <div class="mb-2">
-              <label class="form-label">Tema principal</label>
-              <input type="text" class="form-control" placeholder="Tema o asunto tratado" />
-            </div>
-            <div class="mb-2">
-              <label class="form-label">Asistentes</label>
-              <textarea class="form-control" rows="2" placeholder="Nombres separados por coma"></textarea>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Acuerdos</label>
-              <textarea class="form-control" rows="3" placeholder="Compromisos y responsables"></textarea>
-            </div>
-            <button type="button" class="riesgo-btn riesgo-btn-blue">Guardar acta</button>
-          </form>
-        </div>
-      </div>
-
-      <div class="riesgo-module-card riesgo-card-orange">
-        <span class="riesgo-module-chip">Archivo</span>
-        <div class="riesgo-module-header">
-          <div class="riesgo-module-icon"><i class="bi bi-archive"></i></div>
-          <span class="riesgo-module-badge">Histórico</span>
-        </div>
-        <div class="riesgo-module-body">
-          <h3>Consulta rápida</h3>
-          <p>Accede a las actas previas y descarga los documentos oficiales.</p>
-          <div class="table-responsive">
-            <table class="table table-sm align-middle">
-              <thead>
-                <tr>
-                  <th>ID</th><th>Fecha</th><th>Tema</th><th>Estado</th><th>Descarga</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>ACT-014</td><td>2026-01-10</td><td>Plan de contingencia lluvias</td><td><span class="badge bg-success">Aprobada</span></td><td><a href="#">PDF</a></td></tr>
-                <tr><td>ACT-013</td><td>2025-12-15</td><td>Simulacro comunitario</td><td><span class="badge bg-secondary">Archivada</span></td><td><a href="#">PDF</a></td></tr>
-              </tbody>
-            </table>
-          </div>
-          <a href="{{ url_for('main.gestion_riesgo') }}" class="riesgo-btn riesgo-btn-orange">Volver al hub</a>
-        </div>
-      </div>
-    </section>
+<!-- ── Op-header ── -->
+<div class="op-header">
+  <div>
+    <div class="op-header-breadcrumb">
+      <a href="/riesgo" style="color:#94a3b8;text-decoration:none;"><i class="bi bi-house-fill"></i> Inicio</a>
+      <span>›</span><a href="/riesgo" style="color:#94a3b8;text-decoration:none;">Gestión del Riesgo</a>
+      <span>›</span> <span>Actas CMGR</span>
+    </div>
+    <div class="op-header-title">📋 Actas CMGR — Gestión del Riesgo</div>
+  </div>
+  <div class="ms-auto d-flex gap-2 flex-wrap align-items-center">
+    <div id="stats-chips" class="stats-chips mb-0"></div>
   </div>
 </div>
+
+<!-- ── Alerta mensual ── -->
+<div id="alerta-mensual" class="op-alert-banner" style="display:none;">
+  ⚠️ <span id="alerta-texto">No hay acta registrada este mes.</span>
+  <button class="ms-auto op-filter-btn" onclick="abrirModalActa(null)"
+    style="background:#92400e;font-size:12px;padding:5px 12px;">+ Registrar acta</button>
+</div>
+
+<!-- ── Tab nav ── -->
+<div class="actas-nav">
+  <button class="actas-nav-btn active" onclick="switchTab('actas',this)">
+    <i class="bi bi-journal-text"></i> Actas CMGR
+  </button>
+  <button class="actas-nav-btn" onclick="switchTab('damnificados',this)">
+    <i class="bi bi-people-fill"></i> Damnificados
+  </button>
+  <button class="actas-nav-btn" onclick="switchTab('danos',this)">
+    <i class="bi bi-exclamation-triangle-fill"></i> Registro de Daños
+  </button>
+  <button class="actas-nav-btn" onclick="switchTab('mapa',this)">
+    <i class="bi bi-geo-alt-fill"></i> Mapa de Riesgos
+  </button>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB: ACTAS CMGR
+     ════════════════════════════════════════════ -->
+<div class="tab-pane active" id="tab-actas">
+  <div class="list-bar">
+    <input type="text" id="acta-q" placeholder="Buscar por número, tema..." oninput="cargarActas()" style="flex:1;min-width:180px;">
+    <input type="date" id="acta-desde" onchange="cargarActas()" title="Desde">
+    <input type="date" id="acta-hasta" onchange="cargarActas()" title="Hasta">
+    <button class="op-filter-btn secondary" onclick="resetFiltrosActas()">✕</button>
+    <button class="op-filter-btn ms-auto" onclick="abrirModalActa(null)">
+      <i class="bi bi-plus-lg"></i> Nueva Acta
+    </button>
+  </div>
+
+  <div style="background:#fff;border-radius:14px;box-shadow:0 1px 8px rgba(0,0,0,.06);overflow:hidden;">
+    <table class="actas-table">
+      <thead>
+        <tr>
+          <th>N° Acta</th><th>Fecha</th><th>Tema Principal</th>
+          <th>Asistentes</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="actas-tbody">
+        <tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:30px;">Cargando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div id="actas-paginacion" class="d-flex justify-content-center gap-2 mt-3"></div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB: DAMNIFICADOS
+     ════════════════════════════════════════════ -->
+<div class="tab-pane" id="tab-damnificados">
+  <div class="list-bar">
+    <input type="text" id="dam-q" placeholder="Buscar nombre, documento..." oninput="cargarDamnificados()" style="flex:1;min-width:180px;">
+    <select id="dam-estado" onchange="cargarDamnificados()">
+      <option value="">Estado ayuda</option>
+      <option>Pendiente</option>
+      <option>En proceso</option>
+      <option>Atendido</option>
+    </select>
+    <select id="dam-vereda" onchange="cargarDamnificados()">
+      <option value="">Vereda</option>
+    </select>
+    <button class="op-filter-btn ms-auto" onclick="abrirModalDamnificado(null)">
+      <i class="bi bi-plus-lg"></i> Nuevo Damnificado
+    </button>
+  </div>
+
+  <div id="dam-resumen" class="stats-chips mb-3"></div>
+
+  <div style="background:#fff;border-radius:14px;box-shadow:0 1px 8px rgba(0,0,0,.06);overflow:hidden;">
+    <table class="actas-table">
+      <thead>
+        <tr>
+          <th>Nombre</th><th>Documento</th><th>Vereda</th>
+          <th>Tipo Afectación</th><th>Estado Ayuda</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="dam-tbody">
+        <tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:30px;">Cargando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div id="dam-paginacion" class="d-flex justify-content-center gap-2 mt-3"></div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB: REGISTRO DE DAÑOS
+     ════════════════════════════════════════════ -->
+<div class="tab-pane" id="tab-danos">
+  <div class="list-bar">
+    <select id="dano-tipo" onchange="cargarDanos()">
+      <option value="">Tipo</option>
+      <option>Vivienda</option><option>Vía</option><option>Puente</option>
+      <option>Acueducto</option><option>Cultivos</option><option>Otro</option>
+    </select>
+    <select id="dano-criticidad" onchange="cargarDanos()">
+      <option value="">Criticidad</option>
+      <option>Crítica</option><option>Alta</option><option>Media</option><option>Baja</option>
+    </select>
+    <select id="dano-estado" onchange="cargarDanos()">
+      <option value="">Estado</option>
+      <option>Reportado</option><option>En atención</option><option>Resuelto</option>
+    </select>
+    <button class="op-filter-btn ms-auto" onclick="abrirModalDano(null)">
+      <i class="bi bi-plus-lg"></i> Nuevo Daño
+    </button>
+  </div>
+
+  <div id="dano-resumen" class="stats-chips mb-3"></div>
+
+  <div style="background:#fff;border-radius:14px;box-shadow:0 1px 8px rgba(0,0,0,.06);overflow:hidden;">
+    <table class="actas-table">
+      <thead>
+        <tr>
+          <th>Tipo</th><th>Vereda</th><th>Dirección</th>
+          <th>Criticidad</th><th>Estado</th><th>Costo Est.</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="danos-tbody">
+        <tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:30px;">Cargando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB: MAPA DE RIESGOS
+     ════════════════════════════════════════════ -->
+<div class="tab-pane" id="tab-mapa">
+  <p style="font-size:13px;color:#64748b;margin-bottom:12px;">
+    Mapa interactivo de daños georeferenciados. Los puntos muestran ubicación y criticidad
+    del daño reportado. Solo se muestran registros con coordenadas capturadas.
+  </p>
+  <div id="mapa-riesgos"></div>
+  <p style="font-size:11px;color:#94a3b8;margin-top:8px;text-align:center;">
+    🔴 Crítica &nbsp; 🟠 Alta &nbsp; 🟡 Media &nbsp; 🟢 Baja
+  </p>
+</div>
+
+</div><!-- riesgo-surface -->
+</div><!-- riesgo-wrapper -->
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL: ACTA CMGR
+     ══════════════════════════════════════════════════════ -->
+<div class="modal fade" id="modal-acta" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header" style="background:#0f4c81;color:#fff;">
+        <h5 class="modal-title" id="modal-acta-titulo">Nueva Acta CMGR</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="acta-id">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Fecha de la sesión *</label>
+            <input type="date" class="form-control" id="acta-fecha">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Tema principal</label>
+            <input type="text" class="form-control" id="acta-tema" placeholder="Asunto tratado en la sesión">
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-bold">Asistentes</label>
+            <div id="asistentes-chips" class="d-flex flex-wrap gap-1 mb-1" style="min-height:32px;"></div>
+            <div class="input-group">
+              <input type="text" class="form-control" id="asistente-input"
+                     placeholder="Escribir nombre y presionar Enter"
+                     onkeydown="agregarAsistente(event)">
+              <button class="btn btn-outline-secondary" type="button" onclick="agregarAsistente({key:'Enter'})">+</button>
+            </div>
+            <input type="hidden" id="acta-asistentes" value="[]">
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-bold">Acuerdos y decisiones</label>
+            <textarea class="form-control" id="acta-acuerdos" rows="4"
+                      placeholder="Descripción de los acuerdos tomados en la sesión..."></textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-bold">Compromisos <small class="fw-normal text-muted">(uno por línea: Responsable — Tarea — Fecha límite)</small></label>
+            <div id="compromisos-lista"></div>
+            <button type="button" class="btn btn-sm btn-outline-primary mt-1" onclick="agregarCompromiso()">
+              <i class="bi bi-plus-lg"></i> Agregar compromiso
+            </button>
+            <input type="hidden" id="acta-compromisos" value="[]">
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-bold">Resumen</label>
+            <textarea class="form-control" id="acta-resumen" rows="2" placeholder="Resumen ejecutivo..."></textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-bold">Observaciones</label>
+            <textarea class="form-control" id="acta-observaciones" rows="2"></textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-bold">Adjuntar PDF/DOCX del acta</label>
+            <input type="file" class="form-control" id="acta-pdf-file" accept=".pdf,.doc,.docx">
+            <div id="acta-pdf-info" class="mt-1" style="font-size:12px;color:#64748b;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="guardarActa()">
+          <i class="bi bi-save"></i> Guardar Acta
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL: DAMNIFICADO
+     ══════════════════════════════════════════════════════ -->
+<div class="modal fade" id="modal-damnificado" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header" style="background:#0f4c81;color:#fff;">
+        <h5 class="modal-title" id="modal-dam-titulo">Nuevo Damnificado</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="dam-id">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Nombre completo *</label>
+            <input type="text" class="form-control" id="dam-nombre">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Documento de identidad</label>
+            <input type="text" class="form-control" id="dam-documento">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Contacto / teléfono</label>
+            <input type="text" class="form-control" id="dam-contacto">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Vereda / sector</label>
+            <input type="text" class="form-control" id="dam-vereda">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Tipo de afectación</label>
+            <select class="form-select" id="dam-tipo-afectacion">
+              <option value="">Seleccionar...</option>
+              <option>Vivienda</option><option>Cultivos</option><option>Salud</option>
+              <option>Vía de acceso</option><option>Otro</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Estado de atención</label>
+            <select class="form-select" id="dam-estado-ayuda">
+              <option value="Pendiente">Pendiente</option>
+              <option value="En proceso">En proceso</option>
+              <option value="Atendido">Atendido</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-bold">Descripción de la afectación</label>
+            <textarea class="form-control" id="dam-descripcion" rows="3"></textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-bold">Observaciones</label>
+            <textarea class="form-control" id="dam-observaciones" rows="2"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="guardarDamnificado()">
+          <i class="bi bi-save"></i> Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL: DAÑO
+     ══════════════════════════════════════════════════════ -->
+<div class="modal fade" id="modal-dano" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header" style="background:#dc2626;color:#fff;">
+        <h5 class="modal-title" id="modal-dano-titulo">Nuevo Daño</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="dano-id">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Tipo de daño *</label>
+            <select class="form-select" id="dano-tipo-campo">
+              <option value="">Seleccionar...</option>
+              <option>Vivienda</option><option>Vía</option><option>Puente</option>
+              <option>Acueducto</option><option>Cultivos</option><option>Otro</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Criticidad</label>
+            <select class="form-select" id="dano-criticidad-campo">
+              <option value="Media">Media</option><option value="Baja">Baja</option>
+              <option value="Alta">Alta</option><option value="Crítica">Crítica</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Vereda / sector</label>
+            <input type="text" class="form-control" id="dano-vereda-campo">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Dirección / localización</label>
+            <input type="text" class="form-control" id="dano-direccion-campo">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Latitud</label>
+            <input type="number" step="any" class="form-control" id="dano-lat" placeholder="4.9000">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Longitud</label>
+            <input type="number" step="any" class="form-control" id="dano-lng" placeholder="-74.0000">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Prioridad (1=alta, 5=baja)</label>
+            <input type="number" class="form-control" id="dano-prioridad-campo" min="1" max="5" value="3">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Estado</label>
+            <select class="form-select" id="dano-estado-campo">
+              <option>Reportado</option><option>En atención</option><option>Resuelto</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Costo estimado (COP)</label>
+            <input type="number" class="form-control" id="dano-costo" placeholder="0">
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-bold">Descripción</label>
+            <textarea class="form-control" id="dano-descripcion-campo" rows="3"></textarea>
+          </div>
+          <div class="col-12">
+            <div class="alert alert-info" style="font-size:12px;margin:0;">
+              <i class="bi bi-info-circle"></i>
+              Ingrese latitud y longitud para que aparezca en el <strong>mapa de riesgos</strong>.
+              Puede buscar las coordenadas en Google Maps.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" onclick="guardarDano()">
+          <i class="bi bi-save"></i> Guardar Daño
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.min.js"></script>
+<script>
+// ─────────────────────────────────────────────────────────────
+// PAGINACIÓN & ESTADO GLOBAL
+// ─────────────────────────────────────────────────────────────
+let pActas = 1, pDam = 1;
+
+// ─────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    cargarActas();
+    cargarStats();
+    verificarAlerta();
+});
+
+// ─────────────────────────────────────────────────────────────
+// STATS chips
+// ─────────────────────────────────────────────────────────────
+async function cargarStats() {
+    try {
+        const r = await fetch('/api/actas/stats');
+        if (!r.ok) return;
+        const d = await r.json();
+        document.getElementById('stats-chips').innerHTML = `
+            <div class="stats-chip">📋 <b>${d.actas_total}</b> Actas</div>
+            <div class="stats-chip">🏘️ <b>${d.damnificados_total}</b> Damnificados
+              <span style="color:#dc2626;font-size:11px;"> (${d.damnificados_pendientes} pend.)</span>
+            </div>
+            <div class="stats-chip">🔴 <b>${d.danos_criticos}</b> Daños críticos</div>`;
+    } catch(e) {}
+}
+
+// ─────────────────────────────────────────────────────────────
+// ALERTA MENSUAL
+// ─────────────────────────────────────────────────────────────
+async function verificarAlerta() {
+    try {
+        const r = await fetch('/api/actas/cmgr/alerta-mensual');
+        if (!r.ok) return;
+        const d = await r.json();
+        if (d.alerta) {
+            document.getElementById('alerta-texto').textContent =
+                `No hay acta registrada para ${d.mes}. Se recomienda registrarla antes de fin de mes.`;
+            document.getElementById('alerta-mensual').style.display = 'flex';
+        }
+    } catch(e) {}
+}
+
+// ─────────────────────────────────────────────────────────────
+// SWITCH TAB
+// ─────────────────────────────────────────────────────────────
+let mapaInited = false;
+
+function switchTab(tab, btn) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.actas-nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`tab-${tab}`).classList.add('active');
+    btn.classList.add('active');
+
+    if (tab === 'damnificados') cargarDamnificados();
+    if (tab === 'danos') cargarDanos();
+    if (tab === 'mapa' && !mapaInited) initMapa();
+}
+
+// ─────────────────────────────────────────────────────────────
+// ACTAS LIST
+// ─────────────────────────────────────────────────────────────
+async function cargarActas() {
+    const q     = document.getElementById('acta-q').value;
+    const desde = document.getElementById('acta-desde').value;
+    const hasta = document.getElementById('acta-hasta').value;
+    const url   = `/api/actas/cmgr?page=${pActas}&q=${encodeURIComponent(q)}&desde=${desde}&hasta=${hasta}`;
+
+    try {
+        const r  = await fetch(url);
+        const d  = await r.json();
+        const tb = document.getElementById('actas-tbody');
+        if (!d.items || d.items.length === 0) {
+            tb.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:30px;">Sin actas registradas</td></tr>';
+            return;
+        }
+        tb.innerHTML = d.items.map(a => `
+            <tr>
+                <td><b style="color:#0f4c81;">${a.numero_acta || '—'}</b></td>
+                <td>${a.fecha || '—'}</td>
+                <td>${a.tema_principal || '—'}</td>
+                <td style="font-size:12px;">${(a.asistentes||[]).length} asis.</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="abrirModalActa(${a.id})">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarActa(${a.id})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>`).join('');
+
+        renderPaginacion('actas-paginacion', d.total, pActas, 20, (p) => { pActas = p; cargarActas(); });
+    } catch(e) {
+        document.getElementById('actas-tbody').innerHTML =
+            '<tr><td colspan="5" style="color:#dc2626;text-align:center;">Error cargando actas</td></tr>';
+    }
+}
+
+function resetFiltrosActas() {
+    document.getElementById('acta-q').value = '';
+    document.getElementById('acta-desde').value = '';
+    document.getElementById('acta-hasta').value = '';
+    pActas = 1;
+    cargarActas();
+}
+
+// ─────────────────────────────────────────────────────────────
+// MODAL ACTA
+// ─────────────────────────────────────────────────────────────
+let _asistentes = [];
+let _compromisos = [];
+
+function abrirModalActa(id) {
+    _asistentes = [];
+    _compromisos = [];
+    document.getElementById('acta-id').value = id || '';
+    document.getElementById('modal-acta-titulo').textContent = id ? 'Editar Acta CMGR' : 'Nueva Acta CMGR';
+    document.getElementById('acta-pdf-info').textContent = '';
+    ['acta-fecha','acta-tema','acta-acuerdos','acta-resumen','acta-observaciones'].forEach(f => {
+        document.getElementById(f).value = '';
+    });
+    renderAsistentesChips();
+    renderCompromisosLista();
+
+    if (id) {
+        fetch(`/api/actas/cmgr/${id}`).then(r => r.json()).then(a => {
+            document.getElementById('acta-fecha').value       = a.fecha || '';
+            document.getElementById('acta-tema').value        = a.tema_principal || '';
+            document.getElementById('acta-acuerdos').value    = a.acuerdos || '';
+            document.getElementById('acta-resumen').value     = a.resumen || '';
+            document.getElementById('acta-observaciones').value = a.observaciones || '';
+            _asistentes  = a.asistentes  || [];
+            _compromisos = a.compromisos || [];
+            if (a.archivo_pdf) document.getElementById('acta-pdf-info').textContent = `📎 Archivo adjunto: ${a.archivo_pdf}`;
+            renderAsistentesChips();
+            renderCompromisosLista();
+        });
+    }
+    new bootstrap.Modal(document.getElementById('modal-acta')).show();
+}
+
+function agregarAsistente(e) {
+    if (e.key !== 'Enter') return;
+    const input = document.getElementById('asistente-input');
+    const val = input.value.trim();
+    if (val && !_asistentes.includes(val)) {
+        _asistentes.push(val);
+        renderAsistentesChips();
+    }
+    input.value = '';
+}
+
+function renderAsistentesChips() {
+    document.getElementById('asistentes-chips').innerHTML = _asistentes.map((a, i) => `
+        <span style="background:#e0f0ff;color:#0f4c81;padding:3px 8px;border-radius:6px;font-size:12px;font-weight:600;">
+            ${a} <span style="cursor:pointer;" onclick="quitarAsistente(${i})">✕</span>
+        </span>`).join('');
+    document.getElementById('acta-asistentes').value = JSON.stringify(_asistentes);
+}
+
+function quitarAsistente(i) { _asistentes.splice(i, 1); renderAsistentesChips(); }
+
+function agregarCompromiso() {
+    _compromisos.push({ responsable: '', tarea: '', fecha_limite: '', estado: 'Pendiente' });
+    renderCompromisosLista();
+}
+
+function renderCompromisosLista() {
+    document.getElementById('compromisos-lista').innerHTML = _compromisos.map((c, i) => `
+        <div class="row g-1 mb-1 align-items-center">
+            <div class="col-3"><input type="text" class="form-control form-control-sm" placeholder="Responsable"
+                value="${c.responsable}" oninput="_compromisos[${i}].responsable=this.value;syncCompromisos()"></div>
+            <div class="col-4"><input type="text" class="form-control form-control-sm" placeholder="Tarea / compromiso"
+                value="${c.tarea}" oninput="_compromisos[${i}].tarea=this.value;syncCompromisos()"></div>
+            <div class="col-3"><input type="date" class="form-control form-control-sm"
+                value="${c.fecha_limite}" oninput="_compromisos[${i}].fecha_limite=this.value;syncCompromisos()"></div>
+            <div class="col-1"><select class="form-select form-select-sm" onchange="_compromisos[${i}].estado=this.value;syncCompromisos()">
+                <option ${c.estado==='Pendiente'?'selected':''}>Pendiente</option>
+                <option ${c.estado==='Cumplido'?'selected':''}>Cumplido</option>
+            </select></div>
+            <div class="col-1"><button class="btn btn-sm btn-outline-danger" onclick="_compromisos.splice(${i},1);renderCompromisosLista()">✕</button></div>
+        </div>`).join('') || '<p style="font-size:12px;color:#94a3b8;">Sin compromisos registrados.</p>';
+    syncCompromisos();
+}
+
+function syncCompromisos() {
+    document.getElementById('acta-compromisos').value = JSON.stringify(_compromisos);
+}
+
+async function guardarActa() {
+    const id = document.getElementById('acta-id').value;
+    const payload = {
+        fecha:          document.getElementById('acta-fecha').value,
+        tema_principal: document.getElementById('acta-tema').value,
+        asistentes:     JSON.parse(document.getElementById('acta-asistentes').value || '[]'),
+        acuerdos:       document.getElementById('acta-acuerdos').value,
+        compromisos:    JSON.parse(document.getElementById('acta-compromisos').value || '[]'),
+        resumen:        document.getElementById('acta-resumen').value,
+        observaciones:  document.getElementById('acta-observaciones').value,
+    };
+    if (!payload.fecha) { alert('La fecha es requerida.'); return; }
+
+    const url = id ? `/api/actas/cmgr/${id}` : '/api/actas/cmgr';
+    const method = id ? 'PUT' : 'POST';
+
+    try {
+        const r = await fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || 'Error guardando');
+
+        // Adjuntar PDF si se seleccionó
+        const pdfFile = document.getElementById('acta-pdf-file').files[0];
+        if (pdfFile && d.acta) {
+            const fd = new FormData();
+            fd.append('file', pdfFile);
+            await fetch(`/api/actas/cmgr/${d.acta.id}/pdf`, { method: 'POST', body: fd });
+        }
+
+        bootstrap.Modal.getInstance(document.getElementById('modal-acta')).hide();
+        cargarActas();
+        cargarStats();
+        mostrarToast('Acta guardada correctamente', 'success');
+    } catch(e) {
+        alert('Error: ' + e.message);
+    }
+}
+
+async function eliminarActa(id) {
+    if (!confirm('¿Eliminar esta acta? La acción no se puede deshacer.')) return;
+    await fetch(`/api/actas/cmgr/${id}`, { method: 'DELETE' });
+    cargarActas(); cargarStats();
+    mostrarToast('Acta eliminada', 'warning');
+}
+
+// ─────────────────────────────────────────────────────────────
+// DAMNIFICADOS
+// ─────────────────────────────────────────────────────────────
+async function cargarDamnificados() {
+    const q      = document.getElementById('dam-q').value;
+    const estado = document.getElementById('dam-estado').value;
+    const vereda = document.getElementById('dam-vereda').value;
+    const url    = `/api/actas/damnificados?page=${pDam}&q=${encodeURIComponent(q)}&estado=${estado}&vereda=${encodeURIComponent(vereda)}`;
+
+    try {
+        const r  = await fetch(url);
+        const d  = await r.json();
+        const tb = document.getElementById('dam-tbody');
+
+        // Resumen
+        if (d.resumen) {
+            document.getElementById('dam-resumen').innerHTML = Object.entries(d.resumen).map(([k, v]) => {
+                const color = k==='Pendiente'?'#dc2626':k==='En proceso'?'#d97706':'#059669';
+                return `<div class="stats-chip"><span style="color:${color};">●</span> <b>${v}</b> ${k}</div>`;
+            }).join('');
+        }
+
+        if (!d.items || d.items.length === 0) {
+            tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:30px;">Sin damnificados registrados</td></tr>';
+            return;
+        }
+        tb.innerHTML = d.items.map(dam => {
+            const badge = dam.estado_ayuda === 'Pendiente' ? 'chip-alta'
+                        : dam.estado_ayuda === 'En proceso' ? 'chip-media' : 'chip-baja';
+            return `
+            <tr>
+                <td><b>${dam.nombre}</b></td>
+                <td style="font-size:12px;">${dam.documento || '—'}</td>
+                <td>${dam.vereda || '—'}</td>
+                <td>${dam.tipo_afectacion || '—'}</td>
+                <td><span class="chip-estado ${badge}">${dam.estado_ayuda}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="abrirModalDamnificado(${dam.id})">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarDamnificado(${dam.id})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>`;
+        }).join('');
+
+        renderPaginacion('dam-paginacion', d.total, pDam, 20, (p) => { pDam = p; cargarDamnificados(); });
+    } catch(e) {
+        document.getElementById('dam-tbody').innerHTML =
+            '<tr><td colspan="6" style="color:#dc2626;text-align:center;">Error cargando damnificados</td></tr>';
+    }
+}
+
+function abrirModalDamnificado(id) {
+    document.getElementById('dam-id').value = id || '';
+    document.getElementById('modal-dam-titulo').textContent = id ? 'Editar Damnificado' : 'Nuevo Damnificado';
+    ['dam-nombre','dam-documento','dam-contacto','dam-vereda','dam-descripcion','dam-observaciones'].forEach(f => {
+        document.getElementById(f).value = '';
+    });
+    document.getElementById('dam-tipo-afectacion').value = '';
+    document.getElementById('dam-estado-ayuda').value = 'Pendiente';
+
+    if (id) {
+        fetch(`/api/actas/damnificados/${id}`).then(r => r.json()).then(dam => {
+            document.getElementById('dam-nombre').value          = dam.nombre || '';
+            document.getElementById('dam-documento').value       = dam.documento || '';
+            document.getElementById('dam-contacto').value        = dam.contacto || '';
+            document.getElementById('dam-vereda').value          = dam.vereda || '';
+            document.getElementById('dam-descripcion').value     = dam.descripcion || '';
+            document.getElementById('dam-observaciones').value   = dam.observaciones || '';
+            document.getElementById('dam-tipo-afectacion').value = dam.tipo_afectacion || '';
+            document.getElementById('dam-estado-ayuda').value    = dam.estado_ayuda || 'Pendiente';
+        });
+    }
+    new bootstrap.Modal(document.getElementById('modal-damnificado')).show();
+}
+
+async function guardarDamnificado() {
+    const id = document.getElementById('dam-id').value;
+    const payload = {
+        nombre:          document.getElementById('dam-nombre').value,
+        documento:       document.getElementById('dam-documento').value,
+        contacto:        document.getElementById('dam-contacto').value,
+        vereda:          document.getElementById('dam-vereda').value,
+        tipo_afectacion: document.getElementById('dam-tipo-afectacion').value,
+        descripcion:     document.getElementById('dam-descripcion').value,
+        observaciones:   document.getElementById('dam-observaciones').value,
+        estado_ayuda:    document.getElementById('dam-estado-ayuda').value,
+    };
+    if (!payload.nombre) { alert('El nombre es requerido.'); return; }
+
+    const url = id ? `/api/actas/damnificados/${id}` : '/api/actas/damnificados';
+    const method = id ? 'PUT' : 'POST';
+    try {
+        const r = await fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        if (!r.ok) throw new Error((await r.json()).error);
+        bootstrap.Modal.getInstance(document.getElementById('modal-damnificado')).hide();
+        cargarDamnificados(); cargarStats();
+        mostrarToast('Damnificado guardado', 'success');
+    } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function eliminarDamnificado(id) {
+    if (!confirm('¿Eliminar este registro?')) return;
+    await fetch(`/api/actas/damnificados/${id}`, { method: 'DELETE' });
+    cargarDamnificados(); cargarStats();
+    mostrarToast('Registro eliminado', 'warning');
+}
+
+// ─────────────────────────────────────────────────────────────
+// DAÑOS
+// ─────────────────────────────────────────────────────────────
+async function cargarDanos() {
+    const tipo       = document.getElementById('dano-tipo').value;
+    const criticidad = document.getElementById('dano-criticidad').value;
+    const estado     = document.getElementById('dano-estado').value;
+    const url        = `/api/actas/danos?tipo=${tipo}&criticidad=${encodeURIComponent(criticidad)}&estado=${estado}`;
+
+    try {
+        const r  = await fetch(url);
+        const d  = await r.json();
+        const tb = document.getElementById('danos-tbody');
+
+        // Resumen criticidad
+        if (d.resumen_criticidad) {
+            const rc = d.resumen_criticidad;
+            document.getElementById('dano-resumen').innerHTML = [
+                ['Crítica','chip-critica','🔴'],['Alta','chip-alta','🟠'],
+                ['Media','chip-media','🟡'],['Baja','chip-baja','🟢']
+            ].map(([k, cls, ico]) => `<div class="stats-chip chip-estado ${cls}">${ico} <b>${rc[k]||0}</b> ${k}</div>`).join('');
+        }
+
+        if (!d.items || d.items.length === 0) {
+            tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:30px;">Sin daños registrados</td></tr>';
+            return;
+        }
+        tb.innerHTML = d.items.map(r => {
+            const criticidadClass = {
+                'Crítica':'chip-critica','Alta':'chip-alta','Media':'chip-media','Baja':'chip-baja'
+            }[r.criticidad] || 'chip-media';
+            const costo = r.costo_estimado ? `$${Number(r.costo_estimado).toLocaleString('es-CO')}` : '—';
+            return `
+            <tr>
+                <td><b>${r.tipo}</b></td>
+                <td>${r.vereda || '—'}</td>
+                <td style="font-size:12px;">${r.direccion || '—'}</td>
+                <td><span class="chip-estado ${criticidadClass}">${r.criticidad}</span></td>
+                <td style="font-size:12px;">${r.estado}</td>
+                <td style="font-size:12px;">${costo}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="abrirModalDano(${r.id})">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarDano(${r.id})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>`;
+        }).join('');
+    } catch(e) {}
+}
+
+function abrirModalDano(id) {
+    document.getElementById('dano-id').value = id || '';
+    document.getElementById('modal-dano-titulo').textContent = id ? 'Editar Daño' : 'Nuevo Daño';
+    ['dano-vereda-campo','dano-direccion-campo','dano-lat','dano-lng','dano-costo','dano-descripcion-campo'].forEach(f => {
+        document.getElementById(f).value = '';
+    });
+    document.getElementById('dano-tipo-campo').value       = '';
+    document.getElementById('dano-criticidad-campo').value = 'Media';
+    document.getElementById('dano-estado-campo').value     = 'Reportado';
+    document.getElementById('dano-prioridad-campo').value  = 3;
+
+    if (id) {
+        fetch(`/api/actas/danos/${id}`).then(r => r.json()).then(d => {
+            document.getElementById('dano-tipo-campo').value         = d.tipo || '';
+            document.getElementById('dano-criticidad-campo').value   = d.criticidad || 'Media';
+            document.getElementById('dano-vereda-campo').value       = d.vereda || '';
+            document.getElementById('dano-direccion-campo').value    = d.direccion || '';
+            document.getElementById('dano-lat').value                = d.lat || '';
+            document.getElementById('dano-lng').value                = d.lng || '';
+            document.getElementById('dano-costo').value              = d.costo_estimado || '';
+            document.getElementById('dano-prioridad-campo').value    = d.prioridad || 3;
+            document.getElementById('dano-estado-campo').value       = d.estado || 'Reportado';
+            document.getElementById('dano-descripcion-campo').value  = d.descripcion || '';
+        });
+    }
+    new bootstrap.Modal(document.getElementById('modal-dano')).show();
+}
+
+async function guardarDano() {
+    const id = document.getElementById('dano-id').value;
+    const payload = {
+        tipo:           document.getElementById('dano-tipo-campo').value,
+        criticidad:     document.getElementById('dano-criticidad-campo').value,
+        vereda:         document.getElementById('dano-vereda-campo').value,
+        direccion:      document.getElementById('dano-direccion-campo').value,
+        lat:            parseFloat(document.getElementById('dano-lat').value) || null,
+        lng:            parseFloat(document.getElementById('dano-lng').value) || null,
+        costo_estimado: parseFloat(document.getElementById('dano-costo').value) || null,
+        prioridad:      parseInt(document.getElementById('dano-prioridad-campo').value) || 3,
+        estado:         document.getElementById('dano-estado-campo').value,
+        descripcion:    document.getElementById('dano-descripcion-campo').value,
+    };
+    const url = id ? `/api/actas/danos/${id}` : '/api/actas/danos';
+    const method = id ? 'PUT' : 'POST';
+    try {
+        const r = await fetch(url, { method, headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+        if (!r.ok) throw new Error((await r.json()).error);
+        bootstrap.Modal.getInstance(document.getElementById('modal-dano')).hide();
+        cargarDanos(); cargarStats();
+        mostrarToast('Daño guardado', 'success');
+    } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function eliminarDano(id) {
+    if (!confirm('¿Eliminar este registro de daño?')) return;
+    await fetch(`/api/actas/danos/${id}`, { method: 'DELETE' });
+    cargarDanos(); cargarStats();
+    mostrarToast('Registro eliminado', 'warning');
+}
+
+// ─────────────────────────────────────────────────────────────
+// MAPA DE RIESGOS (Leaflet)
+// ─────────────────────────────────────────────────────────────
+let mapaLeaflet = null;
+
+async function initMapa() {
+    mapaInited = true;
+    // Centro del municipio de Supatá (Colombia) — ajustar si es necesario
+    mapaLeaflet = L.map('mapa-riesgos').setView([5.06, -74.22], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(mapaLeaflet);
+
+    try {
+        const r = await fetch('/api/actas/danos/mapa');
+        if (!r.ok) return;
+        const gj = await r.json();
+
+        if (gj.features && gj.features.length > 0) {
+            L.geoJSON(gj, {
+                pointToLayer: (feature, latlng) => {
+                    return L.circleMarker(latlng, {
+                        radius: 10,
+                        fillColor:   feature.properties.color || '#2563eb',
+                        color:       '#fff',
+                        weight:      2,
+                        opacity:     1,
+                        fillOpacity: 0.85
+                    });
+                },
+                onEachFeature: (feature, layer) => {
+                    const p = feature.properties;
+                    layer.bindPopup(`
+                        <b>${p.tipo}</b><br>
+                        <span style="color:${p.color};font-weight:700;">● ${p.criticidad}</span><br>
+                        ${p.vereda ? `📍 ${p.vereda}<br>` : ''}
+                        ${p.descripcion || ''}
+                        <br><small>Estado: ${p.estado}</small>
+                    `);
+                }
+            }).addTo(mapaLeaflet);
+
+            // Ajustar vista para mostrar todos los puntos
+            const bounds = L.geoJSON(gj).getBounds();
+            if (bounds.isValid()) mapaLeaflet.fitBounds(bounds, { padding: [30, 30] });
+        } else {
+            document.getElementById('mapa-riesgos').insertAdjacentHTML('beforeend',
+                '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.7);font-size:14px;color:#94a3b8;z-index:999;">Sin registros georeferenciados. Ingrese coordenadas en el Registro de Daños.</div>');
+        }
+    } catch(e) { console.warn('mapa error:', e); }
+}
+
+// ─────────────────────────────────────────────────────────────
+// PAGINACIÓN
+// ─────────────────────────────────────────────────────────────
+function renderPaginacion(containerId, total, page, limit, onPage) {
+    const pages = Math.ceil(total / limit);
+    if (pages <= 1) { document.getElementById(containerId).innerHTML = ''; return; }
+    let html = '';
+    for (let i = 1; i <= pages; i++) {
+        html += `<button class="btn btn-sm ${i===page?'btn-primary':'btn-outline-secondary'}"
+                    onclick="(${onPage.toString()})(${i})">${i}</button>`;
+    }
+    document.getElementById(containerId).innerHTML = html;
+}
+
+// ─────────────────────────────────────────────────────────────
+// TOAST
+// ─────────────────────────────────────────────────────────────
+function mostrarToast(msg, tipo) {
+    const bg = tipo === 'success' ? '#059669' : tipo === 'warning' ? '#d97706' : '#dc2626';
+    const div = document.createElement('div');
+    div.style.cssText = `position:fixed;bottom:24px;right:24px;background:${bg};color:#fff;
+        padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;z-index:99999;
+        box-shadow:0 8px 24px rgba(0,0,0,.2);animation:slideUp .3s ease`;
+    div.textContent = msg;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 3000);
+}
+</script>
+<style>
+@keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+#mapa-riesgos { position:relative; }
+</style>
 {% endblock %}

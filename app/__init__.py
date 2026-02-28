@@ -46,6 +46,7 @@ def create_app(config_class=Config):
     from .routes.reportes import reportes_bp
     from .routes.avatares import avatares_bp
     from .routes.riesgo_api import riesgo_api
+    from .routes.riesgo_actas_api import riesgo_actas_api
     from .routes.contingencia_api import contingencia_api
     from .routes.contingencia_views import contingencia_views
     from .routes.contratos_api import contratos_api
@@ -71,6 +72,7 @@ def create_app(config_class=Config):
     app.register_blueprint(reportes_bp)
     app.register_blueprint(avatares_bp)
     app.register_blueprint(riesgo_api)
+    app.register_blueprint(riesgo_actas_api)
     app.register_blueprint(contingencia_api)
     app.register_blueprint(contingencia_views)
     app.register_blueprint(contratos_api)

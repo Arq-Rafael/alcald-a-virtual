@@ -138,3 +138,138 @@ def run_migrations(app, db):
                 db.session.rollback()
             except:
                 pass
+
+    # ── ACTAS CMGR – crear tablas nuevas si no existen ─────────────────────
+    with app.app_context():
+        try:
+            inspector = inspect(db.engine)
+            existing_tables = inspector.get_table_names()
+            db_url = app.config.get('DATABASE_URL', '') or ''
+            is_pg  = 'postgresql' in db_url
+
+            # acta_cmgr
+            if 'acta_cmgr' not in existing_tables:
+                sql = """
+                CREATE TABLE IF NOT EXISTS acta_cmgr (
+                    id               SERIAL PRIMARY KEY,
+                    numero_acta      VARCHAR(30) UNIQUE,
+                    fecha            DATE NOT NULL,
+                    tema_principal   VARCHAR(200),
+                    asistentes       TEXT,
+                    acuerdos         TEXT,
+                    compromisos      TEXT,
+                    archivo_pdf      VARCHAR(255),
+                    resumen          TEXT,
+                    observaciones    TEXT,
+                    usuario_creador  VARCHAR(150),
+                    created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                """ if is_pg else """
+                CREATE TABLE IF NOT EXISTS acta_cmgr (
+                    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+                    numero_acta      VARCHAR(30) UNIQUE,
+                    fecha            DATE NOT NULL,
+                    tema_principal   VARCHAR(200),
+                    asistentes       TEXT,
+                    acuerdos         TEXT,
+                    compromisos      TEXT,
+                    archivo_pdf      VARCHAR(255),
+                    resumen          TEXT,
+                    observaciones    TEXT,
+                    usuario_creador  VARCHAR(150),
+                    created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+                db.session.execute(text(sql))
+                logging.info("[MIGRATION] ✅ Tabla acta_cmgr creada")
+
+            # riesgo_damnificado
+            if 'riesgo_damnificado' not in existing_tables:
+                sql = """
+                CREATE TABLE IF NOT EXISTS riesgo_damnificado (
+                    id               SERIAL PRIMARY KEY,
+                    nombre           VARCHAR(150) NOT NULL,
+                    documento        VARCHAR(20),
+                    contacto         VARCHAR(30),
+                    vereda           VARCHAR(100),
+                    tipo_afectacion  VARCHAR(100),
+                    descripcion      TEXT,
+                    evidencia        TEXT,
+                    estado_ayuda     VARCHAR(50) DEFAULT 'Pendiente',
+                    observaciones    TEXT,
+                    usuario_creador  VARCHAR(150),
+                    created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                """ if is_pg else """
+                CREATE TABLE IF NOT EXISTS riesgo_damnificado (
+                    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nombre           VARCHAR(150) NOT NULL,
+                    documento        VARCHAR(20),
+                    contacto         VARCHAR(30),
+                    vereda           VARCHAR(100),
+                    tipo_afectacion  VARCHAR(100),
+                    descripcion      TEXT,
+                    evidencia        TEXT,
+                    estado_ayuda     VARCHAR(50) DEFAULT 'Pendiente',
+                    observaciones    TEXT,
+                    usuario_creador  VARCHAR(150),
+                    created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+                db.session.execute(text(sql))
+                logging.info("[MIGRATION] ✅ Tabla riesgo_damnificado creada")
+
+            # riesgo_dano
+            if 'riesgo_dano' not in existing_tables:
+                sql = """
+                CREATE TABLE IF NOT EXISTS riesgo_dano (
+                    id               SERIAL PRIMARY KEY,
+                    tipo             VARCHAR(50),
+                    descripcion      TEXT,
+                    vereda           VARCHAR(100),
+                    direccion        VARCHAR(200),
+                    lat              FLOAT,
+                    lng              FLOAT,
+                    criticidad       VARCHAR(20) DEFAULT 'Media',
+                    costo_estimado   FLOAT,
+                    prioridad        INTEGER DEFAULT 3,
+                    estado           VARCHAR(50) DEFAULT 'Reportado',
+                    evidencia        TEXT,
+                    usuario_creador  VARCHAR(150),
+                    created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                """ if is_pg else """
+                CREATE TABLE IF NOT EXISTS riesgo_dano (
+                    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+                    tipo             VARCHAR(50),
+                    descripcion      TEXT,
+                    vereda           VARCHAR(100),
+                    direccion        VARCHAR(200),
+                    lat              REAL,
+                    lng              REAL,
+                    criticidad       VARCHAR(20) DEFAULT 'Media',
+                    costo_estimado   REAL,
+                    prioridad        INTEGER DEFAULT 3,
+                    estado           VARCHAR(50) DEFAULT 'Reportado',
+                    evidencia        TEXT,
+                    usuario_creador  VARCHAR(150),
+                    created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+                db.session.execute(text(sql))
+                logging.info("[MIGRATION] ✅ Tabla riesgo_dano creada")
+
+            db.session.commit()
+
+        except Exception as e:
+            logging.error(f"[MIGRATION] Error creando tablas Actas CMGR: {e}")
+            try:
+                db.session.rollback()
+            except:
+                pass
