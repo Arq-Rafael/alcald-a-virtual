@@ -35,6 +35,13 @@
   .estado-pendiente { background: #17a2b8; color: white; }
   .estado-aprobada { background: #28a745; color: white; }
   .estado-negada { background: #dc3545; color: white; }
+  .estado-visitada { background: #1565c0; color: white; }
+  .badge-radicada { background: #ffc107; color: #000; padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600; }
+  .badge-visitada { background: #1565c0; color: white; padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600; }
+  .badge-aprobada { background: #28a745; color: white; padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600; }
+  .badge-negada   { background: #dc3545; color: white; padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600; }
+  .badge-en-revision-planeacion, .badge-en-revision { background: #e65100; color: white; padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600; }
+  .badge-cerrada  { background: #607d8b; color: white; padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600; }
   .data-summary { background: #f0f4ff; border-left: 4px solid #0f4c81; padding: 16px; margin: 16px 0; border-radius: 4px; }
   .data-summary strong { color: #0f4c81; }
   .form-group-section { background: #f8f9fa; padding: 20px; margin: 20px 0; border-radius: 8px; border: 1px solid #e9ecef; }
@@ -226,7 +233,7 @@
   <!-- Header -->
   <div class="wizard-header">
     <h1>🌳 Gestión Arbórea - Sistema de Radicación</h1>
-    <p class="wz-subtitle">Radicación → Visita Técnica → Dictamen CMGR → Compensación</p>
+    <p class="wz-subtitle">Radicación → Visita Técnica → Dictamen CMGR → Visto Bueno Planeación</p>
   </div>
 
   <!-- Steps indicator -->
@@ -242,6 +249,10 @@
     <div class="wizard-step" data-step="3">
       <div class="step-circle">3</div>
       <div class="step-label">Dictamen CMGR</div>
+    </div>
+    <div class="wizard-step" data-step="4">
+      <div class="step-circle">4</div>
+      <div class="step-label">Planeación</div>
     </div>
   </div>
 
@@ -423,10 +434,26 @@
           <h4>📸 Fotografías de la Inspección</h4>
           <div class="file-upload" id="file-upload-area">
             <p>📷 Arrastra fotos aquí o haz clic para seleccionar</p>
+            <!-- Cámara del celular: capture=environment abre cámara trasera -->
             <input type="file" id="file-input" multiple accept="image/*" class="file-input-hidden">
-            <small class="text-muted">Máximo 5 MB por foto. Formatos: JPG, PNG</small>
+            <input type="file" id="file-input-camera" accept="image/*" capture="environment" class="file-input-hidden">
+            <small class="text-muted">Máximo 5 MB por foto. Formatos: JPG, PNG, WEBP</small>
           </div>
+          <!-- Botones de acción de fotos -->
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+            <button type="button" class="btn-secondary-custom" style="padding:8px 14px;font-size:13px;"
+                    onclick="document.getElementById('file-input').click()">
+              🖼️ Seleccionar fotos
+            </button>
+            <button type="button" class="btn-secondary-custom" style="padding:8px 14px;font-size:13px;"
+                    onclick="document.getElementById('file-input-camera').click()">
+              📷 Tomar foto (celular)
+            </button>
+          </div>
+          <!-- Galería de miniaturas -->
           <div class="uploaded-files" id="uploaded-files"></div>
+          <!-- Galería de fotos ya guardadas en servidor -->
+          <div id="gallery-server" style="margin-top:12px;"></div>
           <input type="hidden" id="archivos_visita">
         </div>
 
@@ -544,15 +571,91 @@
 
       <!-- Confirmación Fase 3 -->
       <div id="permiso-confirmacion" class="wz-confirm-block">
-        <div class="alert alert-success">
-          <strong>✅ ¡Dictamen emitido exitosamente!</strong>
-          <p class="wz-confirm-p">El expediente está completo y procesado.</p>
+        <div class="alert alert-info">
+          <strong>✅ ¡Dictamen emitido!</strong>
+          <p class="wz-confirm-p">
+            ⏳ <strong>Pendiente de Visto Bueno por Planeación.</strong><br>
+            El PDF final se habilitará cuando Planeación apruebe. Puedes descargar una vista previa (sin validez oficial).
+          </p>
         </div>
         <div class="wz-section-gap">
-          <button class="btn-secondary-custom" onclick="descargarPermisoPDF(radicadoActual && radicadoActual.id)">📥 Descargar Permiso/Dictamen PDF</button>
+          <button class="btn-secondary-custom" onclick="descargarBorradorPDF(radicadoActual && radicadoActual.id)">
+            📄 Vista Previa (Borrador)
+          </button>
+          <button class="btn-primary-custom" onclick="showSection(4)">
+            Siguiente: Visto Bueno Planeación →
+          </button>
         </div>
-        <button class="btn-primary-custom" onclick="nuevaPeticion()">➕ Nueva Petición</button>
-        <button class="btn-secondary-custom" onclick="verHistorial()">📋 Ver Historial</button>
+        <div style="margin-top:10px;">
+          <button class="btn-primary-custom" onclick="nuevaPeticion()">➕ Nueva Petición</button>
+          <button class="btn-secondary-custom" onclick="verHistorial()">📋 Ver Historial</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ FASE 4: VISTO BUENO PLANEACIÓN ============ -->
+    <div class="form-section" id="section-4">
+      <h3>🏛️ FASE 4: Visto Bueno – Secretaría de Planeación</h3>
+      <p class="text-muted">Planeación revisa el dictamen del CMGR y aprueba o rechaza antes de habilitar el PDF final oficial.</p>
+
+      <!-- Resumen -->
+      <div class="data-summary" id="resumen-planeacion">
+        <strong>Radicado:</strong> <span id="radicado-numero-4" class="radicado-badge"></span><br>
+        <strong>Solicitante:</strong> <span id="solicitante-resumen-4"></span><br>
+        <strong>Dictamen CMGR:</strong> <span id="dictamen-resumen-4" class="estado-badge"></span>
+      </div>
+
+      <!-- Panel para usuarios de Planeación o Admin -->
+      <div id="panel-planeacion-accion">
+        <div class="form-group-section">
+          <h4>✅ Decisión de Planeación</h4>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Decisión *</label>
+              <select class="form-select" id="planeacion_decision">
+                <option value="">Seleccionar...</option>
+                <option value="Aprobada">✅ APROBADA – Habilitar PDF final</option>
+                <option value="Rechazada">❌ RECHAZADA – Requiere correcciones</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Observaciones *</label>
+              <textarea class="form-control" id="planeacion_observaciones" rows="3"
+                        placeholder="Detalle la decisión, condiciones o correcciones requeridas..."></textarea>
+            </div>
+          </div>
+          <div class="wz-actions-right" style="margin-top:16px;">
+            <button type="button" class="btn-secondary-custom" onclick="showSection(3)">← Volver a Dictamen</button>
+            <button type="button" class="btn-primary-custom" id="btn-aprobar-planeacion" onclick="enviarPlaneacion()">
+              🏛️ Registrar Visto Bueno
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel para usuarios sin permiso de Planeación -->
+      <div id="panel-planeacion-espera" class="wz-hidden">
+        <div class="alert alert-warning">
+          <strong>⏳ Pendiente de Visto Bueno por Planeación</strong><br>
+          Este radicado está en revisión por la Secretaría de Planeación y Obras Públicas.
+          El PDF final se habilitará una vez que Planeación registre su aprobación.
+        </div>
+      </div>
+
+      <!-- Confirmación Planeación -->
+      <div id="planeacion-confirmacion" class="wz-confirm-block">
+        <div id="planeacion-resultado-alert"></div>
+        <div id="planeacion-acciones-pdf" class="wz-hidden">
+          <div class="wz-section-gap">
+            <button class="btn-primary-custom" onclick="descargarPermisoPDF(radicadoActual && radicadoActual.id)">
+              📋 Descargar PDF Final Oficial
+            </button>
+          </div>
+        </div>
+        <div style="margin-top:12px;">
+          <button class="btn-primary-custom" onclick="nuevaPeticion()">➕ Nueva Petición</button>
+          <button class="btn-secondary-custom" onclick="verHistorial()">📋 Ver Historial</button>
+        </div>
       </div>
     </div>
 
@@ -594,14 +697,20 @@ const isAdmin = "{{ session.get('role', '') }}" === "admin";
 // === NAVEGACIÓN WIZARD ===
 function showSection(step) {
   document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.wizard-step').forEach(s => {
+    s.classList.remove('active');
+    if (parseInt(s.dataset.step) < step) s.classList.add('completed');
+    else s.classList.remove('completed');
+  });
 
-  document.getElementById(`section-${step}`).classList.add('active');
-  document.querySelector(`[data-step="${step}"]`).classList.add('active');
+  const secEl = document.getElementById(`section-${step}`);
+  if (secEl) secEl.classList.add('active');
+  const stepEl = document.querySelector(`[data-step="${step}"]`);
+  if (stepEl) stepEl.classList.add('active');
 
-  // Poblar resumen de datos cuando se entra al paso 2 o 3
-  if (step === 2 && radicadoActual) mostrarDatos2();
+  if (step === 2 && radicadoActual) { mostrarDatos2(); mostrarGaleriaServidor(); }
   if (step === 3 && radicadoActual) prepararFase3();
+  if (step === 4 && radicadoActual) prepararFase4();
 
   document.querySelector('.wizard-body').scrollIntoView({ behavior: 'smooth' });
 }
@@ -688,11 +797,12 @@ document.getElementById('form-radicacion').addEventListener('submit', async (e) 
     
     if (resp.ok && result.success) {
       radicadoActual = result;
+      localStorage.setItem('riesgo_radicado_actual', JSON.stringify({ id: result.id }));
       document.getElementById('numero-radicado').textContent = result.numero_radicado;
       document.getElementById('radicado-confirmacion').style.display = 'block';
       document.getElementById('form-radicacion').style.display = 'none';
       document.querySelector('[data-step="1"]').classList.add('completed');
-      
+
       showAlert(`✅ Radicado <strong>${result.numero_radicado}</strong> creado exitosamente`, 'success');
       cargarHistorial();
     } else {
@@ -767,7 +877,16 @@ fileUploadArea.addEventListener('drop', (e) => {
 
 fileInput.addEventListener('change', () => {
   manejarArchivos(fileInput.files);
+  fileInput.value = '';  // reset para permitir re-selección del mismo archivo
 });
+
+const fileInputCamera = document.getElementById('file-input-camera');
+if (fileInputCamera) {
+  fileInputCamera.addEventListener('change', () => {
+    manejarArchivos(fileInputCamera.files);
+    fileInputCamera.value = '';
+  });
+}
 
 function manejarArchivos(files) {
   for (let file of files) {
@@ -778,21 +897,98 @@ function manejarArchivos(files) {
     fotosActuales.push(file);
   }
   mostrarFotos();
+  // Auto-subir si ya tenemos radicado activo
+  if (radicadoActual && radicadoActual.id && files.length > 0) {
+    subirFotosAlServidor(files);
+  }
 }
 
 function mostrarFotos() {
   const container = document.getElementById('uploaded-files');
-  container.innerHTML = fotosActuales.map((f, i) => `
-    <div class="file-item">
-      <span>📷 ${f.name}</span>
-      <button type="button" class="btn btn-sm btn-danger-custom" onclick="eliminarFoto(${i})">Eliminar</button>
-    </div>
-  `).join('');
+  if (fotosActuales.length === 0) { container.innerHTML = ''; return; }
+  container.innerHTML = `<small class="text-muted">Fotos pendientes de subir (${fotosActuales.length}):</small>` +
+    fotosActuales.map((f, i) => `
+      <div class="file-item">
+        <span>📷 ${f.name}</span>
+        <button type="button" class="btn btn-sm btn-danger-custom" onclick="eliminarFotoLocal(${i})">✕</button>
+      </div>
+    `).join('');
 }
 
-function eliminarFoto(i) {
+function eliminarFotoLocal(i) {
   fotosActuales.splice(i, 1);
   mostrarFotos();
+}
+
+async function subirFotosAlServidor(archivos) {
+  if (!radicadoActual || !radicadoActual.id) return;
+  const formData = new FormData();
+  for (let f of archivos) formData.append('foto', f);
+
+  try {
+    const resp = await fetch(`/api/riesgo/arborea/${radicadoActual.id}/foto`, {
+      method: 'POST',
+      body: formData
+    });
+    const result = await resp.json();
+    if (result.success) {
+      // Actualizar lista local con la del servidor
+      radicadoActual.archivos_fotos = result.todas_las_fotos || [];
+      fotosActuales = [];
+      mostrarFotos();
+      mostrarGaleriaServidor();
+      showAlert(`✅ ${result.archivos_subidos.length} foto(s) guardada(s) en el servidor`, 'success');
+    } else {
+      showAlert(`⚠️ Error al subir fotos: ${result.error}`, 'error');
+    }
+  } catch (err) {
+    showAlert(`❌ Error subiendo fotos: ${err.message}`, 'error');
+  }
+}
+
+function mostrarGaleriaServidor() {
+  const container = document.getElementById('gallery-server');
+  if (!container) return;
+  const fotos = (radicadoActual && radicadoActual.archivos_fotos) ? radicadoActual.archivos_fotos : [];
+  if (fotos.length === 0) { container.innerHTML = ''; return; }
+
+  container.innerHTML = `
+    <div style="margin-top:12px;">
+      <small class="text-muted">📸 Fotos guardadas en el servidor (${fotos.length}):</small>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;">
+        ${fotos.map(ruta => {
+          const nombre = ruta.split('/').pop();
+          return `
+            <div style="position:relative;display:inline-block;">
+              <img src="/api/riesgo/uploads/${ruta}"
+                   style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:2px solid #1565c0;"
+                   onerror="this.style.display='none'"
+                   title="${nombre}">
+              <button type="button" onclick="eliminarFotoServidor('${nombre}')"
+                      style="position:absolute;top:-6px;right:-6px;background:#e53935;color:white;border:none;
+                             border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;
+                             display:flex;align-items:center;justify-content:center;">✕</button>
+            </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+async function eliminarFotoServidor(nombre) {
+  if (!radicadoActual || !radicadoActual.id) return;
+  if (!confirm(`¿Eliminar la foto ${nombre}?`)) return;
+  try {
+    const resp = await fetch(`/api/riesgo/arborea/${radicadoActual.id}/foto/${nombre}`, { method: 'DELETE' });
+    const result = await resp.json();
+    if (result.success) {
+      radicadoActual.archivos_fotos = (radicadoActual.archivos_fotos || []).filter(r => !r.endsWith(nombre));
+      mostrarGaleriaServidor();
+    } else {
+      showAlert(`❌ ${result.error}`, 'error');
+    }
+  } catch (err) {
+    showAlert(`❌ ${err.message}`, 'error');
+  }
 }
 
 // === FASE 2: VISITA ===
@@ -990,9 +1186,9 @@ document.getElementById('form-permiso').addEventListener('submit', async (e) => 
 
 // === NUEVA PETICIÓN ===
 function nuevaPeticion() {
-  // Liberar radicado activo
   radicadoActual = null;
   fotosActuales  = [];
+  localStorage.removeItem('riesgo_radicado_actual');
 
   // Resetear Fase 1
   document.getElementById('form-radicacion').reset();
@@ -1030,27 +1226,32 @@ async function cargarHistorial() {
         // ── Máquina de estados limpia ──────────────────────────────────
         // Radicada → Phase 2 pendiente  |  Visitada → Phase 3 pendiente
         // Aprobada / Negada → cerrado
-        const isRadicada  = r.estado === 'Radicada';
-        const isVisitada  = r.estado === 'Visitada';
-        const isProcesada = r.estado === 'Aprobada' || r.estado === 'Negada';
-        const hasInforme  = isVisitada || isProcesada;
-        const hasPermiso  = isProcesada;
-        const canDelete   = isRadicada || (isProcesada && isAdmin);
+        const isRadicada    = r.estado === 'Radicada';
+        const isVisitada    = r.estado === 'Visitada';
+        const isEnPlaneacion = r.estado === 'En revisión Planeación';
+        const isProcesada   = r.estado === 'Aprobada' || r.estado === 'Negada';
+        const hasInforme    = isVisitada || isEnPlaneacion || isProcesada;
+        const hasPermiso    = isProcesada && r.planeacion_decision === 'Aprobada';
+        const hasBorrador   = isEnPlaneacion || isProcesada;
+        const canDelete     = isRadicada || (isProcesada && isAdmin);
+        const estadoClass   = r.estado.toLowerCase().replace(/ /g,'-').replace(/[áéíóú]/g, c => ({'á':'a','é':'e','í':'i','ó':'o','ú':'u'}[c]||c));
 
         return `
           <tr>
             <td><strong>${r.numero_radicado}</strong></td>
             <td>${r.solicitante_nombre}</td>
-            <td>${r.arbol_especie_comun}</td>
-            <td><span class="badge badge-${r.estado.toLowerCase()}">${r.estado}</span></td>
+            <td>${r.arbol_especie_comun || '-'}</td>
+            <td><span class="badge badge-${estadoClass}" style="white-space:nowrap">${r.estado}</span></td>
             <td class="actions-cell">
               <div class="btn-group-actions">
-                ${isRadicada  ? `<button class="action-btn btn-continue" data-title="Registrar Visita Técnica" onclick="continuarConRadicado(${r.id})">▶️ Continuar</button>` : ''}
-                ${isVisitada  ? `<button class="action-btn btn-dictamen" data-title="Emitir Dictamen CMGR" onclick="continuarConDictamen(${r.id})">▶️ Dictamen</button>` : ''}
-                <button class="action-btn btn-edit" data-title="Editar datos del radicado" onclick="editarRadicado(${r.id})">✏️</button>
-                ${hasInforme  ? `<button class="action-btn btn-info" data-title="Descargar Informe Técnico" onclick="descargarPDF(${r.id})">📄</button>` : ''}
-                ${hasPermiso  ? `<button class="action-btn btn-info" data-title="Descargar Permiso/Dictamen" onclick="descargarPermisoPDF(${r.id})">📋</button>` : ''}
-                ${canDelete   ? `<button class="action-btn btn-delete" data-title="Eliminar radicado" onclick="confirmarEliminar(${r.id}, '${r.numero_radicado}')">🗑️</button>` : ''}
+                ${isRadicada     ? `<button class="action-btn btn-continue" data-title="Registrar Visita Técnica" onclick="continuarConRadicado(${r.id})">▶️ Continuar</button>` : ''}
+                ${isVisitada     ? `<button class="action-btn btn-dictamen" data-title="Emitir Dictamen CMGR" onclick="continuarConDictamen(${r.id})">▶️ Dictamen</button>` : ''}
+                ${isEnPlaneacion ? `<button class="action-btn btn-dictamen" data-title="Revisar/Aprobar Planeación" onclick="continuarConPlaneacion(${r.id})">🏛️ Planeación</button>` : ''}
+                <button class="action-btn btn-edit" data-title="Editar datos" onclick="editarRadicado(${r.id})">✏️</button>
+                ${hasInforme    ? `<button class="action-btn btn-info" data-title="Informe Técnico PDF" onclick="descargarPDF(${r.id})">📄</button>` : ''}
+                ${hasBorrador   ? `<button class="action-btn btn-info" data-title="Vista Previa Borrador" onclick="descargarBorradorPDF(${r.id})">📝</button>` : ''}
+                ${hasPermiso    ? `<button class="action-btn btn-info" data-title="PDF Final Oficial" onclick="descargarPermisoPDF(${r.id})">📋</button>` : ''}
+                ${canDelete     ? `<button class="action-btn btn-delete" data-title="Eliminar radicado" onclick="confirmarEliminar(${r.id}, '${r.numero_radicado}')">🗑️</button>` : ''}
               </div>
             </td>
           </tr>
@@ -1068,7 +1269,18 @@ function descargarPDF(id) {
   window.open(`/api/riesgo/arborea/${id}/pdf/informe`, '_blank');
 }
 
+function descargarBorradorPDF(id) {
+  if (!id) return;
+  window.open(`/api/riesgo/arborea/${id}/pdf/dictamen?borrador=1`, '_blank');
+}
+
 function descargarPermisoPDF(id) {
+  if (!id) return;
+  // Verificar estado antes de intentar descargar
+  if (radicadoActual && radicadoActual.estado !== 'Aprobada') {
+    showAlert('⛔ El PDF final solo está disponible después del Visto Bueno de Planeación. Use la Vista Previa (Borrador) mientras tanto.', 'warning');
+    return;
+  }
   window.open(`/api/riesgo/arborea/${id}/pdf/dictamen`, '_blank');
 }
 
@@ -1093,9 +1305,10 @@ async function continuarConRadicado(id) {
     }
     
     radicadoActual = data.radicado;
+    localStorage.setItem('riesgo_radicado_actual', JSON.stringify({ id: radicadoActual.id }));
     console.log('[JS] Radicado cargado:', radicadoActual);
-    mostrarDatos2(); // Cargar datos en Fase 2
-    showSection(2); // Ir a Fase 2
+    mostrarDatos2();
+    showSection(2);
     document.querySelector('.wizard-container').scrollIntoView({ behavior: 'smooth' });
     showAlert('✅ Cargado. Ahora completa el informe técnico.', 'success');
   } catch (err) {
@@ -1172,14 +1385,32 @@ async function continuarConDictamen(id) {
     }
     
     radicadoActual = data.radicado;
+    localStorage.setItem('riesgo_radicado_actual', JSON.stringify({ id: radicadoActual.id }));
     console.log('[JS] Radicado cargado para dictamen:', radicadoActual);
-    prepararFase3(); // Cargar datos en Fase 3
-    showSection(3); // Ir a Fase 3
+    prepararFase3();
+    showSection(3);
     document.querySelector('.wizard-container').scrollIntoView({ behavior: 'smooth' });
     showAlert('✅ Cargado. Ahora emite el dictamen del CMGR.', 'success');
   } catch (err) {
     console.error('[JS] Error en continuarConDictamen:', err);
     showAlert(`❌ Error: ${err.message}`, 'error');
+  }
+}
+
+async function continuarConPlaneacion(id) {
+  try {
+    const resp = await fetch(`/api/riesgo/arborea/${id}`);
+    const data = await resp.json();
+    if (!resp.ok || !data.radicado) {
+      showAlert(`❌ Error cargando radicado`, 'error'); return;
+    }
+    radicadoActual = data.radicado;
+    localStorage.setItem('riesgo_radicado_actual', JSON.stringify({ id: radicadoActual.id }));
+    prepararFase4();
+    showSection(4);
+    document.querySelector('.wizard-container').scrollIntoView({ behavior: 'smooth' });
+  } catch (err) {
+    showAlert(`❌ ${err.message}`, 'error');
   }
 }
 
@@ -1205,7 +1436,6 @@ async function confirmarEliminar(id, numeroRadicado) {
 }
 
 function verDetalle(id) {
-  // Abrir PDF adecuado según estado (si tiene dictamen, abrir dictamen; si no, informe)
   window.open(`/api/riesgo/arborea/${id}/pdf/informe`, '_blank');
 }
 
@@ -1213,23 +1443,107 @@ function verHistorial() {
   document.querySelector('.historial-container').scrollIntoView({ behavior: 'smooth' });
 }
 
-// === INICIALIZACIÓN ===
-document.addEventListener('DOMContentLoaded', () => {
+// === FASE 4: PLANEACIÓN ===
+function prepararFase4() {
+  if (!radicadoActual) return;
+  document.getElementById('radicado-numero-4').textContent     = radicadoActual.numero_radicado || '';
+  document.getElementById('solicitante-resumen-4').textContent = radicadoActual.solicitante_nombre || '';
+  const dictBadge = document.getElementById('dictamen-resumen-4');
+  dictBadge.textContent = radicadoActual.dictamen_decision || 'Pendiente';
+  dictBadge.className   = `estado-badge ${radicadoActual.dictamen_decision === 'Aprobado' ? 'estado-aprobada' : 'estado-pendiente'}`;
+
+  const fase4Lista   = !!radicadoActual.planeacion_decision;
+  const usuarioActual = '{{ session.get("user","") }}'.toLowerCase();
+  const esPlaneacion  = isAdmin || usuarioActual.includes('(planeacion)');
+
+  document.getElementById('panel-planeacion-accion').style.display = (!fase4Lista && esPlaneacion) ? 'block' : 'none';
+  document.getElementById('panel-planeacion-espera').style.display = (!fase4Lista && !esPlaneacion) ? 'block' : 'none';
+  document.getElementById('planeacion-confirmacion').style.display = fase4Lista ? 'block' : 'none';
+
+  if (fase4Lista) {
+    const aprobada = radicadoActual.planeacion_decision === 'Aprobada';
+    document.getElementById('planeacion-resultado-alert').innerHTML = aprobada
+      ? `<div class="alert alert-success"><strong>✅ Aprobado por Planeación</strong><br>
+         Por: ${radicadoActual.planeacion_usuario || '-'} —
+         Fecha: ${(radicadoActual.planeacion_fecha || '').substring(0,10)}<br>
+         <em>${radicadoActual.planeacion_observaciones || ''}</em></div>`
+      : `<div class="alert alert-error"><strong>❌ Rechazado por Planeación</strong><br>
+         Motivo: ${radicadoActual.planeacion_observaciones || '-'}</div>`;
+    document.getElementById('planeacion-acciones-pdf').style.display = aprobada ? 'block' : 'none';
+  }
+
+  [1,2,3].forEach(s => {
+    const el = document.querySelector(`[data-step="${s}"]`);
+    if (el) el.classList.add('completed');
+  });
+  if (fase4Lista) {
+    const el = document.querySelector('[data-step="4"]');
+    if (el) el.classList.add('completed');
+  }
+}
+
+async function enviarPlaneacion() {
+  if (!radicadoActual) return;
+  const decision = document.getElementById('planeacion_decision').value;
+  const obs      = document.getElementById('planeacion_observaciones').value.trim();
+  if (!decision) { showAlert('❌ Selecciona una decisión', 'error'); return; }
+  if (!obs)      { showAlert('❌ Las observaciones son obligatorias', 'error'); return; }
+
+  const btn = document.getElementById('btn-aprobar-planeacion');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  try {
+    const resp = await fetch(`/api/riesgo/arborea/${radicadoActual.id}/planeacion`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ decision, observaciones: obs })
+    });
+    const result = await resp.json();
+    if (resp.ok && result.success) {
+      radicadoActual = result.radicado;
+      localStorage.setItem('riesgo_radicado_actual', JSON.stringify({ id: radicadoActual.id }));
+      prepararFase4();
+      cargarHistorial();
+      showAlert(`✅ Visto Bueno de Planeación registrado: ${decision}`, 'success');
+    } else {
+      showAlert(`❌ ${result.mensaje || result.error}`, 'error');
+    }
+  } catch (err) {
+    showAlert(`❌ ${err.message}`, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '🏛️ Registrar Visto Bueno';
+  }
+}
+
+// === INICIALIZACIÓN + RECUPERACIÓN localStorage ===
+document.addEventListener('DOMContentLoaded', async () => {
   cargarHistorial();
   cargarEspecies();
-  
-  // Observe section changes
-  const observer = new MutationObserver((mutations) => {
-    if (document.getElementById('section-2').classList.contains('active') && radicadoActual) {
-      mostrarDatos2();
+
+  // Guardar radicado en localStorage al crearlo
+  // (se hace también en continuarConRadicado / continuarConDictamen)
+
+  // Recuperar radicado en proceso al recargar la página
+  try {
+    const guardado = localStorage.getItem('riesgo_radicado_actual');
+    if (guardado) {
+      const { id } = JSON.parse(guardado);
+      if (id) {
+        const resp = await fetch(`/api/riesgo/arborea/${id}`);
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data.radicado && data.radicado.estado !== 'Aprobada' && data.radicado.estado !== 'Cerrada') {
+            radicadoActual = data.radicado;
+            showAlert(
+              `↩️ Radicado en proceso recuperado: <strong>${radicadoActual.numero_radicado}</strong> (${radicadoActual.estado}). ` +
+              `Usa el historial para continuar.`, 'info'
+            );
+          }
+        }
+      }
     }
-    if (document.getElementById('section-3').classList.contains('active') && radicadoActual) {
-      prepararFase3();
-    }
-  });
-  
-  observer.observe(document.getElementById('section-2'), { attributes: true, attributeFilter: ['class'] });
-  observer.observe(document.getElementById('section-3'), { attributes: true, attributeFilter: ['class'] });
+  } catch (e) {
+    console.warn('[Recovery] Error al recuperar radicado:', e);
+  }
 });
 
 async function cargarEspecies() {

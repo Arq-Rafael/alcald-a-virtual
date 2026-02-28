@@ -20,29 +20,41 @@
 
     <!-- KPI CARDS -->
     <section class="riesgo-kpis-container">
-        <div class="riesgo-kpi-card" data-tooltip="Solicitudes activas">
+        <!-- Solicitudes Arbóreas: total clickeable -->
+        <a href="/riesgo/gestion-arborea" style="text-decoration:none;">
+        <div class="riesgo-kpi-card" data-tooltip="Ver solicitudes arbóreas">
             <div class="riesgo-kpi-icon">🌳</div>
             <div class="riesgo-kpi-content">
-                <div class="riesgo-kpi-value" id="kpi-solicitudes">0</div>
+                <div class="riesgo-kpi-value" id="kpi-solicitudes">—</div>
                 <div class="riesgo-kpi-label">Solicitudes Arbóreas</div>
+                <div style="font-size:11px;color:#1565c0;margin-top:2px;" id="kpi-arborea-detalle">cargando...</div>
             </div>
         </div>
+        </a>
 
-        <div class="riesgo-kpi-card" data-tooltip="Actas registradas">
-            <div class="riesgo-kpi-icon">📋</div>
+        <!-- Pendientes Planeación (solo visibles si hay) -->
+        <a href="/riesgo/gestion-arborea" style="text-decoration:none;">
+        <div class="riesgo-kpi-card" data-tooltip="Pendientes de Visto Bueno – Planeación" id="kpi-card-planeacion">
+            <div class="riesgo-kpi-icon">🏛️</div>
             <div class="riesgo-kpi-content">
-                <div class="riesgo-kpi-value" id="kpi-actas">0</div>
-                <div class="riesgo-kpi-label">Actas CMGR</div>
+                <div class="riesgo-kpi-value" id="kpi-planeacion">—</div>
+                <div class="riesgo-kpi-label">Pendientes Planeación</div>
+                <div style="font-size:11px;color:#e07b00;margin-top:2px;">Requieren visto bueno</div>
             </div>
         </div>
+        </a>
 
-        <div class="riesgo-kpi-card" data-tooltip="Planes activos">
+        <!-- Planes de contingencia -->
+        <a href="/riesgo/planes-contingencia" style="text-decoration:none;">
+        <div class="riesgo-kpi-card" data-tooltip="Ver planes de contingencia">
             <div class="riesgo-kpi-icon">📑</div>
             <div class="riesgo-kpi-content">
-                <div class="riesgo-kpi-value" id="kpi-planes">0</div>
+                <div class="riesgo-kpi-value" id="kpi-planes">—</div>
                 <div class="riesgo-kpi-label">Planes Contingencia</div>
+                <div style="font-size:11px;color:#0f4c81;margin-top:2px;" id="kpi-planes-detalle">cargando...</div>
             </div>
         </div>
+        </a>
     </section>
 
     <!-- MODULE CARDS -->
@@ -184,42 +196,64 @@
 </div>
 
 <script>
-// KPIs Animation
-document.addEventListener('DOMContentLoaded', async () => {
-    // Cargar datos reales desde la API
-    try {
-        // Planes de contingencia
-        const resPlanes = await fetch('/api/contingencia?per_page=1');
-        const dataPlanes = await resPlanes.json();
-        const totalPlanes = dataPlanes.total || 0;
-        
-        animarNumero('kpi-solicitudes', 0, 800);
-        animarNumero('kpi-actas', 0, 800);
-        animarNumero('kpi-planes', totalPlanes, 800);
-    } catch (error) {
-        console.error('Error cargando KPIs:', error);
-        // Mostrar 0 en caso de error
-        document.getElementById('kpi-solicitudes').textContent = '0';
-        document.getElementById('kpi-actas').textContent = '0';
-        document.getElementById('kpi-planes').textContent = '0';
-    }
-});
-
 function animarNumero(eleId, target, duration) {
     const ele = document.getElementById(eleId);
-    const start = 0;
-    const increment = target / (duration / 16);
-    let current = start;
-
+    if (!ele) return;
+    const increment = target / Math.max(1, duration / 16);
+    let current = 0;
     const timer = setInterval(() => {
         current += increment;
-        if (current >= target) {
-            ele.textContent = Math.round(target);
-            clearInterval(timer);
-        } else {
-            ele.textContent = Math.round(current);
-        }
+        if (current >= target) { ele.textContent = Math.round(target); clearInterval(timer); }
+        else { ele.textContent = Math.round(current); }
     }, 16);
 }
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // ── Estadísticas Arbóreas reales ───────────────────────────────────────
+    try {
+        const res = await fetch('/api/riesgo/stats');
+        if (res.ok) {
+            const data = await res.json();
+            const a = data.arborea || {};
+            animarNumero('kpi-solicitudes', a.total || 0, 600);
+            animarNumero('kpi-planeacion', a.en_planeacion || 0, 600);
+
+            const detalleEl = document.getElementById('kpi-arborea-detalle');
+            if (detalleEl) {
+                const partes = [];
+                if (a.radicadas)    partes.push(`${a.radicadas} radicadas`);
+                if (a.en_visita)    partes.push(`${a.en_visita} en visita`);
+                if (a.aprobadas)    partes.push(`${a.aprobadas} aprobadas`);
+                if (a.negadas)      partes.push(`${a.negadas} negadas`);
+                detalleEl.textContent = partes.join(' · ') || 'Sin datos';
+            }
+
+            // Ocultar tarjeta de Planeación si no hay pendientes
+            const cardPlan = document.getElementById('kpi-card-planeacion');
+            if (cardPlan && (a.en_planeacion || 0) === 0) {
+                cardPlan.style.opacity = '0.5';
+            }
+        }
+    } catch (e) {
+        console.warn('KPI arborea error:', e);
+        ['kpi-solicitudes','kpi-planeacion'].forEach(id => {
+            const el = document.getElementById(id); if (el) el.textContent = '?';
+        });
+    }
+
+    // ── Planes de contingencia ─────────────────────────────────────────────
+    try {
+        const resP = await fetch('/api/contingencia?per_page=1');
+        if (resP.ok) {
+            const dp = await resP.json();
+            animarNumero('kpi-planes', dp.total || 0, 600);
+            const detalleP = document.getElementById('kpi-planes-detalle');
+            if (detalleP) detalleP.textContent = `${dp.total || 0} plan(es) registrado(s)`;
+        }
+    } catch (e) {
+        console.warn('KPI planes error:', e);
+        const el = document.getElementById('kpi-planes'); if (el) el.textContent = '?';
+    }
+});
 </script>
 {% endblock %}

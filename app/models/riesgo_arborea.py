@@ -119,10 +119,24 @@ class RadicadoArborea(db.Model):
     pdf_completo = db.Column(db.String(255))  # informe + fotos + cálculos
     
     # Estado y auditoría
-    estado = db.Column(db.String(50), default='Radicada')  # Radicada, En visita, Dictamen, Aprobada, Negada, Cerrada
+    # estados: Radicada → Visitada → En revisión Planeación → Aprobada / Negada / Rechazada → Cerrada
+    estado = db.Column(db.String(50), default='Radicada')
+    fase_actual = db.Column(db.Integer, default=1)          # 1-5, fase actual del wizard
     usuario_creador = db.Column(db.String(150))
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Visto bueno Planeación (Fase 4)
+    planeacion_decision      = db.Column(db.String(20))     # Aprobada, Rechazada
+    planeacion_usuario       = db.Column(db.String(150))    # nombre del usuario de Planeación
+    planeacion_fecha         = db.Column(db.DateTime)
+    planeacion_observaciones = db.Column(db.Text)
+
+    # Galería de fotos subidas desde celular/desktop
+    archivos_fotos           = db.Column(db.Text)           # JSON list de rutas
+
+    # Acta/soporte adjunto al dictamen del comité
+    dictamen_acta_archivo    = db.Column(db.String(255))
     
     def __repr__(self):
         return f'<RadicadoArborea {self.numero_radicado}>'
@@ -202,5 +216,19 @@ class RadicadoArborea(db.Model):
             'permiso_obligaciones': self.permiso_obligaciones,
             'permiso_firmante1': self.permiso_firmante1,
             'created_at': self.created_at.isoformat(),
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+            # Fase actual del wizard
+            'fase_actual': self.fase_actual or 1,
+            # Visto bueno Planeación
+            'planeacion_decision': self.planeacion_decision,
+            'planeacion_usuario': self.planeacion_usuario,
+            'planeacion_fecha': self.planeacion_fecha.isoformat() if self.planeacion_fecha else None,
+            'planeacion_observaciones': self.planeacion_observaciones,
+            # Fotos
+            'archivos_fotos': json.loads(self.archivos_fotos) if self.archivos_fotos else [],
+            # Acta comité
+            'dictamen_acta_archivo': self.dictamen_acta_archivo,
+            # Archivos adjuntos (parse JSON)
+            'archivos_radicacion': json.loads(self.archivos_radicacion) if self.archivos_radicacion else [],
+            'archivos_visita': json.loads(self.archivos_visita) if self.archivos_visita else [],
         }

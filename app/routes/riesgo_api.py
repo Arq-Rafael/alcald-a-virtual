@@ -913,10 +913,63 @@ def _render_dictamen_content(c, radicado, margin, y_position, w, h, style_title,
         c.showPage()
         y_position = h - 140
     
+    # ── BLOQUE DE FIRMAS OBLIGATORIO ─────────────────────────────────────
+    if y_position < 180:
+        c.showPage()
+        y_position = h - 140
+
+    y_position -= 20
+    c.setStrokeColor(colors.HexColor('#0f4c81'))
+    c.setLineWidth(1)
+    c.line(margin, y_position, margin + table_width, y_position)
+    y_position -= 14
+
+    c.setFont('Helvetica-Bold', 10)
+    c.setFillColor(colors.HexColor(COLOR_PRIMARY))
+    c.drawString(margin, y_position, 'FIRMAS DE APROBACIÓN')
+    y_position -= 20
+
+    col_w = (table_width - 20) / 2
+    # Firma izquierda
+    c.setStrokeColor(colors.HexColor('#333333'))
+    c.setLineWidth(0.5)
+    c.line(margin, y_position, margin + col_w, y_position)
+    c.setFont('Helvetica', 9)
+    c.setFillColor(colors.HexColor('#3d3d3d'))
+    c.drawCentredString(margin + col_w / 2, y_position - 12,
+                        radicado.permiso_firmante1 or 'Secretario/a de Planeación y Obras Públicas')
     c.setFont('Helvetica-Oblique', 8)
     c.setFillColor(colors.gray)
-    c.drawString(margin, y_position, f'Generado automáticamente por el Sistema de Gestión Arbórea — {radicado.usuario_creador or "admin"}')
-    
+    c.drawCentredString(margin + col_w / 2, y_position - 22, 'Municipio de Supatá')
+
+    # Firma derecha
+    right_x = margin + col_w + 20
+    c.setStrokeColor(colors.HexColor('#333333'))
+    c.line(right_x, y_position, right_x + col_w, y_position)
+    c.setFont('Helvetica', 9)
+    c.setFillColor(colors.HexColor('#3d3d3d'))
+    c.drawCentredString(right_x + col_w / 2, y_position - 12,
+                        radicado.permiso_firmante2 or 'Coordinador/a del CMGR')
+    c.setFont('Helvetica-Oblique', 8)
+    c.setFillColor(colors.gray)
+    c.drawCentredString(right_x + col_w / 2, y_position - 22, 'Comité Municipal de Gestión del Riesgo')
+
+    y_position -= 40
+
+    # ── LEYENDA DE INVALIDEZ ──────────────────────────────────────────────
+    c.setFillColor(colors.HexColor('#f8d7da'))
+    c.roundRect(margin, y_position - 18, table_width, 22, 4, fill=1, stroke=0)
+    c.setFont('Helvetica-Bold', 9)
+    c.setFillColor(colors.HexColor('#721c24'))
+    c.drawCentredString(margin + table_width / 2, y_position - 9,
+                        '⚠  Este documento no tiene validez sin las firmas originales de los funcionarios designados.')
+    y_position -= 30
+
+    c.setFont('Helvetica-Oblique', 8)
+    c.setFillColor(colors.gray)
+    c.drawString(margin, y_position,
+                 f'Generado por el Sistema de Gestión Arbórea — Alcaldía de Supatá — {radicado.usuario_creador or ""}')
+
     return y_position
 
 
@@ -939,15 +992,32 @@ def pdf_informe(radicado_id):
 
 @riesgo_api.route('/arborea/<int:radicado_id>/pdf/dictamen', methods=['GET'])
 def pdf_dictamen(radicado_id):
-    """Genera y descarga el PDF del dictamen CMGR (Fase 3)."""
+    """
+    Genera PDF del dictamen CMGR.
+    - borrador=1 en query param → siempre permitido (sin bloqueo).
+    - Sin borrador → solo si Planeación ya aprobó (estado='Aprobada').
+    """
     try:
         RadicadoArborea, _ = get_models()
         radicado = RadicadoArborea.query.get_or_404(radicado_id)
+
+        es_borrador = request.args.get('borrador', '0') == '1'
+
+        if not es_borrador and radicado.estado != 'Aprobada':
+            return jsonify({
+                'error': 'PDF final bloqueado',
+                'mensaje': 'El PDF final solo se puede generar después del Visto Bueno de Planeación. '
+                           'Usa ?borrador=1 para descargar una vista previa sin validez oficial.'
+            }), 403
+
+        titulo = 'Vista Previa – Dictamen CMGR (BORRADOR)' if es_borrador else 'Permiso – Dictamen CMGR'
         context = {
             'radicado': radicado,
-            'titulo': 'Permiso – Dictamen CMGR',
+            'titulo': titulo,
+            'es_borrador': es_borrador,
         }
-        filename = f"Dictamen_{radicado.numero_radicado}.pdf"
+        prefijo = 'BORRADOR_' if es_borrador else ''
+        filename = f"{prefijo}Dictamen_{radicado.numero_radicado}.pdf"
         return _render_pdf('pdf_dictamen_arborea.html', context, filename)
     except Exception as e:
         logger.error(f"Error pdf_dictamen: {e}", exc_info=True)
@@ -987,13 +1057,20 @@ def actualizar_radicado(radicado_id):
         if fase2_actualizada and radicado.estado == 'Radicada':
             radicado.estado = 'Visitada'
 
+        # ── Fase actual del wizard ────────────────────────────────────────
+        if 'fase_actual' in data:
+            radicado.fase_actual = int(data['fase_actual'])
+
         # ── Dictamen y permiso (Fase 3) ───────────────────────────────────
         if 'dictamen_decision' in data:
             radicado.dictamen_decision = data['dictamen_decision']
             if data['dictamen_decision'] == 'Aprobado':
-                radicado.estado = 'Aprobada'
+                # Requiere visto bueno Planeación → estado intermedio
+                radicado.estado = 'En revisión Planeación'
+                radicado.fase_actual = 4
             elif data['dictamen_decision'] == 'Negado':
                 radicado.estado = 'Negada'
+                radicado.fase_actual = 3
 
         if 'permiso_vigencia_dias' in data:
             radicado.permiso_vigencia_dias = data['permiso_vigencia_dias']
@@ -1162,3 +1239,222 @@ def generar_numero():
     except Exception as e:
         logger.error(f"Error generar_numero: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
+
+
+# ============================================================================
+# ESTADÍSTICAS REALES — para el dashboard del módulo
+# ============================================================================
+
+@riesgo_api.route('/stats', methods=['GET'])
+def get_stats():
+    """
+    Retorna KPIs reales del módulo Gestión del Riesgo.
+    GET /api/riesgo/stats
+    """
+    try:
+        RadicadoArborea, _ = get_models()
+        db = get_db()
+
+        total       = RadicadoArborea.query.count()
+        radicadas   = RadicadoArborea.query.filter_by(estado='Radicada').count()
+        visitadas   = RadicadoArborea.query.filter_by(estado='Visitada').count()
+        en_planeacion = RadicadoArborea.query.filter_by(estado='En revisión Planeación').count()
+        aprobadas   = RadicadoArborea.query.filter_by(estado='Aprobada').count()
+        negadas     = RadicadoArborea.query.filter_by(estado='Negada').count()
+        cerradas    = RadicadoArborea.query.filter_by(estado='Cerrada').count()
+        pendientes  = total - aprobadas - negadas - cerradas
+
+        return jsonify({
+            'arborea': {
+                'total': total,
+                'radicadas': radicadas,
+                'en_visita': visitadas,
+                'en_planeacion': en_planeacion,
+                'aprobadas': aprobadas,
+                'negadas': negadas,
+                'cerradas': cerradas,
+                'pendientes': pendientes,
+            }
+        }), 200
+    except Exception as e:
+        logger.error(f"Error get_stats: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+# ============================================================================
+# SUBIDA DE FOTOS — desde celular o desktop
+# ============================================================================
+
+@riesgo_api.route('/arborea/<int:radicado_id>/foto', methods=['POST'])
+def subir_foto(radicado_id):
+    """
+    Sube una o varias fotos al radicado.
+    POST /api/riesgo/arborea/<id>/foto  (multipart/form-data, campo 'foto')
+    """
+    from werkzeug.utils import secure_filename
+    RadicadoArborea, _ = get_models()
+    db = get_db()
+
+    if not session.get('user'):
+        return jsonify({'success': False, 'mensaje': 'Sesión requerida'}), 401
+
+    radicado = RadicadoArborea.query.get_or_404(radicado_id)
+
+    if 'foto' not in request.files:
+        return jsonify({'success': False, 'error': 'No se envió archivo'}), 400
+
+    archivos = request.files.getlist('foto')
+    rutas_guardadas = []
+
+    upload_dir = os.path.join(str(current_app.config.get('UPLOADS_DIR', 'uploads')), 'riesgo', str(radicado_id))
+    os.makedirs(upload_dir, exist_ok=True)
+
+    for archivo in archivos:
+        if archivo.filename == '':
+            continue
+        ext = os.path.splitext(archivo.filename)[1].lower()
+        if ext not in ('.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic', '.heif'):
+            continue
+        nombre_seguro = secure_filename(archivo.filename)
+        ts = datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')
+        nombre_final = f"{ts}_{nombre_seguro}"
+        ruta_absoluta = os.path.join(upload_dir, nombre_final)
+        archivo.save(ruta_absoluta)
+        ruta_relativa = f"riesgo/{radicado_id}/{nombre_final}"
+        rutas_guardadas.append(ruta_relativa)
+
+    if not rutas_guardadas:
+        return jsonify({'success': False, 'error': 'Ningún archivo válido recibido'}), 400
+
+    # Acumular a la lista existente
+    fotos_actuales = json.loads(radicado.archivos_fotos) if radicado.archivos_fotos else []
+    fotos_actuales.extend(rutas_guardadas)
+    radicado.archivos_fotos = json.dumps(fotos_actuales)
+    radicado.updated_at = datetime.utcnow()
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'archivos_subidos': rutas_guardadas,
+        'total_fotos': len(fotos_actuales),
+        'todas_las_fotos': fotos_actuales
+    }), 201
+
+
+@riesgo_api.route('/arborea/<int:radicado_id>/foto/<path:nombre_foto>', methods=['DELETE'])
+def eliminar_foto(radicado_id, nombre_foto):
+    """Elimina una foto del radicado."""
+    RadicadoArborea, _ = get_models()
+    db = get_db()
+
+    if not session.get('user'):
+        return jsonify({'success': False}), 401
+
+    radicado = RadicadoArborea.query.get_or_404(radicado_id)
+    fotos = json.loads(radicado.archivos_fotos) if radicado.archivos_fotos else []
+
+    ruta_relativa = f"riesgo/{radicado_id}/{nombre_foto}"
+    if ruta_relativa in fotos:
+        fotos.remove(ruta_relativa)
+        radicado.archivos_fotos = json.dumps(fotos)
+        db.session.commit()
+        # Intentar borrar el archivo físico
+        try:
+            ruta_abs = os.path.join(str(current_app.config.get('UPLOADS_DIR', 'uploads')), ruta_relativa)
+            if os.path.exists(ruta_abs):
+                os.remove(ruta_abs)
+        except Exception:
+            pass
+        return jsonify({'success': True, 'total_fotos': len(fotos)}), 200
+
+    return jsonify({'success': False, 'error': 'Foto no encontrada'}), 404
+
+
+@riesgo_api.route('/uploads/riesgo/<int:radicado_id>/<path:nombre_foto>', methods=['GET'])
+def servir_foto(radicado_id, nombre_foto):
+    """Sirve una foto del radicado."""
+    upload_dir = os.path.join(str(current_app.config.get('UPLOADS_DIR', 'uploads')), 'riesgo', str(radicado_id))
+    return send_file(os.path.join(upload_dir, nombre_foto))
+
+
+# ============================================================================
+# APROBACIÓN PLANEACIÓN — Fase 4
+# ============================================================================
+
+@riesgo_api.route('/arborea/<int:radicado_id>/planeacion', methods=['PUT'])
+def aprobar_planeacion(radicado_id):
+    """
+    Planeación aprueba o rechaza el dictamen del CMGR.
+    Solo usuarios con '(planeacion)' en el nombre o admin.
+    PUT /api/riesgo/arborea/<id>/planeacion
+    {
+        "decision": "Aprobada" | "Rechazada",
+        "observaciones": "..."
+    }
+    """
+    RadicadoArborea, _ = get_models()
+    db = get_db()
+
+    usuario = session.get('user', '')
+    rol     = session.get('role', '')
+
+    # Verificar permiso: solo planeación o admin
+    es_planeacion = '(planeacion)' in usuario.lower() or rol == 'admin'
+    if not es_planeacion:
+        return jsonify({'success': False, 'mensaje': 'Solo Planeación puede realizar esta acción'}), 403
+
+    radicado = RadicadoArborea.query.get_or_404(radicado_id)
+    data = request.get_json() or {}
+
+    decision = data.get('decision')
+    if decision not in ('Aprobada', 'Rechazada'):
+        return jsonify({'success': False, 'error': 'decision debe ser Aprobada o Rechazada'}), 400
+
+    try:
+        radicado.planeacion_decision      = decision
+        radicado.planeacion_usuario       = usuario
+        radicado.planeacion_fecha         = datetime.utcnow()
+        radicado.planeacion_observaciones = data.get('observaciones', '')
+        radicado.fase_actual              = 5 if decision == 'Aprobada' else 3
+
+        if decision == 'Aprobada':
+            radicado.estado = 'Aprobada'
+        else:
+            radicado.estado = 'En revisión Planeación'  # vuelve a revisión
+
+        radicado.updated_at = datetime.utcnow()
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'radicado': radicado.to_dict(),
+            'mensaje': f'Radicado {radicado.numero_radicado} {decision.lower()} por Planeación'
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error aprobar_planeacion: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@riesgo_api.route('/arborea/pendientes-planeacion', methods=['GET'])
+def pendientes_planeacion():
+    """
+    Lista los radicados pendientes de visto bueno de Planeación.
+    Solo accesible por Planeación/admin.
+    """
+    usuario = session.get('user', '')
+    rol     = session.get('role', '')
+    es_planeacion = '(planeacion)' in usuario.lower() or rol == 'admin'
+    if not es_planeacion:
+        return jsonify({'success': False, 'mensaje': 'Acceso denegado'}), 403
+
+    RadicadoArborea, _ = get_models()
+    pendientes = RadicadoArborea.query.filter_by(estado='En revisión Planeación').order_by(
+        RadicadoArborea.updated_at.desc()
+    ).all()
+
+    return jsonify({
+        'total': len(pendientes),
+        'radicados': [r.to_dict() for r in pendientes]
+    }), 200
