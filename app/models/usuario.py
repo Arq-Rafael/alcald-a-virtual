@@ -64,6 +64,12 @@ class Usuario(db.Model):
     
     # Activo/Inactivo
     activo = db.Column(db.Boolean, default=True)
+
+    # Permisos granulares — Gestión del Riesgo (submódulos)
+    # False = sin acceso; True = con acceso. Admin siempre tiene acceso.
+    can_risk_arborea = db.Column(db.Boolean, default=False, nullable=True)
+    can_risk_actas   = db.Column(db.Boolean, default=False, nullable=True)
+    can_risk_planes  = db.Column(db.Boolean, default=False, nullable=True)
     
     def __init__(self, usuario, clave=None, role='user', email=None, **kwargs):
         """Inicializa usuario con contraseña hasheada"""

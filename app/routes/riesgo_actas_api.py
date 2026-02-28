@@ -29,6 +29,26 @@ def _usuario():
     return session.get('user', 'Sistema')
 
 
+def _check_actas_perm():
+    """Devuelve (True, None) o (False, Response 403) si no hay permiso."""
+    from app.utils import can_risk_submodule
+    if not can_risk_submodule('actas'):
+        return False, (jsonify({
+            'error': 'Acceso denegado',
+            'mensaje': 'No tienes permisos para el submódulo Actas CMGR.'
+        }), 403)
+    return True, None
+
+
+def _filtro_actas(query, Model):
+    """Filtra por usuario_creador salvo admin."""
+    rol     = session.get('role', '')
+    usuario = session.get('user', '')
+    if rol == 'admin':
+        return query
+    return query.filter(Model.usuario_creador == usuario)
+
+
 # ============================================================================
 # ACTAS CMGR
 # ============================================================================
@@ -36,6 +56,9 @@ def _usuario():
 @riesgo_actas_api.route('/cmgr', methods=['GET'])
 def listar_actas():
     """GET /api/actas/cmgr?page=1&limit=20&q=texto&desde=YYYY-MM-DD&hasta=YYYY-MM-DD"""
+    ok, err = _check_actas_perm()
+    if not ok:
+        return err
     try:
         ActaCMGR, _, _ = _models()
         page  = int(request.args.get('page', 1))
@@ -44,7 +67,7 @@ def listar_actas():
         desde = request.args.get('desde', '')
         hasta = request.args.get('hasta', '')
 
-        query = ActaCMGR.query
+        query = _filtro_actas(ActaCMGR.query, ActaCMGR)
 
         if q:
             query = query.filter(
@@ -78,6 +101,9 @@ def listar_actas():
 @riesgo_actas_api.route('/cmgr', methods=['POST'])
 def crear_acta():
     """POST /api/actas/cmgr  — crea nueva acta"""
+    ok, err = _check_actas_perm()
+    if not ok:
+        return err
     try:
         db = _db()
         ActaCMGR, _, _ = _models()
@@ -232,6 +258,9 @@ def alerta_mensual():
 @riesgo_actas_api.route('/damnificados', methods=['GET'])
 def listar_damnificados():
     """GET /api/actas/damnificados?page=1&estado=Pendiente&vereda=&q="""
+    ok, err = _check_actas_perm()
+    if not ok:
+        return err
     try:
         _, Damnificado, _ = _models()
         page   = int(request.args.get('page', 1))
@@ -240,7 +269,7 @@ def listar_damnificados():
         vereda = request.args.get('vereda', '')
         q      = request.args.get('q', '').strip()
 
-        query = Damnificado.query
+        query = _filtro_actas(Damnificado.query, Damnificado)
 
         if estado:
             query = query.filter(Damnificado.estado_ayuda == estado)
@@ -276,6 +305,9 @@ def listar_damnificados():
 
 @riesgo_actas_api.route('/damnificados', methods=['POST'])
 def crear_damnificado():
+    ok, err = _check_actas_perm()
+    if not ok:
+        return err
     try:
         db = _db()
         _, Damnificado, _ = _models()
@@ -366,7 +398,7 @@ def listar_danos():
         page       = int(request.args.get('page', 1))
         limit      = int(request.args.get('limit', 50))
 
-        query = RegistroDano.query
+        query = _filtro_actas(RegistroDano.query, RegistroDano)
 
         if tipo:
             query = query.filter(RegistroDano.tipo == tipo)
@@ -401,6 +433,9 @@ def listar_danos():
 
 @riesgo_actas_api.route('/danos', methods=['POST'])
 def crear_dano():
+    ok, err = _check_actas_perm()
+    if not ok:
+        return err
     try:
         db = _db()
         _, _, RegistroDano = _models()

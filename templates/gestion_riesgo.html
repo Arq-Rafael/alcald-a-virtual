@@ -42,7 +42,7 @@
         <button class="op-filter-btn" onclick="abrirCmdPalette()" title="Ctrl+K">
             <i class="bi bi-search"></i> Buscar &nbsp;<kbd style="font-size:10px;opacity:.7;">Ctrl+K</kbd>
         </button>
-        <a href="/riesgo/gestion-arborea" class="op-filter-btn" style="text-decoration:none;">
+        <a id="btn-nuevo-radicado" href="/riesgo/gestion-arborea" class="op-filter-btn" style="text-decoration:none;">
             <i class="bi bi-plus-lg"></i> Nuevo Radicado
         </a>
     </div>
@@ -94,6 +94,14 @@
         </div>
         <span style="margin-left:auto;font-size:18px;">⏰</span>
     </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     ACCESOS RÁPIDOS — siempre visibles, filtrados por permisos
+     Renderizados por JS tras cargar /api/riesgo/mis-permisos
+     ════════════════════════════════════════════════ -->
+<div id="accesos-rapidos" class="row g-3 mb-3" style="display:none !important;">
+    <!-- Las tarjetas se insertan aquí via JS -->
 </div>
 
 <!-- ════════════════════════════════════════════════
@@ -305,6 +313,9 @@ let filtros = { texto: '', tipo: '', estado: '', criticidad: '', desde: '', hast
 document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('role-badge').textContent =
         '{{ session.get("role","usuario") | upper }}';
+
+    // Cargar permisos primero (determina qué mostrar)
+    await cargarPermisos();
 
     await Promise.all([cargarStats(), cargarKanban(), verificarAlertaMensual()]);
     cargarPlanesContingencia();
@@ -594,19 +605,111 @@ async function cargarStatsActas() {
 }
 
 // ─────────────────────────────────────────────────────────────
-// ALERTA MENSUAL
+// ─────────────────────────────────────────────────────────────
+// PERMISOS — cargar y renderizar accesos rápidos
+// ─────────────────────────────────────────────────────────────
+let _permisos = { arborea: false, actas: false, planes: false, es_planeacion: false };
+
+async function cargarPermisos() {
+    try {
+        const r = await fetch('/api/riesgo/mis-permisos');
+        if (!r.ok) return;
+        _permisos = await r.json();
+    } catch(e) {
+        // Si falla (p. ej. sin conexión), asumir sin permisos por seguridad
+        _permisos = { arborea: false, actas: false, planes: false, es_planeacion: false };
+    }
+    renderAccesosRapidos();
+    // Ocultar botón "Nuevo Radicado" si no tiene permiso arbórea
+    const btnNuevo = document.getElementById('btn-nuevo-radicado');
+    if (btnNuevo && !_permisos.arborea) btnNuevo.style.display = 'none';
+}
+
+function renderAccesosRapidos() {
+    const container = document.getElementById('accesos-rapidos');
+    if (!container) return;
+
+    const modulos = [
+        {
+            key: 'arborea',
+            icon: '🌳',
+            titulo: 'Gestión Arbórea',
+            desc: 'Radicación · Visita técnica · Dictamen · Planeación · PDF oficial',
+            href: '/riesgo/gestion-arborea',
+            color: '#0f4c81',
+            btnLabel: 'Nuevo Radicado'
+        },
+        {
+            key: 'actas',
+            icon: '📋',
+            titulo: 'Actas CMGR',
+            desc: 'Actas · Damnificados · Registro de daños · Mapa de riesgos',
+            href: '/riesgo/actas-cmgr',
+            color: '#7c3aed',
+            btnLabel: 'Nueva Acta'
+        },
+        {
+            key: 'planes',
+            icon: '📑',
+            titulo: 'Planes de Contingencia',
+            desc: 'Crear y gestionar planes en formato oficial de la alcaldía',
+            href: '/riesgo/planes-contingencia',
+            color: '#d97706',
+            btnLabel: 'Ver Planes'
+        },
+    ];
+
+    const visibles = modulos.filter(m => _permisos[m.key]);
+    if (visibles.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    const cols = visibles.length === 1 ? 12 : visibles.length === 2 ? 6 : 4;
+    container.innerHTML = visibles.map(m => `
+        <div class="col-md-${cols}">
+            <div class="op-module-card" style="border-top-color:${m.color};">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div class="op-module-card__icon"
+                         style="background:${m.color};font-size:22px;width:44px;height:44px;
+                                display:flex;align-items:center;justify-content:center;
+                                border-radius:12px;">${m.icon}</div>
+                    <div class="op-module-card__title">${m.titulo}</div>
+                </div>
+                <div class="op-module-card__desc">${m.desc}</div>
+                <div class="op-module-card__actions">
+                    <a href="${m.href}" class="op-module-action-btn primary"
+                       style="border-color:${m.color};background:${m.color};text-decoration:none;
+                              display:inline-flex;align-items:center;justify-content:center;gap:4px;">
+                        <i class="bi bi-box-arrow-in-right"></i> ${m.btnLabel}
+                    </a>
+                </div>
+            </div>
+        </div>`).join('');
+
+    // Mostrar el bloque (había display:none !important)
+    container.setAttribute('style', 'display: flex !important; flex-wrap: wrap;');
+}
+
+// ALERTA MENSUAL — solo para usuarios planeación (doble verificación)
 // ─────────────────────────────────────────────────────────────
 async function verificarAlertaMensual() {
     try {
+        // 1️⃣ Frontend: verificar nombre de sesión (doble check)
+        const usuario = '{{ session.get("user","") }}';
+        if (!usuario.toLowerCase().includes('(planeacion)')) return;
+
+        // 2️⃣ Backend: confirmar y obtener datos del mes
         const r = await fetch('/api/actas/cmgr/alerta-mensual');
         if (!r.ok) return;
         const d = await r.json();
-        if (d.alerta) {
-            const banner = document.getElementById('alerta-mensual');
-            document.getElementById('alerta-mensual-texto').textContent =
-                `⚠️ No hay acta del CMGR registrada para ${d.mes}. Se recomienda registrarla.`;
-            banner.style.display = 'flex';
-        }
+        // El backend devuelve alerta:false para no-planeacion; doble seguridad
+        if (!d.alerta) return;
+
+        const banner = document.getElementById('alerta-mensual');
+        document.getElementById('alerta-mensual-texto').textContent =
+            `No hay acta del CMGR registrada para ${d.mes}. Se recomienda registrarla antes de fin de mes.`;
+        banner.style.display = 'flex';
     } catch(e) {}
 }
 

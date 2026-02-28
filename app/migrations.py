@@ -27,6 +27,10 @@ def run_migrations(app, db):
                 'codigo_primer_acceso': ('VARCHAR(6)', 'VARCHAR(6)'),
                 'codigo_primer_acceso_expira': ('TIMESTAMP', 'TIMESTAMP'),
                 'primer_acceso_verificado': ('TIMESTAMP', 'TIMESTAMP'),
+                # Permisos granulares de Gestión del Riesgo (DEFAULT FALSE = sin acceso)
+                'can_risk_arborea': ('BOOLEAN DEFAULT FALSE', 'BOOLEAN DEFAULT 0'),
+                'can_risk_actas':   ('BOOLEAN DEFAULT FALSE', 'BOOLEAN DEFAULT 0'),
+                'can_risk_planes':  ('BOOLEAN DEFAULT FALSE', 'BOOLEAN DEFAULT 0'),
             }
             
             # Columnas a agregar

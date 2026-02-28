@@ -32,6 +32,44 @@ def get_models():
 
 riesgo_api = Blueprint('riesgo_api', __name__, url_prefix='/api/riesgo')
 
+
+# ── Helpers de seguridad ──────────────────────────────────────────────────────
+
+def _es_planeacion() -> bool:
+    return '(planeacion)' in session.get('user', '').lower()
+
+
+def _filtro_por_usuario(query, Model):
+    """
+    Aplica filtro de visibilidad sobre una query de RadicadoArborea.
+    - Admin: ve todo.
+    - Planeación: ve sus propios + los pendientes de su aprobación.
+    - Regular: solo sus propios.
+    """
+    usuario = session.get('user', '')
+    rol     = session.get('role', '')
+    if rol == 'admin':
+        return query          # admin: sin filtro
+    if _es_planeacion():
+        # Planeación: propios + en revisión Planeación
+        return query.filter(
+            (Model.usuario_creador == usuario) |
+            (Model.estado == 'En revisión Planeación')
+        )
+    return query.filter(Model.usuario_creador == usuario)
+
+
+def _check_submodule(submodule: str):
+    """Retorna (True, None) si el usuario puede acceder al submódulo,
+    o (False, Response 403) si no puede."""
+    from app.utils import can_risk_submodule
+    if not can_risk_submodule(submodule):
+        return False, (jsonify({
+            'error': 'Acceso denegado',
+            'mensaje': f'No tienes permisos para el submódulo: {submodule}'
+        }), 403)
+    return True, None
+
 # ============================================================================
 # ESPECIES - Autocomplete y catálogo
 # ============================================================================
@@ -116,6 +154,9 @@ def crear_radicado():
     Persiste en base de datos, calcula compensación, genera número.
     POST /api/riesgo/arborea
     """
+    ok, err = _check_submodule('arborea')
+    if not ok:
+        return err
     data = request.get_json()
     db = get_db()
     RadicadoArborea, _ = get_models()
@@ -247,10 +288,21 @@ def crear_radicado():
 @riesgo_api.route('/arborea/<int:radicado_id>', methods=['GET'])
 def obtener_radicado(radicado_id):
     """Obtiene un radicado completo por ID"""
+    ok, err = _check_submodule('arborea')
+    if not ok:
+        return err
     try:
         logger.info(f"[GET] Obteniendo radicado ID: {radicado_id}")
         RadicadoArborea, _ = get_models()
         radicado = RadicadoArborea.query.get_or_404(radicado_id)
+
+        # Verificar propiedad: solo el dueño, admin o planeación pueden leerlo
+        usuario = session.get('user', '')
+        rol     = session.get('role', '')
+        es_dueno = radicado.usuario_creador == usuario
+        es_planeacion_y_pendiente = _es_planeacion() and radicado.estado == 'En revisión Planeación'
+        if rol != 'admin' and not es_dueno and not es_planeacion_y_pendiente:
+            return jsonify({'success': False, 'error': 'No autorizado'}), 403
         
         logger.info(f"[GET] Radicado encontrado: {radicado.numero_radicado}")
         
@@ -1267,10 +1319,12 @@ def get_stats():
     try:
         RadicadoArborea, _ = get_models()
 
+        # ── Filtro de usuario (historial propio) ─────────────────────────────
+        query_base = _filtro_por_usuario(RadicadoArborea.query, RadicadoArborea)
+
         # Filtro de fecha opcional
         desde_str = request.args.get('desde', '')
         hasta_str = request.args.get('hasta', '')
-        query_base = RadicadoArborea.query
 
         if desde_str:
             try:
@@ -1355,13 +1409,16 @@ def get_kanban():
             ('Cerrado',                 ['Negada', 'Rechazada', 'Cerrada']),
         ]
 
+        # ── Filtro de usuario (cada uno ve sus radicados) ──────────────────────
+        base_q = _filtro_por_usuario(RadicadoArborea.query, RadicadoArborea)
+
         columnas = []
         for titulo, estados in estados_columnas:
-            items = (RadicadoArborea.query
+            items = (base_q
                      .filter(RadicadoArborea.estado.in_(estados))
                      .order_by(RadicadoArborea.created_at.desc())
                      .limit(limite).all())
-            total_col = (RadicadoArborea.query
+            total_col = (base_q
                          .filter(RadicadoArborea.estado.in_(estados)).count())
 
             columnas.append({
@@ -1386,6 +1443,30 @@ def get_kanban():
     except Exception as e:
         logger.error(f"Error get_kanban: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
+
+
+# ============================================================================
+# PERMISOS DE SUBMÓDULOS — endpoint para el frontend
+# ============================================================================
+
+@riesgo_api.route('/mis-permisos', methods=['GET'])
+def mis_permisos():
+    """
+    GET /api/riesgo/mis-permisos
+    Retorna los permisos de submódulos del usuario en sesión.
+    Usado por el frontend para mostrar/ocultar tarjetas de acceso rápido.
+    """
+    if not session.get('user'):
+        return jsonify({'error': 'No autenticado'}), 401
+    from app.utils import can_risk_submodule
+    return jsonify({
+        'arborea': can_risk_submodule('arborea'),
+        'actas':   can_risk_submodule('actas'),
+        'planes':  can_risk_submodule('planes'),
+        'usuario': session.get('user', ''),
+        'rol':     session.get('role', ''),
+        'es_planeacion': _es_planeacion(),
+    })
 
 
 # ============================================================================

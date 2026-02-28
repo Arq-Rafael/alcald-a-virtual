@@ -472,14 +472,19 @@ async function cargarStats() {
 // ─────────────────────────────────────────────────────────────
 async function verificarAlerta() {
     try {
+        // 1️⃣ Doble check frontend: solo mostrar si el nombre contiene '(planeacion)'
+        const usuario = '{{ session.get("user","") }}';
+        if (!usuario.toLowerCase().includes('(planeacion)')) return;
+
+        // 2️⃣ Backend confirma y proporciona datos del mes
         const r = await fetch('/api/actas/cmgr/alerta-mensual');
         if (!r.ok) return;
         const d = await r.json();
-        if (d.alerta) {
-            document.getElementById('alerta-texto').textContent =
-                `No hay acta registrada para ${d.mes}. Se recomienda registrarla antes de fin de mes.`;
-            document.getElementById('alerta-mensual').style.display = 'flex';
-        }
+        if (!d.alerta) return;   // backend ya validó planeación y mes
+
+        document.getElementById('alerta-texto').textContent =
+            `No hay acta registrada para ${d.mes}. Se recomienda registrarla antes de fin de mes.`;
+        document.getElementById('alerta-mensual').style.display = 'flex';
     } catch(e) {}
 }
 

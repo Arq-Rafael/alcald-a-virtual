@@ -211,6 +211,23 @@ def configuracion():
             flash('✅ Permisos de modulos actualizados', 'success')
             return redirect(url_for('configuracion.index'))
 
+        # ===== PERMISOS GESTIÓN DEL RIESGO (SUBMÓDULOS) =====
+        if 'update_risk_perms' in form:
+            for user in users_for_permissions:
+                u = Usuario.query.filter_by(usuario=user.usuario).first()
+                if u is None:
+                    continue
+                u.can_risk_arborea = form.get(f'risk_arborea_{u.usuario}') == 'on'
+                u.can_risk_actas   = form.get(f'risk_actas_{u.usuario}')   == 'on'
+                u.can_risk_planes  = form.get(f'risk_planes_{u.usuario}')  == 'on'
+            try:
+                db.session.commit()
+                flash('✅ Permisos de Gestión del Riesgo actualizados', 'success')
+            except Exception as e:
+                db.session.rollback()
+                flash(f'❌ Error: {str(e)}', 'danger')
+            return redirect(url_for('configuracion.index'))
+
         # ===== ELIMINAR USUARIO =====
         if 'delete_user' in form:
             to_del = form.get('delete_user')

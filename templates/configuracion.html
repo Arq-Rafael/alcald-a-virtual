@@ -345,6 +345,84 @@
     </div>
   </div>
 
+  <!-- SECCIÓN 3b: PERMISOS GESTIÓN DEL RIESGO (SUBMÓDULOS) -->
+  <div class="panel-section" style="border-left: 4px solid #0f4c81;">
+    <h4 style="border-bottom-color:#0f4c81;">
+      <i class="bi bi-shield-fill-exclamation"></i> Permisos Gestión del Riesgo — Submódulos
+    </h4>
+    <p class="text-muted" style="font-size:13px;">
+      Define qué submódulos puede usar cada usuario dentro de <strong>Gestión del Riesgo</strong>.
+      El usuario <code>admin</code> y los usuarios con <code>(planeacion)</code> en su nombre
+      siempre tienen acceso a Arbórea y Actas sin importar estos switches.
+    </p>
+
+    <form method="POST" class="form-section">
+      <div class="table-responsive">
+        <table class="table table-sm align-middle" style="font-size:13px;">
+          <thead style="background:#f1f5fb;">
+            <tr>
+              <th>Usuario</th>
+              <th class="text-center">🌳 Gestión Arbórea</th>
+              <th class="text-center">📋 Actas CMGR</th>
+              <th class="text-center">📑 Planes Contingencia</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in permissions_users %}
+            <tr>
+              <td>
+                <strong>{{ u.usuario }}</strong>
+                {% if u.role == 'admin' %}
+                  <span class="badge bg-primary ms-1">Admin</span>
+                {% endif %}
+                {% if '(planeacion)' in (u.usuario or '')|lower %}
+                  <span class="badge ms-1" style="background:#7c3aed;">Planeación</span>
+                {% endif %}
+              </td>
+              <td class="text-center">
+                <div class="form-check form-switch d-flex justify-content-center">
+                  <input class="form-check-input" type="checkbox"
+                         name="risk_arborea_{{ u.usuario }}"
+                         id="ra_{{ loop.index }}"
+                         {% if u.can_risk_arborea %}checked{% endif %}
+                         style="width:2.2em;height:1.2em;">
+                </div>
+              </td>
+              <td class="text-center">
+                <div class="form-check form-switch d-flex justify-content-center">
+                  <input class="form-check-input" type="checkbox"
+                         name="risk_actas_{{ u.usuario }}"
+                         id="rac_{{ loop.index }}"
+                         {% if u.can_risk_actas %}checked{% endif %}
+                         style="width:2.2em;height:1.2em;">
+                </div>
+              </td>
+              <td class="text-center">
+                <div class="form-check form-switch d-flex justify-content-center">
+                  <input class="form-check-input" type="checkbox"
+                         name="risk_planes_{{ u.usuario }}"
+                         id="rp_{{ loop.index }}"
+                         {% if u.can_risk_planes %}checked{% endif %}
+                         style="width:2.2em;height:1.2em;">
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <button type="submit" name="update_risk_perms" class="btn btn-primary" style="background:#0f4c81;border-color:#0f4c81;">
+        <i class="bi bi-save"></i> Guardar permisos de riesgo
+      </button>
+    </form>
+
+    <div class="alert alert-info mt-3" style="font-size:12px;">
+      <i class="bi bi-info-circle"></i>
+      <strong>Efecto inmediato:</strong> Al guardar, el acceso a los submódulos se bloquea o habilita en rutas y API.
+      Los datos existentes <strong>no se borran</strong> — solo se controla la visibilidad.
+    </div>
+  </div>
+
   <!-- SECCIÓN 4: BACKUPS -->
   <div class="panel-section">
     <h4><i class="bi bi-cloud-download"></i> Sistema de Backups</h4>

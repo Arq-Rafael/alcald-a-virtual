@@ -62,9 +62,67 @@ def admin_required(f):
         tokens = _session_tokens()
         if "admin" not in tokens and not current_app.config.get("ALWAYS_ADMIN", False):
              flash('Acceso denegado: se requiere rol de administrador.', 'danger')
-             return redirect(url_for('main.dashboard') if 'main.dashboard' in current_app.view_functions else '/') 
+             return redirect(url_for('main.dashboard') if 'main.dashboard' in current_app.view_functions else '/')
         return f(*args, **kwargs)
     return decorated_function
+
+
+# ── Permisos granulares de Gestión del Riesgo ────────────────────────────────
+
+def _es_planeacion() -> bool:
+    """True si el username contiene '(planeacion)' (case-insensitive)."""
+    return '(planeacion)' in session.get('user', '').lower()
+
+
+def can_risk_submodule(submodule: str) -> bool:
+    """
+    Verifica si el usuario actual puede acceder a un submódulo de Gestión del Riesgo.
+
+    Submodules: 'arborea' | 'actas' | 'planes'
+
+    Reglas:
+    - Admin: siempre True.
+    - Planeación: siempre puede acceder a 'arborea' y 'actas'.
+    - Demás usuarios: requieren el flag can_risk_<submodule>=True en BD.
+    """
+    if is_admin():
+        return True
+
+    # Planeación tiene acceso automático a arborea y actas
+    if _es_planeacion() and submodule in ('arborea', 'actas'):
+        return True
+
+    # Consultar BD para el usuario en sesión
+    try:
+        from app.models.usuario import Usuario
+        usuario_nombre = session.get('user', '')
+        u = Usuario.query.filter_by(usuario=usuario_nombre).first()
+        if u is None:
+            return False
+        col = f'can_risk_{submodule}'
+        val = getattr(u, col, None)
+        return bool(val)
+    except Exception:
+        return False
+
+
+def risk_submodule_required(submodule: str):
+    """Decorador: bloquea acceso si el usuario no tiene permiso al submódulo."""
+    def decorator(f):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            if not session.get('user'):
+                return redirect(url_for('auth.login'))
+            if not can_risk_submodule(submodule):
+                flash(
+                    f'No tienes permisos para acceder a este submódulo de Gestión del Riesgo '
+                    f'({submodule}). Contacta al administrador.',
+                    'danger'
+                )
+                return redirect(url_for('main.gestion_riesgo'))
+            return f(*args, **kwargs)
+        return decorated
+    return decorator
 
 # --- SQLite Helpers ---
 # --- SQLite Helpers ---

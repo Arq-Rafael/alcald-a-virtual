@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, session, redirect, url_for, current_app, request, flash, jsonify
-from app.utils import can_access, normalize_features, is_admin, current_session_user, current_session_secretaria
+from app.utils import can_access, normalize_features, is_admin, current_session_user, current_session_secretaria, can_risk_submodule
 import json
 import os
 import csv as csv_mod
@@ -143,6 +143,9 @@ def riesgo_gestion_arborea():
     if not can_access('riesgo'):
         flash('No tienes permisos para acceder a este módulo', 'error')
         return redirect(url_for('main.dashboard'))
+    if not can_risk_submodule('arborea'):
+        flash('No tienes permisos para acceder a Gestión Arbórea. Contacta al administrador.', 'danger')
+        return redirect(url_for('main.gestion_riesgo'))
     return render_template('riesgo_gestion_arborea_v2.html', user=session.get('user'))
 
 @main_bp.route('/riesgo/actas-cmgr')
@@ -152,11 +155,19 @@ def riesgo_actas_cmgr():
     if not can_access('riesgo'):
         flash('No tienes permisos para acceder a este módulo', 'error')
         return redirect(url_for('main.dashboard'))
+    if not can_risk_submodule('actas'):
+        flash('No tienes permisos para acceder a Actas CMGR. Contacta al administrador.', 'danger')
+        return redirect(url_for('main.gestion_riesgo'))
     return render_template('riesgo_actas_cmgr.html')
 
 @main_bp.route('/riesgo/planes-contingencia')
 def riesgo_planes_contingencia():
     """Redirecciona a la nueva ruta de planes de contingencia V2"""
+    if not session.get('user'):
+        return redirect(url_for('auth.login'))
+    if not can_risk_submodule('planes'):
+        flash('No tienes permisos para acceder a Planes de Contingencia. Contacta al administrador.', 'danger')
+        return redirect(url_for('main.gestion_riesgo'))
     return redirect(url_for('contingencia.listar_planes'))
 
 @main_bp.route('/seguimiento-metas')
