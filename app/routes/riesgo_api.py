@@ -196,7 +196,7 @@ def crear_radicado():
         # Solicitud
         radicado.tipo_solicitud = data.get('tipo_solicitud', 'Poda')
         radicado.motivo_solicitud = data.get('motivo_solicitud')
-        radicado.usuario_creador = data.get('usuario_creador', 'Sistema')
+        radicado.usuario_creador = session.get('user', 'Sistema')
         
         # Visita técnica (si viene en el mismo request)
         if data.get('visita_fecha'):
