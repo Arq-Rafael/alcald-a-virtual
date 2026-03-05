@@ -1184,7 +1184,7 @@ def actualizar_radicado(radicado_id):
 
 @riesgo_api.route('/arborea/<int:radicado_id>', methods=['DELETE'])
 def eliminar_radicado(radicado_id):
-    """Elimina un radicado. Radicados Aprobados/Negados: solo admin."""
+    """Elimina un radicado. Solo el administrador puede eliminar."""
     RadicadoArborea, _ = get_models()
     db = get_db()
 
@@ -1192,14 +1192,14 @@ def eliminar_radicado(radicado_id):
     if not session.get('user'):
         return jsonify({'success': False, 'mensaje': 'Sesión no válida'}), 401
 
-    radicado = RadicadoArborea.query.get_or_404(radicado_id)
-
-    # Radicados aprobados o negados: solo admin puede eliminar
-    if radicado.estado in ('Aprobada', 'Negada') and session.get('role') != 'admin':
+    # Solo admin puede eliminar cualquier radicado
+    if session.get('role') != 'admin':
         return jsonify({
             'success': False,
-            'mensaje': 'Solo el administrador puede eliminar radicados ya procesados'
+            'mensaje': 'Solo el administrador puede eliminar radicados'
         }), 403
+
+    radicado = RadicadoArborea.query.get_or_404(radicado_id)
     
     try:
         db.session.delete(radicado)

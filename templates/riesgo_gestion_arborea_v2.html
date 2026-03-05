@@ -1232,7 +1232,7 @@ async function cargarHistorial() {
         const hasInforme    = isVisitada || isEnPlaneacion || isProcesada;
         const hasPermiso    = isProcesada && r.planeacion_decision === 'Aprobada';
         const hasBorrador   = isEnPlaneacion || isProcesada;
-        const canDelete     = isRadicada || (isProcesada && isAdmin);
+        const canDelete     = isAdmin;
         const estadoClass   = r.estado.toLowerCase().replace(/ /g,'-').replace(/[áéíóú]/g, c => ({'á':'a','é':'e','í':'i','ó':'o','ú':'u'}[c]||c));
 
         return `
