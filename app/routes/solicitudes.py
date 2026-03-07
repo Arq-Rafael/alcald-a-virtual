@@ -12,6 +12,51 @@ from app import db
 
 solicitudes_bp = Blueprint('solicitudes', __name__)
 
+# ─────────────────────────────────────────────────────────────────────────────
+# CSV: columnas y migración automática
+# ─────────────────────────────────────────────────────────────────────────────
+
+_CSV_HEADERS = [
+    'municipio', 'nit', 'fecha', 'secretaria', 'objeto',
+    'justificacion', 'valor', 'meta_producto', 'eje', 'sector',
+    'codigo_bpim', 'estado', 'creado_por'
+]
+
+
+def _migrar_csv_si_necesario(path):
+    """
+    Garantiza que el CSV tenga la columna 'creado_por'.
+    Si el archivo no existe, lo crea con el header correcto.
+    Si existe pero no tiene 'creado_por', agrega la columna conservando todos
+    los datos existentes (las filas antiguas quedan con creado_por vacío).
+    """
+    str_path = str(path)
+    try:
+        if not os.path.exists(str_path):
+            os.makedirs(os.path.dirname(str_path), exist_ok=True)
+            with open(str_path, 'w', newline='', encoding='utf-8') as f:
+                csv.writer(f).writerow(_CSV_HEADERS)
+            return
+
+        with open(str_path, 'r', encoding='utf-8') as f:
+            rows = list(csv.reader(f))
+
+        if not rows:
+            with open(str_path, 'w', newline='', encoding='utf-8') as f:
+                csv.writer(f).writerow(_CSV_HEADERS)
+            return
+
+        if 'creado_por' not in rows[0]:
+            rows[0].append('creado_por')
+            for i in range(1, len(rows)):
+                rows[i].append('')   # solicitudes antiguas sin autor
+            with open(str_path, 'w', newline='', encoding='utf-8') as f:
+                csv.writer(f).writerows(rows)
+
+    except Exception as e:
+        print(f"[solicitudes] Error en migración CSV: {e}")
+
+
 # --- Routes: Solicitudes Generales (CSV) ---
 
 @solicitudes_bp.route('/solicitudes', methods=['GET', 'POST'], endpoint='index')
@@ -26,14 +71,20 @@ def solicitudes():
 
     path = current_app.config['SOLICITUDES_PATH']
 
+    # Garantizar que el CSV tiene la columna creado_por antes de cualquier lectura
+    _migrar_csv_si_necesario(path)
+
     if request.method == 'POST':
         raw_val = request.form.get('valor','').strip()
         try:
             num = int(raw_val.replace('.', ''))
             valor_formatted = '$ ' + '{:,.0f}'.format(num).replace(',', '.')
         except ValueError:
-            valor_formatted = raw_val        
-         
+            valor_formatted = raw_val
+
+        # Registrar quién crea la solicitud
+        autor = session.get('user', '')
+
         row = [
             request.form.get('municipio','').strip(),
             request.form.get('nit','').strip(),
@@ -46,48 +97,60 @@ def solicitudes():
             request.form.get('eje',''),
             request.form.get('sector',''),
             request.form.get('codigo_bpim',''),
-            'nuevo'  # Estado inicial: nuevo (entra directo a certificados)
+            'nuevo',   # Estado inicial
+            autor      # ← quién creó la solicitud
         ]
-        
+
         try:
-            with open(path, 'a', newline='', encoding='utf-8') as f:
+            with open(str(path), 'a', newline='', encoding='utf-8') as f:
                 writer = csv.writer(f)
                 writer.writerow(row)
             flash('✅ Solicitud guardada correctamente.', 'success')
         except Exception as e:
             flash(f'Error guardando solicitud: {e}', 'danger')
-            
+
         return redirect(url_for('solicitudes.index'))
 
     # Load Plan de Desarrollo data
     plan_list = load_plan_desarrollo()
-    
-    # Cargar solicitudes — admin ve todo; usuarios normales solo su secretaría
+
+    # ─────────────────────────────────────────────────────────────────────
+    # Cargar solicitudes con filtro correcto:
+    #   Admin  → ve TODAS las solicitudes de todos los usuarios.
+    #   Normal → ve SOLO las solicitudes que él mismo creó (creado_por).
+    #   Las solicitudes antiguas sin creado_por solo las ve el admin.
+    # ─────────────────────────────────────────────────────────────────────
     user_solicitudes = []
-    _admin_user  = is_admin()
-    _user_secr   = current_session_secretaria()
+    _admin_user   = is_admin()
+    _usuario_actual = current_session_user()   # session['user']
 
     try:
-        if os.path.exists(path):
-            with open(path, 'r', encoding='utf-8') as f:
+        if os.path.exists(str(path)):
+            with open(str(path), 'r', encoding='utf-8') as f:
                 reader = csv.DictReader(f)
-                for row in reader:
-                    # Si no es admin, mostrar solo las de la misma secretaría
-                    if not _admin_user and row.get('secretaria', '') != _user_secr:
-                        continue
+                for csv_idx, row in enumerate(reader):
+                    creado_por = row.get('creado_por', '').strip()
+
+                    if not _admin_user:
+                        # Usuario normal: solo ve sus propias solicitudes
+                        if creado_por != _usuario_actual:
+                            continue
+
                     user_solicitudes.append({
-                        'municipio': row.get('municipio', ''),
-                        'nit': row.get('nit', ''),
-                        'fecha': row.get('fecha', ''),
-                        'secretaria': row.get('secretaria', ''),
-                        'objeto': row.get('objeto', ''),
+                        '_csv_idx':    csv_idx,          # ← índice real en el CSV (0-based)
+                        'municipio':   row.get('municipio', ''),
+                        'nit':         row.get('nit', ''),
+                        'fecha':       row.get('fecha', ''),
+                        'secretaria':  row.get('secretaria', ''),
+                        'objeto':      row.get('objeto', ''),
                         'justificacion': row.get('justificacion', ''),
-                        'valor': row.get('valor', ''),
+                        'valor':       row.get('valor', ''),
                         'meta_producto': row.get('meta_producto', ''),
-                        'eje': row.get('eje', ''),
-                        'sector': row.get('sector', ''),
+                        'eje':         row.get('eje', ''),
+                        'sector':      row.get('sector', ''),
                         'codigo_bpim': row.get('codigo_bpim', ''),
-                        'estado': row.get('estado', 'borrador')
+                        'estado':      row.get('estado', 'borrador'),
+                        'creado_por':  creado_por,
                     })
     except Exception as e:
         print(f"Error cargando solicitudes: {e}")
@@ -104,22 +167,23 @@ def solicitudes():
 
 @solicitudes_bp.route('/solicitudes/editar', methods=['POST'], endpoint='editar_solicitud')
 def editar_solicitud():
-    """Edita una solicitud existente en el CSV"""
+    """Edita una solicitud existente en el CSV (usa índice real del CSV)."""
     path = current_app.config['SOLICITUDES_PATH']
-    
+
     try:
         indice = int(request.form.get('indice', -1))
-        
+
         # Leer todas las filas
-        rows = []
-        with open(path, 'r', encoding='utf-8') as f:
-            reader = csv.reader(f)
-            rows = list(reader)
-        
-        if indice < 0 or indice >= len(rows) - 1:  # -1 porque la primera fila es header
+        with open(str(path), 'r', encoding='utf-8') as f:
+            rows = list(csv.reader(f))
+
+        # rows[0] = header; rows[indice+1] = fila de datos con índice 'indice'
+        if indice < 0 or indice >= len(rows) - 1:
             flash('❌ Solicitud no encontrada', 'danger')
             return redirect(url_for('solicitudes.index'))
-        
+
+        fila_actual = rows[indice + 1]
+
         # Formatear valor
         raw_val = request.form.get('valor', '').strip()
         try:
@@ -127,78 +191,81 @@ def editar_solicitud():
             valor_formatted = '$ ' + '{:,.0f}'.format(num).replace(',', '.')
         except ValueError:
             valor_formatted = raw_val
-        
-        # Determinar nuevo estado: si fue 'generado', cambiar a 'editado', si no preservar
-        estado_actual = rows[indice + 1][11] if len(rows[indice + 1]) > 11 else 'nuevo'
+
         # Siempre marcamos como editado para reactivar el flujo hacia certificados
         nuevo_estado = 'editado'
-        
-        # Actualizar la fila (indice + 1 porque hay header)
+
+        # Preservar 'creado_por' (columna 12) — no sobrescribir al editar
+        creado_por_original = fila_actual[12] if len(fila_actual) > 12 else ''
+
         rows[indice + 1] = [
-            request.form.get('municipio', rows[indice + 1][0]).strip(),
-            request.form.get('nit', rows[indice + 1][1]).strip(),
+            request.form.get('municipio', fila_actual[0] if fila_actual else '').strip(),
+            request.form.get('nit',       fila_actual[1] if len(fila_actual) > 1 else '').strip(),
             request.form.get('fecha', ''),
             request.form.get('secretaria', ''),
             request.form.get('objeto', '').strip(),
             request.form.get('justificacion', '').strip(),
             valor_formatted,
             request.form.get('meta_producto', ''),
-            request.form.get('eje', rows[indice + 1][8] if len(rows[indice + 1]) > 8 else ''),
-            request.form.get('sector', rows[indice + 1][9] if len(rows[indice + 1]) > 9 else ''),
-            request.form.get('codigo_bpim', rows[indice + 1][10] if len(rows[indice + 1]) > 10 else ''),
-            nuevo_estado  # Cambiar a 'editado' si fue 'generado'
+            request.form.get('eje',         fila_actual[8]  if len(fila_actual) > 8  else ''),
+            request.form.get('sector',      fila_actual[9]  if len(fila_actual) > 9  else ''),
+            request.form.get('codigo_bpim', fila_actual[10] if len(fila_actual) > 10 else ''),
+            nuevo_estado,
+            creado_por_original,   # ← preservar autoría original
         ]
-        
-        # Escribir de vuelta al archivo
-        with open(path, 'w', newline='', encoding='utf-8') as f:
+
+        with open(str(path), 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             writer.writerows(rows)
-            f.flush()  # Flush del buffer Python
-            os.fsync(f.fileno())  # Sincronización forzada al disco
-        
+            f.flush()
+            os.fsync(f.fileno())
+
         flash('✅ Solicitud actualizada correctamente', 'success')
     except Exception as e:
         flash(f'❌ Error actualizando solicitud: {e}', 'danger')
-    
+
     return redirect(url_for('solicitudes.index'))
 
 
 @solicitudes_bp.route('/solicitudes/enviar_certificado', methods=['POST'], endpoint='enviar_certificado')
 def enviar_certificado():
-    """Marca una solicitud como lista para generar certificado"""
+    """Marca una solicitud como lista para generar certificado (usa índice real del CSV)."""
     path = current_app.config['SOLICITUDES_PATH']
-    
+
     try:
         indice = int(request.form.get('indice', -1))
-        
-        # Leer todas las filas
-        rows = []
-        with open(path, 'r', encoding='utf-8') as f:
-            reader = csv.reader(f)
-            rows = list(reader)
-        
+
+        with open(str(path), 'r', encoding='utf-8') as f:
+            rows = list(csv.reader(f))
+
         if indice < 0 or indice >= len(rows) - 1:
             flash('❌ Solicitud no encontrada', 'danger')
             return redirect(url_for('solicitudes.index'))
-        
-        # Actualizar estado a "pendiente"
+
         row_index = indice + 1
+
+        # Actualizar estado a "pendiente" (columna 11), preservar las demás columnas
         if len(rows[row_index]) > 11:
             rows[row_index][11] = 'pendiente'
         else:
-            # Si no existe la columna, agregarla
-            rows[row_index].append('pendiente')
-        
-        # Escribir de vuelta al archivo
-        with open(path, 'w', newline='', encoding='utf-8') as f:
+            while len(rows[row_index]) < 12:
+                rows[row_index].append('')
+            rows[row_index][11] = 'pendiente'
+
+        # Asegurar que la columna creado_por (12) exista y se preserve
+        if len(rows[row_index]) < 13:
+            rows[row_index].append('')
+
+        with open(str(path), 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             writer.writerows(rows)
-            f.flush()  # Flush del buffer Python
-            os.fsync(f.fileno())  # Sincronización forzada al disco
+            f.flush()
+            os.fsync(f.fileno())
+
         flash('✅ Solicitud enviada para generar certificado', 'success')
     except Exception as e:
         flash(f'❌ Error enviando solicitud: {e}', 'danger')
-    
+
     return redirect(url_for('solicitudes.index'))
 
 

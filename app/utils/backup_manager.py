@@ -27,48 +27,63 @@ class BackupManager:
         
         logger.info(f"[BACKUP] Sistema de backup inicializado en {self.backup_dir}")
     
+    def _get_csv_paths(self):
+        """Retorna rutas de archivos CSV críticos a incluir en el backup."""
+        paths = {}
+        try:
+            solicitudes_path = Path(str(self.app.config.get('SOLICITUDES_PATH', '')))
+            if solicitudes_path.exists():
+                paths['solicitudes.csv'] = solicitudes_path
+        except Exception:
+            pass
+        return paths
+
     def crear_backup(self, nombre_custom=None):
         """
-        Crea un backup comprimido de la BD actual
-        Retorna ruta del backup creado
+        Crea un backup comprimido de la BD SQLite y los CSV de datos críticos.
+        Retorna información del backup creado.
         """
         try:
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             nombre_backup = nombre_custom or f"backup_{timestamp}"
             ruta_backup = self.backup_dir / f"{nombre_backup}.zip"
-            
-            # Crear archivo ZIP con la BD y metadatos
+
+            csv_paths = self._get_csv_paths()
+
             with zipfile.ZipFile(ruta_backup, 'w', zipfile.ZIP_DEFLATED) as zf:
-                # Agregar archivo de BD
+                # Agregar base de datos SQLite
                 if self.db_file.exists():
                     zf.write(self.db_file, arcname='app.db')
-                    logger.info(f"[BACKUP] BD añadida al backup")
-                
+                    logger.info("[BACKUP] BD SQLite añadida al backup")
+
+                # Agregar CSV de solicitudes y otros datos críticos
+                for arcname, csv_path in csv_paths.items():
+                    zf.write(csv_path, arcname=arcname)
+                    logger.info(f"[BACKUP] CSV añadido al backup: {arcname}")
+
                 # Metadatos del backup
                 metadata = {
                     'timestamp': timestamp,
                     'fecha': datetime.now().isoformat(),
-                    'tamaño_kb': self.db_file.stat().st_size / 1024 if self.db_file.exists() else 0,
+                    'tamaño_db_kb': self.db_file.stat().st_size / 1024 if self.db_file.exists() else 0,
+                    'archivos_csv': list(csv_paths.keys()),
                     'nombre_archivo': nombre_backup
                 }
-                
-                zf.writestr('metadata.json', json.dumps(metadata, indent=2))
-                logger.info(f"[BACKUP] Metadatos añadidos")
-            
+                zf.writestr('metadata.json', json.dumps(metadata, indent=2, ensure_ascii=False))
+                logger.info("[BACKUP] Metadatos añadidos")
+
             logger.info(f"[BACKUP] ✅ Backup creado: {ruta_backup}")
             return {
                 'success': True,
                 'archivo': str(ruta_backup),
                 'nombre': nombre_backup,
                 'timestamp': timestamp,
-                'tamaño_kb': ruta_backup.stat().st_size / 1024
+                'tamaño_kb': ruta_backup.stat().st_size / 1024,
+                'archivos_csv': list(csv_paths.keys()),
             }
         except Exception as e:
             logger.error(f"[BACKUP] ❌ Error creando backup: {e}")
-            return {
-                'success': False,
-                'error': str(e)
-            }
+            return {'success': False, 'error': str(e)}
     
     def listar_backups(self):
         """Lista todos los backups disponibles"""
@@ -129,29 +144,54 @@ class BackupManager:
             
             # 2. Restaurar desde ZIP
             logger.info(f"[BACKUP] Extrayendo backup desde {archivo_backup}...")
-            
+
+            archivos_restaurados = []
+
             with zipfile.ZipFile(ruta_backup, 'r') as zf:
-                # Extraer app.db
-                if 'app.db' in zf.namelist():
-                    # Respaldar BD actual
+                namelist = zf.namelist()
+
+                # Restaurar base de datos SQLite
+                if 'app.db' in namelist:
                     if self.db_file.exists():
-                        self.db_file.rename(f"{self.db_file}.old")
-                    
-                    # Extraer nuevo
+                        old_path = Path(f"{self.db_file}.old")
+                        if old_path.exists():
+                            old_path.unlink()
+                        self.db_file.rename(old_path)
                     zf.extract('app.db', path=self.db_file.parent)
-                    logger.info(f"[BACKUP] ✅ BD restaurada desde backup")
-                    
-                    return {
-                        'success': True,
-                        'mensaje': 'Datos restaurados exitosamente',
-                        'backup_seguridad': backup_actual.get('archivo'),
-                        'fecha_restauracion': datetime.now().isoformat()
-                    }
-                else:
-                    return {
-                        'success': False,
-                        'error': 'El archivo de backup no contiene app.db'
-                    }
+                    archivos_restaurados.append('app.db')
+                    logger.info("[BACKUP] ✅ BD SQLite restaurada")
+
+                # Restaurar CSV de solicitudes (y cualquier otro CSV en el backup)
+                csv_paths = self._get_csv_paths()
+                for arcname, destino in csv_paths.items():
+                    if arcname in namelist:
+                        # Respaldar CSV actual antes de sobreescribir
+                        if destino.exists():
+                            old_csv = destino.with_suffix('.csv.old')
+                            if old_csv.exists():
+                                old_csv.unlink()
+                            destino.rename(old_csv)
+                        zf.extract(arcname, path=destino.parent)
+                        # zf.extract pone el archivo como destino.parent/arcname
+                        extracted = destino.parent / arcname
+                        if extracted.exists() and extracted != destino:
+                            extracted.rename(destino)
+                        archivos_restaurados.append(arcname)
+                        logger.info(f"[BACKUP] ✅ {arcname} restaurado")
+
+            if not archivos_restaurados:
+                return {
+                    'success': False,
+                    'error': 'El backup no contiene archivos conocidos (app.db / solicitudes.csv)'
+                }
+
+            return {
+                'success': True,
+                'mensaje': f'Datos restaurados exitosamente: {", ".join(archivos_restaurados)}',
+                'archivos_restaurados': archivos_restaurados,
+                'backup_seguridad': backup_actual.get('archivo'),
+                'fecha_restauracion': datetime.now().isoformat()
+            }
         
         except Exception as e:
             logger.error(f"[BACKUP] ❌ Error restaurando backup: {e}")

@@ -676,7 +676,7 @@ textarea.sol-form-control {
   <div class="sol-section-title">
     <div class="sol-section-title-left">
       <i class="bi bi-clipboard-check-fill"></i>
-      Mis Solicitudes
+      {% if is_admin %}Todas las Solicitudes{% else %}Mis Solicitudes{% endif %}
     </div>
     <button class="sol-collapse-btn" onclick="toggleHistorial()" id="collapseBtn">
       <i class="bi bi-chevron-up" id="collapseIcon"></i>
@@ -688,7 +688,7 @@ textarea.sol-form-control {
     <div class="sol-panel-header">
       <h4><i class="bi bi-table"></i> Registro de solicitudes</h4>
       {% if user_solicitudes %}
-      <span class="sol-count-label">{{ total }} registros</span>
+      <span class="sol-count-label">{{ total }} registros{% if is_admin %} (todos los usuarios){% endif %}</span>
       {% endif %}
     </div>
 
@@ -701,6 +701,7 @@ textarea.sol-form-control {
             <th>Secretaría</th>
             <th>Objeto</th>
             <th>Valor</th>
+            {% if is_admin %}<th>Creado por</th>{% endif %}
             <th>Estado</th>
             <th class="sol-th-actions">Acciones</th>
           </tr>
@@ -719,7 +720,13 @@ textarea.sol-form-control {
                 {{ sol.objeto[:50] }}{% if sol.objeto|length > 50 %}…{% endif %}
               </span>
             </td>
-            <td class="sol-td-valor">${{ sol.valor }}</td>
+            <td class="sol-td-valor">{{ sol.valor }}</td>
+            {% if is_admin %}
+            <td style="font-size:0.78rem;color:#64748b;white-space:nowrap;">
+              <i class="bi bi-person-fill" style="color:#0f4c81;"></i>
+              {{ sol.creado_por or '—' }}
+            </td>
+            {% endif %}
             <td>
               {% set e = sol.estado or 'borrador' %}
               <span class="sol-badge {{ e }}">
@@ -732,6 +739,7 @@ textarea.sol-form-control {
               </span>
             </td>
             <td class="sol-td-actions">
+              {# loop.index0 = posición local en la lista JS; sol._csv_idx = fila real en el CSV #}
               <button onclick="editarSolicitud({{ loop.index0 }})"
                       class="sol-action-btn edit" title="Editar solicitud">
                 <i class="bi bi-pencil-square"></i>
@@ -739,7 +747,7 @@ textarea.sol-form-control {
 
               {% if sol.estado == 'editado' %}
               <form method="POST" action="{{ url_for('solicitudes.enviar_certificado') }}" class="sol-form-inline">
-                <input type="hidden" name="indice" value="{{ loop.index0 }}">
+                <input type="hidden" name="indice" value="{{ sol._csv_idx }}">
                 <button type="submit" class="sol-action-btn send" title="Enviar para generar certificado">
                   <i class="bi bi-send-fill"></i>
                 </button>
@@ -749,7 +757,7 @@ textarea.sol-form-control {
               {% if is_admin %}
               <form method="POST" action="{{ url_for('solicitudes.eliminar_solicitud') }}" class="sol-form-inline"
                     onsubmit="return confirm('¿Eliminar esta solicitud?');">
-                <input type="hidden" name="indice" value="{{ loop.index0 }}">
+                <input type="hidden" name="indice" value="{{ sol._csv_idx }}">
                 <button type="submit" class="sol-action-btn del" title="Eliminar">
                   <i class="bi bi-trash3-fill"></i>
                 </button>
@@ -915,7 +923,8 @@ function editarSolicitud(idx) {
   const sol = userSolicitudes[idx];
   if (!sol) return;
 
-  $('#edit_indice').val(idx);
+  // Usar el índice real del CSV, no el índice local de la lista filtrada
+  $('#edit_indice').val(sol._csv_idx);
   $('#edit_fecha').val(sol.fecha);
   $('#edit_secretaria').val(sol.secretaria);
   $('#edit_objeto').val(sol.objeto);
