@@ -71,37 +71,31 @@
   border-radius: 10px;
   font-size: 0.82rem;
   font-weight: 600;
-  border: none;
+  border: 1.5px solid rgba(255,255,255,0.3);
   cursor: pointer;
   text-decoration: none !important;
   transition: all 0.18s ease;
   background: rgba(255,255,255,0.12);
   color: #fff;
-  border: 1.5px solid rgba(255,255,255,0.3);
   position: relative; z-index: 1;
 }
 
 .cert-banner-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
 
-/* ---- KPI Cards con degradado ---- */
+/* ---- KPI Cards (6 columnas) ---- */
 .cert-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 1rem;
   margin-bottom: 1.75rem;
 }
 
-@media (max-width: 900px) {
-  .cert-kpi-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 500px) {
-  .cert-kpi-grid { grid-template-columns: repeat(2, 1fr); }
-}
+@media (max-width: 1100px) { .cert-kpi-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 700px)  { .cert-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
 
 .cert-kpi-card {
   border-radius: 16px;
-  padding: 1.25rem 1.25rem 1.1rem;
+  padding: 1.15rem 1.15rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -126,24 +120,26 @@
   border-radius: 50%;
 }
 
-.cert-kpi-card:nth-child(1) { animation-delay: 0.05s; background: linear-gradient(130deg, #0c3d6b, #0f4c81); }
-.cert-kpi-card:nth-child(2) { animation-delay: 0.09s; background: linear-gradient(130deg, #065f46, #059669); }
-.cert-kpi-card:nth-child(3) { animation-delay: 0.13s; background: linear-gradient(130deg, #9a3412, #ea580c); }
-.cert-kpi-card:nth-child(4) { animation-delay: 0.17s; background: linear-gradient(130deg, #0369a1, #0ea5e9); }
+.cert-kpi-card:nth-child(1) { animation-delay: 0.04s; background: linear-gradient(130deg, #0c3d6b, #0f4c81); }
+.cert-kpi-card:nth-child(2) { animation-delay: 0.08s; background: linear-gradient(130deg, #065f46, #059669); }
+.cert-kpi-card:nth-child(3) { animation-delay: 0.12s; background: linear-gradient(130deg, #9a3412, #ea580c); }
+.cert-kpi-card:nth-child(4) { animation-delay: 0.16s; background: linear-gradient(130deg, #0369a1, #0ea5e9); }
+.cert-kpi-card:nth-child(5) { animation-delay: 0.20s; background: linear-gradient(130deg, #6d28d9, #8b5cf6); }
+.cert-kpi-card:nth-child(6) { animation-delay: 0.24s; background: linear-gradient(130deg, #92400e, #d97706); }
 
 .cert-kpi-icon {
-  width: 36px; height: 36px;
-  border-radius: 10px;
+  width: 34px; height: 34px;
+  border-radius: 9px;
   background: rgba(255,255,255,0.18);
   display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; color: #fff;
-  margin-bottom: 0.4rem;
+  font-size: 0.95rem; color: #fff;
+  margin-bottom: 0.35rem;
   flex-shrink: 0;
   position: relative; z-index: 1;
 }
 
 .cert-kpi-num {
-  font-size: 2.1rem;
+  font-size: 1.9rem;
   font-weight: 900;
   color: #fff;
   line-height: 1;
@@ -151,15 +147,24 @@
   position: relative; z-index: 1;
 }
 
+.cert-kpi-num-sm {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+  position: relative; z-index: 1;
+  word-break: break-word;
+}
+
 .cert-kpi-label {
-  font-size: 0.78rem;
+  font-size: 0.73rem;
   font-weight: 700;
-  color: rgba(255,255,255,0.92);
+  color: rgba(255,255,255,0.88);
   margin-top: 0.1rem;
   position: relative; z-index: 1;
 }
 
-/* ---- Content grid ---- */
+/* ---- Layout stats + filtros ---- */
 .cert-content-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -199,7 +204,14 @@
 }
 
 .cert-card-header h3 i { color: #0f4c81; }
-.cert-card-body { padding: 1.5rem; }
+.cert-card-body { padding: 1.25rem 1.5rem; }
+
+/* ---- Gráfico horizontal mejorado ---- */
+.cert-chart-wrap {
+  position: relative;
+  width: 100%;
+  min-height: 220px;
+}
 
 /* ---- Filtros ---- */
 .cert-filter-label {
@@ -212,7 +224,7 @@
 
 .cert-filter-control {
   width: 100%;
-  padding: 0.65rem 0.9rem;
+  padding: 0.6rem 0.85rem;
   border: 1.5px solid #e2e8f0;
   border-radius: 10px;
   font-size: 0.875rem;
@@ -259,7 +271,7 @@
   transform: none;
 }
 
-/* ---- Tabla ---- */
+/* ---- Tabla headers ---- */
 .cert-table-header {
   display: flex;
   justify-content: space-between;
@@ -292,6 +304,15 @@
   font-weight: 700;
 }
 
+.cert-badge-generados {
+  background: #dcfce7;
+  color: #16a34a;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
 .btn-batch-inline {
   display: inline-flex;
   align-items: center;
@@ -315,6 +336,7 @@
   overflow-x: auto;
 }
 
+/* ---- Tabla ---- */
 .cert-table {
   width: 100%;
   border-collapse: collapse;
@@ -334,7 +356,7 @@
 }
 
 .cert-table tbody td {
-  padding: 0.75rem 0.9rem;
+  padding: 0.7rem 0.9rem;
   border-bottom: 1px solid #f1f5f9;
   color: #374151;
   vertical-align: middle;
@@ -353,10 +375,14 @@
   display: inline-block;
   background: #e0f2fe;
   color: #0369a1;
-  padding: 0.22rem 0.65rem;
+  padding: 0.2rem 0.6rem;
   border-radius: 8px;
-  font-size: 0.75rem;
+  font-size: 0.73rem;
   font-weight: 600;
+  white-space: nowrap;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .badge-status {
@@ -371,12 +397,73 @@
   font-weight: 700;
 }
 
+.badge-generado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: #dcfce7;
+  color: #16a34a;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.badge-sin-pdf {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: #fef9c3;
+  color: #ca8a04;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
 .td-index { font-weight: 700; color: #0f4c81; }
 .td-center { text-align: center; }
 .th-check  { width: 46px; text-align: center; }
 .th-index  { width: 46px; }
-.td-ellipsis-200 { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.td-ellipsis-250 { max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.td-ellipsis-180 { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.td-ellipsis-220 { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---- Botón reimprimir ---- */
+.btn-reimp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 7px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.18s;
+}
+
+.btn-reimp-pdf {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.btn-reimp-pdf:hover {
+  background: #dbeafe;
+  color: #1e3a8a;
+}
+
+.btn-reimp-regen {
+  background: #fefce8;
+  color: #a16207;
+  border: 1px solid #fde68a;
+}
+
+.btn-reimp-regen:hover {
+  background: #fef3c7;
+  color: #92400e;
+}
 
 /* ---- DataTables overrides ---- */
 .dataTables_wrapper .dataTables_paginate .paginate_button {
@@ -413,14 +500,28 @@
   border-top: 1px solid #f1f5f9;
 }
 
-/* Chart container */
-#chartSecretarias { max-height: 260px; }
+/* ---- Modal descarga lote ---- */
+.modal-download-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.modal-download-item:last-child { border-bottom: none; }
+
+.modal-download-filename {
+  font-size: 0.82rem;
+  color: #374151;
+  font-weight: 600;
+}
 
 @media (max-width: 768px) {
   .cert-page { padding: 1.25rem 1rem; }
   .cert-banner { padding: 1.25rem; }
   .cert-banner-left h2 { font-size: 1.25rem !important; }
-  .cert-kpi-grid { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 {% endblock %}
@@ -432,14 +533,14 @@
   <div class="cert-banner">
     <div class="cert-banner-left">
       <h2><i class="bi bi-award-fill me-2"></i>Gestión de Certificados</h2>
-      <p>Administración y generación de certificados municipales</p>
+      <p>Administración y generación de certificados municipales · {{ session.get('user', '') }}</p>
     </div>
     <a href="{{ url_for('main.dashboard') }}" class="cert-banner-btn">
       <i class="bi bi-arrow-left"></i> Dashboard
     </a>
   </div>
 
-  <!-- ===== KPI CARDS ===== -->
+  <!-- ===== KPI CARDS (6) ===== -->
   <div class="cert-kpi-grid">
     <div class="cert-kpi-card">
       <div class="cert-kpi-icon"><i class="bi bi-file-earmark-text-fill"></i></div>
@@ -449,7 +550,7 @@
     <div class="cert-kpi-card">
       <div class="cert-kpi-icon"><i class="bi bi-check-circle-fill"></i></div>
       <div class="cert-kpi-num">{{ generados }}</div>
-      <div class="cert-kpi-label">Generados</div>
+      <div class="cert-kpi-label">Certificados Generados</div>
     </div>
     <div class="cert-kpi-card">
       <div class="cert-kpi-icon"><i class="bi bi-hourglass-split"></i></div>
@@ -461,18 +562,36 @@
       <div class="cert-kpi-num">{{ tiempo_medio }}s</div>
       <div class="cert-kpi-label">Tiempo Medio</div>
     </div>
+    <div class="cert-kpi-card">
+      <div class="cert-kpi-icon"><i class="bi bi-calendar-check-fill"></i></div>
+      <div class="cert-kpi-num">{{ certificados_mes }}</div>
+      <div class="cert-kpi-label">Generados este Mes</div>
+    </div>
+    <div class="cert-kpi-card">
+      <div class="cert-kpi-icon"><i class="bi bi-clock-history"></i></div>
+      {% if ultimo_generado %}
+      <div class="cert-kpi-num-sm">{{ ultimo_generado.secretaria_corta if ultimo_generado.secretaria_corta is defined else ultimo_generado.secretaria }}</div>
+      <div class="cert-kpi-label">Último · {{ ultimo_generado.fecha[:10] if ultimo_generado.fecha and ultimo_generado.fecha != '—' else '—' }}</div>
+      {% else %}
+      <div class="cert-kpi-num">—</div>
+      <div class="cert-kpi-label">Sin registros aún</div>
+      {% endif %}
+    </div>
   </div>
 
   <!-- ===== CONTENIDO (gráfica + filtros) ===== -->
   <div class="cert-content-grid">
 
-    <!-- Gráfica -->
+    <!-- Gráfica horizontal por secretaría -->
     <div class="cert-card">
       <div class="cert-card-header">
-        <h3><i class="bi bi-bar-chart-fill"></i> Estadísticas por Secretaría</h3>
+        <h3><i class="bi bi-bar-chart-fill"></i> Certificados por Secretaría</h3>
+        <span class="cert-badge-generados">{{ generados }} generados</span>
       </div>
       <div class="cert-card-body">
-        <canvas id="chartSecretarias"></canvas>
+        <div class="cert-chart-wrap">
+          <canvas id="chartSecretarias"></canvas>
+        </div>
       </div>
     </div>
 
@@ -482,7 +601,6 @@
         <h3><i class="bi bi-sliders"></i> Filtros y Acciones</h3>
       </div>
       <div class="cert-card-body">
-
         <label class="cert-filter-label">Filtrar Secretaría</label>
         <select id="filterSecretaria" class="cert-filter-control">
           <option value="">Todas las Secretarías</option>
@@ -499,18 +617,17 @@
           <i class="bi bi-lightning-charge-fill"></i>
           Generar Seleccionados
         </button>
-
       </div>
     </div>
 
   </div>
 
-  <!-- ===== TABLA ===== -->
-  <div class="cert-card">
+  <!-- ===== TABLA PENDIENTES ===== -->
+  <div class="cert-card" style="margin-bottom: 1.25rem;">
     <div class="cert-table-header">
       <h3><i class="bi bi-list-check"></i> Solicitudes Pendientes</h3>
       <div class="d-flex align-items-center gap-2">
-        <span class="cert-badge-count">{{ pendientes_list|length }} Pendientes</span>
+        <span class="cert-badge-count">{{ pendientes_list|length }} pendientes</span>
         <button id="batchGenerateTop" type="button" class="btn-batch-inline">
           <i class="bi bi-files"></i> Generar Seleccionados
         </button>
@@ -539,10 +656,14 @@
               <input type="checkbox" class="cert-checkbox rowCheck" data-id="{{ sol.id }}">
             </td>
             <td class="td-index">{{ loop.index }}</td>
-            <td><span class="badge-sec">{{ sol.secretaria[:25] }}...</span></td>
-            <td class="td-ellipsis-200">{{ sol.objeto }}</td>
-            <td class="td-ellipsis-250">{{ sol.justificacion }}</td>
-            <td>{{ sol.fecha }}</td>
+            <td>
+              <span class="badge-sec" title="{{ sol.secretaria }}">
+                {{ sol.secretaria | replace('Secretaría de ', '') | replace('Secretaría ', '') | truncate(26, True, '…') }}
+              </span>
+            </td>
+            <td class="td-ellipsis-180">{{ sol.objeto }}</td>
+            <td class="td-ellipsis-220">{{ sol.justificacion }}</td>
+            <td style="white-space:nowrap;">{{ sol.fecha }}</td>
             <td class="td-center">
               <span class="badge-status"><i class="bi bi-clock-fill"></i> Pendiente</span>
             </td>
@@ -553,7 +674,104 @@
     </div>
   </div>
 
+  <!-- ===== HISTORIAL DE CERTIFICADOS GENERADOS ===== -->
+  <div class="cert-card">
+    <div class="cert-table-header">
+      <h3><i class="bi bi-archive-fill"></i> Historial de Certificados Generados</h3>
+      <span class="cert-badge-generados">{{ historial_list|length }} registros</span>
+    </div>
+
+    {% if historial_list %}
+    <div class="cert-table-wrap">
+      <table id="tblHistorial" class="cert-table">
+        <thead>
+          <tr>
+            <th class="th-index">#</th>
+            <th>ID Solicitud</th>
+            <th>Secretaría</th>
+            <th>Objeto</th>
+            <th>Generado por</th>
+            <th>Fecha Generación</th>
+            <th>Archivo</th>
+            <th class="td-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cert in historial_list %}
+          <tr>
+            <td class="td-index">{{ loop.index }}</td>
+            <td><strong style="color:#0f4c81;">{{ cert.id }}</strong></td>
+            <td>
+              <span class="badge-sec" title="{{ cert.secretaria }}">
+                {{ cert.secretaria_corta }}
+              </span>
+            </td>
+            <td class="td-ellipsis-180" title="{{ cert.objeto }}">{{ cert.objeto }}</td>
+            <td style="white-space:nowrap;font-size:0.8rem;">
+              <i class="bi bi-person-fill" style="color:#0f4c81;"></i>
+              {{ cert.generado_por or '—' }}
+            </td>
+            <td style="white-space:nowrap;font-size:0.8rem;">
+              {{ cert.fecha_generacion[:16] if cert.fecha_generacion else '—' }}
+            </td>
+            <td style="white-space:nowrap;font-size:0.8rem;">
+              {% if cert.pdf_disponible %}
+                <span class="badge-generado"><i class="bi bi-file-earmark-pdf-fill"></i> Disponible</span>
+              {% else %}
+                <span class="badge-sin-pdf"><i class="bi bi-exclamation-triangle-fill"></i> Sin archivo</span>
+              {% endif %}
+            </td>
+            <td class="td-center">
+              {% if cert.pdf_disponible %}
+              <a href="{{ url_for('certificados.descargar_certificado', idx=cert.id) }}"
+                 class="btn-reimp btn-reimp-pdf" title="Descargar PDF">
+                <i class="bi bi-download"></i> Descargar
+              </a>
+              {% else %}
+              <a href="{{ url_for('certificados.reimprimir_certificado', idx=cert.id) }}"
+                 class="btn-reimp btn-reimp-regen" title="Regenerar y descargar PDF">
+                <i class="bi bi-arrow-clockwise"></i> Regenerar
+              </a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="cert-card-body" style="text-align:center;padding:2.5rem 1.5rem;color:#94a3b8;">
+      <i class="bi bi-archive" style="font-size:2.5rem;display:block;margin-bottom:0.75rem;"></i>
+      <p style="margin:0;font-size:0.9rem;">Aún no se han generado certificados. Los registros aparecerán aquí automáticamente.</p>
+    </div>
+    {% endif %}
+  </div>
+
 </div><!-- /cert-page -->
+
+<!-- ===== MODAL: Resultados de generación en lote ===== -->
+<div class="modal fade" id="modalDescargasLote" tabindex="-1" aria-labelledby="modalDescargasLoteLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="border-radius:16px;border:none;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+      <div class="modal-header" style="background:linear-gradient(130deg,#0f4c81,#1565c0);border-radius:16px 16px 0 0;border:none;">
+        <h5 class="modal-title" id="modalDescargasLoteLabel" style="color:#fff;font-weight:700;">
+          <i class="bi bi-check-circle-fill me-2"></i><span id="modalTitulo">Certificados Generados</span>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" style="padding:1.5rem;">
+        <p id="modalResumen" style="font-size:0.9rem;color:#374151;margin-bottom:1rem;"></p>
+        <div id="modalListaCerts" style="max-height:340px;overflow-y:auto;"></div>
+        <div id="modalErrores" style="display:none;margin-top:1rem;"></div>
+      </div>
+      <div class="modal-footer" style="border-top:1px solid #f1f5f9;gap:0.5rem;">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" onclick="location.reload()">
+          <i class="bi bi-arrow-clockwise me-1"></i> Recargar página
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -564,7 +782,8 @@
 <script>
 $(document).ready(function() {
 
-  const table = $('#tblPendientes').DataTable({
+  // ---- DataTable: Solicitudes Pendientes ----
+  const tablePend = $('#tblPendientes').DataTable({
     paging: true,
     info: true,
     lengthChange: false,
@@ -574,82 +793,184 @@ $(document).ready(function() {
     order: [[1, 'asc']]
   });
 
+  // ---- DataTable: Historial ----
+  if ($('#tblHistorial').length) {
+    $('#tblHistorial').DataTable({
+      paging: true,
+      info: true,
+      lengthChange: false,
+      pageLength: 10,
+      language: { url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
+      dom: 'rtip',
+      order: [[0, 'asc']]
+    });
+  }
+
+  // ---- Filtros pendientes ----
   $('#filterSecretaria').on('change', function() {
-    table.column(2).search(this.value).draw();
+    tablePend.column(2).search(this.value).draw();
   });
 
   $('#searchText').on('keyup', function() {
-    table.search(this.value).draw();
+    tablePend.search(this.value).draw();
   });
 
+  // ---- Seleccionar todos ----
   $('#selectAll').on('click', function() {
     $('.rowCheck').prop('checked', this.checked);
   });
 
+  // ---- Generación en lote ----
   function ejecutarGeneracion(btn) {
     const ids = $('.rowCheck:checked').map((_, el) => el.dataset.id).get();
-    if (!ids.length) { alert('⚠️ Por favor selecciona al menos una solicitud.'); return; }
+    if (!ids.length) {
+      alert('Selecciona al menos una solicitud antes de generar.');
+      return;
+    }
+
     const originalHtml = btn.html();
-    btn.html('<span class="spinner-border spinner-border-sm me-2"></span>Procesando ' + ids.length + '...').prop('disabled', true);
+    btn.html('<span class="spinner-border spinner-border-sm me-2"></span>Procesando ' + ids.length + '...')
+       .prop('disabled', true);
+
     const formData = new FormData();
     ids.forEach(id => formData.append('indices[]', id));
+
     fetch('{{ url_for("certificados.generar_lote") }}', { method: 'POST', body: formData })
-      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(data => {
-        if (!data.success) throw new Error(data.error || 'Error desconocido');
-        btn.html('<i class="bi bi-check-circle me-2"></i>✅ Éxito');
-        if (Array.isArray(data.download_urls)) {
-          data.download_urls.forEach((url, i) => {
-            const a = document.createElement('a');
-            a.href = url; a.download = ''; a.style.display = 'none';
-            document.body.appendChild(a);
-            setTimeout(() => { a.click(); document.body.removeChild(a); }, i * 150);
-          });
-        }
-        let msg = '✅ ' + data.generados + ' de ' + data.total + ' certificados generados.';
-        if (data.errores?.length) msg += '\n\n⚠️ Errores:\n- ' + data.errores.join('\n- ');
-        alert(msg);
-        setTimeout(() => location.reload(), 2000);
+      .then(r => {
+        if (r.status === 401) throw new Error('Sesión expirada. Por favor recarga la página e inicia sesión de nuevo.');
+        if (!r.ok) throw new Error('Error del servidor (HTTP ' + r.status + ')');
+        return r.json();
       })
-      .catch(err => { btn.html(originalHtml).prop('disabled', false); alert('❌ Error:\n' + err.message); });
+      .then(data => {
+        btn.html(originalHtml).prop('disabled', false);
+        if (!data.success) throw new Error(data.error || 'Error desconocido');
+        mostrarModalDescargasLote(data);
+      })
+      .catch(err => {
+        btn.html(originalHtml).prop('disabled', false);
+        alert('Error al generar certificados:\n' + err.message);
+      });
   }
 
-  $('#batchGenerate, #batchGenerateTop').on('click', function() { ejecutarGeneracion($(this)); });
+  $('#batchGenerate, #batchGenerateTop').on('click', function() {
+    ejecutarGeneracion($(this));
+  });
 
-  // Chart.js — paleta institucional azul
+  // ---- Modal de descargas (reemplaza auto-click que bloqueaban navegadores) ----
+  function mostrarModalDescargasLote(data) {
+    const modal = new bootstrap.Modal(document.getElementById('modalDescargasLote'));
+
+    document.getElementById('modalTitulo').textContent =
+      data.generados + ' de ' + data.total + ' Certificados Generados';
+
+    document.getElementById('modalResumen').textContent =
+      'Los certificados han sido generados y guardados. Descarga cada uno usando el botón correspondiente.';
+
+    const lista = document.getElementById('modalListaCerts');
+    lista.innerHTML = '';
+
+    if (Array.isArray(data.certificados) && data.certificados.length) {
+      data.certificados.forEach(function(cert) {
+        const item = document.createElement('div');
+        item.className = 'modal-download-item';
+        item.innerHTML =
+          '<span class="modal-download-filename"><i class="bi bi-file-earmark-pdf-fill" style="color:#dc2626;"></i> ' +
+          cert.filename + '</span>' +
+          '<a href="' + cert.url + '" class="btn-reimp btn-reimp-pdf" download>' +
+          '<i class="bi bi-download"></i> Descargar' +
+          '</a>';
+        lista.appendChild(item);
+      });
+    } else {
+      lista.innerHTML = '<p style="color:#94a3b8;font-size:0.85rem;text-align:center;">No hay archivos para descargar.</p>';
+    }
+
+    // Mostrar errores si los hay
+    const errDiv = document.getElementById('modalErrores');
+    if (data.errores && data.errores.length) {
+      errDiv.style.display = 'block';
+      errDiv.innerHTML =
+        '<div class="alert alert-warning" style="font-size:0.82rem;margin:0;">' +
+        '<strong>Advertencias:</strong><ul style="margin:0.5rem 0 0;padding-left:1.2rem;">' +
+        data.errores.map(e => '<li>' + e + '</li>').join('') +
+        '</ul></div>';
+    } else {
+      errDiv.style.display = 'none';
+    }
+
+    modal.show();
+  }
+
+  // ---- Gráfico horizontal por secretaría ----
   const ctx = document.getElementById('chartSecretarias');
   if (ctx) {
+    const labels = {{ sec_labels | tojson }};
+    const counts = {{ sec_counts | tojson }};
+    const maxVal = Math.max(...counts, 1);
+
+    // Paleta institucional progresiva
+    const bgColors = labels.map((_, i) => {
+      const intensity = 0.55 + 0.35 * (i / Math.max(labels.length - 1, 1));
+      return `rgba(15, 76, 129, ${intensity})`;
+    });
+
     new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: {{ sec_labels|tojson }},
+        labels: labels,
         datasets: [{
           label: 'Certificados Generados',
-          data: {{ sec_counts|tojson }},
-          backgroundColor: 'rgba(15,76,129,0.75)',
-          borderColor: 'rgba(15,76,129,1)',
-          borderWidth: 2,
-          borderRadius: 8
+          data: counts,
+          backgroundColor: bgColors,
+          borderColor: 'rgba(15,76,129,0.9)',
+          borderWidth: 1.5,
+          borderRadius: 6,
+          borderSkipped: false,
         }]
       },
       options: {
+        indexAxis: 'y',   // <-- barras horizontales para etiquetas largas
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
+        layout: { padding: { right: 24, top: 8, bottom: 8 } },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                return ' ' + ctx.parsed.x + ' certificado' + (ctx.parsed.x !== 1 ? 's' : '');
+              }
+            }
+          }
+        },
         scales: {
-          y: {
-            beginAtZero: true,
-            grid: { color: 'rgba(0,0,0,0.04)' },
-            ticks: { color: '#64748b', font: { weight: 600, size: 11 } }
-          },
           x: {
+            beginAtZero: true,
+            max: maxVal + 1,
+            grid: { color: 'rgba(0,0,0,0.05)' },
+            ticks: {
+              color: '#64748b',
+              font: { size: 11, weight: '600' },
+              stepSize: 1,
+              precision: 0,
+            }
+          },
+          y: {
             grid: { display: false },
-            ticks: { color: '#64748b', font: { weight: 600, size: 10 }, maxRotation: 40, minRotation: 40 }
+            ticks: {
+              color: '#374151',
+              font: { size: 11, weight: '600' },
+              padding: 6,
+            }
           }
         }
       }
     });
+
+    // Ajustar altura del canvas según número de secretarías
+    ctx.parentElement.style.minHeight = Math.max(180, labels.length * 48) + 'px';
   }
+
 });
 </script>
 {% endblock %}
