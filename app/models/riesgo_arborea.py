@@ -137,10 +137,49 @@ class RadicadoArborea(db.Model):
 
     # Acta/soporte adjunto al dictamen del comité
     dictamen_acta_archivo    = db.Column(db.String(255))
+
+    # ── Campos nuevos (fase 2 mejoras) ──────────────────────────────────────
+    # Criticidad: alta / media / baja (calculada automáticamente o manual)
+    criticidad               = db.Column(db.String(10), default='media')
+    # Log JSON de cambios de estado [{estado, fecha, usuario, observacion}]
+    historial_estados        = db.Column(db.Text)
+    # SLA en días (tiempo máximo para resolver)
+    sla_dias                 = db.Column(db.Integer, default=15)
+    # Fecha límite calculada a partir de created_at + sla_dias
+    fecha_vencimiento_sla    = db.Column(db.DateTime)
     
     def __repr__(self):
         return f'<RadicadoArborea {self.numero_radicado}>'
-    
+
+    def calcular_criticidad(self):
+        """Auto-calcula criticidad según tipo de solicitud y DAP."""
+        tipo = (self.tipo_solicitud or '').lower()
+        dap  = self.arbol_dap_cm or 0
+        if 'riesgo' in tipo or 'emergencia' in tipo or dap >= 80:
+            self.criticidad = 'alta'
+        elif 'tala' in tipo and 40 <= dap < 80:
+            self.criticidad = 'media'
+        else:
+            self.criticidad = 'baja'
+        return self.criticidad
+
+    def calcular_vencimiento_sla(self):
+        """Calcula fecha_vencimiento_sla = created_at + sla_dias."""
+        base = self.created_at or datetime.utcnow()
+        self.fecha_vencimiento_sla = base + timedelta(days=(self.sla_dias or 15))
+
+    def registrar_cambio_estado(self, nuevo_estado: str, usuario: str, observacion: str = ''):
+        """Agrega una entrada al log historial_estados."""
+        historial = json.loads(self.historial_estados) if self.historial_estados else []
+        historial.append({
+            'estado': nuevo_estado,
+            'fecha': datetime.utcnow().isoformat(),
+            'usuario': usuario,
+            'observacion': observacion
+        })
+        self.historial_estados = json.dumps(historial, ensure_ascii=False)
+        self.estado = nuevo_estado
+
     def generar_numero_radicado(self):
         """Genera número de radicado único: AR-2026-00001"""
         anio = datetime.utcnow().year
@@ -170,6 +209,11 @@ class RadicadoArborea(db.Model):
             self.compensacion_calculo_json = json.dumps(calculo)
     
     def to_dict(self):
+        historial = json.loads(self.historial_estados) if self.historial_estados else []
+        dias_sla_restantes = None
+        if self.fecha_vencimiento_sla:
+            delta = (self.fecha_vencimiento_sla - datetime.utcnow()).days
+            dias_sla_restantes = delta
         return {
             'id': self.id,
             'numero_radicado': self.numero_radicado,
@@ -231,4 +275,10 @@ class RadicadoArborea(db.Model):
             # Archivos adjuntos (parse JSON)
             'archivos_radicacion': json.loads(self.archivos_radicacion) if self.archivos_radicacion else [],
             'archivos_visita': json.loads(self.archivos_visita) if self.archivos_visita else [],
+            # Nuevos campos
+            'criticidad': self.criticidad or 'media',
+            'historial_estados': historial,
+            'sla_dias': self.sla_dias or 15,
+            'fecha_vencimiento_sla': self.fecha_vencimiento_sla.isoformat() if self.fecha_vencimiento_sla else None,
+            'dias_sla_restantes': dias_sla_restantes,
         }

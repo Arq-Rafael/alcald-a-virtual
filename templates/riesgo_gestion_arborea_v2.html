@@ -4,7 +4,23 @@
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/gestion_riesgo.css') }}">
 <style>
-  .wizard-container { max-width: 1000px; margin: 20px auto; background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
+  /* ===== WIZARD COMO MODAL (no ocupa espacio en la página) ===== */
+  .wizard-container {
+    display: none; /* oculto por defecto */
+    position: fixed; inset: 0; z-index: 1035;
+    background: rgba(0,0,0,.58);
+    overflow-y: auto;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 16px;
+  }
+  .wizard-container.open { display: flex; }
+  .wizard-inner {
+    max-width: 1000px; width: 100%;
+    background: white; border-radius: 12px;
+    box-shadow: 0 8px 40px rgba(0,0,0,.35);
+    position: relative;
+  }
   .wizard-header { background: linear-gradient(130deg, #0f4c81 0%, #1565c0 55%, #0ea5e9 100%); color: white; padding: 30px; border-radius: 12px 12px 0 0; }
   .wizard-header h1 { margin: 0; font-size: 28px; }
   .wizard-steps { display: flex; justify-content: space-between; padding: 24px; border-bottom: 2px solid #f0f0f0; background: #fafafa; }
@@ -62,7 +78,7 @@
   .autocomplete-item small { color: #6c757d; font-style: italic; display: block; margin-top: 2px; }
   .compensacion-result { background: #e8f0fe; padding: 20px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #1565c0; text-align: center; }
   .compensacion-numero { font-size: 36px; font-weight: bold; color: #0f4c81; }
-  .historial-container { margin-top: 40px; padding-top: 40px; border-top: 2px solid #f0f0f0; }
+  .historial-container { padding: 0; }
   
   /* ESTILOS DE BOTONES MEJORADOS */
   .actions-cell { white-space: nowrap; padding: 8px !important; }
@@ -225,12 +241,146 @@
   .wz-section-gap { margin: 16px 0; }
   .wz-hidden { display: none; }
   .wz-comp-label { font-size: 14px; color: #666; margin-bottom: 8px; }
+
+  /* ======================================================
+     KANBAN DASHBOARD
+  ====================================================== */
+  .kb-header {
+    background: linear-gradient(135deg, #0f4c81 0%, #1565c0 60%, #0ea5e9 100%);
+    color: white; padding: 20px 28px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px; box-shadow: 0 4px 20px rgba(15,76,129,.35);
+  }
+  .kb-header h2 { margin:0; font-size: 22px; }
+  .kb-header-sub { font-size: 13px; opacity: .85; margin-top: 3px; }
+  .kb-metrics { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  .kb-metric {
+    background: white; border-radius: 10px; padding: 14px 20px;
+    flex: 1; min-width: 110px; text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,.08); border-bottom: 3px solid;
+  }
+  .kb-metric .val { font-size: 28px; font-weight: 800; }
+  .kb-metric .lbl { font-size: 11px; color: #6b7280; margin-top: 2px; font-weight: 600; }
+  .kb-metric.m-radicada { border-color: #fbbf24; }  .kb-metric.m-radicada .val { color: #d97706; }
+  .kb-metric.m-visitada { border-color: #3b82f6; }  .kb-metric.m-visitada .val { color: #2563eb; }
+  .kb-metric.m-revision  { border-color: #f97316; }  .kb-metric.m-revision .val { color: #ea580c; }
+  .kb-metric.m-aprobada  { border-color: #22c55e; }  .kb-metric.m-aprobada .val { color: #16a34a; }
+  .kb-metric.m-negada    { border-color: #ef4444; }  .kb-metric.m-negada .val { color: #dc2626; }
+  .kb-metric.m-total     { border-color: #8b5cf6; }  .kb-metric.m-total .val { color: #7c3aed; }
+  .kb-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 12px; flex-wrap: wrap; }
+  .kb-search { padding: 8px 14px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; width: 240px; }
+  .kb-view-toggle button {
+    padding: 7px 16px; border: 1px solid #d1d5db; cursor: pointer;
+    font-size: 13px; font-weight: 600; background: white; transition: all .2s;
+  }
+  .kb-view-toggle button:first-child { border-radius: 8px 0 0 8px; }
+  .kb-view-toggle button:last-child  { border-radius: 0 8px 8px 0; }
+  .kb-view-toggle button.active { background: #1565c0; color: white; border-color: #1565c0; }
+  .kb-board { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 16px; align-items: flex-start; }
+  .kb-col { background: #f8fafc; border-radius: 12px; min-width: 230px; flex: 1; padding: 12px; border: 1px solid #e2e8f0; }
+  .kb-col-header { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+    padding: 6px 10px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+  .kbh-radicada  { background: #fef3c7; color: #92400e; }
+  .kbh-visitada  { background: #dbeafe; color: #1e40af; }
+  .kbh-revision  { background: #ffedd5; color: #9a3412; }
+  .kbh-aprobada  { background: #dcfce7; color: #166534; }
+  .kbh-negada    { background: #fee2e2; color: #991b1b; }
+  /* ====== KANBAN CARDS — Premium design ====== */
+  .kb-card {
+    background: white; border-radius: 12px; padding: 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.05);
+    border-left: 4px solid #e5e7eb; cursor: pointer;
+    transition: all .22s cubic-bezier(.4,0,.2,1);
+    position: relative; overflow: hidden;
+  }
+  .kb-card::after {
+    content:''; position:absolute; inset:0;
+    background: linear-gradient(135deg,rgba(255,255,255,.0) 0%, rgba(255,255,255,.0) 100%);
+    transition: background .22s;
+  }
+  .kb-card:hover {
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: 0 8px 24px rgba(0,0,0,.14), 0 2px 6px rgba(0,0,0,.08);
+  }
+  .kb-card.crit-alta  { border-left-color: #ef4444; background: linear-gradient(to right, rgba(254,226,226,.25), white 40%); }
+  .kb-card.crit-media { border-left-color: #f97316; background: linear-gradient(to right, rgba(255,237,213,.25), white 40%); }
+  .kb-card.crit-baja  { border-left-color: #22c55e; background: linear-gradient(to right, rgba(220,252,231,.25), white 40%); }
+  .kb-card-header { display:flex; align-items:center; gap:9px; margin-bottom:8px; }
+  .kb-card-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg,#0f4c81,#1565c0);
+    color: white; font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .kb-card-num  { font-size: 10px; font-weight: 700; color: #94a3b8; letter-spacing:.5px; text-transform:uppercase; }
+  .kb-card-sol  { font-weight: 700; font-size: 13px; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height:1.2; }
+  .kb-card-esp  { font-size: 12px; color: #64748b; margin-top:4px; display:flex; align-items:center; gap:4px; }
+  .kb-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 8px; border-top: 1px solid #f1f5f9; }
+  .kb-crit { display: inline-flex; align-items:center; gap:3px; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; letter-spacing:.3px; }
+  .kb-crit.alta  { background: #fee2e2; color: #991b1b; }
+  .kb-crit.media { background: #ffedd5; color: #9a3412; }
+  .kb-crit.baja  { background: #dcfce7; color: #166534; }
+  .kb-sla { font-size: 11px; font-weight: 600; display:flex; align-items:center; gap:3px; }
+  .kb-sla.ok   { color: #16a34a; }
+  .kb-sla.warn { color: #d97706; }
+  .kb-sla.late { color: #dc2626; }
+  .kb-tipo-pill { display:inline-flex; align-items:center; gap:3px; background:#f1f5f9; color:#475569; font-size:10px; font-weight:600; padding:2px 8px; border-radius:20px; }
+  .kb-empty { color: #9ca3af; font-size: 13px; text-align: center; padding: 30px 0; }
+  .kb-empty-icon { font-size: 28px; display:block; margin-bottom:6px; opacity:.4; }
+  /* Drawer */
+  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1040; display: none; }
+  .drawer-overlay.open { display: block; }
+  .side-drawer {
+    position: fixed; top: 0; right: -420px; width: 420px; height: 100%; background: white;
+    z-index: 1050; box-shadow: -4px 0 24px rgba(0,0,0,.15); transition: right .3s ease;
+    display: flex; flex-direction: column; overflow-y: auto;
+  }
+  .side-drawer.open { right: 0; }
+  .drawer-header {
+    background: linear-gradient(135deg, #0f4c81, #1565c0);
+    color: white; padding: 18px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .drawer-close { background: none; border: none; color: white; font-size: 22px; cursor: pointer; }
+  .drawer-body { padding: 20px; flex: 1; }
+  .drawer-section { margin-bottom: 18px; }
+  .drawer-section h5 { font-size: 12px; text-transform: uppercase; letter-spacing: .5px; color: #6b7280;
+    font-weight: 700; margin: 0 0 8px 0; border-bottom: 1px solid #f3f4f6; padding-bottom: 4px; }
+  .drawer-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+  .drawer-label { color: #6b7280; }
+  .drawer-value { font-weight: 600; color: #1f2937; text-align: right; max-width: 60%; }
+  .timeline { border-left: 2px solid #e5e7eb; padding-left: 14px; margin-top: 8px; }
+  .tl-item { position: relative; margin-bottom: 12px; }
+  .tl-dot { position: absolute; left: -20px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: #1565c0; border: 2px solid white; box-shadow: 0 0 0 2px #1565c0; }
+  .tl-estado { font-weight: 600; font-size: 13px; }
+  .tl-meta   { font-size: 11px; color: #6b7280; }
+  /* Modal aprobación */
+  .modal-aprobacion { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1060; display: none; align-items: center; justify-content: center; }
+  .modal-aprobacion.open { display: flex; }
+  .modal-box { background: white; border-radius: 16px; padding: 32px; max-width: 460px; width: 94%; box-shadow: 0 20px 50px rgba(0,0,0,.2); }
+  .modal-box h4 { margin: 0 0 16px 0; font-size: 18px; color: #0f4c81; }
+  .modal-warning { background: #fef9c3; border: 1px solid #fde047; border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 13px; color: #713f12; }
+  .modal-checklist { list-style: none; padding: 0; margin: 0 0 16px 0; }
+  .modal-checklist li { display: flex; align-items: center; gap: 8px; font-size: 14px; margin-bottom: 6px; }
+  /* Table mode */
+  .kb-table-mode { display: none; }
+  .kb-table-mode.active { display: block; }
+  .kb-kanban-mode { display: flex; }
+  .kb-kanban-mode.hidden { display: none; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="wizard-container">
-  <!-- Header -->
+<!-- ===== WIZARD MODAL (oculto hasta que abre Nueva Petición) ===== -->
+<div class="wizard-container" id="wizard-container" onclick="wizardOverlayClick(event)">
+  <div class="wizard-inner">
+    <button onclick="cerrarWizardModal()"
+      style="position:absolute;top:12px;right:12px;z-index:10;background:#f1f5f9;
+             border:none;border-radius:50%;width:36px;height:36px;font-size:18px;
+             cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);line-height:1;"
+    >✕</button>
   <div class="wizard-header">
     <h1>🌳 Gestión Arbórea - Sistema de Radicación</h1>
     <p class="wz-subtitle">Radicación → Visita Técnica → Dictamen CMGR → Visto Bueno Planeación</p>
@@ -653,41 +803,157 @@
           </div>
         </div>
         <div style="margin-top:12px;">
-          <button class="btn-primary-custom" onclick="nuevaPeticion()">➕ Nueva Petición</button>
-          <button class="btn-secondary-custom" onclick="verHistorial()">📋 Ver Historial</button>
         </div>
       </div>
     </div>
+  </div> <!-- /wizard-body -->
+  </div> <!-- /wizard-inner -->
+</div> <!-- /wizard-container / modal -->
 
-    <!-- HISTORIAL -->
-    <div class="historial-container">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <h4 style="margin:0;">📋 Radicados Recientes</h4>
-        <button class="btn-primary-custom" onclick="nuevaPeticion()" style="padding:8px 20px;font-size:0.9rem;">
-          ➕ Nueva Petición
-        </button>
+
+<!-- ===== HISTORIAL / TABLERO (vista principal) ===== -->
+<div class="historial-container" id="historial-container">
+
+      <!-- KB Header -->
+      <div class="kb-header">
+        <div>
+          <h2>🌳 Gestión Arbórea — Tablero de Control</h2>
+          <div class="kb-header-sub">Administración del ciclo de radicados arbóreos</div>
+        </div>
+        <button class="btn-primary-custom" onclick="abrirWizardModal()"
+                style="background:white;color:#0f4c81;font-size:14px;">➕ Nueva Petición</button>
       </div>
-      <div class="table-responsive">
-        <table class="table table-sm align-middle">
-          <thead>
-            <tr>
-              <th>Radicado</th>
-              <th>Solicitante</th>
-              <th>Especie</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="historial-tbody">
-            <tr>
-              <td colspan="5" class="text-center text-muted">Cargando...</td>
-            </tr>
-          </tbody>
-        </table>
+
+      <!-- Métricas rápidas -->
+      <div class="kb-metrics" id="kb-metrics"></div>
+
+      <!-- Barra de herramientas -->
+      <div class="kb-toolbar">
+        <input class="kb-search" type="text" id="kb-search" placeholder="🔍 Buscar por radicado, solicitante..." oninput="filtrarKanban()">
+        <div class="kb-view-toggle">
+          <button id="btn-kanban" class="active" onclick="toggleView('kanban')">⊞ Cuadrícula</button>
+          <button id="btn-tabla" onclick="toggleView('tabla')">≡ Tabla</button>
+        </div>
       </div>
+
+      <!-- KANBAN BOARD -->
+      <div id="kb-kanban-mode" class="kb-kanban-mode kb-board">
+        <div class="kb-col" id="col-radicada">
+          <div class="kb-col-header kbh-radicada"><span>Radicada</span><span id="cnt-radicada">0</span></div>
+          <div id="cards-radicada"></div>
+        </div>
+        <div class="kb-col" id="col-visitada">
+          <div class="kb-col-header kbh-visitada"><span>Visitada</span><span id="cnt-visitada">0</span></div>
+          <div id="cards-visitada"></div>
+        </div>
+        <div class="kb-col" id="col-revision">
+          <div class="kb-col-header kbh-revision"><span>En Revisión Planeación</span><span id="cnt-revision">0</span></div>
+          <div id="cards-revision"></div>
+        </div>
+        <div class="kb-col" id="col-aprobada">
+          <div class="kb-col-header kbh-aprobada"><span>Aprobada</span><span id="cnt-aprobada">0</span></div>
+          <div id="cards-aprobada"></div>
+        </div>
+        <div class="kb-col" id="col-negada">
+          <div class="kb-col-header kbh-negada"><span>Negada</span><span id="cnt-negada">0</span></div>
+          <div id="cards-negada"></div>
+        </div>
+      </div>
+
+      <!-- TABLE MODE -->
+      <div id="kb-tabla-mode" class="kb-table-mode">
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead><tr>
+              <th>Radicado</th><th>Solicitante</th><th>Especie</th>
+              <th>DAP (cm)</th><th>Estado</th><th>Criticidad</th><th>SLA</th><th>Acciones</th>
+            </tr></thead>
+            <tbody id="historial-tbody">
+              <tr><td colspan="8" class="text-center text-muted">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /historial-container -->
+
+  </div><!-- /wizard-body -->
+</div><!-- /wizard-container -->
+
+<!-- ================================================================
+     DRAWER DETALLE
+================================================================ -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="cerrarDrawer()"></div>
+<div class="side-drawer" id="side-drawer">
+  <div class="drawer-header">
+    <div>
+      <div style="font-size:12px;opacity:.8;">DETALLE DEL RADICADO</div>
+      <div id="drawer-num" style="font-weight:700;font-size:18px;"></div>
+    </div>
+    <button class="drawer-close" onclick="cerrarDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="drawer-section">
+      <h5>Solicitante</h5>
+      <div class="drawer-row"><span class="drawer-label">Nombre</span><span class="drawer-value" id="dr-nombre">-</span></div>
+      <div class="drawer-row"><span class="drawer-label">Documento</span><span class="drawer-value" id="dr-doc">-</span></div>
+      <div class="drawer-row"><span class="drawer-label">Contacto</span><span class="drawer-value" id="dr-tel">-</span></div>
+      <div class="drawer-row"><span class="drawer-label">Correo</span><span class="drawer-value" id="dr-email">-</span></div>
+    </div>
+    <div class="drawer-section">
+      <h5>Árbol y Ubicación</h5>
+      <div class="drawer-row"><span class="drawer-label">Especie</span><span class="drawer-value" id="dr-especie">-</span></div>
+      <div class="drawer-row"><span class="drawer-label">DAP</span><span class="drawer-value" id="dr-dap">-</span></div>
+      <div class="drawer-row"><span class="drawer-label">Altura</span><span class="drawer-value" id="dr-altura">-</span></div>
+      <div class="drawer-row"><span class="drawer-label">Dirección</span><span class="drawer-value" id="dr-dir">-</span></div>
+      <div class="drawer-row"><span class="drawer-label">Tipo solicitud</span><span class="drawer-value" id="dr-tipo">-</span></div>
+      <div class="drawer-row"><span class="drawer-label">Criticidad</span><span class="drawer-value" id="dr-crit">-</span></div>
+      <div class="drawer-row"><span class="drawer-label">Riesgo final</span><span class="drawer-value" id="dr-riesgo">-</span></div>
+    </div>
+    <div class="drawer-section">
+      <h5>Dictamen y Permiso</h5>
+      <div class="drawer-row"><span class="drawer-label">Decisión CMGR</span><span class="drawer-value" id="dr-dictamen">-</span></div>
+      <div class="drawer-row"><span class="drawer-label">Compensación</span><span class="drawer-value" id="dr-comp">-</span></div>
+      <div class="drawer-row"><span class="drawer-label">Visto Planeación</span><span class="drawer-value" id="dr-plan">-</span></div>
+      <div class="drawer-row"><span class="drawer-label">Vencimiento permiso</span><span class="drawer-value" id="dr-venc">-</span></div>
+    </div>
+    <div class="drawer-section">
+      <h5>Historial de estados</h5>
+      <div class="timeline" id="dr-timeline"></div>
+    </div>
+    <div id="drawer-actions" style="margin-top:16px;display:flex;flex-wrap:wrap;gap:8px;"></div>
+  </div>
+</div>
+
+<!-- ================================================================
+     MODAL APROBACIÓN PLANEACIÓN
+================================================================ -->
+<div class="modal-aprobacion" id="modal-aprobacion">
+  <div class="modal-box">
+    <h4>🏛️ Registro de Visto Bueno — Planeación</h4>
+    <p id="modal-rad-info" style="font-size:13px;color:#6b7280;margin-bottom:12px;"></p>
+    <div class="modal-warning" id="modal-faltantes" style="display:none;"></div>
+    <div class="mb-3">
+      <label class="form-label">Decisión *</label>
+      <select class="form-select" id="modal-decision">
+        <option value="">Seleccionar...</option>
+        <option value="Aprobada">✅ APROBADA — Habilitar PDF final</option>
+        <option value="Rechazada">❌ RECHAZADA — Requiere correcciones</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Observaciones *</label>
+      <textarea class="form-control" id="modal-obs" rows="3"
+        placeholder="Detalle la decisión o las correcciones requeridas..."></textarea>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">
+      <button class="btn-secondary-custom" onclick="cerrarModalAprobacion()">Cancelar</button>
+      <button class="btn-primary-custom" id="modal-btn-confirm" onclick="confirmarAprobacion()">🏛️ Registrar</button>
     </div>
   </div>
 </div>
+
+
 
 <script>
 let radicadoActual = null;
@@ -1213,73 +1479,190 @@ function nuevaPeticion() {
   showAlert('📝 Formulario listo para una nueva petición.', 'success');
 }
 
+// === KANBAN ENGINE ===================================================
+let allRadicados = [];
+let drawerRadicado = null;
+let aprobacionTargetId = null;
+
+const ESTADO_COL = {
+  'Radicada': 'radicada',
+  'Visitada': 'visitada',
+  'En revisión Planeación': 'revision',
+  'En revision Planeacion': 'revision',
+  'Aprobada': 'aprobada',
+  'Negada': 'negada',
+  'Rechazada': 'negada',
+  'Cerrada': 'aprobada',
+};
+
+function diasSla(r) {
+  if (!r.fecha_vencimiento_sla) return null;
+  const d = Math.round((new Date(r.fecha_vencimiento_sla) - new Date()) / 86400000);
+  return d;
+}
+
+function slaHtml(r) {
+  const d = diasSla(r);
+  if (d === null) return '';
+  if (d > 5)  return `<span class="kb-sla ok">⏱ ${d}d</span>`;
+  if (d >= 0) return `<span class="kb-sla warn">⚠ ${d}d</span>`;
+  return `<span class="kb-sla late">🔴 Vencido</span>`;
+}
+
+function critBadge(crit) {
+  const map = { alta: '🔴 ALTA', media: '🟠 MEDIA', baja: '🟢 BAJA' };
+  return `<span class="kb-crit ${crit || 'media'}">${map[crit] || 'MEDIA'}</span>`;
+}
+
+function tipoIcon(tipo) {
+  const icons = { Poda:'✂️', Tala:'🪓', Trasplante:'🌱', Emergencia:'🚨' };
+  return icons[tipo] || '🌳';
+}
+
+function estadoBadgeHtml(estado) {
+  const key = (estado || '').toLowerCase().replace(/ /g,'-').replace(/[áéíóúñ]/g,
+    c => ({á:'a',é:'e',í:'i',ó:'o',ú:'u',ñ:'n'}[c]||c));
+  return `<span class="badge badge-${key}" style="white-space:nowrap;">${estado}</span>`;
+}
+
+function renderKanban(lista) {
+  const cols = { radicada:[], visitada:[], revision:[], aprobada:[], negada:[] };
+  lista.forEach(r => {
+    const col = ESTADO_COL[r.estado] || 'radicada';
+    if (cols[col]) cols[col].push(r);
+  });
+
+  // Métricas
+  document.getElementById('kb-metrics').innerHTML = [
+    { cls:'m-radicada', val: cols.radicada.length, lbl:'Radicadas' },
+    { cls:'m-visitada', val: cols.visitada.length, lbl:'Visitadas' },
+    { cls:'m-revision', val: cols.revision.length, lbl:'En Planeación' },
+    { cls:'m-aprobada', val: cols.aprobada.length, lbl:'Aprobadas' },
+    { cls:'m-negada',   val: cols.negada.length,   lbl:'Negadas' },
+    { cls:'m-total',    val: lista.length,          lbl:'Total' },
+  ].map(m => `<div class="kb-metric ${m.cls}"><div class="val">${m.val}</div><div class="lbl">${m.lbl}</div></div>`).join('');
+
+  // Columnas
+  Object.entries(cols).forEach(([key, items]) => {
+    const cnt  = document.getElementById(`cnt-${key}`);
+    const area = document.getElementById(`cards-${key}`);
+    if (!cnt || !area) return;
+    cnt.textContent = items.length;
+    if (items.length === 0) {
+      area.innerHTML = '<div class="kb-empty"><span class="kb-empty-icon">🌿</span>Sin radicados</div>';
+      return;
+    }
+    area.innerHTML = items.map(r => {
+      const crit = (r.criticidad || 'media').toLowerCase();
+      const inicial = (r.solicitante_nombre || '?')[0].toUpperCase();
+      const tipoPill = r.tipo_solicitud
+        ? `<span class="kb-tipo-pill">${tipoIcon(r.tipo_solicitud)} ${r.tipo_solicitud}</span>`
+        : '';
+      return `<div class="kb-card crit-${crit}" onclick="abrirDrawer(${r.id})" title="Ver detalle">
+        <div class="kb-card-header">
+          <div class="kb-card-avatar">${inicial}</div>
+          <div style="min-width:0;flex:1;">
+            <div class="kb-card-num">${r.numero_radicado}</div>
+            <div class="kb-card-sol">${r.solicitante_nombre}</div>
+          </div>
+        </div>
+        <div class="kb-card-esp">🌳 ${r.arbol_especie_comun || 'Especie —'} &nbsp;·&nbsp; ⌀ ${r.arbol_dap_cm || '?'} cm</div>
+        <div class="kb-card-footer">
+          <div style="display:flex;gap:6px;align-items:center;">${critBadge(crit)} ${tipoPill}</div>
+          ${slaHtml(r)}
+        </div>
+      </div>`;
+    }).join('');
+  });
+}
+
+
+function renderTabla(lista) {
+  const tbody = document.getElementById('historial-tbody');
+  if (!lista || lista.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Sin registros</td></tr>'; return;
+  }
+  tbody.innerHTML = lista.map(r => {
+    const isRadicada    = r.estado === 'Radicada';
+    const isVisitada    = r.estado === 'Visitada';
+    const isEnPlaneacion = r.estado === 'En revisión Planeación' || r.estado === 'En revision Planeacion';
+    const isProcesada   = r.estado === 'Aprobada' || r.estado === 'Negada' || r.estado === 'Rechazada';
+    const hasInforme    = isVisitada || isEnPlaneacion || isProcesada;
+    const hasPermiso    = r.planeacion_decision === 'Aprobada';
+    const hasBorrador   = isEnPlaneacion || isProcesada;
+    const canDelete     = isAdmin;
+    const d = diasSla(r);
+    const slaCls = d === null ? '' : (d > 5 ? 'ok' : d >= 0 ? 'warn' : 'late');
+    return `<tr>
+      <td><strong style="cursor:pointer;color:#1565c0;" onclick="abrirDrawer(${r.id})">${r.numero_radicado}</strong></td>
+      <td>${r.solicitante_nombre}</td>
+      <td>${r.arbol_especie_comun || '-'}</td>
+      <td style="text-align:center;">${r.arbol_dap_cm || '-'}</td>
+      <td>${estadoBadgeHtml(r.estado)}</td>
+      <td>${critBadge(r.criticidad)}</td>
+      <td><span class="kb-sla ${slaCls}">${d !== null ? (d < 0 ? 'Vencido' : d+'d') : '-'}</span></td>
+      <td class="actions-cell">
+        <div class="btn-group-actions">
+          ${isRadicada     ? `<button class="action-btn btn-continue" onclick="continuarConRadicado(${r.id})">▶ Visita</button>` : ''}
+          ${isVisitada     ? `<button class="action-btn btn-dictamen" onclick="continuarConDictamen(${r.id})">▶ Dictamen</button>` : ''}
+          ${isEnPlaneacion && (isAdmin || esPlaneacion) ? `<button class="action-btn btn-dictamen" onclick="abrirModalAprobacion(${r.id})">🏛️ Aprobar</button>` : ''}
+          <button class="action-btn btn-info" data-title="Ver detalle" onclick="abrirDrawer(${r.id})">🔍</button>
+          ${hasInforme ? `<button class="action-btn btn-info" data-title="Informe PDF" onclick="descargarPDF(${r.id})">📄</button>` : ''}
+          ${hasBorrador ? `<button class="action-btn btn-info" data-title="Borrador" onclick="descargarBorradorPDF(${r.id})">📝</button>` : ''}
+          ${hasPermiso  ? `<button class="action-btn btn-info" data-title="PDF Oficial" onclick="descargarPermisoPDF2(${r.id})">📋</button>` : ''}
+          ${canDelete ? `<button class="action-btn btn-delete" onclick="confirmarEliminar(${r.id},'${r.numero_radicado}')">🗑</button>` : ''}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filtrarKanban() {
+  const q = (document.getElementById('kb-search').value || '').toLowerCase();
+  const filtrado = q ? allRadicados.filter(r =>
+    (r.numero_radicado || '').toLowerCase().includes(q) ||
+    (r.solicitante_nombre || '').toLowerCase().includes(q) ||
+    (r.arbol_especie_comun || '').toLowerCase().includes(q)
+  ) : allRadicados;
+  renderKanban(filtrado);
+  renderTabla(filtrado);
+}
+
+function toggleView(mode) {
+  document.getElementById('btn-kanban').classList.toggle('active', mode === 'kanban');
+  document.getElementById('btn-tabla').classList.toggle('active', mode === 'tabla');
+  document.getElementById('kb-kanban-mode').classList.toggle('hidden', mode !== 'kanban');
+  document.getElementById('kb-tabla-mode').classList.toggle('active', mode === 'tabla');
+}
+
 // === HISTORIAL ===
 async function cargarHistorial() {
   try {
-    const resp = await fetch('/api/riesgo/arborea?per_page=10');
+    const resp = await fetch('/api/riesgo/arborea?per_page=200');
     const data = await resp.json();
-    const tbody = document.getElementById('historial-tbody');
-    
-    if (data.radicados && data.radicados.length > 0) {
-      tbody.innerHTML = data.radicados.map(r => {
-        // ── Máquina de estados limpia ──────────────────────────────────
-        // Radicada → Phase 2 pendiente  |  Visitada → Phase 3 pendiente
-        // Aprobada / Negada → cerrado
-        const isRadicada    = r.estado === 'Radicada';
-        const isVisitada    = r.estado === 'Visitada';
-        const isEnPlaneacion = r.estado === 'En revisión Planeación';
-        const isProcesada   = r.estado === 'Aprobada' || r.estado === 'Negada';
-        const hasInforme    = isVisitada || isEnPlaneacion || isProcesada;
-        const hasPermiso    = isProcesada && r.planeacion_decision === 'Aprobada';
-        const hasBorrador   = isEnPlaneacion || isProcesada;
-        const canDelete     = isAdmin;
-        const estadoClass   = r.estado.toLowerCase().replace(/ /g,'-').replace(/[áéíóú]/g, c => ({'á':'a','é':'e','í':'i','ó':'o','ú':'u'}[c]||c));
-
-        return `
-          <tr>
-            <td><strong>${r.numero_radicado}</strong></td>
-            <td>${r.solicitante_nombre}</td>
-            <td>${r.arbol_especie_comun || '-'}</td>
-            <td><span class="badge badge-${estadoClass}" style="white-space:nowrap">${r.estado}</span></td>
-            <td class="actions-cell">
-              <div class="btn-group-actions">
-                ${isRadicada     ? `<button class="action-btn btn-continue" data-title="Registrar Visita Técnica" onclick="continuarConRadicado(${r.id})">▶️ Continuar</button>` : ''}
-                ${isVisitada     ? `<button class="action-btn btn-dictamen" data-title="Emitir Dictamen CMGR" onclick="continuarConDictamen(${r.id})">▶️ Dictamen</button>` : ''}
-                ${isEnPlaneacion ? `<button class="action-btn btn-dictamen" data-title="Revisar/Aprobar Planeación" onclick="continuarConPlaneacion(${r.id})">🏛️ Planeación</button>` : ''}
-                <button class="action-btn btn-edit" data-title="Editar datos" onclick="editarRadicado(${r.id})">✏️</button>
-                ${hasInforme    ? `<button class="action-btn btn-info" data-title="Informe Técnico PDF" onclick="descargarPDF(${r.id})">📄</button>` : ''}
-                ${hasBorrador   ? `<button class="action-btn btn-info" data-title="Vista Previa Borrador" onclick="descargarBorradorPDF(${r.id})">📝</button>` : ''}
-                ${hasPermiso    ? `<button class="action-btn btn-info" data-title="PDF Final Oficial" onclick="descargarPermisoPDF(${r.id})">📋</button>` : ''}
-                ${canDelete     ? `<button class="action-btn btn-delete" data-title="Eliminar radicado" onclick="confirmarEliminar(${r.id}, '${r.numero_radicado}')">🗑️</button>` : ''}
-              </div>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    } else {
-      tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Sin registros</td></tr>';
-    }
+    allRadicados = data.radicados || [];
+    renderKanban(allRadicados);
+    renderTabla(allRadicados);
   } catch (err) {
-    console.error('Error:', err);
+    console.error('Error cargarHistorial:', err);
   }
 }
 
 function descargarPDF(id) {
   window.open(`/api/riesgo/arborea/${id}/pdf/informe`, '_blank');
 }
-
 function descargarBorradorPDF(id) {
   if (!id) return;
   window.open(`/api/riesgo/arborea/${id}/pdf/dictamen?borrador=1`, '_blank');
 }
-
 function descargarPermisoPDF(id) {
-  if (!id) return;
-  // Verificar estado antes de intentar descargar
-  if (radicadoActual && radicadoActual.estado !== 'Aprobada') {
-    showAlert('⛔ El PDF final solo está disponible después del Visto Bueno de Planeación. Use la Vista Previa (Borrador) mientras tanto.', 'warning');
+  if (!radicadoActual || radicadoActual.estado !== 'Aprobada') {
+    showAlert('⛔ El PDF final solo está disponible después del Visto Bueno de Planeación.', 'warning');
     return;
   }
+  window.open(`/api/riesgo/arborea/${id}/pdf/dictamen`, '_blank');
+}
+function descargarPermisoPDF2(id) {
   window.open(`/api/riesgo/arborea/${id}/pdf/dictamen`, '_blank');
 }
 
@@ -1452,8 +1835,8 @@ function prepararFase4() {
   dictBadge.className   = `estado-badge ${radicadoActual.dictamen_decision === 'Aprobado' ? 'estado-aprobada' : 'estado-pendiente'}`;
 
   const fase4Lista   = !!radicadoActual.planeacion_decision;
-  const usuarioActual = '{{ session.get("user","") }}'.toLowerCase();
-  const esPlaneacion  = isAdmin || usuarioActual.includes('(planeacion)');
+  const usuarioActual = '{{ session.get("user","") }}';
+  const esPlaneacion  = isAdmin || usuarioActual.endsWith('.planeacion');
 
   document.getElementById('panel-planeacion-accion').style.display = (!fase4Lista && esPlaneacion) ? 'block' : 'none';
   document.getElementById('panel-planeacion-espera').style.display = (!fase4Lista && !esPlaneacion) ? 'block' : 'none';
@@ -1513,15 +1896,147 @@ async function enviarPlaneacion() {
   }
 }
 
+// === DRAWER =========================================================
+async function abrirDrawer(id) {
+  try {
+    const resp = await fetch(`/api/riesgo/arborea/${id}`);
+    const data = await resp.json();
+    if (!data.radicado) return;
+    const r = data.radicado;
+    drawerRadicado = r;
+    document.getElementById('drawer-num').textContent  = r.numero_radicado;
+    document.getElementById('dr-nombre').textContent   = r.solicitante_nombre || '-';
+    document.getElementById('dr-doc').textContent      = r.solicitante_documento || '-';
+    document.getElementById('dr-tel').textContent      = r.solicitante_contacto || '-';
+    document.getElementById('dr-email').textContent    = r.solicitante_correo || '-';
+    document.getElementById('dr-especie').textContent  = r.arbol_especie_comun || '-';
+    document.getElementById('dr-dap').textContent      = r.arbol_dap_cm ? r.arbol_dap_cm + ' cm' : '-';
+    document.getElementById('dr-altura').textContent   = r.arbol_altura_m  ? r.arbol_altura_m + ' m' : '-';
+    document.getElementById('dr-dir').textContent      = r.ubicacion_direccion || '-';
+    document.getElementById('dr-tipo').textContent     = r.tipo_solicitud || '-';
+    document.getElementById('dr-crit').textContent     = (r.criticidad || 'media').toUpperCase();
+    document.getElementById('dr-riesgo').textContent   = r.visita_riesgo_final || '-';
+    document.getElementById('dr-dictamen').textContent = r.dictamen_decision || 'Pendiente';
+    document.getElementById('dr-comp').textContent     = r.compensacion_arboles_plantar ? r.compensacion_arboles_plantar + ' árbol(es)' : '-';
+    document.getElementById('dr-plan').textContent     = r.planeacion_decision || 'Pendiente';
+    document.getElementById('dr-venc').textContent     = r.permiso_fecha_limite ? r.permiso_fecha_limite.substring(0,10) : '-';
+
+    // Timeline
+    const hist = r.historial_estados || [];
+    document.getElementById('dr-timeline').innerHTML = hist.length
+      ? hist.map(h => `<div class="tl-item"><div class="tl-dot"></div>
+          <div class="tl-estado">${h.estado}</div>
+          <div class="tl-meta">${(h.fecha||'').substring(0,10)} — ${h.usuario||''}</div>
+          ${h.observacion ? `<div class="tl-meta" style="font-style:italic;">${h.observacion}</div>` : ''}
+        </div>`).join('')
+      : '<div style="color:#9ca3af;font-size:12px;">Sin historial</div>';
+
+    // Acciones
+    const estado = r.estado || '';
+    const esRad  = estado === 'Radicada';
+    const esVis  = estado === 'Visitada';
+    const esRev  = estado === 'En revisión Planeación' || estado === 'En revision Planeacion';
+    const esApr  = r.planeacion_decision === 'Aprobada';
+    const usuarioActualDrw = '{{ session.get("user","") }}';
+    const esPlaneacionDrw  = isAdmin || usuarioActualDrw.endsWith('.planeacion');
+    document.getElementById('drawer-actions').innerHTML = [
+      esRad ? `<button class="action-btn btn-continue" onclick="continuarConRadicado(${r.id});cerrarDrawer();">▶ Registrar Visita</button>` : '',
+      esVis ? `<button class="action-btn btn-dictamen" onclick="continuarConDictamen(${r.id});cerrarDrawer();">▶ Emitir Dictamen</button>` : '',
+      (esRev && esPlaneacionDrw) ? `<button class="action-btn btn-dictamen" onclick="abrirModalAprobacion(${r.id})">🏛️ Aprobar/Rechazar</button>` : '',
+      `<button class="action-btn btn-info" onclick="descargarPDF(${r.id})">📄 Informe</button>`,
+      (esRev || esApr || ['Aprobada','Negada','Rechazada'].includes(estado)) ? `<button class="action-btn btn-info" onclick="descargarBorradorPDF(${r.id})">📝 Borrador</button>` : '',
+      esApr ? `<button class="action-btn btn-info" onclick="descargarPermisoPDF2(${r.id})">📋 PDF Oficial</button>` : '',
+    ].filter(Boolean).join('');
+
+    document.getElementById('drawer-overlay').classList.add('open');
+    document.getElementById('side-drawer').classList.add('open');
+  } catch(err) { console.error('Error abrirDrawer:', err); }
+}
+
+function cerrarDrawer() {
+  document.getElementById('drawer-overlay').classList.remove('open');
+  document.getElementById('side-drawer').classList.remove('open');
+}
+
+// === MODAL APROBACIÓN ===============================================
+function abrirModalAprobacion(id) {
+  aprobacionTargetId = id;
+  const r = allRadicados.find(x => x.id === id) || {};
+  document.getElementById('modal-rad-info').textContent =
+    `Radicado ${r.numero_radicado || ''} — ${r.solicitante_nombre || ''}`;
+  document.getElementById('modal-decision').value = '';
+  document.getElementById('modal-obs').value = '';
+  document.getElementById('modal-faltantes').style.display = 'none';
+  document.getElementById('modal-aprobacion').classList.add('open');
+}
+
+function cerrarModalAprobacion() {
+  document.getElementById('modal-aprobacion').classList.remove('open');
+  aprobacionTargetId = null;
+}
+
+async function confirmarAprobacion() {
+  const decision = document.getElementById('modal-decision').value;
+  const obs      = document.getElementById('modal-obs').value.trim();
+  if (!decision) { showAlert('❌ Selecciona una decisión', 'error'); return; }
+  if (!obs)      { showAlert('❌ Las observaciones son obligatorias', 'error'); return; }
+
+  const btn = document.getElementById('modal-btn-confirm');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  try {
+    const resp = await fetch(`/api/riesgo/arborea/${aprobacionTargetId}/estado`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ estado: decision, observacion: obs })
+    });
+    const result = await resp.json();
+    if (resp.ok && result.success) {
+      cerrarModalAprobacion();
+      cerrarDrawer();
+      showAlert(`✅ Visto Bueno registrado: ${decision}`, 'success');
+      await cargarHistorial();
+    } else {
+      const faltantes = result.faltantes ? '<ul><li>' + result.faltantes.join('</li><li>') + '</li></ul>' : '';
+      document.getElementById('modal-faltantes').innerHTML =
+        `<strong>Campos incompletos:</strong>${faltantes || result.error || ''}` ;
+      document.getElementById('modal-faltantes').style.display = 'block';
+    }
+  } catch(ex) {
+    showAlert(`❌ ${ex.message}`, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '🏛️ Registrar';
+  }
+}
+
+// === WIZARD MODAL ===================================================
+function abrirWizardModal() {
+  document.getElementById('wizard-container').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  nuevaPeticion();
+}
+
+function cerrarWizardModal() {
+  document.getElementById('wizard-container').classList.remove('open');
+  document.body.style.overflow = '';
+  cargarHistorial();
+}
+
+function wizardOverlayClick(e) {
+  // Cerrar si clic en el fondo oscuro (no en el contenido)
+  if (e.target === document.getElementById('wizard-container')) {
+    cerrarWizardModal();
+  }
+}
+
+
+// === PLANEACION ROLE HELPER ========================================
+const esPlaneacion = isAdmin || '{{ session.get("user","") }}'.endsWith('.planeacion');
+
 // === INICIALIZACIÓN + RECUPERACIÓN localStorage ===
 document.addEventListener('DOMContentLoaded', async () => {
   cargarHistorial();
   cargarEspecies();
 
-  // Guardar radicado en localStorage al crearlo
-  // (se hace también en continuarConRadicado / continuarConDictamen)
-
-  // Recuperar radicado en proceso al recargar la página
   try {
     const guardado = localStorage.getItem('riesgo_radicado_actual');
     if (guardado) {
@@ -1534,15 +2049,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             radicadoActual = data.radicado;
             showAlert(
               `↩️ Radicado en proceso recuperado: <strong>${radicadoActual.numero_radicado}</strong> (${radicadoActual.estado}). ` +
-              `Usa el historial para continuar.`, 'info'
+              `Abre 'Nueva Petición' para continuar.`, 'info'
             );
           }
         }
       }
     }
-  } catch (e) {
-    console.warn('[Recovery] Error al recuperar radicado:', e);
-  }
+  } catch (e) { console.warn('[Recovery] Error al recuperar radicado:', e); }
 });
 
 async function cargarEspecies() {
@@ -1552,9 +2065,7 @@ async function cargarEspecies() {
     const sel = document.getElementById('arbol_especie_select');
     sel.innerHTML = '<option value="">Seleccione especie...</option>' +
       (data.especies || []).map(e => `<option value="${e.nombre_comun}">${e.nombre_comun} (${e.nombre_cientifico})</option>`).join('');
-  } catch (err) {
-    console.error('Error cargando especies', err);
-  }
+  } catch (err) { console.error('Error cargando especies', err); }
 }
 </script>
 {% endblock %}

@@ -87,6 +87,7 @@ class Config:
         'contratos': {'*'},
         'certificados': {'admin', 'formulador', '*'}, # Todos
         'ia': {'*'},  # Todos los usuarios - IA Municipal
+        'correo_inteligente': {'admin'},
         'configuracion': {'admin'}, # Solo admin
     }
     

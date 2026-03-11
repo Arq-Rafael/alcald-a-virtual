@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}Correo Inteligente Institucional{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/correo_inteligente.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="mail-smart-shell">
+  <section class="mail-hero">
+    <div class="mail-hero-left">
+      <h1><i class="bi bi-envelope-paper-heart"></i> Correo Inteligente Institucional</h1>
+      <p>Gestion operativa del correo oficial con sincronizacion Gmail, analitica institucional y asistencia inteligente.</p>
+      <div class="mail-status-row">
+        <span class="chip-status {{ 'connected' if account.conectada else 'disconnected' }}">
+          <i class="bi {{ 'bi-link-45deg' if account.conectada else 'bi-plug' }}"></i>
+          {{ 'Gmail conectado' if account.conectada else 'Gmail sin conectar' }}
+        </span>
+        <span class="chip-muted">
+          Ultima sincronizacion:
+          {% if account.ultima_sincronizacion %}
+            {{ account.ultima_sincronizacion.strftime('%Y-%m-%d %H:%M') }} UTC
+          {% else %}
+            Sin datos
+          {% endif %}
+        </span>
+      </div>
+    </div>
+    <div class="mail-hero-right">
+      <form method="POST" action="{{ url_for('correo_inteligente.oauth_connect') }}">
+        <button class="btn-mail btn-mail-primary" type="submit">
+          <i class="bi bi-google"></i> Conectar Gmail
+        </button>
+      </form>
+      <form method="POST" action="{{ url_for('correo_inteligente.sync_messages') }}">
+        <button class="btn-mail btn-mail-success" type="submit">
+          <i class="bi bi-arrow-repeat"></i> Sincronizar Correos
+        </button>
+      </form>
+      {% if account.mensaje_estado %}
+      <div class="mail-note">{{ account.mensaje_estado }}</div>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="mail-kpis">
+    <article class="kpi-card">
+      <span>Total correos</span>
+      <strong>{{ analytics.total }}</strong>
+    </article>
+    <article class="kpi-card kpi-warning">
+      <span>Requieren respuesta</span>
+      <strong>{{ analytics.requieren_respuesta }}</strong>
+    </article>
+    <article class="kpi-card kpi-danger">
+      <span>Criticos</span>
+      <strong>{{ analytics.criticos }}</strong>
+    </article>
+    <article class="kpi-card kpi-info">
+      <span>Pendientes</span>
+      <strong>{{ analytics.pendientes }}</strong>
+    </article>
+  </section>
+
+  <section class="mail-analytics" id="mail-analytics" data-categoria='{{ analytics.categoria|tojson }}' data-estado='{{ analytics.estado|tojson }}' data-tendencia='{{ analytics.tendencia_7d|tojson }}'>
+    <div class="analytics-block">
+      <h4>Distribucion por categoria</h4>
+      <div id="categoriaBars" class="bar-list"></div>
+    </div>
+    <div class="analytics-block">
+      <h4>Estados operativos</h4>
+      <div id="estadoBars" class="bar-list"></div>
+    </div>
+    <div class="analytics-block">
+      <h4>Tendencia ultimos 7 dias</h4>
+      <div id="tendenciaBars" class="bar-list"></div>
+    </div>
+  </section>
+
+  <section class="mail-filters">
+    <form method="GET" action="{{ url_for('correo_inteligente.inbox') }}" class="filters-grid">
+      <input type="text" name="q" value="{{ filters.q }}" placeholder="Buscar por remitente, asunto o vista previa" class="form-control">
+
+      <select name="categoria" class="form-select">
+        <option value="">Categoria</option>
+        {% for cat in categories %}
+        <option value="{{ cat }}" {% if filters.categoria == cat %}selected{% endif %}>{{ cat }}</option>
+        {% endfor %}
+      </select>
+
+      <select name="estado" class="form-select">
+        <option value="">Estado</option>
+        <option value="nuevo" {% if filters.estado == 'nuevo' %}selected{% endif %}>Nuevo</option>
+        <option value="en_gestion" {% if filters.estado == 'en_gestion' %}selected{% endif %}>En gestion</option>
+        <option value="respondido" {% if filters.estado == 'respondido' %}selected{% endif %}>Respondido</option>
+        <option value="informativo" {% if filters.estado == 'informativo' %}selected{% endif %}>Informativo</option>
+      </select>
+
+      <select name="semaforo" class="form-select">
+        <option value="">Semaforo</option>
+        <option value="verde" {% if filters.semaforo == 'verde' %}selected{% endif %}>Verde</option>
+        <option value="amarillo" {% if filters.semaforo == 'amarillo' %}selected{% endif %}>Amarillo</option>
+        <option value="rojo" {% if filters.semaforo == 'rojo' %}selected{% endif %}>Rojo</option>
+        <option value="azul" {% if filters.semaforo == 'azul' %}selected{% endif %}>Azul</option>
+      </select>
+
+      <select name="requiere" class="form-select">
+        <option value="">Respuesta</option>
+        <option value="si" {% if filters.requiere == 'si' %}selected{% endif %}>Requiere</option>
+        <option value="no" {% if filters.requiere == 'no' %}selected{% endif %}>No requiere</option>
+      </select>
+
+      <select name="order" class="form-select">
+        <option value="fecha_desc" {% if filters.order == 'fecha_desc' %}selected{% endif %}>Mas recientes</option>
+        <option value="fecha_asc" {% if filters.order == 'fecha_asc' %}selected{% endif %}>Mas antiguos</option>
+        <option value="prioridad" {% if filters.order == 'prioridad' %}selected{% endif %}>Prioridad</option>
+        <option value="estado" {% if filters.order == 'estado' %}selected{% endif %}>Estado</option>
+      </select>
+
+      <button type="submit" class="btn-mail btn-mail-primary"><i class="bi bi-funnel"></i> Filtrar</button>
+    </form>
+  </section>
+
+  <section class="mail-main-grid">
+    <div class="inbox-list-card">
+      <div class="inbox-list-header">
+        <h3>Bandeja institucional</h3>
+        <span>{{ messages|length }} resultados</span>
+      </div>
+      <div class="inbox-list">
+        {% for msg in messages %}
+        <a class="inbox-item {% if selected_message and selected_message.id == msg.id %}active{% endif %}"
+           href="{{ url_for('correo_inteligente.inbox', msg_id=msg.id, q=filters.q, categoria=filters.categoria, estado=filters.estado, semaforo=filters.semaforo, requiere=filters.requiere, order=filters.order) }}">
+          <div class="line-1">
+            <strong>{{ msg.remitente or msg.remitente_email or 'Remitente no identificado' }}</strong>
+            <time>{{ msg.fecha_recepcion.strftime('%Y-%m-%d %H:%M') if msg.fecha_recepcion else '' }}</time>
+          </div>
+          <div class="line-2">{{ msg.asunto or '(Sin asunto)' }}</div>
+          <div class="line-3">{{ msg.snippet or '' }}</div>
+          <div class="line-tags">
+            <span class="tag tag-{{ msg.semaforo }}">{{ msg.semaforo }}</span>
+            <span class="tag">{{ msg.categoria }}</span>
+            <span class="tag">{{ msg.prioridad }}</span>
+            <span class="tag {{ 'tag-need' if msg.requiere_respuesta else 'tag-info' }}">
+              {{ 'Requiere respuesta' if msg.requiere_respuesta else 'Informativo' }}
+            </span>
+          </div>
+        </a>
+        {% else %}
+        <div class="empty-block">No hay correos para los filtros actuales.</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="mail-detail-card">
+      {% if selected_message %}
+      <div class="detail-head">
+        <h3>{{ selected_message.asunto or '(Sin asunto)' }}</h3>
+        <div class="detail-meta">
+          <span><i class="bi bi-person"></i> {{ selected_message.remitente }} ({{ selected_message.remitente_email }})</span>
+          <span><i class="bi bi-calendar-event"></i> {{ selected_message.fecha_recepcion.strftime('%Y-%m-%d %H:%M') if selected_message.fecha_recepcion else '-' }}</span>
+        </div>
+      </div>
+
+      <div class="detail-chips">
+        <span class="tag tag-{{ selected_message.semaforo }}">Semaforo: {{ selected_message.semaforo }}</span>
+        <span class="tag">Categoria: {{ selected_message.categoria }}</span>
+        <span class="tag">Urgencia: {{ selected_message.urgencia }}</span>
+        <span class="tag">Prioridad: {{ selected_message.prioridad }}</span>
+        <span class="tag">Dias: {{ selected_message.dias_transcurridos }}</span>
+        <span class="tag">Riesgo: {{ selected_message.riesgo_vencimiento }}</span>
+      </div>
+
+      <div class="detail-ai">
+        <h4>Analisis inteligente</h4>
+        <p><strong>Tema principal:</strong> {{ selected_message.tema_principal or 'Pendiente de analisis' }}</p>
+        <p><strong>Resumen ejecutivo:</strong> {{ selected_message.resumen_ejecutivo or 'Sin resumen' }}</p>
+        <p><strong>Recomendacion de gestion:</strong> {{ selected_message.recomendacion_gestion or 'Sin recomendacion' }}</p>
+        <div class="detail-actions">
+          <button class="btn-mail btn-mail-secondary" data-reanalyze="{{ selected_message.id }}">
+            <i class="bi bi-stars"></i> Reanalizar
+          </button>
+          <button class="btn-mail btn-mail-warning" data-status="en_gestion" data-message-id="{{ selected_message.id }}">
+            <i class="bi bi-hourglass-split"></i> Marcar en gestion
+          </button>
+          <button class="btn-mail btn-mail-success" data-status="respondido" data-message-id="{{ selected_message.id }}">
+            <i class="bi bi-check2-circle"></i> Marcar respondido
+          </button>
+        </div>
+      </div>
+
+      <div class="detail-body">
+        <h4>Contenido del correo</h4>
+        <pre>{{ selected_message.cuerpo_texto or selected_message.snippet or '(Sin contenido)' }}</pre>
+      </div>
+
+      <div class="detail-attachments">
+        <h4>Adjuntos</h4>
+        {% set adjuntos = selected_message.get_adjuntos() %}
+        {% if adjuntos %}
+          {% for adj in adjuntos %}
+          <div class="attachment-item">
+            <i class="bi bi-paperclip"></i>
+            <span>{{ adj.filename }}</span>
+            <small>{{ adj.mimeType }} | {{ adj.size }} bytes</small>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p>No se detectaron adjuntos.</p>
+        {% endif %}
+      </div>
+
+      <div class="detail-drafts">
+        <h4>Borrador de respuesta</h4>
+        {% if selected_message.requiere_respuesta %}
+        <div class="draft-actions-inline">
+            <button class="btn-mail btn-mail-primary" id="openDraftModalBtn" data-message-id="{{ selected_message.id }}">
+              <i class="bi bi-reply-all-fill"></i> Redactar respuesta inteligente
+            </button>
+            <span class="draft-helper-text">La IA analizará el correo y sus adjuntos (PDFs) para proponer un borrador.</span>
+        </div>
+        {% else %}
+        <p>Este correo fue clasificado como informativo. No requiere respuesta formal.</p>
+        {% endif %}
+      </div>
+      {% else %}
+      <div class="empty-block detail-empty">
+        Selecciona un correo para ver analisis, detalle y generar borrador.
+      </div>
+      {% endif %}
+    </div>
+  </section>
+</div>
+
+<!-- Modal para redactar borrador inteligente (Estilo Gmail Compose) -->
+<div id="draftComposeModal" class="mail-compose-modal">
+  <div class="compose-header">
+    <div class="compose-title">Nueva respuesta generada por IA</div>
+    <div class="compose-actions">
+      <button type="button" class="btn-compose-icon btn-minimize"><i class="bi bi-dash"></i></button>
+      <button type="button" class="btn-compose-icon btn-expand"><i class="bi bi-arrows-angle-expand"></i></button>
+      <button type="button" class="btn-compose-icon btn-close-modal" id="closeDraftModalBtn"><i class="bi bi-x-lg"></i></button>
+    </div>
+  </div>
+  
+  <div class="compose-body">
+    <div class="compose-field">
+      <label>Tono IA:</label>
+      <select id="draftTone" class="form-select compose-select">
+        {% for tone in tones %}
+        <option value="{{ tone }}">{{ tone|replace('_', ' ')|title }}</option>
+        {% endfor %}
+      </select>
+      <button class="btn-mail btn-mail-info btn-sm compose-generate-btn" id="generateDraftBtn">
+        <i class="bi bi-stars"></i> Generar Borrador
+      </button>
+    </div>
+    <div class="compose-field">
+      <label>Destinatario:</label>
+      <input type="text" class="compose-input" value="{{ selected_message.remitente_email if selected_message else '' }}" readonly>
+    </div>
+    <div class="compose-field">
+      <label>Asunto:</label>
+      <input type="text" class="compose-input" value="Re: {{ selected_message.asunto if selected_message else '' }}" readonly>
+    </div>
+    <div class="compose-editor">
+      <textarea id="draftResult" placeholder="El borrador generado se mostrará aquí... Puedes editarlo antes de enviarlo."></textarea>
+      
+      <!-- Loading overlay -->
+      <div id="draftLoadingOverlay" class="compose-loading-overlay">
+        <div class="spinner-border text-primary" role="status"></div>
+        <span>Analizando contexto y adjuntos...</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="compose-footer">
+    <button class="btn-mail btn-mail-primary" id="sendDraftBtn">
+      <i class="bi bi-send-fill"></i> Enviar respuesta
+    </button>
+    <div class="compose-footer-tools">
+      <button class="btn-compose-tool" title="Adjuntar archivos"><i class="bi bi-paperclip"></i></button>
+      <button class="btn-compose-tool" title="Descartar borrador" id="discardDraftBtn"><i class="bi bi-trash"></i></button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.currentMessageId = "{{ selected_message.id if selected_message else '' }}";
+</script>
+<script src="{{ url_for('static', filename='js/correo_inteligente.js') }}"></script>
+{% endblock %}

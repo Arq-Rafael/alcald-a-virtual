@@ -100,9 +100,7 @@
      ACCESOS RÁPIDOS — siempre visibles, filtrados por permisos
      Renderizados por JS tras cargar /api/riesgo/mis-permisos
      ════════════════════════════════════════════════ -->
-<div id="accesos-rapidos" class="row g-3 mb-3" style="display:none !important;">
-    <!-- Las tarjetas se insertan aquí via JS -->
-</div>
+
 
 <!-- ════════════════════════════════════════════════
      VIEW TOGGLE + FILTER BAR
@@ -697,7 +695,7 @@ async function verificarAlertaMensual() {
     try {
         // 1️⃣ Frontend: verificar nombre de sesión (doble check)
         const usuario = '{{ session.get("user","") }}';
-        if (!usuario.toLowerCase().includes('(planeacion)')) return;
+        if (!usuario.toLowerCase().endsWith('.planeacion')) return;
 
         // 2️⃣ Backend: confirmar y obtener datos del mes
         const r = await fetch('/api/actas/cmgr/alerta-mensual');

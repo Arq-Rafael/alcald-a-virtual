@@ -84,11 +84,14 @@ def run_migrations(app, db):
             inspector = inspect(db.engine)
             if 'radicado_arborea' not in inspector.get_table_names():
                 logging.info("[MIGRATION] Tabla 'radicado_arborea' no existe aún – se creará con create_all()")
-                return
-
-            existing = {col['name'] for col in inspector.get_columns('radicado_arborea')}
-            db_url   = app.config.get('DATABASE_URL', '') or ''
-            is_pg    = 'postgresql' in db_url
+                # Continuar con otras migraciones aunque esta tabla no exista.
+                existing = set()
+                db_url   = app.config.get('DATABASE_URL', '') or ''
+                is_pg    = 'postgresql' in db_url
+            else:
+                existing = {col['name'] for col in inspector.get_columns('radicado_arborea')}
+                db_url   = app.config.get('DATABASE_URL', '') or ''
+                is_pg    = 'postgresql' in db_url
 
             new_cols = {
                 'fase_actual':              ('INTEGER DEFAULT 1',     'INTEGER DEFAULT 1'),
@@ -138,6 +141,164 @@ def run_migrations(app, db):
 
         except Exception as e:
             logging.error(f"[MIGRATION] Error en radicado_arborea: {e}")
+            try:
+                db.session.rollback()
+            except:
+                pass
+
+    # ── CORREO INTELIGENTE – tablas del modulo ─────────────────────────────
+    with app.app_context():
+        try:
+            inspector = inspect(db.engine)
+            existing_tables = inspector.get_table_names()
+            db_url = app.config.get('DATABASE_URL', '') or ''
+            is_pg = 'postgresql' in db_url
+
+            if 'correo_institucional_cuentas' not in existing_tables:
+                sql = """
+                CREATE TABLE IF NOT EXISTS correo_institucional_cuentas (
+                    id                 SERIAL PRIMARY KEY,
+                    usuario_id         INTEGER NOT NULL,
+                    email_institucional VARCHAR(180) NOT NULL,
+                    proveedor          VARCHAR(30) DEFAULT 'gmail',
+                    token_encriptado   TEXT,
+                    scopes             TEXT,
+                    conectada          BOOLEAN DEFAULT FALSE,
+                    ultima_sincronizacion TIMESTAMP,
+                    estado             VARCHAR(30) DEFAULT 'desconectada',
+                    mensaje_estado     VARCHAR(250),
+                    created_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    CONSTRAINT fk_correo_cuenta_usuario
+                      FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+                )
+                """ if is_pg else """
+                CREATE TABLE IF NOT EXISTS correo_institucional_cuentas (
+                    id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+                    usuario_id         INTEGER NOT NULL,
+                    email_institucional VARCHAR(180) NOT NULL,
+                    proveedor          VARCHAR(30) DEFAULT 'gmail',
+                    token_encriptado   TEXT,
+                    scopes             TEXT,
+                    conectada          BOOLEAN DEFAULT 0,
+                    ultima_sincronizacion TIMESTAMP,
+                    estado             VARCHAR(30) DEFAULT 'desconectada',
+                    mensaje_estado     VARCHAR(250),
+                    created_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+                )
+                """
+                db.session.execute(text(sql))
+                logging.info("[MIGRATION] ✅ Tabla correo_institucional_cuentas creada")
+
+            if 'correo_institucional_mensajes' not in existing_tables:
+                sql = """
+                CREATE TABLE IF NOT EXISTS correo_institucional_mensajes (
+                    id                 SERIAL PRIMARY KEY,
+                    cuenta_id          INTEGER NOT NULL,
+                    gmail_message_id   VARCHAR(140) UNIQUE NOT NULL,
+                    gmail_thread_id    VARCHAR(140),
+                    remitente          VARCHAR(255),
+                    remitente_email    VARCHAR(180),
+                    destinatarios      TEXT,
+                    cc                 TEXT,
+                    asunto             VARCHAR(500),
+                    snippet            TEXT,
+                    cuerpo_texto       TEXT,
+                    fecha_recepcion    TIMESTAMP NOT NULL,
+                    tiene_adjuntos     BOOLEAN DEFAULT FALSE,
+                    adjuntos_json      TEXT,
+                    estado             VARCHAR(30) DEFAULT 'nuevo',
+                    categoria          VARCHAR(60) DEFAULT 'otro',
+                    prioridad          VARCHAR(20) DEFAULT 'media',
+                    requiere_respuesta BOOLEAN DEFAULT TRUE,
+                    urgencia           VARCHAR(20) DEFAULT 'media',
+                    tema_principal     VARCHAR(200),
+                    resumen_ejecutivo  TEXT,
+                    recomendacion_gestion TEXT,
+                    semaforo           VARCHAR(20) DEFAULT 'gris',
+                    dias_transcurridos INTEGER DEFAULT 0,
+                    riesgo_vencimiento VARCHAR(30) DEFAULT 'bajo',
+                    analizado_at       TIMESTAMP,
+                    respondido_at      TIMESTAMP,
+                    created_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    CONSTRAINT fk_correo_mensaje_cuenta
+                      FOREIGN KEY (cuenta_id) REFERENCES correo_institucional_cuentas(id)
+                )
+                """ if is_pg else """
+                CREATE TABLE IF NOT EXISTS correo_institucional_mensajes (
+                    id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+                    cuenta_id          INTEGER NOT NULL,
+                    gmail_message_id   VARCHAR(140) UNIQUE NOT NULL,
+                    gmail_thread_id    VARCHAR(140),
+                    remitente          VARCHAR(255),
+                    remitente_email    VARCHAR(180),
+                    destinatarios      TEXT,
+                    cc                 TEXT,
+                    asunto             VARCHAR(500),
+                    snippet            TEXT,
+                    cuerpo_texto       TEXT,
+                    fecha_recepcion    TIMESTAMP NOT NULL,
+                    tiene_adjuntos     BOOLEAN DEFAULT 0,
+                    adjuntos_json      TEXT,
+                    estado             VARCHAR(30) DEFAULT 'nuevo',
+                    categoria          VARCHAR(60) DEFAULT 'otro',
+                    prioridad          VARCHAR(20) DEFAULT 'media',
+                    requiere_respuesta BOOLEAN DEFAULT 1,
+                    urgencia           VARCHAR(20) DEFAULT 'media',
+                    tema_principal     VARCHAR(200),
+                    resumen_ejecutivo  TEXT,
+                    recomendacion_gestion TEXT,
+                    semaforo           VARCHAR(20) DEFAULT 'gris',
+                    dias_transcurridos INTEGER DEFAULT 0,
+                    riesgo_vencimiento VARCHAR(30) DEFAULT 'bajo',
+                    analizado_at       TIMESTAMP,
+                    respondido_at      TIMESTAMP,
+                    created_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (cuenta_id) REFERENCES correo_institucional_cuentas(id)
+                )
+                """
+                db.session.execute(text(sql))
+                logging.info("[MIGRATION] ✅ Tabla correo_institucional_mensajes creada")
+
+            if 'correo_institucional_borradores' not in existing_tables:
+                sql = """
+                CREATE TABLE IF NOT EXISTS correo_institucional_borradores (
+                    id                 SERIAL PRIMARY KEY,
+                    mensaje_id         INTEGER NOT NULL,
+                    tono               VARCHAR(40) DEFAULT 'formal_institucional',
+                    version            INTEGER DEFAULT 1,
+                    contenido          TEXT NOT NULL,
+                    generado_por_ia    BOOLEAN DEFAULT TRUE,
+                    generado_por       VARCHAR(100),
+                    created_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    CONSTRAINT fk_correo_borrador_mensaje
+                      FOREIGN KEY (mensaje_id) REFERENCES correo_institucional_mensajes(id)
+                )
+                """ if is_pg else """
+                CREATE TABLE IF NOT EXISTS correo_institucional_borradores (
+                    id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+                    mensaje_id         INTEGER NOT NULL,
+                    tono               VARCHAR(40) DEFAULT 'formal_institucional',
+                    version            INTEGER DEFAULT 1,
+                    contenido          TEXT NOT NULL,
+                    generado_por_ia    BOOLEAN DEFAULT 1,
+                    generado_por       VARCHAR(100),
+                    created_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (mensaje_id) REFERENCES correo_institucional_mensajes(id)
+                )
+                """
+                db.session.execute(text(sql))
+                logging.info("[MIGRATION] ✅ Tabla correo_institucional_borradores creada")
+
+            db.session.commit()
+        except Exception as e:
+            logging.error(f"[MIGRATION] Error en modulo Correo Inteligente: {e}")
             try:
                 db.session.rollback()
             except:

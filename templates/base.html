@@ -750,6 +750,14 @@
       </a>
       {% endif %}
 
+      {% if can('correo_inteligente') %}
+      <a href="{{ url_for('correo_inteligente.inbox') }}"
+         class="av-nav-item {% if request.endpoint and 'correo_inteligente' in request.endpoint %}active{% endif %}">
+        <i class="bi bi-envelope-paper av-nav-icon"></i>
+        Correo Inteligente
+      </a>
+      {% endif %}
+
       <!-- ADMIN -->
       {% if session.user_role == 'admin' %}
       <div class="av-nav-section">
@@ -850,6 +858,7 @@
         {% if can('seguimiento') %}<a class="av-nav-item" href="{{ url_for('seguimiento.metas_dashboard') }}"><i class="bi bi-graph-up-arrow av-nav-icon"></i> Metas</a>{% endif %}
         {% if can('riesgo') %}<a class="av-nav-item" href="{{ url_for('main.gestion_riesgo') }}"><i class="bi bi-tree av-nav-icon"></i> Riesgo</a>{% endif %}
         {% if can('contratos') %}<a class="av-nav-item" href="/contratos"><i class="bi bi-briefcase-fill av-nav-icon"></i> Contratos</a>{% endif %}
+        {% if can('correo_inteligente') %}<a class="av-nav-item" href="{{ url_for('correo_inteligente.inbox') }}"><i class="bi bi-envelope-paper av-nav-icon"></i> Correo Inteligente</a>{% endif %}
         <a class="av-nav-item danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right av-nav-icon"></i> Cerrar Sesión</a>
       </div>
     </div>

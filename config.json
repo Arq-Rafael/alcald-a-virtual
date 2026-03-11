@@ -49,6 +49,13 @@
       "planeacion"
     ],
     "ia": [],
+    "correo_inteligente": [
+      "desarrollo_rural",
+      "desarrollo_social",
+      "gobierno",
+      "hacienda",
+      "planeacion"
+    ],
     "configuracion": []
   }
 }

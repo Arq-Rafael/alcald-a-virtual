@@ -35,6 +35,7 @@ def get_module_catalog():
         {'key': 'contratos', 'label': 'Contratos'},
         {'key': 'certificados', 'label': 'Certificados'},
         {'key': 'ia', 'label': 'IA'},
+        {'key': 'correo_inteligente', 'label': 'Correo Inteligente Institucional'},
         {'key': 'configuracion', 'label': 'Configuracion'}
     ]
 

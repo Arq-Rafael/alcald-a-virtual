@@ -56,6 +56,7 @@ def create_app(config_class=Config):
     from .routes.totp_setup import totp_bp
     from .routes.backup_api import backup_api
     from .routes.weather_api import weather_bp
+    from .routes.correo_inteligente import correo_inteligente_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
@@ -82,6 +83,7 @@ def create_app(config_class=Config):
     app.register_blueprint(totp_bp)
     app.register_blueprint(backup_api)
     app.register_blueprint(weather_bp)
+    app.register_blueprint(correo_inteligente_bp)
 
     
     # Context Processors (for templates)
@@ -126,6 +128,7 @@ def create_app(config_class=Config):
         from .models.participacion import Radicado, RespuestaRadicado  # noqa: F401
         from .models.usuario import Usuario, AuditoriaAcceso  # noqa: F401
         from .models.riesgo_arborea import RadicadoArborea, ArbolEspecie  # noqa: F401
+        from .models.correo_inteligente import CorreoInstitucionalCuenta, CorreoInstitucionalMensaje, CorreoInstitucionalBorrador  # noqa: F401
         db.create_all()
         
         # Inicializar sistema de backup

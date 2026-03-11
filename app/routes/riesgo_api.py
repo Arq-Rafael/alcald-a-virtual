@@ -36,26 +36,23 @@ riesgo_api = Blueprint('riesgo_api', __name__, url_prefix='/api/riesgo')
 # ── Helpers de seguridad ──────────────────────────────────────────────────────
 
 def _es_planeacion() -> bool:
-    return '(planeacion)' in session.get('user', '').lower()
+    usuario = session.get('user', '')
+    return usuario.endswith('.planeacion')
 
 
 def _filtro_por_usuario(query, Model):
     """
     Aplica filtro de visibilidad sobre una query de RadicadoArborea.
     - Admin: ve todo.
-    - Planeación: ve sus propios + los pendientes de su aprobación.
+    - Planeación (.planeacion): ve TODOS los radicados.
     - Regular: solo sus propios.
     """
     usuario = session.get('user', '')
     rol     = session.get('role', '')
     if rol == 'admin':
-        return query          # admin: sin filtro
+        return query
     if _es_planeacion():
-        # Planeación: propios + en revisión Planeación
-        return query.filter(
-            (Model.usuario_creador == usuario) |
-            (Model.estado == 'En revisión Planeación')
-        )
+        return query   # planeación ve todo
     return query.filter(Model.usuario_creador == usuario)
 
 
@@ -197,6 +194,18 @@ def crear_radicado():
         radicado.tipo_solicitud = data.get('tipo_solicitud', 'Poda')
         radicado.motivo_solicitud = data.get('motivo_solicitud')
         radicado.usuario_creador = session.get('user', 'Sistema')
+
+        # Auto-calcular criticidad y SLA
+        radicado.calcular_criticidad()
+        radicado.calcular_vencimiento_sla()
+
+        # Registrar estado inicial en historial
+        radicado.historial_estados = json.dumps([{
+            'estado': 'Radicada',
+            'fecha': datetime.utcnow().isoformat(),
+            'usuario': radicado.usuario_creador,
+            'observacion': 'Radicado creado'
+        }])
         
         # Visita técnica (si viene en el mismo request)
         if data.get('visita_fecha'):
@@ -401,8 +410,69 @@ def listar_radicados():
         return jsonify({'error': str(e)}), 500
 
 
-# ============================================================================
-# PDF - Generación de informe técnico y dictamen
+@riesgo_api.route('/arborea/<int:radicado_id>/estado', methods=['PATCH'])
+def cambiar_estado(radicado_id):
+    """
+    Cambia el estado de un radicado con validación de rol y registro en historial.
+    PATCH /api/riesgo/arborea/<id>/estado
+    Body: {"estado": "Visitada", "observacion": "..."}
+    """
+    RadicadoArborea, _ = get_models()
+    db = get_db()
+    radicado = RadicadoArborea.query.get_or_404(radicado_id)
+    data = request.get_json() or {}
+    nuevo_estado = data.get('estado', '').strip()
+    observacion  = data.get('observacion', '').strip()
+    usuario      = session.get('user', 'Sistema')
+    rol          = session.get('role', '')
+
+    if not nuevo_estado:
+        return jsonify({'error': 'Se requiere el campo estado'}), 400
+
+    # ─ Transiciones permitidas por rol ───────────────────────────────────
+    es_planeacion = _es_planeacion()
+    es_admin      = (rol == 'admin')
+
+    # Solo .planeacion puede aprobar/rechazar
+    SOLO_PLANEACION = {'Aprobada', 'Rechazada'}
+    if nuevo_estado in SOLO_PLANEACION and not es_planeacion and not es_admin:
+        return jsonify({'error': 'Solo un usuario de Planeación puede aprobar o rechazar radicados'}), 403
+
+    # Validaciones antes de aprobar
+    if nuevo_estado == 'Aprobada':
+        faltantes = []
+        if not radicado.arbol_especie_comun: faltantes.append('Especie del árbol')
+        if not radicado.arbol_dap_cm:        faltantes.append('DAP')
+        if not radicado.ubicacion_direccion: faltantes.append('Ubicación')
+        if not radicado.dictamen_decision:   faltantes.append('Decisión CMGR')
+        if not radicado.permiso_vigencia_dias: faltantes.append('Vigencia del permiso')
+        if not radicado.permiso_obligaciones: faltantes.append('Obligaciones especiales')
+        if not radicado.compensacion_arboles_plantar: faltantes.append('Compensación (número de árboles)')
+        if faltantes:
+            return jsonify({
+                'error': 'Campos requeridos incompletos',
+                'faltantes': faltantes
+            }), 422
+
+    try:
+        radicado.registrar_cambio_estado(nuevo_estado, usuario, observacion)
+        # Si se aprueba, actualizar campos de planeación
+        if nuevo_estado in ('Aprobada', 'Rechazada'):
+            radicado.planeacion_decision      = nuevo_estado
+            radicado.planeacion_usuario       = usuario
+            radicado.planeacion_fecha         = datetime.utcnow()
+            radicado.planeacion_observaciones = observacion
+        db.session.commit()
+        return jsonify({
+            'success': True,
+            'estado': nuevo_estado,
+            'radicado': radicado.to_dict()
+        })
+    except Exception as ex:
+        db.session.rollback()
+        logger.error(f'Error cambiar_estado {radicado_id}: {ex}', exc_info=True)
+        return jsonify({'error': str(ex)}), 500
+
 # ============================================================================
 
 def _render_pdf(template_name, context, filename="documento.pdf"):
@@ -920,13 +990,13 @@ def _render_dictamen_content(c, radicado, margin, y_position, w, h, style_title,
             textColor=colors.HexColor('#2c3e50'),
             alignment=0
         )
-        obl_para = Paragraph(radicado.permiso_obligaciones[:400], style)
-        w_obl, h_obl = obl_para.wrap(table_width, 150)
-        
+        obl_para = Paragraph(radicado.permiso_obligaciones or '', style)
+        w_obl, h_obl = obl_para.wrap(table_width, 9999)
+
         if y_position - h_obl < 80:
             c.showPage()
             y_position = h - 140
-        
+
         obl_para.drawOn(c, margin, y_position - h_obl)
         y_position -= (h_obl + 16)
     
@@ -939,14 +1009,19 @@ def _render_dictamen_content(c, radicado, margin, y_position, w, h, style_title,
     c.line(margin, y_position, margin + table_width, y_position)
     y_position -= 14
     
-    data = [
-        ['Árboles a plantar', str(radicado.compensacion_arboles_plantar) if radicado.compensacion_arboles_plantar else '-'],
-        ['Especie recomendada', radicado.compensacion_especie_recomendada or '-'],
-        ['Sitio de plantación', radicado.compensacion_sitio or '-'],
+    # Sitio de plantación: usar Paragraph para permitir word-wrap
+    data_comp = [
+        ['Tipo de solicitud', (radicado.tipo_solicitud or '-').upper()],
+        ['Especies a plantar', str(radicado.compensacion_arboles_plantar) if radicado.compensacion_arboles_plantar else '-'],
+        ['Especie recomendada', (radicado.compensacion_especie_recomendada or '-').upper()],
         ['Plazo', radicado.compensacion_plazo or '30 días'],
-        ['Método de cálculo', radicado.compensacion_metodo or '-']
+        ['Método de cálculo', radicado.compensacion_metodo or '-'],
     ]
-    table = Table(data, colWidths=[table_width*0.25, table_width*0.75])
+    # Sitio va aparte como Paragraph para no truncar
+    sitio_txt = radicado.compensacion_sitio or '-'
+
+    col_w = [table_width*0.30, table_width*0.70]
+    table = Table(data_comp, colWidths=col_w)
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (0, -1), colors.HexColor(COLOR_HEADER_BG)),
         ('BACKGROUND', (1, 0), (1, -1), colors.white),
@@ -954,88 +1029,105 @@ def _render_dictamen_content(c, radicado, margin, y_position, w, h, style_title,
         ('TEXTCOLOR', (1, 0), (1, -1), colors.HexColor('#2c3e50')),
         ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
         ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (0, -1), 9),
-        ('FONTSIZE', (1, 0), (1, -1), 10),
+        ('FONTSIZE', (0, 0), (-1, -1), 9),
         ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor(COLOR_GRID)),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('LEFTPADDING', (0, 0), (-1, -1), 8),
         ('RIGHTPADDING', (0, 0), (-1, -1), 8),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
     ]))
-    w_table, h_table = table.wrap(table_width, 150)
-    
+    w_table, h_table = table.wrap(table_width, 9999)
     if y_position - h_table < 100:
         c.showPage()
         y_position = h - 140
-    
     table.drawOn(c, margin, y_position - h_table)
-    y_position -= (h_table + 12)
+    y_position -= (h_table + 8)
+
+    # Sitio de plantación (texto largo)
+    c.setFont('Helvetica-Bold', 9)
+    c.setFillColor(colors.HexColor(COLOR_HEADER_BG))
+    c.rect(margin, y_position - 18, table_width*0.30, 18, fill=1, stroke=0)
+    c.setFillColor(colors.white)
+    c.drawString(margin + 8, y_position - 13, 'Sitio de plantación')
+    # Celda de valor
+    c.setFillColor(colors.white)
+    c.setStrokeColor(colors.HexColor(COLOR_GRID))
+    c.rect(margin + table_width*0.30, y_position - 18, table_width*0.70, 18, fill=1, stroke=1)
+    style_sitio = ParagraphStyle('sitio', fontName='Helvetica', fontSize=9,
+                                  textColor=colors.HexColor('#2c3e50'), leading=11)
+    para_sitio = Paragraph(sitio_txt, style_sitio)
+    w_s, h_s = para_sitio.wrap(table_width*0.70 - 16, 9999)
+    # Si cabe en 18pt ponemos inline, si no extendemos
+    if h_s <= 18:
+        para_sitio.drawOn(c, margin + table_width*0.30 + 8, y_position - 15)
+        y_position -= (18 + 12)
+    else:
+        c.rect(margin + table_width*0.30, y_position - h_s - 4, table_width*0.70, h_s + 8, fill=1, stroke=1)
+        para_sitio.drawOn(c, margin + table_width*0.30 + 8, y_position - h_s)
+        y_position -= (h_s + 16)
     
     # Pie
     if y_position < 80:
         c.showPage()
         y_position = h - 140
     
-    # ── BLOQUE DE FIRMAS OBLIGATORIO ─────────────────────────────────────
-    if y_position < 180:
-        c.showPage()
-        y_position = h - 140
-
-    y_position -= 20
-    c.setStrokeColor(colors.HexColor('#0f4c81'))
-    c.setLineWidth(1)
-    c.line(margin, y_position, margin + table_width, y_position)
-    y_position -= 14
+    # ── BLOQUE DE FIRMAS (siempre en nueva página) ────────────────────────
+    c.showPage()
+    y_position = h - 140
 
     c.setFont('Helvetica-Bold', 10)
     c.setFillColor(colors.HexColor(COLOR_PRIMARY))
     c.drawString(margin, y_position, 'FIRMAS DE APROBACIÓN')
-    y_position -= 20
+    y_position -= 28
 
-    col_w = (table_width - 20) / 2
+    col_w = (table_width - 40) / 2
+    firma_y = y_position
+
     # Firma izquierda
     c.setStrokeColor(colors.HexColor('#333333'))
-    c.setLineWidth(0.5)
-    c.line(margin, y_position, margin + col_w, y_position)
-    c.setFont('Helvetica', 9)
-    c.setFillColor(colors.HexColor('#3d3d3d'))
-    c.drawCentredString(margin + col_w / 2, y_position - 12,
-                        radicado.permiso_firmante1 or 'Secretario/a de Planeación y Obras Públicas')
-    c.setFont('Helvetica-Oblique', 8)
+    c.setLineWidth(0.8)
+    c.line(margin, firma_y, margin + col_w, firma_y)
+    c.setFont('Helvetica-Bold', 9)
+    c.setFillColor(colors.HexColor('#1a1a1a'))
+    c.drawCentredString(margin + col_w / 2, firma_y - 14, 'SECRETARIO(A) DE PLANEACIÓN')
+    c.drawCentredString(margin + col_w / 2, firma_y - 25, 'Y OBRAS PÚBLICAS')
+    c.setFont('Helvetica', 8)
     c.setFillColor(colors.gray)
-    c.drawCentredString(margin + col_w / 2, y_position - 22, 'Municipio de Supatá')
+    c.drawCentredString(margin + col_w / 2, firma_y - 36, 'Alcaldía Municipal de Supatá')
 
     # Firma derecha
-    right_x = margin + col_w + 20
+    right_x = margin + col_w + 40
     c.setStrokeColor(colors.HexColor('#333333'))
-    c.line(right_x, y_position, right_x + col_w, y_position)
-    c.setFont('Helvetica', 9)
-    c.setFillColor(colors.HexColor('#3d3d3d'))
-    c.drawCentredString(right_x + col_w / 2, y_position - 12,
-                        radicado.permiso_firmante2 or 'Coordinador/a del CMGR')
-    c.setFont('Helvetica-Oblique', 8)
-    c.setFillColor(colors.gray)
-    c.drawCentredString(right_x + col_w / 2, y_position - 22, 'Comité Municipal de Gestión del Riesgo')
-
-    y_position -= 40
-
-    # ── LEYENDA DE INVALIDEZ ──────────────────────────────────────────────
-    c.setFillColor(colors.HexColor('#f8d7da'))
-    c.roundRect(margin, y_position - 18, table_width, 22, 4, fill=1, stroke=0)
+    c.line(right_x, firma_y, right_x + col_w, firma_y)
     c.setFont('Helvetica-Bold', 9)
-    c.setFillColor(colors.HexColor('#721c24'))
-    c.drawCentredString(margin + table_width / 2, y_position - 9,
-                        '⚠  Este documento no tiene validez sin las firmas originales de los funcionarios designados.')
-    y_position -= 30
+    c.setFillColor(colors.HexColor('#1a1a1a'))
+    c.drawCentredString(right_x + col_w / 2, firma_y - 14, 'COORDINADOR(A) DEL CMGR')
+    c.drawCentredString(right_x + col_w / 2, firma_y - 25, 'Comité Municipal de Gestión')
+    c.setFont('Helvetica', 8)
+    c.setFillColor(colors.gray)
+    c.drawCentredString(right_x + col_w / 2, firma_y - 36, 'del Riesgo — Supatá')
+
+    y_position = firma_y - 60
+
+    # ── LEYENDA DE INVALIDEZ ─────────────────────────────────────────────
+    c.setFillColor(colors.HexColor('#fef3c7'))
+    c.roundRect(margin, y_position - 22, table_width, 26, 4, fill=1, stroke=0)
+    c.setFont('Helvetica-Bold', 9)
+    c.setFillColor(colors.HexColor('#92400e'))
+    c.drawCentredString(margin + table_width / 2, y_position - 12,
+                        'Este documento no tiene validez sin las firmas originales de los funcionarios designados.')
+    y_position -= 38
 
     c.setFont('Helvetica-Oblique', 8)
     c.setFillColor(colors.gray)
     c.drawString(margin, y_position,
-                 f'Generado por el Sistema de Gestión Arbórea — Alcaldía de Supatá — {radicado.usuario_creador or ""}')
+                 'Generado por el Sistema de Gestión Arbórea — Alcaldía Municipal de Supatá')
+    c.drawRightString(margin + table_width, y_position,
+                      'NIT: 899999398-5 | Carrera 7 N° 4-14 | alcaldia@supata-cundinamarca.gov.co')
 
     return y_position
+
 
 
 @riesgo_api.route('/arborea/<int:radicado_id>/pdf/informe', methods=['GET'])
