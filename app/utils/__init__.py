@@ -83,6 +83,7 @@ def can_risk_submodule(submodule: str) -> bool:
     Reglas:
     - Admin: siempre True.
     - Planeación: siempre puede acceder a 'arborea' y 'actas'.
+    - Cualquier usuario con acceso al módulo 'riesgo': puede acceder a 'arborea'.
     - Demás usuarios: requieren el flag can_risk_<submodule>=True en BD.
     """
     if is_admin():
@@ -90,6 +91,10 @@ def can_risk_submodule(submodule: str) -> bool:
 
     # Planeación tiene acceso automático a arborea y actas
     if _es_planeacion() and submodule in ('arborea', 'actas'):
+        return True
+
+    # Cualquier usuario con acceso al módulo riesgo puede ver gestión arbórea
+    if submodule == 'arborea' and can_access('riesgo'):
         return True
 
     # Consultar BD para el usuario en sesión

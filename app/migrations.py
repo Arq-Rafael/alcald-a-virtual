@@ -114,6 +114,11 @@ def run_migrations(app, db):
                 'pdf_compensacion':         ('VARCHAR(255)',           'VARCHAR(255)'),
                 'permiso_firmante2':        ('VARCHAR(150)',           'VARCHAR(150)'),
                 'permiso_fecha_limite':     ('TIMESTAMP',              'TIMESTAMP'),
+                # Columnas fase 2 (v3)
+                'criticidad':               ("VARCHAR(10) DEFAULT 'media'", "VARCHAR(10) DEFAULT 'media'"),
+                'historial_estados':        ('TEXT',                   'TEXT'),
+                'sla_dias':                 ('INTEGER DEFAULT 15',     'INTEGER DEFAULT 15'),
+                'fecha_vencimiento_sla':    ('TIMESTAMP',              'TIMESTAMP'),
             }
 
             added = []

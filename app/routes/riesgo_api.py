@@ -382,11 +382,7 @@ def listar_radicados():
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 20, type=int)
         
-        query = RadicadoArborea.query
-
-        # Control de acceso: admin ve todo; usuarios normales solo sus radicados
-        if not is_admin():
-            query = query.filter_by(usuario_creador=current_session_user())
+        query = _filtro_por_usuario(RadicadoArborea.query, RadicadoArborea)
 
         if estado:
             query = query.filter_by(estado=estado)
