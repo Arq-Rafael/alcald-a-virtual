@@ -1,1034 +1,847 @@
-{# templates/geoportal.html - Geoportal Profesional iOS 26 #}
-{% extends "base.html" %}
-
-{% block title %}Geoportal - Alcaldía Virtual Supatá{% endblock %}
-
-{% block styles %}
-<style>
-/* ========================================
-   GEOPORTAL PROFESIONAL - iOS 26
-   Diseño Premium con Glassmorphism Avanzado
-   ======================================== */
-
-:root {
-  --geo-dark: #1a3a1f;
-  --geo-primary: #2d5016;
-  --geo-primary-light: #4a7c2f;
-  --geo-accent: #d4a574;
-  --geo-accent-bright: #f4c896;
-  --geo-glass-dark: rgba(42, 65, 48, 0.85);
-  --geo-glass-light: rgba(255, 255, 255, 0.12);
-  --geo-border: rgba(255, 255, 255, 0.15);
-}
-
-* {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif !important;
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-}
-
-.geo-wrapper {
-  min-height: 100vh;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 0;
-  color: white;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-}
-
-.geo-container {
-  max-width: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-/* Top Navigation Bar */
-.geo-topbar {
-  background: var(--geo-dark);
-  padding: 0.75rem 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-}
-
-.geo-logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: white;
-  font-size: 1.1rem;
-  font-weight: 700;
-}
-
-.geo-logo i {
-  font-size: 1.8rem;
-  color: var(--geo-accent);
-}
-
-.geo-nav {
-  display: flex;
-  gap: 2rem;
-  align-items: center;
-}
-
-.geo-nav-item {
-  color: rgba(255,255,255,0.8);
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: color 0.2s;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-}
-
-.geo-nav-item:hover {
-  color: white;
-  background: rgba(255,255,255,0.1);
-}
-
-.geo-nav-item.active {
-  color: white;
-  background: rgba(255,255,255,0.15);
-}
-
-.geo-search {
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 20px;
-  padding: 0.5rem 1rem;
-  color: white;
-  font-size: 0.9rem;
-  width: 250px;
-  outline: none;
-}
-
-.geo-search::placeholder {
-  color: rgba(255,255,255,0.5);
-}
-
-/* Map Container */
-.map-container {
-  position: relative;
-  height: calc(100vh - 60px);
-  overflow: hidden;
-}
-
-.map-iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-}
-
-/* Floating Panels - Professional Design */
-.floating-panel {
-  position: absolute;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-  z-index: 100;
-  transition: all 0.3s ease;
-}
-
-.floating-panel:hover {
-  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.45);
-}
-
-/* Left Panel - Layers & Filters */
-.left-panel {
-  left: 20px;
-  top: 20px;
-  width: 280px;
-  max-height: calc(100vh - 100px);
-  overflow-y: auto;
-}
-
-/* Right Panel - Parcel Details */
-.right-panel {
-  right: 20px;
-  top: 20px;
-  width: 320px;
-  max-height: calc(100vh - 100px);
-  overflow-y: auto;
-}
-
-/* Panel Header */
-.panel-header {
-  padding: 16px 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: move;
-  user-select: none;
-}
-
-.panel-icon {
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, var(--geo-accent), var(--geo-accent-bright));
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--geo-dark);
-  font-size: 1rem;
-  flex-shrink: 0;
-}
-
-.panel-title {
-  flex: 1;
-}
-
-.panel-title h3 {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: white;
-  letter-spacing: 0.3px;
-}
-
-.panel-title p {
-  margin: 2px 0 0 0;
-  font-size: 0.75rem;
-  color: rgba(255,255,255,0.6);
-}
-
-/* Panel Content */
-.panel-content {
-  padding: 16px 20px;
-}
-
-/* Collapsible Section */
-.section {
-  margin-bottom: 20px;
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 0;
-  cursor: pointer;
-  user-select: none;
-}
-
-.section-header h4 {
-  margin: 0;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: rgba(255,255,255,0.9);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.section-toggle {
-  color: rgba(255,255,255,0.6);
-  transition: transform 0.3s;
-}
-
-.section.collapsed .section-toggle {
-  transform: rotate(-90deg);
-}
-
-.section-content {
-  padding-top: 8px;
-  max-height: 500px;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-}
-
-.section.collapsed .section-content {
-  max-height: 0;
-  padding-top: 0;
-}
-
-/* Layer Item with Toggle */
-.layer-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  margin-bottom: 6px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 10px;
-  transition: all 0.2s;
-}
-
-.layer-item:hover {
-  background: rgba(255,255,255,0.1);
-}
-
-.layer-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-}
-
-.layer-info i {
-  color: var(--geo-accent);
-  font-size: 1rem;
-}
-
-.layer-info span {
-  color: rgba(255,255,255,0.9);
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
-/* Toggle Switch */
-.toggle-switch {
-  position: relative;
-  width: 44px;
-  height: 24px;
-  background: rgba(255,255,255,0.2);
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.toggle-switch.active {
-  background: var(--geo-accent);
-}
-
-.toggle-switch::after {
-  content: '';
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 18px;
-  height: 18px;
-  background: white;
-  border-radius: 50%;
-  transition: transform 0.3s;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.toggle-switch.active::after {
-  transform: translateX(20px);
-}
-
-/* Base Map Selector */
-.basemap-selector {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.basemap-btn {
-  flex: 1;
-  padding: 8px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 8px;
-  color: rgba(255,255,255,0.8);
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.basemap-btn:hover {
-  background: rgba(255,255,255,0.15);
-}
-
-.basemap-btn.active {
-  background: var(--geo-accent);
-  color: var(--geo-dark);
-  border-color: var(--geo-accent);
-}
-
-/* Filter Chips */
-.filter-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.filter-chip {
-  padding: 6px 12px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 16px;
-  color: rgba(255,255,255,0.8);
-  font-size: 0.75rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.filter-chip:hover {
-  background: rgba(255,255,255,0.15);
-}
-
-.filter-chip.active {
-  background: var(--geo-accent);
-  color: var(--geo-dark);
-  border-color: var(--geo-accent);
-}
-
-/* Slider */
-.slider-group {
-  margin-top: 12px;
-}
-
-.slider-label {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  color: rgba(255,255,255,0.8);
-  font-size: 0.8rem;
-}
-
-.slider {
-  width: 100%;
-  height: 4px;
-  background: rgba(255,255,255,0.2);
-  border-radius: 2px;
-  outline: none;
-  -webkit-appearance: none;
-}
-
-.slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
-  background: var(--geo-accent);
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-}
-
-.slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  background: var(--geo-accent);
-  border-radius: 50%;
-  cursor: pointer;
-  border: none;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-}
-
-/* Parcel Details Card */
-.parcel-card {
-  background: linear-gradient(135deg, var(--geo-accent) 0%, var(--geo-accent-bright) 100%);
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
-  color: var(--geo-dark);
-}
-
-.parcel-code {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 8px;
-  opacity: 0.8;
-}
-
-.parcel-id {
-  font-size: 1.1rem;
-  font-weight: 800;
-  margin-bottom: 16px;
-}
-
-.parcel-detail {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.parcel-detail i {
-  font-size: 1rem;
-  margin-top: 2px;
-  opacity: 0.7;
-}
-
-.parcel-detail-content {
-  flex: 1;
-}
-
-.parcel-detail-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 2px;
-  opacity: 0.7;
-}
-
-.parcel-detail-value {
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-/* Tabs in Parcel Details */
-.parcel-tabs {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 12px;
-  background: rgba(0,0,0,0.1);
-  padding: 4px;
-  border-radius: 8px;
-}
-
-.parcel-tab {
-  flex: 1;
-  padding: 6px;
-  background: transparent;
-  border: none;
-  border-radius: 6px;
-  color: var(--geo-dark);
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  opacity: 0.6;
-}
-
-.parcel-tab.active {
-  background: rgba(255,255,255,0.4);
-  opacity: 1;
-}
-
-/* Info List */
-.info-list {
-  background: rgba(255,255,255,0.05);
-  border-radius: 10px;
-  padding: 12px;
-}
-
-.info-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  color: rgba(255,255,255,0.9);
-  font-size: 0.8rem;
-}
-
-.info-item:last-child {
-  border-bottom: none;
-}
-
-.info-label {
-  opacity: 0.7;
-}
-
-.info-value {
-  font-weight: 600;
-}
-
-/* Action Button */
-.action-btn {
-  width: 100%;
-  padding: 12px;
-  background: linear-gradient(135deg, var(--geo-accent), var(--geo-accent-bright));
-  border: none;
-  border-radius: 10px;
-  color: var(--geo-dark);
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 12px;
-  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
-}
-
-.action-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(212, 165, 116, 0.4);
+{# templates/geoportal.html — Geoportal GIS Institucional #}
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Geoportal — Alcaldía Virtual Supatá</title>
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+<!-- Inter Font -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"/>
+
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "surface":                  "#060e20",
+        "surface-dim":              "#060e20",
+        "surface-container-lowest": "#000000",
+        "surface-container-low":    "#091328",
+        "surface-container":        "#0f1930",
+        "surface-container-high":   "#141f38",
+        "surface-container-highest":"#192540",
+        "surface-variant":          "#192540",
+        "surface-bright":           "#1f2b49",
+        "on-surface":               "#dee5ff",
+        "on-surface-variant":       "#a3aac4",
+        "background":               "#060e20",
+        "on-background":            "#dee5ff",
+        "primary":                  "#4bc1ff",
+        "primary-fixed":            "#36bcfd",
+        "primary-fixed-dim":        "#1aaeee",
+        "primary-dim":              "#1aaeee",
+        "primary-container":        "#27b3f4",
+        "on-primary":               "#003952",
+        "on-primary-container":     "#002d42",
+        "secondary":                "#69f6b8",
+        "secondary-dim":            "#58e7ab",
+        "secondary-fixed":          "#69f6b8",
+        "secondary-fixed-dim":      "#58e7ab",
+        "secondary-container":      "#006c49",
+        "on-secondary":             "#005a3c",
+        "on-secondary-container":   "#e1ffec",
+        "tertiary":                 "#ffb148",
+        "tertiary-fixed":           "#f8a010",
+        "tertiary-fixed-dim":       "#e79400",
+        "tertiary-container":       "#f8a010",
+        "on-tertiary":              "#573500",
+        "outline":                  "#6d758c",
+        "outline-variant":          "#40485d",
+        "error":                    "#ff716c",
+        "error-container":          "#9f0519",
+        "on-error":                 "#490006",
+        "surface-tint":             "#4bc1ff",
+        "inverse-surface":          "#faf8ff",
+        "inverse-primary":          "#00668e",
+        "inverse-on-surface":       "#4d556b",
+      },
+      fontFamily: {
+        "sans": ["Inter", "system-ui", "sans-serif"],
+      },
+      borderRadius: {
+        "DEFAULT": "0.125rem",
+        "sm":  "0.125rem",
+        "md":  "0.25rem",
+        "lg":  "0.5rem",
+        "xl":  "0.75rem",
+        "2xl": "1rem",
+        "full":"9999px",
+      },
+    },
+  },
 }
-
-/* 3D Controls */
-.controls-3d {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--geo-glass-dark);
-  backdrop-filter: blur(30px);
-  border-radius: 12px;
-  border: 1px solid var(--geo-border);
-  padding: 12px 16px;
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-}
-
-.control-btn {
-  width: 36px;
-  height: 36px;
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 8px;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.control-btn:hover {
-  background: rgba(255,255,255,0.2);
-}
-
-.control-btn.active {
-  background: var(--geo-accent);
-  color: var(--geo-dark);
-  border-color: var(--geo-accent);
-}
-
-.control-label {
-  color: rgba(255,255,255,0.8);
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-/* Scrollbar Styling */
-.left-panel::-webkit-scrollbar,
-.right-panel::-webkit-scrollbar {
-  width: 6px;
-}
-
-.left-panel::-webkit-scrollbar-track,
-.right-panel::-webkit-scrollbar-track {
-  background: rgba(255,255,255,0.05);
-  border-radius: 3px;
-}
-
-.left-panel::-webkit-scrollbar-thumb,
-.right-panel::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.2);
-  border-radius: 3px;
-}
-
-.left-panel::-webkit-scrollbar-thumb:hover,
-.right-panel::-webkit-scrollbar-thumb:hover {
-  background: rgba(255,255,255,0.3);
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.floating-panel {
-  animation: fadeIn 0.4s ease-out;
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-  .left-panel, .right-panel {
-    width: 260px;
-  }
-  
-  .geo-nav {
-    gap: 1rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .geo-topbar {
-    padding: 0.5rem 1rem;
-  }
-  
-  .geo-nav {
-    display: none;
-  }
-  
-  .left-panel {
-    width: calc(100% - 40px);
-    max-width: 300px;
-  }
-  
-  .right-panel {
-    width: calc(100% - 40px);
-    max-width: 300px;
-    top: auto;
-    bottom: 20px;
-    right: 20px;
-  }
-  
-  .controls-3d {
-    bottom: 10px;
-    padding: 8px 12px;
-  }
-}
-</style>
-{% endblock %}
-
-{% block content %}
-<div class="geo-wrapper">
-  <div class="geo-container">
-    
-    <!-- Top Navigation Bar -->
-    <div class="geo-topbar">
-      <div class="geo-logo">
-        <i class="bi bi-shield-fill-check"></i>
-        <span>GEOPORTAL MUNICIPAL</span>
-      </div>
-      
-      <div class="geo-nav">
-        <a href="#" class="geo-nav-item">
-          <i class="bi bi-house-fill"></i> Home
-        </a>
-        <a href="#" class="geo-nav-item active">
-          <i class="bi bi-map-fill"></i> Map View
-        </a>
-        <a href="#" class="geo-nav-item">
-          <i class="bi bi-database-fill"></i> Data Catalog
-        </a>
-        <a href="#" class="geo-nav-item">
-          <i class="bi bi-gear-fill"></i> Services
-        </a>
-        <a href="#" class="geo-nav-item">
-          <i class="bi bi-question-circle-fill"></i> Help & Support
-        </a>
-      </div>
-      
-      <input type="text" class="geo-search" placeholder="Search Parcels, Places...">
-    </div>
-
-    <!-- Map Container -->
-    <div class="map-container">
-      <iframe src="{{ url_for('usos_suelo.catastro_3d') }}" class="map-iframe"></iframe>
-
-      <!-- Left Panel - Layers & Filters -->
-      <div class="floating-panel left-panel" id="leftPanel">
-        <div class="panel-header">
-          <div class="panel-icon">
-            <i class="bi bi-layers-fill"></i>
-          </div>
-          <div class="panel-title">
-            <h3>LAYERS & FILTERS</h3>
-          </div>
-        </div>
-        
-        <div class="panel-content">
-          <!-- Layers Section -->
-          <div class="section">
-            <div class="section-header" onclick="toggleSection(this)">
-              <h4>Layers</h4>
-              <i class="bi bi-chevron-down section-toggle"></i>
-            </div>
-            <div class="section-content">
-              <div class="layer-item">
-                <div class="layer-info">
-                  <i class="bi bi-building"></i>
-                  <span>Cadastre</span>
-                </div>
-                <div class="toggle-switch active" onclick="toggleLayer(this)"></div>
-              </div>
-              
-              <div class="layer-item">
-                <div class="layer-info">
-                  <i class="bi bi-map"></i>
-                  <span>Land Use</span>
-                </div>
-                <div class="toggle-switch active" onclick="toggleLayer(this)"></div>
-              </div>
-              
-              <div class="layer-item">
-                <div class="layer-info">
-                  <i class="bi bi-tree-fill"></i>
-                  <span>Environment</span>
-                </div>
-                <div class="toggle-switch" onclick="toggleLayer(this)"></div>
-              </div>
-              
-              <div class="layer-item">
-                <div class="layer-info">
-                  <i class="bi bi-sign-turn-right-fill"></i>
-                  <span>Infrastructure</span>
-                </div>
-                <div class="toggle-switch" onclick="toggleLayer(this)"></div>
-              </div>
-              
-              <!-- Base Map -->
-              <div style="margin-top:16px">
-                <div class="slider-label">
-                  <span style="font-weight:600">Base Map</span>
-                </div>
-                <div class="basemap-selector">
-                  <button class="basemap-btn" onclick="selectBasemap(this)">Street</button>
-                  <button class="basemap-btn active" onclick="selectBasemap(this)">Satellite</button>
-                  <button class="basemap-btn" onclick="selectBasemap(this)">Hybrid</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Filters Section -->
-          <div class="section">
-            <div class="section-header" onclick="toggleSection(this)">
-              <h4>Filters</h4>
-              <i class="bi bi-chevron-down section-toggle"></i>
-            </div>
-            <div class="section-content">
-              <!-- Zoning Type -->
-              <div style="margin-bottom:16px">
-                <div class="slider-label">
-                  <span>Zoning Type</span>
-                </div>
-                <div class="filter-chips">
-                  <div class="filter-chip active" onclick="toggleChip(this)">Residential</div>
-                  <div class="filter-chip" onclick="toggleChip(this)">Commercial</div>
-                  <div class="filter-chip" onclick="toggleChip(this)">Industrial</div>
-                </div>
-              </div>
-              
-              <!-- Parcel Size -->
-              <div class="slider-group">
-                <div class="slider-label">
-                  <span>Parcel Size</span>
-                  <span id="sizeValue">100m² - 10,000m²</span>
-                </div>
-                <input type="range" class="slider" min="100" max="10000" value="5000" 
-                       oninput="document.getElementById('sizeValue').textContent = this.value + 'm²'">
-              </div>
-              
-              <!-- Date of Last Update -->
-              <div class="slider-group">
-                <div class="slider-label">
-                  <span>Date of Last Update</span>
-                  <span id="dateValue">June 2023</span>
-                </div>
-                <select style="width:100%;padding:8px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:white;font-size:0.85rem;outline:none">
-                  <option>June 2023</option>
-                  <option>May 2023</option>
-                  <option>April 2023</option>
-                </select>
-              </div>
-              
-              <!-- Property Value -->
-              <div class="slider-group">
-                <div class="slider-label">
-                  <span>Property Value</span>
-                </div>
-                <input type="range" class="slider" min="0" max="100" value="50">
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right Panel - Parcel Details -->
-      <div class="floating-panel right-panel" id="rightPanel">
-        <div class="panel-header">
-          <div class="panel-icon">
-            <i class="bi bi-file-earmark-text-fill"></i>
-          </div>
-          <div class="panel-title">
-            <h3>PARCEL DETAILS</h3>
-          </div>
-        </div>
-        
-        <div class="panel-content">
-          <!-- Parcel Code Card -->
-          <div class="parcel-card">
-            <div class="parcel-code">PARCEL CODE</div>
-            <div class="parcel-id">MUNI-2024-87348</div>
-            
-            <div class="parcel-detail">
-              <i class="bi bi-person-fill"></i>
-              <div class="parcel-detail-content">
-                <div class="parcel-detail-label">OWNER</div>
-                <div class="parcel-detail-value">John & Jane Doe</div>
-              </div>
-            </div>
-            
-            <div class="parcel-detail">
-              <i class="bi bi-rulers"></i>
-              <div class="parcel-detail-content">
-                <div class="parcel-detail-label">AREA</div>
-                <div class="parcel-detail-value">1,250 m²</div>
-              </div>
-            </div>
-            
-            <div class="parcel-detail">
-              <i class="bi bi-house-fill"></i>
-              <div class="parcel-detail-content">
-                <div class="parcel-detail-label">ZONING</div>
-                <div class="parcel-detail-value">Residential - Low Density</div>
-              </div>
-            </div>
-            
-            <div class="parcel-detail">
-              <i class="bi bi-geo-alt-fill"></i>
-              <div class="parcel-detail-content">
-                <div class="parcel-detail-label">ADDRESS</div>
-                <div class="parcel-detail-value">123 Maple Avenue<br>Municipal Town, MT 54321</div>
-              </div>
-            </div>
-            
-            <div class="parcel-detail">
-              <i class="bi bi-cash-coin"></i>
-              <div class="parcel-detail-content">
-                <div class="parcel-detail-label">TAX ASSESSMENT</div>
-                <div class="parcel-detail-value">$450,000 (2023)</div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Tabs -->
-          <div class="parcel-tabs">
-            <button class="parcel-tab active" onclick="switchParcelTab(this, 'history')">History</button>
-            <button class="parcel-tab" onclick="switchParcelTab(this, 'documents')">Documents</button>
-            <button class="parcel-tab" onclick="switchParcelTab(this, 'taxes')">Taxes</button>
-            <button class="parcel-tab" onclick="switchParcelTab(this, 'permits')">Related Permits</button>
-          </div>
-          
-          <!-- Tab Content -->
-          <div id="tab-history" class="tab-content">
-            <div class="info-list">
-              <div class="info-item">
-                <span class="info-label">Ownership Transfer - June 15, 2023</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label" style="padding-left:16px;font-size:0.75rem;opacity:0.6">June 15, 2023</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">Ownership Transfer - June 15, 2023</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label" style="padding-left:16px;font-size:0.75rem;opacity:0.6">June 15, 2023</span>
-              </div>
-            </div>
-          </div>
-          
-          <button class="action-btn">
-            <i class="bi bi-file-earmark-pdf-fill"></i>
-            VIEW FULL REPORT
-          </button>
-        </div>
-      </div>
-
-      <!-- 3D Controls -->
-      <div class="controls-3d">
-        <span class="control-label">3D View:</span>
-        <button class="control-btn" onclick="toggle3D(this)" title="Toggle 3D Buildings">
-          <i class="bi bi-building"></i>
-        </button>
-        <button class="control-btn active" onclick="toggle3D(this)" title="Toggle Terrain">
-          <i class="bi bi-globe"></i>
-        </button>
-        <button class="control-btn" onclick="toggle3D(this)" title="Toggle Shadows">
-          <i class="bi bi-brightness-high-fill"></i>
-        </button>
-        <span class="control-label" style="margin-left:8px">|</span>
-        <button class="control-btn" onclick="resetView()" title="Reset View">
-          <i class="bi bi-arrow-clockwise"></i>
-        </button>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<script>
-// Toggle Section Collapse
-function toggleSection(header) {
-  header.parentElement.classList.toggle('collapsed');
-}
-
-// Toggle Layer Switch
-function toggleLayer(toggle) {
-  toggle.classList.toggle('active');
-}
-
-// Select Basemap
-function selectBasemap(btn) {
-  document.querySelectorAll('.basemap-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-}
-
-// Toggle Filter Chip
-function toggleChip(chip) {
-  chip.classList.toggle('active');
-}
-
-// Switch Parcel Tab
-function switchParcelTab(btn, tabName) {
-  document.querySelectorAll('.parcel-tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  // Here you would show/hide tab content
-}
-
-// Toggle 3D Controls
-function toggle3D(btn) {
-  btn.classList.toggle('active');
-}
-
-// Reset View
-function resetView() {
-  console.log('Resetting view...');
-}
-
-// Make panels draggable
-function makeDraggable(panel) {
-  const header = panel.querySelector('.panel-header');
-  if (!header) return;
-  
-  let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-  header.style.cursor = 'move';
-  
-  header.onmousedown = dragMouseDown;
-  
-  function dragMouseDown(e) {
-    e.preventDefault();
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    document.onmouseup = closeDragElement;
-    document.onmousemove = elementDrag;
-  }
-  
-  function elementDrag(e) {
-    e.preventDefault();
-    pos1 = pos3 - e.clientX;
-    pos2 = pos4 - e.clientY;
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    panel.style.top = (panel.offsetTop - pos2) + "px";
-    panel.style.left = (panel.offsetLeft - pos1) + "px";
-  }
-  
-  function closeDragElement() {
-    document.onmouseup = null;
-    document.onmousemove = null;
-  }
-}
-
-// Initialize draggable panels
-document.addEventListener('DOMContentLoaded', () => {
-  makeDraggable(document.getElementById('leftPanel'));
-  makeDraggable(document.getElementById('rightPanel'));
-});
 </script>
-{% endblock %}
+
+<style>
+  * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle;
+    line-height: 1;
+  }
+
+  .glass-panel {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  /* Leaflet customization */
+  .leaflet-container { background: #060e20 !important; }
+  .leaflet-control-zoom { display: none !important; }
+  .leaflet-control-attribution {
+    background: rgba(6, 14, 32, 0.75) !important;
+    color: #a3aac4 !important;
+    font-size: 9px !important;
+    border-radius: 6px !important;
+  }
+  .leaflet-control-attribution a { color: #4bc1ff !important; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #40485d; border-radius: 2px; }
+
+  /* Toggle switch */
+  .lyr-toggle {
+    position: relative; width: 34px; height: 18px;
+    border-radius: 9px; cursor: pointer; flex-shrink: 0;
+    transition: background 0.25s;
+  }
+  .lyr-toggle.on  { background: rgba(105,246,184,0.25); }
+  .lyr-toggle.off { background: rgba(64,72,93,0.55); }
+  .lyr-toggle-thumb {
+    position: absolute; top: 3px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: white;
+    transition: left 0.25s, background 0.25s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+  .lyr-toggle.on  .lyr-toggle-thumb { left: 19px; background: #69f6b8; }
+  .lyr-toggle.off .lyr-toggle-thumb { left: 3px; }
+
+  /* View button active */
+  .view-btn-active {
+    background: #4bc1ff !important;
+    color: #003952 !important;
+    box-shadow: 0 1px 4px rgba(75,193,255,0.3);
+  }
+  .view-btn-inactive {
+    background: transparent !important;
+    color: #a3aac4 !important;
+  }
+  .view-btn-inactive:hover { background: rgba(255,255,255,0.06) !important; }
+
+  /* Sidebar tooltip */
+  .sidebar-label {
+    opacity: 0;
+    transition: opacity 0.25s;
+    white-space: nowrap;
+  }
+  #geo-sidebar:hover .sidebar-label { opacity: 1; }
+  #geo-sidebar:hover .sidebar-brand { opacity: 1; }
+  .sidebar-brand { opacity: 0; transition: opacity 0.25s; }
+
+  /* Pulse dot */
+  @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .pulse-dot { animation: pulse-dot 2s infinite; }
+</style>
+</head>
+
+<body class="bg-surface text-on-surface overflow-hidden">
+
+<!-- ═══ TOP NAVIGATION BAR ═══════════════════════════════════ -->
+<header class="fixed top-0 w-full z-50 bg-slate-950/65 backdrop-blur-xl border-b border-white/5 flex justify-between items-center px-5 h-14">
+
+  <div class="flex items-center gap-3">
+    <!-- Back button -->
+    <a href="{{ url_for('main.dashboard') }}"
+       class="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-colors"
+       title="Volver al Dashboard">
+      <span class="material-symbols-outlined" style="font-size:18px">arrow_back</span>
+    </a>
+
+    <div class="h-5 w-px bg-outline-variant/30"></div>
+
+    <!-- Brand -->
+    <div class="flex items-center gap-2">
+      <div class="w-6 h-6 rounded bg-sky-500/20 flex items-center justify-center">
+        <span class="material-symbols-outlined text-sky-400" style="font-size:14px;font-variation-settings:'FILL' 1">map</span>
+      </div>
+      <span class="text-sm font-bold text-slate-100 tracking-tight hidden sm:block">Geoportal GIS</span>
+    </div>
+
+    <div class="h-5 w-px bg-outline-variant/30 hidden md:block"></div>
+    <span class="text-xs text-sky-400 font-semibold hidden md:block">Municipio de Supatá · Cundinamarca</span>
+  </div>
+
+  <!-- Center: search -->
+  <div class="flex-1 max-w-xs mx-4 hidden sm:block">
+    <div class="relative">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <span class="material-symbols-outlined text-on-surface-variant" style="font-size:15px">search</span>
+      </div>
+      <input id="search-input"
+             class="w-full bg-surface-container-lowest/80 border border-outline-variant/30 rounded-lg py-1.5 pl-9 pr-3 text-xs focus:outline-none focus:ring-1 focus:ring-primary placeholder-on-surface-variant/50"
+             placeholder="Cód. catastral (25777…) o vereda…"
+             type="text"
+             onkeydown="if(event.key==='Enter') searchLocation(this.value)"/>
+    </div>
+  </div>
+
+  <!-- Right: actions + user -->
+  <div class="flex items-center gap-1">
+    <button class="p-1.5 text-slate-400 hover:bg-white/5 transition-colors rounded-lg" title="Centrar en Supatá" onclick="goToSupata()">
+      <span class="material-symbols-outlined" style="font-size:18px;font-variation-settings:'FILL' 1">my_location</span>
+    </button>
+    <button class="p-1.5 text-slate-400 hover:bg-white/5 transition-colors rounded-lg" title="Ayuda">
+      <span class="material-symbols-outlined" style="font-size:18px">help</span>
+    </button>
+    <!-- User avatar -->
+    <div class="ml-1 w-7 h-7 rounded-full bg-surface-container-high border border-outline-variant/30 flex items-center justify-center text-[10px] font-bold text-primary select-none" title="{{ session.get('user', '') }}">
+      {{ (session.get('user', 'US') | upper)[:2] }}
+    </div>
+  </div>
+</header>
+
+
+<!-- ═══ SIDE NAVIGATION BAR ══════════════════════════════════ -->
+<aside id="geo-sidebar"
+       class="fixed left-0 top-14 h-[calc(100vh-56px)] w-14 hover:w-60 transition-all duration-300 z-40
+              bg-slate-900/85 backdrop-blur-2xl border-r border-white/5 flex flex-col py-3 overflow-hidden">
+
+  <!-- Brand (visible on hover) -->
+  <div class="px-5 mb-6 flex items-center gap-3 sidebar-brand">
+    <div class="w-7 h-7 bg-sky-500/20 rounded flex items-center justify-center text-sky-400 flex-shrink-0">
+      <span class="material-symbols-outlined" style="font-size:15px;font-variation-settings:'FILL' 1">map</span>
+    </div>
+    <div>
+      <div class="text-sky-400 font-black text-xs uppercase tracking-wider leading-none">Catastro</div>
+      <div class="text-[9px] text-on-surface-variant font-bold uppercase tracking-widest">GIS Control</div>
+    </div>
+  </div>
+
+  <!-- Nav items -->
+  <nav class="flex-1">
+    <ul class="space-y-0.5">
+
+      <li>
+        <a href="#" class="flex items-center h-11 px-4 gap-4 bg-sky-500/10 text-sky-400 border-r-2 border-sky-400">
+          <span class="material-symbols-outlined shrink-0" style="font-size:20px;font-variation-settings:'FILL' 1">layers</span>
+          <span class="sidebar-label text-[10px] uppercase tracking-widest font-bold">Vista</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" onclick="scrollToPanel()" class="flex items-center h-11 px-4 gap-4 text-slate-500 hover:text-slate-200 hover:bg-slate-800/50 transition-all">
+          <span class="material-symbols-outlined shrink-0" style="font-size:20px">layers</span>
+          <span class="sidebar-label text-[10px] uppercase tracking-widest font-bold">Capas</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="flex items-center h-11 px-4 gap-4 text-slate-500 hover:text-slate-200 hover:bg-slate-800/50 transition-all">
+          <span class="material-symbols-outlined shrink-0" style="font-size:20px">filter_alt</span>
+          <span class="sidebar-label text-[10px] uppercase tracking-widest font-bold">Filtros</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="{{ url_for('usos_suelo.exportar_usos_excel') }}"
+           class="flex items-center h-11 px-4 gap-4 text-slate-500 hover:text-slate-200 hover:bg-slate-800/50 transition-all">
+          <span class="material-symbols-outlined shrink-0" style="font-size:20px">file_download</span>
+          <span class="sidebar-label text-[10px] uppercase tracking-widest font-bold">Exportar</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="{{ url_for('usos_suelo.certificado_uso_suelo_gen') }}"
+           class="flex items-center h-11 px-4 gap-4 text-slate-500 hover:text-slate-200 hover:bg-slate-800/50 transition-all">
+          <span class="material-symbols-outlined shrink-0" style="font-size:20px">description</span>
+          <div class="sidebar-label flex flex-col">
+            <span class="text-[10px] uppercase tracking-widest font-bold">Consultas</span>
+            <span class="text-[9px] text-sky-400 font-medium">Cert. Uso del Suelo</span>
+          </div>
+        </a>
+      </li>
+
+      <li>
+        <a href="{{ url_for('main.gestion_riesgo') }}"
+           class="flex items-center h-11 px-4 gap-4 text-slate-500 hover:text-slate-200 hover:bg-slate-800/50 transition-all">
+          <span class="material-symbols-outlined shrink-0" style="font-size:20px">warning</span>
+          <div class="sidebar-label flex flex-col">
+            <span class="text-[10px] uppercase tracking-widest font-bold">Riesgo</span>
+            <span class="text-[9px] text-sky-400 font-medium">Gestión Arbórea</span>
+          </div>
+        </a>
+      </li>
+
+    </ul>
+  </nav>
+
+  <!-- Bottom: generate report button + home -->
+  <div class="mt-auto px-3">
+    <a href="{{ url_for('usos_suelo.certificado_uso_suelo_gen') }}"
+       class="w-full h-9 rounded-md flex items-center justify-center gap-2 overflow-hidden
+              bg-gradient-to-br from-primary to-primary-container text-on-primary
+              shadow-lg shadow-primary/15 hover:opacity-90 transition-opacity">
+      <span class="material-symbols-outlined" style="font-size:15px">description</span>
+      <span class="sidebar-label text-[10px] font-bold uppercase tracking-wider">Generar Certificado</span>
+    </a>
+
+    <div class="mt-4 pt-4 border-t border-outline-variant/10">
+      <a href="{{ url_for('main.dashboard') }}"
+         class="flex items-center h-10 px-1 gap-4 text-slate-500 hover:text-slate-200 transition-all">
+        <span class="material-symbols-outlined shrink-0" style="font-size:20px">home</span>
+        <span class="sidebar-label text-[10px] uppercase tracking-widest font-bold">Dashboard</span>
+      </a>
+    </div>
+  </div>
+</aside>
+
+
+<!-- ═══ MAIN MAP CANVAS ═══════════════════════════════════════ -->
+<main class="fixed inset-0 pt-14 pl-14 z-0 overflow-hidden">
+
+  <!-- Leaflet Map -->
+  <div id="map" class="absolute inset-0"></div>
+
+  <!-- ─── Left Floating Panel (Capas + Filtros) ─── -->
+  <div id="left-panel" class="absolute left-5 top-5 bottom-5 w-72 z-30 flex flex-col gap-4 pointer-events-none">
+    <div class="glass-panel bg-surface-container-low/65 rounded-xl shadow-2xl overflow-y-auto pointer-events-auto
+                flex flex-col gap-5 p-5 max-h-full">
+
+      <!-- Vista -->
+      <section>
+        <h3 class="text-[10px] font-bold text-on-surface uppercase tracking-[0.18em] mb-3">Vista</h3>
+        <div class="flex bg-surface-container-lowest/80 p-1 rounded-lg gap-1">
+          <button id="btn-dark" class="flex-1 py-1.5 text-[10px] font-bold rounded view-btn-active transition-all" onclick="setView('dark')">Oscuro</button>
+          <button id="btn-sat"  class="flex-1 py-1.5 text-[10px] font-bold rounded view-btn-inactive transition-all" onclick="setView('sat')">Satélite</button>
+          <button id="btn-hyb"  class="flex-1 py-1.5 text-[10px] font-bold rounded view-btn-inactive transition-all" onclick="setView('hyb')">Híbrido</button>
+        </div>
+      </section>
+
+      <!-- Capas -->
+      <section>
+        <h3 class="text-[10px] font-bold text-on-surface uppercase tracking-[0.18em] mb-3">Capas</h3>
+        <div class="space-y-2.5">
+          {% set layers = [
+            ('predios', 'Predios / Catastro', true),
+            ('usos',    'Usos de Suelo',      true),
+            ('riesgo',  'Riesgo y Emergencias',false),
+            ('vias',    'Vías y Accesos',      false),
+          ] %}
+          {% for key, label, default_on in layers %}
+          <div class="flex items-center justify-between cursor-pointer group" onclick="toggleLayer('{{ key }}')">
+            <span class="text-sm text-on-surface-variant group-hover:text-on-surface transition-colors select-none">{{ label }}</span>
+            <div id="toggle-{{ key }}" class="lyr-toggle {{ 'on' if default_on else 'off' }}">
+              <div class="lyr-toggle-thumb"></div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- Filtros -->
+      <section>
+        <h3 class="text-[10px] font-bold text-on-surface uppercase tracking-[0.18em] mb-3">Filtros</h3>
+        <div class="space-y-3">
+          <div class="space-y-1">
+            <label class="text-[9px] uppercase font-bold text-outline">Categoría de suelo</label>
+            <select class="w-full bg-surface-container-highest/80 border-none rounded text-xs py-1.5 px-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary">
+              <option>Todos</option>
+              <option>Urbano Residencial</option>
+              <option>Rural Productivo</option>
+              <option>Suelo de Protección</option>
+              <option>Suelo Suburbano</option>
+            </select>
+          </div>
+          <div class="space-y-1">
+            <div class="flex justify-between">
+              <label class="text-[9px] uppercase font-bold text-outline">Área mínima (ha)</label>
+              <span id="area-val" class="text-[9px] text-primary font-mono">0</span>
+            </div>
+            <input class="w-full h-1 rounded-full accent-primary cursor-pointer" type="range"
+                   min="0" max="100" value="0"
+                   oninput="document.getElementById('area-val').textContent=this.value"/>
+          </div>
+        </div>
+      </section>
+
+      <!-- Info quick -->
+      <div class="pt-2 border-t border-outline-variant/20">
+        <div class="flex items-center gap-2 text-[9px] text-on-surface-variant">
+          <span class="w-1.5 h-1.5 rounded-full bg-secondary pulse-dot inline-block flex-shrink-0"></span>
+          Datos actualizados · EOT Supatá Acuerdo 014/2023
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ─── Right Panel: Legend ─── -->
+  <div class="absolute right-5 top-5 w-60 z-30 max-h-[calc(100vh-120px)] overflow-y-auto">
+    <div class="glass-panel bg-surface-container-low/65 rounded-xl p-4 shadow-2xl">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="material-symbols-outlined text-primary" style="font-size:17px">legend_toggle</span>
+        <h3 class="text-[10px] font-bold text-on-surface uppercase tracking-[0.1em]">Usos del Suelo — EOT</h3>
+      </div>
+      <p class="text-[9px] text-on-surface-variant mb-3 leading-tight">Acuerdo 014 de 2023 · Supatá</p>
+      <div class="space-y-1.5" id="legend-items">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ─── Bottom-Right: Estadísticas ─── -->
+  <div class="absolute right-5 bottom-5 z-30">
+    <div class="glass-panel bg-surface-container-low/80 rounded-xl p-5 shadow-2xl min-w-[280px]">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-[10px] font-black text-primary uppercase tracking-[0.18em]">Estadísticas Globales</h3>
+        <span class="material-symbols-outlined text-on-surface-variant" style="font-size:16px">query_stats</span>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-surface-container-highest flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-secondary" style="font-size:18px">home_work</span>
+          </div>
+          <div>
+            <div class="text-[9px] text-on-surface-variant font-bold uppercase tracking-widest">Total Predios</div>
+            <div class="text-lg font-bold text-on-surface leading-tight">5.337</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-surface-container-highest flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-primary" style="font-size:18px">square_foot</span>
+          </div>
+          <div>
+            <div class="text-[9px] text-on-surface-variant font-bold uppercase tracking-widest">Área Total</div>
+            <div class="text-lg font-bold text-on-surface leading-tight">41.965 <span class="text-xs font-medium text-outline">ha</span></div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-surface-container-highest flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-tertiary" style="font-size:18px">payments</span>
+          </div>
+          <div>
+            <div class="text-[9px] text-on-surface-variant font-bold uppercase tracking-widest">Avalúo Catastral</div>
+            <div class="text-lg font-bold text-on-surface leading-tight">$113.729M</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-outline-variant/20 text-[9px] text-on-surface-variant">
+        Fuente: IGAC · Última act: <span id="last-update">—</span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ─── Map Navigation Controls ─── -->
+  <div class="absolute z-30 flex flex-col gap-2" style="right:20px; top:calc(50% - 60px)">
+    <button class="w-9 h-9 glass-panel bg-surface-container-low/80 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-highest transition-colors"
+            onclick="map.zoomIn()" title="Acercar">
+      <span class="material-symbols-outlined" style="font-size:18px">add</span>
+    </button>
+    <button class="w-9 h-9 glass-panel bg-surface-container-low/80 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-highest transition-colors"
+            onclick="map.zoomOut()" title="Alejar">
+      <span class="material-symbols-outlined" style="font-size:18px">remove</span>
+    </button>
+    <div class="h-px bg-outline-variant/30 my-1"></div>
+    <button class="w-9 h-9 glass-panel bg-surface-container-low/80 rounded-lg flex items-center justify-center text-primary hover:bg-surface-container-highest transition-colors"
+            onclick="goToSupata()" title="Centrar en Supatá">
+      <span class="material-symbols-outlined" style="font-size:18px;font-variation-settings:'FILL' 1">my_location</span>
+    </button>
+  </div>
+
+
+  <!-- ─── Bottom: Coordinates bar ─── -->
+  <div class="absolute bottom-5 left-20 z-30">
+    <div class="glass-panel bg-surface-container-low/80 rounded-lg px-3 py-1.5 border border-primary/10 flex items-center gap-3">
+      <div class="flex items-center gap-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-secondary flex-shrink-0"></span>
+        <span class="text-[9px] uppercase font-bold tracking-widest text-on-surface">Coord.</span>
+      </div>
+      <div id="coords-display" class="text-[9px] font-mono text-on-surface-variant">5°01'N  74°12'W</div>
+      <div class="h-3 w-px bg-outline-variant/30"></div>
+      <div id="zoom-display" class="text-[9px] uppercase font-bold tracking-widest text-primary">1:10000</div>
+    </div>
+  </div>
+
+</main><!-- /main -->
+
+
+<!-- ═══ SCRIPTS ══════════════════════════════════════════════ -->
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+<script>
+// ──────────────────────────────────────────────────────────
+//  Constantes
+// ──────────────────────────────────────────────────────────
+const SUPATA = [5.0167, -74.2];
+const ZOOM_SCALES = {
+  10:'1:100.000', 11:'1:50.000', 12:'1:25.000',
+  13:'1:10.000',  14:'1:5.000',  15:'1:2.500',
+  16:'1:1.250',   17:'1:625',    18:'1:300',   19:'1:150'
+};
+
+// ──────────────────────────────────────────────────────────
+//  Tile layers
+// ──────────────────────────────────────────────────────────
+const darkTile = L.tileLayer(
+  'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+  { attribution:'© <a href="https://www.openstreetmap.org/copyright">OSM</a>, © <a href="https://carto.com/">CARTO</a>',
+    maxZoom: 20, subdomains: 'abcd' }
+);
+
+const satTile = L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  { attribution:'© Esri, DigitalGlobe', maxZoom: 19 }
+);
+
+const labelsTile = L.tileLayer(
+  'https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png',
+  { attribution:'', maxZoom: 20, subdomains: 'abcd', opacity: 0.9 }
+);
+
+// ──────────────────────────────────────────────────────────
+//  Inicializar mapa
+// ──────────────────────────────────────────────────────────
+const map = L.map('map', {
+  center: SUPATA,
+  zoom: 13,
+  zoomControl: false,
+  layers: [darkTile]
+});
+
+let currentLabels = null;
+let activeView = 'dark';
+
+// ──────────────────────────────────────────────────────────
+//  Capas GeoJSON
+// ──────────────────────────────────────────────────────────
+const layerStates = { predios: true, usos: true, riesgo: false, vias: false };
+const geoLayers   = {};
+
+// ──────────────────────────────────────────────────────────
+//  Paleta EOT Supatá (Acuerdo 014/2023)
+// ──────────────────────────────────────────────────────────
+const EOT_COLORS = {
+  // Suelo de Protección
+  'ronda':            '#06b6d4',  // cyan  – rondas hídricas
+  'forestal protec':  '#166534',  // verde oscuro – forestal protector
+  'forestal produc':  '#16a34a',  // verde medio  – forestal protector-productor
+  'snap':             '#0e7490',  // teal oscuro  – SNAP / DRMI
+  // Rural productivo
+  'agropecuario':     '#a16207',  // ámbar oscuro – agropecuario
+  'semi':             '#ca8a04',  // ámbar – semi-mecanizado
+  // Rural habitacional
+  'vivienda campestr':'#d97706',  // naranja claro – vivienda campestre
+  'recreac':          '#9333ea',  // violeta – recreación
+  // Suburbano
+  'suburbano':        '#f59e0b',  // amarillo-naranja – suburbano
+  // Urbano consolidado
+  'consolid equip':   '#8b5cf6',  // morado – equipamiento
+  'consolid resid':   '#3b82f6',  // azul   – residencial consolidado
+  'consolid comerc':  '#f97316',  // naranja – comercial consolidado
+  'consolid serv':    '#ec4899',  // rosa    – servicios
+  // Urbano mejoramiento / expansión
+  'mejora resid':     '#60a5fa',  // azul claro – mejoramiento residencial
+  'mejora comerc':    '#fb923c',  // naranja claro – mejoramiento comercial
+  'expansi':          '#bef264',  // lima – expansión urbana
+  // Magola
+  'magola protec':    '#134e4a',  // verde azulado oscuro
+  'magola mejora':    '#0d9488',  // teal
+};
+
+function getUsoColor(uso) {
+  const u = (uso || '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  for (const [key, color] of Object.entries(EOT_COLORS)) {
+    if (u.includes(key)) return color;
+  }
+  return '#4bc1ff'; // default azul cielo
+}
+
+// Colores por tipo de uso
+function usosStyle(feature) {
+  const color = getUsoColor(feature.properties.uso_predio || feature.properties.uso || '');
+  return { color, weight: 1.2, fillColor: color, fillOpacity: 0.35, opacity: 0.85 };
+}
+
+function prediosStyle() {
+  return { color:'#4bc1ff', weight:0.8, fillColor:'#4bc1ff', fillOpacity:0.08, opacity:0.5 };
+}
+
+function riesgoStyle(f) {
+  const crit = (f.properties.criticidad || '').toLowerCase();
+  const color = crit === 'alta' ? '#ff716c' : crit === 'media' ? '#ffb148' : '#69f6b8';
+  return { color, weight:2, fillColor:color, fillOpacity:0.35, opacity:0.9 };
+}
+
+// Índice de features para búsqueda catastral
+const _predioIndex = {}; // cedula_catastral → feature
+let _allLayers = [];     // [{ feature, layer }] para highlight
+
+function _certUrl(p) {
+  const params = new URLSearchParams();
+  if (p.cedula_catastral || p.cc || p.cod_pred) params.set('cc',  p.cedula_catastral || p.cc || p.cod_pred || '');
+  if (p.matricula)   params.set('mat',   p.matricula);
+  if (p.uso_predio || p.uso) params.set('uso',   p.uso_predio || p.uso || '');
+  if (p.direccion)   params.set('dir',   p.direccion);
+  if (p.area_ha)     params.set('area',  p.area_ha);
+  if (p.vereda || p.barrio) params.set('ver', p.vereda || p.barrio || '');
+  return '/geoportal/certificado-uso-suelo?' + params.toString();
+}
+
+function _popupHtml(p) {
+  const uso   = p.uso_predio || p.uso || '—';
+  const color = getUsoColor(uso);
+  return `<div style="font-family:Inter,sans-serif;font-size:12px;min-width:210px;line-height:1.6">
+    <b style="color:#4bc1ff;display:block;margin-bottom:4px">${p.direccion || p.vereda || 'Predio'}</b>
+    <span style="display:inline-block;padding:1px 6px;border-radius:4px;background:${color}22;color:${color};font-size:10px;font-weight:700;margin-bottom:6px">${uso}</span><br>
+    ${p.cedula_catastral||p.cc ? '<span style="color:#999;font-size:11px">Cédula: '+(p.cedula_catastral||p.cc)+'</span><br>' : ''}
+    ${p.matricula ? '<span style="color:#999;font-size:11px">Matr.: '+p.matricula+'</span><br>' : ''}
+    ${p.area_ha   ? '<span style="color:#999;font-size:11px">Área: '+parseFloat(p.area_ha).toFixed(2)+' ha</span><br>' : ''}
+    <a href="${_certUrl(p)}" style="display:block;margin-top:8px;padding:5px 10px;background:#0ea5e9;color:#fff;border-radius:4px;text-align:center;font-weight:700;font-size:11px;text-decoration:none">
+      📄 Generar Certificado
+    </a>
+  </div>`;
+}
+
+// Cargar predios
+fetch('/usos_suelo/geojson')
+  .then(r => r.json())
+  .then(data => {
+    // Indexar features para búsqueda
+    (data.features || []).forEach(f => {
+      const p = f.properties || {};
+      const key = (p.cedula_catastral || p.cc || p.cod_pred || '').toString().trim();
+      if (key) _predioIndex[key.replace(/[^0-9]/g,'').toLowerCase()] = f;
+    });
+
+    const prediosLayer = L.geoJSON(data, {
+      style: prediosStyle,
+      onEachFeature(f, layer) {
+        const p = f.properties || {};
+        layer.bindPopup(_popupHtml(p));
+        _allLayers.push({ f, layer });
+        layer.on('click', function() {
+          _highlightLayer(layer);
+        });
+      }
+    });
+    geoLayers['predios'] = prediosLayer;
+
+    const usosLayer = L.geoJSON(data, {
+      style: usosStyle,
+      onEachFeature(f, layer) {
+        const p = f.properties || {};
+        layer.bindPopup(_popupHtml(p));
+      }
+    });
+    geoLayers['usos'] = usosLayer;
+
+    if (layerStates.predios) prediosLayer.addTo(map);
+    if (layerStates.usos)    usosLayer.addTo(map);
+  })
+  .catch(() => console.info('[Geoportal] GeoJSON predios no disponible'));
+
+let _lastHighlight = null;
+function _highlightLayer(layer) {
+  if (_lastHighlight && _lastHighlight !== layer) {
+    _lastHighlight.setStyle(prediosStyle());
+  }
+  layer.setStyle({ color:'#facc15', weight:2.5, fillColor:'#facc15', fillOpacity:0.35 });
+  _lastHighlight = layer;
+}
+
+// Cargar riesgo
+fetch('/api/actas/danos/mapa')
+  .then(r => r.json())
+  .then(data => {
+    const riesgoLayer = L.geoJSON(data, {
+      style: riesgoStyle,
+      pointToLayer(f, latlng) {
+        return L.circleMarker(latlng, { radius:6, ...riesgoStyle(f) });
+      },
+      onEachFeature(f, layer) {
+        const p = f.properties || {};
+        layer.bindPopup(`<div style="font-family:Inter,sans-serif;font-size:12px">
+          <b style="color:#ff716c">${p.tipo_dano || 'Daño registrado'}</b><br>
+          <span style="color:#666">Criticidad: ${p.criticidad || '—'}</span>
+        </div>`);
+      }
+    });
+    geoLayers['riesgo'] = riesgoLayer;
+  })
+  .catch(() => console.info('[Geoportal] GeoJSON riesgo no disponible'));
+
+// ──────────────────────────────────────────────────────────
+//  Funciones UI
+// ──────────────────────────────────────────────────────────
+function setView(mode) {
+  ['dark','sat','hyb'].forEach(m => {
+    const btn = document.getElementById('btn-' + m);
+    if (!btn) return;
+    btn.className = m === mode
+      ? 'flex-1 py-1.5 text-[10px] font-bold rounded view-btn-active transition-all'
+      : 'flex-1 py-1.5 text-[10px] font-bold rounded view-btn-inactive transition-all';
+  });
+
+  map.removeLayer(darkTile);
+  map.removeLayer(satTile);
+  if (currentLabels) { map.removeLayer(currentLabels); currentLabels = null; }
+
+  if (mode === 'dark') {
+    map.addLayer(darkTile);
+  } else if (mode === 'sat') {
+    map.addLayer(satTile);
+  } else { // hyb
+    map.addLayer(satTile);
+    labelsTile.addTo(map);
+    currentLabels = labelsTile;
+  }
+  activeView = mode;
+}
+
+function toggleLayer(name) {
+  layerStates[name] = !layerStates[name];
+  const toggle = document.getElementById('toggle-' + name);
+  if (toggle) {
+    toggle.className = 'lyr-toggle ' + (layerStates[name] ? 'on' : 'off');
+  }
+  const layer = geoLayers[name];
+  if (!layer) return;
+  if (layerStates[name]) map.addLayer(layer);
+  else map.removeLayer(layer);
+}
+
+function goToSupata() {
+  map.flyTo(SUPATA, 13, { duration: 1.2 });
+}
+
+function scrollToPanel() {
+  document.getElementById('left-panel').scrollIntoView({ behavior:'smooth' });
+}
+
+function searchLocation(query) {
+  if (!query.trim()) return;
+
+  // 1. Buscar por cédula catastral en GeoJSON local
+  const norm = query.replace(/[^0-9]/g,'').toLowerCase();
+  if (norm.length >= 5) {
+    for (const [key, feat] of Object.entries(_predioIndex)) {
+      if (key.includes(norm) || norm.includes(key)) {
+        const layer = _allLayers.find(l => l.f === feat);
+        if (layer) {
+          try {
+            const bounds = layer.layer.getBounds ? layer.layer.getBounds() : null;
+            if (bounds) {
+              map.flyToBounds(bounds, { maxZoom:17, duration:1.2 });
+            } else {
+              const latlng = layer.layer.getLatLng ? layer.layer.getLatLng() : null;
+              if (latlng) map.flyTo(latlng, 17, { duration:1.2 });
+            }
+            layer.layer.openPopup();
+            _highlightLayer(layer.layer);
+          } catch(e) {}
+          return;
+        }
+      }
+    }
+  }
+
+  // 2. Fallback: Nominatim geocoder
+  fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query+' Supatá Cundinamarca Colombia')}&format=json&limit=1`)
+    .then(r => r.json())
+    .then(results => {
+      if (results && results.length > 0) {
+        const { lat, lon } = results[0];
+        map.flyTo([parseFloat(lat), parseFloat(lon)], 16, { duration: 1.2 });
+      } else {
+        console.info('[Geoportal] Sin resultados para:', query);
+      }
+    })
+    .catch(() => {});
+}
+
+// ──────────────────────────────────────────────────────────
+//  Eventos del mapa
+// ──────────────────────────────────────────────────────────
+function toDMS(deg, dir) {
+  const d = Math.floor(deg);
+  const m = Math.floor((deg - d) * 60);
+  return `${d}°${String(m).padStart(2,'0')}'${dir}`;
+}
+
+map.on('mousemove', function(e) {
+  const lat = e.latlng.lat;
+  const lng = e.latlng.lng;
+  document.getElementById('coords-display').textContent =
+    toDMS(Math.abs(lat), lat>=0?'N':'S') + '  ' +
+    toDMS(Math.abs(lng), lng>=0?'E':'O');
+});
+
+map.on('zoomend', function() {
+  const z = map.getZoom();
+  document.getElementById('zoom-display').textContent =
+    ZOOM_SCALES[z] || '1:' + Math.round(591657550 / (Math.pow(2, z) * 96));
+});
+
+// ──────────────────────────────────────────────────────────
+//  Leyenda EOT dinámica
+// ──────────────────────────────────────────────────────────
+const LEGEND_ITEMS = [
+  ['#06b6d4', 'Rondas hídricas'],
+  ['#166534', 'Forestal protector'],
+  ['#16a34a', 'Forestal prot-prod.'],
+  ['#0e7490', 'SNAP / DRMI'],
+  ['#a16207', 'Agropecuario'],
+  ['#ca8a04', 'Semi-mecanizado'],
+  ['#d97706', 'Vivienda campestre'],
+  ['#9333ea', 'Recreación'],
+  ['#f59e0b', 'Suburbano'],
+  ['#8b5cf6', 'Urb. consolidado equip.'],
+  ['#3b82f6', 'Urb. consolidado resid.'],
+  ['#f97316', 'Urb. consolidado comer.'],
+  ['#ec4899', 'Urb. consolidado serv.'],
+  ['#60a5fa', 'Mejoramiento resid.'],
+  ['#fb923c', 'Mejoramiento comer.'],
+  ['#bef264', 'Expansión urbana'],
+  ['#134e4a', 'Magola – Protección'],
+  ['#0d9488', 'Magola – Mejoramiento'],
+];
+
+(function buildLegend() {
+  const el = document.getElementById('legend-items');
+  if (!el) return;
+  el.innerHTML = LEGEND_ITEMS.map(([color, label]) =>
+    `<div class="flex items-center gap-2">
+       <div style="background:${color};width:10px;height:10px;border-radius:2px;flex-shrink:0"></div>
+       <span style="font-size:10px;color:#a3aac4;line-height:1.2">${label}</span>
+     </div>`
+  ).join('');
+})();
+
+// ──────────────────────────────────────────────────────────
+//  Init
+// ──────────────────────────────────────────────────────────
+document.getElementById('last-update').textContent =
+  new Date().toLocaleDateString('es-CO', { day:'2-digit', month:'short', year:'numeric' });
+</script>
+</body>
+</html>

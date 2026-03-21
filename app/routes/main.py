@@ -123,7 +123,7 @@ def geoportal():
     if not can_access('geoportal'):
         flash('No tienes permisos para acceder a este módulo', 'error')
         return redirect(url_for('main.dashboard'))
-    return render_template('catastro_3d.html')
+    return render_template('geoportal.html')
 
 @main_bp.route('/gestion-riesgo')
 @main_bp.route('/gestion-ambiental')  # Alias para compatibilidad

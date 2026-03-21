@@ -420,6 +420,15 @@ def catastro_3d():
     """Visor catastral profesional 3D con MapLibre GL."""
     return render_template('catastro_3d.html')
 
+@usos_bp.route('/geoportal/certificado-uso-suelo')
+def certificado_uso_suelo_gen():
+    """Generador interactivo de Certificado de Uso del Suelo."""
+    from flask import session
+    if not session.get('user'):
+        from flask import redirect, url_for
+        return redirect(url_for('auth.login'))
+    return render_template('certificado_uso_suelo_gen.html')
+
 @usos_bp.route('/casco_urbano')
 def mapa_casco_urbano():
     return render_template('mapa_casco.html')
