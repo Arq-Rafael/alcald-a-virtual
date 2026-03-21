@@ -8,7 +8,17 @@
       "Bash(find C:Usersrafa_DownloadsAlcaldiaVirtualWeb -path *documentos_generados* -type f)",
       "Bash(find C:Usersrafa_DownloadsAlcaldiaVirtualWeb -type f \\\\\\(-name *.geojson -o -name *.json -o -name *.shp -o -name *.dbf -o -name *.shx -o -name *.prj \\\\\\))",
       "Bash(xargs grep:*)",
-      "Bash(xargs basename:*)"
+      "Bash(xargs basename:*)",
+      "Bash(where gh:*)",
+      "Bash(wt=\"C:\\\\Users\\\\rafa_\\\\Downloads\\\\AlcaldiaVirtualWeb\\\\.claude\\\\worktrees\\\\exciting-mirzakhani\")",
+      "Bash(main=\"C:\\\\Users\\\\rafa_\\\\Downloads\\\\AlcaldiaVirtualWeb\")",
+      "Bash(cp \"$main/app/routes/main.py\" \"$wt/app/routes/main.py\")",
+      "Bash(cp \"$main/app/routes/usos.py\" \"$wt/app/routes/usos.py\")",
+      "Bash(cp \"$main/templates/geoportal.html\" \"$wt/templates/geoportal.html\")",
+      "Bash(wt=C:Usersrafa_DownloadsAlcaldiaVirtualWeb.claudeworktreesexciting-mirzakhani)",
+      "Read(//c/Users/rafa_/Downloads/AlcaldiaVirtualWeb/.claude/worktrees/exciting-mirzakhani/$wt/**)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\(''''scripts'''',{}\\), indent=2\\)\\)\")",
+      "Read(//c/Users/rafa_/Downloads/AlcaldiaVirtualWeb/.claude/worktrees/exciting-mirzakhani/**)"
     ]
   }
 }
