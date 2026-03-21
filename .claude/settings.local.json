@@ -1,7 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python -c \":*)"
+      "Bash(python -c \":*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:5000/)",
+      "Bash(powershell -Command \"Start-Process -FilePath ''venv\\\\Scripts\\\\python.exe'' -ArgumentList ''-c'', ''import sys; sys.stdout.reconfigure\\(encoding=\"\"utf-8\"\", errors=\"\"replace\"\"\\); sys.stderr.reconfigure\\(encoding=\"\"utf-8\"\", errors=\"\"replace\"\"\\); from app import create_app; app = create_app\\(\\); app.run\\(debug=False, host=\"\"0.0.0.0\"\", port=5000, use_reloader=False\\)'' -WorkingDirectory ''C:\\\\Users\\\\rafa_\\\\Downloads\\\\AlcaldiaVirtualWeb'' -NoNewWindow\")",
+      "Bash(netstat -ano)",
+      "Bash(find C:Usersrafa_DownloadsAlcaldiaVirtualWeb -path *documentos_generados* -type f)",
+      "Bash(find C:Usersrafa_DownloadsAlcaldiaVirtualWeb -type f \\\\\\(-name *.geojson -o -name *.json -o -name *.shp -o -name *.dbf -o -name *.shx -o -name *.prj \\\\\\))",
+      "Bash(xargs grep:*)",
+      "Bash(xargs basename:*)"
     ]
   }
 }
