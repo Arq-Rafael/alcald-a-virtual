@@ -1,7 +1,23 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python -c \":*)"
+      "Bash(python -c \":*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:5000/)",
+      "Bash(powershell -Command \"Start-Process -FilePath ''venv\\\\Scripts\\\\python.exe'' -ArgumentList ''-c'', ''import sys; sys.stdout.reconfigure\\(encoding=\"\"utf-8\"\", errors=\"\"replace\"\"\\); sys.stderr.reconfigure\\(encoding=\"\"utf-8\"\", errors=\"\"replace\"\"\\); from app import create_app; app = create_app\\(\\); app.run\\(debug=False, host=\"\"0.0.0.0\"\", port=5000, use_reloader=False\\)'' -WorkingDirectory ''C:\\\\Users\\\\rafa_\\\\Downloads\\\\AlcaldiaVirtualWeb'' -NoNewWindow\")",
+      "Bash(netstat -ano)",
+      "Bash(venv/Scripts/python -c ' *)",
+      "Bash(xargs grep *)",
+      "Bash(sort -k5 -rn)",
+      "Bash(python importar_radicados.py)",
+      "Bash(python -)",
+      "Bash(2>&1)",
+      "Bash(python -c \"import sys; [print\\(l\\) for l in sys.stdin.read\\(\\).splitlines\\(\\) if not any\\(x in l for x in ['INFO','ERROR','SEED','INIT','BACK','MIGR']\\)]\")",
+      "Bash(python -c ' *)",
+      "Bash(python -m py_compile app/routes/licencias_bp.py)",
+      "Bash(python -m py_compile app/routes/main.py app/routes/api_prefs.py)",
+      "Bash(python -c \"from app import create_app; app = create_app\\(\\); print\\('App OK'\\)\")",
+      "Bash(python -m py_compile app/routes/main.py)",
+      "Bash(python -m py_compile app/routes/perfil.py)"
     ]
   }
 }

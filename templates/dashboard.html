@@ -63,6 +63,7 @@ body.has-sidebar {
 }
 
 .db-banner-left { position: relative; z-index: 1; }
+.db-banner-right { position: relative; z-index: 1; flex-shrink: 0; }
 
 .db-banner-left h2 {
   font-size: 1.75rem !important;
@@ -97,23 +98,6 @@ body.has-sidebar {
 
 .db-banner-chip.chip-success i { color: #6ee7b7; }
 .db-banner-chip.chip-info    i { color: #bae6fd; }
-
-.db-banner-right { position: relative; z-index: 1; flex-shrink: 0; }
-
-.db-weather-card {
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 14px;
-  padding: 1rem 1.25rem;
-  text-align: center;
-  min-width: 110px;
-  backdrop-filter: blur(8px);
-  cursor: pointer;
-}
-
-.db-weather-card i    { font-size: 2rem; color: #fde68a; display: block; margin-bottom: 0.25rem; }
-.db-weather-card .temp { font-size: 1.4rem; font-weight: 700; color: #fff; line-height: 1; }
-.db-weather-card .desc { font-size: 0.72rem; color: rgba(255,255,255,0.65); margin-top: 0.15rem; }
 
 /* =====================================================
    SECTION TITLE
@@ -498,10 +482,45 @@ body.has-sidebar {
   .db-page { padding: 1.25rem 1rem; }
   .db-banner { padding: 1.5rem; }
   .db-banner-left h2 { font-size: 1.4rem !important; }
-  .db-banner-right { display: none; }
   .db-stats-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
   .db-quick-row { gap: 0.75rem 1.1rem; }
 }
+
+/* ── Accesos destacados dinámicos ── */
+.db-featured-empty {
+  text-align: center;
+  padding: 2rem;
+  border: 2px dashed #e2e8f0;
+  border-radius: 16px;
+  color: #94a3b8;
+  margin-bottom: 1.75rem;
+  background: #f8fafc;
+}
+.db-featured-empty i { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
+.db-featured-empty p { font-size: 13px; margin: 0; }
+
+.db-featured-remove {
+  position: absolute; top: 10px; right: 12px;
+  background: rgba(0,0,0,0.07); border: none;
+  width: 22px; height: 22px; border-radius: 50%;
+  font-size: 14px; line-height: 1; cursor: pointer;
+  color: #64748b; display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s;
+  z-index: 5;
+}
+.db-featured-remove:hover { background: #fee2e2; color: #dc2626; }
+
+/* Estrella en módulos del sistema */
+.db-quick-item { position: relative; }
+.db-star-btn {
+  position: absolute; top: 4px; right: 4px;
+  background: none; border: none; cursor: pointer;
+  font-size: 15px; color: #cbd5e1; line-height: 1;
+  padding: 2px; border-radius: 4px; transition: color 0.15s, transform 0.15s;
+  z-index: 5;
+}
+.db-star-btn:hover { color: #f59e0b; transform: scale(1.2); }
+.db-star-btn.active { color: #f59e0b; }
 </style>
 {% endblock %}
 
@@ -522,38 +541,36 @@ body.has-sidebar {
         </span>
       </div>
     </div>
-    <div class="db-banner-right">
-      <div class="db-weather-card" onclick="showWeatherDetails()">
-        <i class="bi bi-cloud-sun-fill"></i>
-        <div class="temp">22°C</div>
-        <div class="desc">Supatá</div>
-      </div>
-    </div>
   </div>
 
   <!-- ===== ACCESOS DESTACADOS ===== -->
   <div class="db-section-title">
     <i class="bi bi-stars"></i>
     Accesos Destacados
+    <span style="margin-left:auto;font-size:11px;font-weight:500;color:#94a3b8;cursor:help"
+          title="Haz clic en la estrella ☆ de cualquier módulo para añadirlo aquí">
+      <i class="bi bi-info-circle"></i> Clic en ☆ para personalizar
+    </span>
   </div>
 
+  {% if featured_cards %}
   <div class="db-hero-grid">
-
-    <a href="{{ url_for('ia.letter') }}" class="db-hero-card" data-accent="amber">
-      <div class="db-hero-card-icon"><i class="bi bi-pencil-square"></i></div>
-      <div class="db-hero-card-title">Redactar Oficios con IA</div>
-      <p class="db-hero-card-desc">Genera documentos institucionales automáticamente. Formato oficial, en segundos.</p>
-      <div class="db-hero-card-btn"><i class="bi bi-stars"></i> Abrir asistente</div>
+    {% for card in featured_cards %}
+    <a href="{{ card.url }}" class="db-hero-card" data-accent="{{ card.accent }}">
+      <button class="db-featured-remove" onclick="removeFeatured(event, '{{ card.id }}')" title="Quitar de destacados">×</button>
+      <div class="db-hero-card-icon"><i class="bi {{ card.icon }}"></i></div>
+      <div class="db-hero-card-title">{{ card.name }}</div>
+      <p class="db-hero-card-desc">{{ card.desc }}</p>
+      <div class="db-hero-card-btn"><i class="bi bi-arrow-right-short"></i> Abrir</div>
     </a>
-
-    <a href="/calendario" class="db-hero-card" data-accent="sky">
-      <div class="db-hero-card-icon"><i class="bi bi-calendar-event-fill"></i></div>
-      <div class="db-hero-card-title">Agenda Institucional</div>
-      <p class="db-hero-card-desc">Eventos, alertas y programación del municipio en un solo lugar.</p>
-      <div class="db-hero-card-btn"><i class="bi bi-arrow-right-short"></i> Ver agenda</div>
-    </a>
-
+    {% endfor %}
   </div>
+  {% else %}
+  <div class="db-featured-empty">
+    <i class="bi bi-star"></i>
+    <p>Haz clic en <strong>☆</strong> en cualquier módulo para añadirlo como acceso destacado</p>
+  </div>
+  {% endif %}
 
   <!-- ===== MÓDULOS DEL SISTEMA (estilo iOS) ===== -->
   <div class="db-section-title">
@@ -564,70 +581,70 @@ body.has-sidebar {
   <div class="db-quick-row">
 
     {% if can('solicitudes') %}
-    <a href="{{ url_for('solicitudes.index') }}" class="db-quick-item" data-accent="blue">
+    <a href="{{ url_for('solicitudes.index') }}" class="db-quick-item" data-accent="blue" data-module-id="solicitudes">
       <div class="db-quick-icon"><i class="bi bi-file-earmark-text-fill"></i></div>
       <span class="db-quick-label">Solicitudes</span>
     </a>
     {% endif %}
 
     {% if can('certificados') %}
-    <a href="{{ url_for('certificados.index') }}" class="db-quick-item" data-accent="emerald">
+    <a href="{{ url_for('certificados.index') }}" class="db-quick-item" data-accent="emerald" data-module-id="certificados">
       <div class="db-quick-icon"><i class="bi bi-patch-check-fill"></i></div>
       <span class="db-quick-label">Certificados</span>
     </a>
     {% endif %}
 
-    {% if can('licencias') %}
-    <a href="/licencias" class="db-quick-item" data-accent="orange">
+    {% if can('licencias') and ('planeacion' in (session.get('secretaria','') or '')|lower or session.get('role','') == 'admin') %}
+    <a href="/licencias" class="db-quick-item" data-accent="orange" data-module-id="licencias">
       <div class="db-quick-icon"><i class="bi bi-buildings-fill"></i></div>
       <span class="db-quick-label">Licencias</span>
     </a>
     {% endif %}
 
     {% if can('ia') %}
-    <a href="{{ url_for('ia.index') }}" class="db-quick-item" data-accent="violet">
+    <a href="{{ url_for('ia.index') }}" class="db-quick-item" data-accent="violet" data-module-id="ia">
       <div class="db-quick-icon"><i class="bi bi-cpu-fill"></i></div>
       <span class="db-quick-label">IA Municipal</span>
     </a>
     {% endif %}
 
     {% if can('participacion') %}
-    <a href="{{ url_for('participacion.index') }}" class="db-quick-item" data-accent="rose">
+    <a href="{{ url_for('participacion.index') }}" class="db-quick-item" data-accent="rose" data-module-id="participacion">
       <div class="db-quick-icon"><i class="bi bi-people-fill"></i></div>
       <span class="db-quick-label">Participación</span>
     </a>
     {% endif %}
 
     {% if can('geoportal') %}
-    <a href="{{ url_for('main.geoportal') }}" class="db-quick-item" data-accent="teal">
+    <a href="{{ url_for('main.geoportal') }}" class="db-quick-item" data-accent="teal" data-module-id="geoportal">
       <div class="db-quick-icon"><i class="bi bi-globe-americas"></i></div>
       <span class="db-quick-label">Geoportal</span>
     </a>
     {% endif %}
 
     {% if can('seguimiento') %}
-    <a href="{{ url_for('seguimiento.metas_dashboard') }}" class="db-quick-item" data-accent="indigo">
+    <a href="{{ url_for('seguimiento.metas_dashboard') }}" class="db-quick-item" data-accent="indigo" data-module-id="seguimiento">
       <div class="db-quick-icon"><i class="bi bi-graph-up-arrow"></i></div>
       <span class="db-quick-label">Seguimiento</span>
     </a>
     {% endif %}
 
     {% if can('riesgo') %}
-    <a href="{{ url_for('main.gestion_riesgo') }}" class="db-quick-item" data-accent="green">
+    <a href="{{ url_for('main.gestion_riesgo') }}" class="db-quick-item" data-accent="green" data-module-id="riesgo">
       <div class="db-quick-icon"><i class="bi bi-tree-fill"></i></div>
       <span class="db-quick-label">Gestión Riesgo</span>
     </a>
     {% endif %}
 
     {% if can('contratos') %}
-    <a href="/contratos" class="db-quick-item" data-accent="sky">
+    <a href="/contratos" class="db-quick-item" data-accent="sky" data-module-id="contratos">
       <div class="db-quick-icon"><i class="bi bi-briefcase-fill"></i></div>
       <span class="db-quick-label">Contratación</span>
     </a>
     {% endif %}
 
     {% if can('correo_inteligente') %}
-    <a href="{{ url_for('correo_inteligente.inbox') }}" class="db-quick-item" data-accent="rose">
+    <a href="{{ url_for('correo_inteligente.inbox') }}" class="db-quick-item" data-accent="rose" data-module-id="correo">
       <div class="db-quick-icon"><i class="bi bi-envelope-paper-heart-fill"></i></div>
       <span class="db-quick-label">Correo IA</span>
     </a>
@@ -802,10 +819,57 @@ body.has-sidebar {
   });
 })();
 </script>
-<script src="{{ url_for('static', filename='js/weather.js') }}"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    if (window.WeatherWidget) WeatherWidget.init();
+// ── Accesos Destacados dinámicos ──────────────────────────────────────────
+(function () {
+  var featured = {{ featured_cards | map(attribute='id') | list | tojson }};
+
+  // Inyectar botón estrella en cada db-quick-item que tenga data-module-id
+  document.querySelectorAll('.db-quick-item[data-module-id]').forEach(function (el) {
+    var mid = el.dataset.moduleId;
+    var btn = document.createElement('button');
+    btn.className = 'db-star-btn' + (featured.indexOf(mid) > -1 ? ' active' : '');
+    btn.title = featured.indexOf(mid) > -1 ? 'Quitar de destacados' : 'Añadir a destacados';
+    btn.innerHTML = featured.indexOf(mid) > -1 ? '★' : '☆';
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleFeatured(mid, btn);
+    });
+    el.appendChild(btn);
   });
+
+  window.toggleFeatured = function (mid, btn) {
+    var idx = featured.indexOf(mid);
+    if (idx > -1) {
+      featured.splice(idx, 1);
+    } else {
+      if (featured.length >= 4) {
+        alert('Máximo 4 accesos destacados. Quita uno primero.');
+        return;
+      }
+      featured.push(mid);
+    }
+    saveFeatured(featured, function () { location.reload(); });
+  };
+
+  window.removeFeatured = function (e, mid) {
+    e.preventDefault();
+    e.stopPropagation();
+    var idx = featured.indexOf(mid);
+    if (idx > -1) featured.splice(idx, 1);
+    saveFeatured(featured, function () { location.reload(); });
+  };
+
+  function saveFeatured(list, cb) {
+    fetch('/api/prefs/featured', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ modules: list })
+    }).then(function (r) { return r.json(); })
+      .then(function (d) { if (d.ok && cb) cb(); })
+      .catch(function () { alert('Error al guardar preferencias.'); });
+  }
+})();
 </script>
 {% endblock %}

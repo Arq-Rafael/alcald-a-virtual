@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geoportal EOT Supatá 2023 V8.0</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;overflow:hidden;background:#111}
+
+#header{
+  background:linear-gradient(135deg,#0d3320 0%,#1a5c38 50%,#27774d 100%);
+  color:#fff;padding:0 20px;display:flex;align-items:center;justify-content:space-between;
+  height:52px;z-index:2000;position:relative;box-shadow:0 2px 12px rgba(0,0,0,.4);
+}
+.hdr-left{display:flex;align-items:center;gap:12px}
+.hdr-left i{font-size:26px;opacity:.9}
+.hdr-left h1{font-size:15px;font-weight:700;letter-spacing:.4px}
+.hdr-left .sub{font-size:10.5px;opacity:.75;font-weight:300}
+.hdr-right{display:flex;gap:16px;font-size:11px;opacity:.85}
+.hdr-right span{display:flex;align-items:center;gap:4px}
+
+#app{display:flex;height:calc(100vh - 52px)}
+
+#sidebar{
+  width:320px;min-width:320px;background:#f5f6f8;display:flex;flex-direction:column;
+  border-right:1px solid #d0d4da;z-index:1500;transition:margin-left .3s ease;overflow:hidden;
+}
+#sidebar.closed{margin-left:-320px;min-width:0}
+.sb-top{background:#1a5c38;color:#fff;padding:9px 14px;font-size:12.5px;font-weight:600;display:flex;align-items:center;justify-content:space-between}
+.sb-top .close-sb{cursor:pointer;font-size:15px;opacity:.7;transition:opacity .15s}
+.sb-top .close-sb:hover{opacity:1}
+
+#search-box{padding:8px 12px;background:#fff;border-bottom:1px solid #ddd}
+#search-input{
+  width:100%;padding:7px 10px 7px 32px;border:1px solid #c8ccd2;border-radius:6px;
+  font-size:13px;background:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='gray' stroke-width='2'><circle cx='11' cy='11' r='8'/><path d='m21 21-4.35-4.35'/></svg>") no-repeat 8px center/16px;
+  transition:all .2s
+}
+#search-input:focus{outline:none;border-color:#1a5c38;box-shadow:0 0 4px rgba(26,92,56,.2)}
+#search-results{padding:0 12px;font-size:11px;color:#666;display:none;background:#fff;border-bottom:1px solid #ddd;padding:4px 12px}
+
+#stats-bar{background:#fff;border-bottom:1px solid #ddd;padding:10px 14px;font-size:11px;color:#555;line-height:1.5;border-top:2px solid #1a5c38}
+.stat-label{color:#333;font-weight:600;margin-bottom:4px}
+.stat-items{display:flex;flex-wrap:wrap;gap:8px}
+.stat-item{display:flex;align-items:center;gap:3px}
+.stat-badge{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:2px}
+
+#layer-tabs{display:flex;border-bottom:1px solid #ddd;background:#f9fafb}
+.tab-btn{flex:1;padding:8px 10px;border:none;background:none;cursor:pointer;font-size:12px;color:#666;border-bottom:2px solid transparent;transition:all .15s;text-align:center;font-weight:500}
+.tab-btn.active{color:#1a5c38;border-bottom-color:#1a5c38;background:#fff}
+.tab-btn:hover{background:#f0f2f5}
+
+#layers-panel{flex:1;overflow-y:auto;padding:0;background:#f5f6f8}
+
+.layer-group{border-top:1px solid #e0e3e8}
+.layer-group:first-child{border-top:none}
+.group-title{padding:7px 14px;font-weight:600;font-size:11px;color:#1a5c38;cursor:pointer;display:flex;align-items:center;gap:6px;user-select:none}
+.group-title:hover{background:#e8f0ec}
+.group-title i.chev{font-size:10px;transition:transform .15s;width:10px}
+.group-title i.chev.open{transform:rotate(90deg)}
+.group-content{display:none}
+
+.layer-item{padding:5px 14px 5px 30px;display:flex;align-items:center;gap:8px;font-size:11.5px;color:#333;transition:background .1s;position:relative}
+.layer-item:hover{background:#e8eff5}
+.layer-item input[type="checkbox"]{position:absolute;left:10px;cursor:pointer}
+.layer-item label{flex:1;cursor:pointer;user-select:none}
+.layer-item .swatch{width:14px;height:14px;border-radius:2px;border:1px solid #ccc;flex-shrink:0}
+.layer-item.loading label{color:#999;font-style:italic}
+.layer-item.loading label::after{content:' ...';font-size:10px}
+
+.bm-group{padding:8px 14px;background:#fff;border-bottom:1px solid #ddd}
+.bm-title{font-weight:600;font-size:11px;color:#1a5c38;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.bm-option{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:12px;color:#333;cursor:pointer}
+.bm-option input{cursor:pointer}
+.bm-option label{cursor:pointer;user-select:none}
+
+.legend-section{background:#fff;border-top:1px solid #ddd;padding:10px 14px;font-size:11px;color:#555}
+.legend-title{font-weight:600;color:#333;margin-bottom:6px;font-size:11px}
+.legend-item{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.legend-color{width:16px;height:16px;border-radius:3px;border:1px solid rgba(0,0,0,.2);flex-shrink:0}
+
+/* INFO PANEL */
+#info-panel{
+  position:absolute;bottom:15px;right:15px;width:360px;max-height:60vh;
+  background:#fff;border-radius:8px;border:1px solid #d0d4da;box-shadow:0 4px 16px rgba(0,0,0,.2);
+  display:none;z-index:1400;overflow-y:auto;
+}
+#info-panel.active{display:block;animation:slideIn .2s ease-out}
+@keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.info-header{
+  background:linear-gradient(135deg,#0d3320 0%,#1a5c38 100%);color:#fff;
+  padding:10px 12px;border-radius:8px 8px 0 0;display:flex;justify-content:space-between;align-items:center;
+  position:sticky;top:0;z-index:1;
+}
+.info-header h3{font-size:13px;font-weight:700;margin:0}
+.close-info{cursor:pointer;font-size:14px;opacity:.7;transition:opacity .15s;background:none;border:none;color:#fff}
+.close-info:hover{opacity:1}
+
+.info-content{padding:12px;font-size:12px;color:#333}
+.info-row{margin-bottom:7px;display:flex;gap:4px}
+.info-label{font-weight:600;color:#1a5c38;min-width:90px;font-size:11px}
+.info-value{flex:1;word-break:break-word}
+
+.clase-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-weight:600;font-size:11px;color:#fff}
+.clase-urbano{background:#2563eb}
+.clase-rural{background:#10b981}
+.clase-expansion{background:#f59e0b}
+.clase-cp_magola{background:#8b6f47}
+
+.usos-header{font-weight:600;color:#1a5c38;margin-top:10px;margin-bottom:6px;padding-top:8px;border-top:1px solid #e0e3e8}
+.uso-item{margin-bottom:6px;padding:6px;background:#f9fafb;border-radius:4px;font-size:11px;border-left:3px solid #1a5c38}
+.uso-nombre{font-weight:600;color:#0d3320;margin-bottom:2px}
+.uso-cat{color:#666;font-size:10px}
+.uso-area{color:#1a5c38;font-weight:600;margin-top:2px;font-size:10px}
+.verification-note{background:#e0f2fe;border-left:3px solid #0284c7;padding:6px 8px;margin-top:8px;font-size:10px;color:#0c4a6e;border-radius:2px}
+
+#map-container{flex:1;position:relative;background:#d0d0d0}
+#map{width:100%;height:100%}
+#map3d{width:100%;height:100%;position:absolute;top:0;left:0;display:none;z-index:500}
+#coords{position:absolute;bottom:28px;left:10px;background:rgba(255,255,255,.9);padding:3px 8px;border-radius:4px;font-size:10px;color:#333;z-index:1000;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+#mode3d-hint{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#fff;padding:6px 14px;border-radius:6px;font-size:12px;z-index:1000;display:none;pointer-events:none;transition:opacity .3s}
+
+.sb-toggle{position:absolute;left:10px;top:10px;z-index:1600;background:#1a5c38;color:#fff;border:none;padding:8px 10px;border-radius:4px;cursor:pointer;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,.2);transition:all .2s;display:none}
+.sb-toggle:hover{background:#0d2817;transform:scale(1.05)}
+.sb-toggle.show{display:block}
+
+#loading{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;z-index:9999;font-size:16px;color:#1a5c38;font-weight:600;flex-direction:column;gap:12px}
+.spinner{border:3px solid #e0e3e8;border-top:3px solid #1a5c38;border-radius:50%;width:36px;height:36px;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#load-status{font-size:12px;color:#666;font-weight:400}
+
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#f5f6f8}
+::-webkit-scrollbar-thumb{background:#c8ccd2;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#a0a5ab}
+
+@media(max-width:768px){
+  .hdr-left h1{font-size:13px}.hdr-left .sub{display:none}.hdr-right{font-size:10px}
+  #sidebar{width:290px;min-width:290px}#sidebar.closed{margin-left:-290px}
+  .sb-toggle.show{display:block}#info-panel{width:290px;max-height:50vh}
+}
+</style>
+</head>
+<body>
+
+<div id="loading"><div class="spinner"></div><span>Cargando Geoportal EOT Supatá...</span><span id="load-status">Iniciando...</span></div>
+
+<div id="header">
+  <div class="hdr-left">
+    <i class="fas fa-map"></i>
+    <div>
+      <h1>Geoportal EOT Supatá 2023 V8.0</h1>
+      <div class="sub">Acuerdo N° 14 del 13 Sep 2023 — 4,730 predios | Catastro actualizado 2023</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <span><i class="fas fa-cube"></i> 54 Capas</span>
+    <span><i class="fas fa-database"></i> Catastro 2023</span>
+  </div>
+</div>
+
+<div id="app">
+  <div id="sidebar">
+    <div class="sb-top"><span>Capas &amp; Búsqueda</span><i class="fas fa-times close-sb"></i></div>
+
+    <div id="search-box">
+      <input type="text" id="search-input" placeholder="Código, dirección o propietario...">
+    </div>
+    <div id="search-results"></div>
+
+    <div id="stats-bar">
+      <div class="stat-label">Clasificación de Predios (EOT Art. 18):</div>
+      <div class="stat-items">
+        <div class="stat-item"><div class="stat-badge" style="background:#2563eb"></div><span>Urbanos: 898</span></div>
+        <div class="stat-item"><div class="stat-badge" style="background:#10b981"></div><span>Rurales: 3,712</span></div>
+        <div class="stat-item"><div class="stat-badge" style="background:#f59e0b"></div><span>Expansión: 66</span></div>
+        <div class="stat-item"><div class="stat-badge" style="background:#8b6f47"></div><span>CP Magola: 54</span></div>
+      </div>
+      <div style="margin-top:6px;font-weight:600;color:#333">Total: 4,730 predios</div>
+    </div>
+
+    <div id="layer-tabs">
+      <button class="tab-btn active" data-tab="consulta">Consulta Predial</button>
+      <button class="tab-btn" data-tab="layers">Todas las Capas</button>
+    </div>
+
+    <div id="layers-panel">
+      <div id="tab-consulta" class="tab-content" style="display:block">
+        <div class="layer-group">
+          <div class="group-title"><i class="fas fa-chevron-right chev open"></i><span>Consulta Predial EOT</span></div>
+          <div class="group-content" style="display:block">
+            <div class="layer-item"><input type="checkbox" id="c_consulta_predial" checked onchange="toggleLayer('consulta_predial')"><label for="c_consulta_predial">Predios Verificados (4,730)</label><div class="swatch" style="background:#2563eb"></div></div>
+          </div>
+        </div>
+
+        <div class="bm-group">
+          <div class="bm-title"><i class="fas fa-globe-americas"></i> MAPA BASE</div>
+          <div class="bm-option"><input type="radio" name="bm" id="bm_osm" value="osm" onchange="changeBaseMap('osm')"><label for="bm_osm">OpenStreetMap</label></div>
+          <div class="bm-option"><input type="radio" name="bm" id="bm_sat" value="sat" onchange="changeBaseMap('sat')"><label for="bm_sat">Satélite (Esri)</label></div>
+          <div class="bm-option"><input type="radio" name="bm" id="bm_topo" value="topo" checked onchange="changeBaseMap('topo')"><label for="bm_topo">Topográfico</label></div>
+          <div class="bm-option"><input type="radio" name="bm" id="bm_dark" value="dark" onchange="changeBaseMap('dark')"><label for="bm_dark">Oscuro</label></div>
+          <div class="bm-option"><input type="radio" name="bm" id="bm_3d" value="3d" onchange="changeBaseMap('3d')"><label for="bm_3d"><i class="fas fa-mountain"></i> Relieve 3D</label></div>
+        </div>
+
+        <div class="legend-section">
+          <div class="legend-title">Clasificación por Clase de Suelo</div>
+          <div class="legend-item"><div class="legend-color" style="background:#2563eb"></div><span><strong>Urbano</strong> (43.46 Ha) — Art. 18 EOT</span></div>
+          <div class="legend-item"><div class="legend-color" style="background:#10b981"></div><span><strong>Rural</strong> (12,956.56 Ha) — Art. 18 EOT</span></div>
+          <div class="legend-item"><div class="legend-color" style="background:#f59e0b"></div><span><strong>Expansión</strong> (23.75 Ha) — Art. 18 EOT</span></div>
+          <div class="legend-item"><div class="legend-color" style="background:#8b6f47"></div><span><strong>CP Magola</strong> (4.77 Ha) — Centro Poblado</span></div>
+        </div>
+      </div>
+
+      <div id="tab-layers" class="tab-content" style="display:none"></div>
+    </div>
+  </div>
+
+  <div id="map-container">
+    <button class="sb-toggle show"><i class="fas fa-bars"></i></button>
+    <div id="map"></div>
+    <div id="map3d"></div>
+    <div id="mode3d-hint">Arrastra para rotar · Ctrl+Arrastra para inclinar · Scroll para zoom</div>
+    <div id="coords">—</div>
+    <div id="info-panel">
+      <div class="info-header"><h3>Información del Predio</h3><button class="close-info"><i class="fas fa-times"></i></button></div>
+      <div class="info-content" id="info-content"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>if(typeof L==='undefined'){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"><\/script>');}</script>
+<script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+<script src="/geoportal/data/catastro_eot_verificado_v6.js"></script>
+<script>
+// ============================================
+// CONFIG
+// ============================================
+var CLASE_COLORS = {urbano:'#2563eb',rural:'#10b981',expansion:'#f59e0b',cp_magola:'#8b6f47'};
+var CLASE_LABELS = {urbano:'Urbano',rural:'Rural',expansion:'Expansión Urbana',cp_magola:'CP Magola — Centro Poblado'};
+
+var AA_CLR = {Residencial:'#2196f3','Residencial VIS':'#64b5f6',Comercial:'#ff9800','Comercio tipo 6':'#f57c00',Institucional:'#9c27b0',Equipamientos:'#e91e63',Servicios:'#607d8b','Área de Conservación Ambiental':'#4caf50','Espacio publico':'#00bcd4'};
+var TR_CLR = {'Consolidación':'#1565c0','Mejoramiento integral':'#ef6c00','Espacio publico':'#00897b','Conservacion ambiental':'#2e7d32',Desarrollo:'#ad1457'};
+var SUB_CLR = {'Áreas de conservación y protección ambiental':'#1b5e20','Áreas del sistema de servicios públicos domiciliarios':'#5d4037','Áreas para la producción agrícola y ganadera y de explotación de recursos naturales':'#8bc34a','Áreas de recreación':'#00bcd4','Áreas de vivienda campestre':'#ff7043','Suelos Suburbanos':'#ffa726','Equipamientos':'#7b1fa2','Centros Poblados':'#e53935'};
+
+// ============================================
+// MAP (Leaflet 2D)
+// ============================================
+var map = L.map('map', {zoomControl:false}).setView([5.07, -74.225], 13);
+L.control.zoom({position:'topright'}).addTo(map);
+L.control.scale({imperial:false,position:'bottomleft',maxWidth:150}).addTo(map);
+
+// Custom pane for boundary/perimeter layers: below overlayPane (z=400) but above tilePane (z=200)
+map.createPane('boundaryPane');
+map.getPane('boundaryPane').style.zIndex = 350;
+map.getPane('boundaryPane').style.pointerEvents = 'auto';
+map.on('mousemove', function(e) {
+  document.getElementById('coords').textContent = e.latlng.lat.toFixed(5) + ', ' + e.latlng.lng.toFixed(5);
+});
+
+var BM = {
+  osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'&copy; OSM',maxZoom:19}),
+  sat: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {attribution:'&copy; Esri',maxZoom:19}),
+  topo: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {attribution:'&copy; OpenTopoMap',maxZoom:17}),
+  dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {attribution:'&copy; CARTO',maxZoom:19})
+};
+var curBM = BM.topo;
+curBM.addTo(map);
+
+// ============================================
+// 3D MAP (MapLibre GL)
+// ============================================
+var map3d = null;
+var is3DMode = false;
+
+function init3DMap() {
+  if (map3d) return;
+  map3d = new maplibregl.Map({
+    container: 'map3d',
+    style: {
+      version: 8,
+      sources: {
+        'terrain-tiles': {
+          type: 'raster-dem',
+          tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+          encoding: 'terrarium',
+          tileSize: 256,
+          maxzoom: 15
+        },
+        'satellite': {
+          type: 'raster',
+          tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+          tileSize: 256,
+          maxzoom: 19
+        },
+        'topo-tiles': {
+          type: 'raster',
+          tiles: ['https://a.tile.opentopomap.org/{z}/{x}/{y}.png'],
+          tileSize: 256,
+          maxzoom: 17
+        }
+      },
+      layers: [
+        { id: 'satellite-layer', type: 'raster', source: 'satellite', paint: {'raster-opacity': 0.85} },
+        { id: 'topo-layer', type: 'raster', source: 'topo-tiles', paint: {'raster-opacity': 0.5} }
+      ],
+      terrain: { source: 'terrain-tiles', exaggeration: 1.8 }
+    },
+    center: [-74.225, 5.07],
+    zoom: 12.5,
+    pitch: 55,
+    bearing: -20,
+    maxPitch: 80
+  });
+
+  map3d.addControl(new maplibregl.NavigationControl({visualizePitch:true}), 'top-right');
+  map3d.addControl(new maplibregl.ScaleControl({unit:'metric'}), 'bottom-left');
+
+  map3d.on('load', function() {
+    if (typeof CATASTRO_DATA !== 'undefined') {
+      map3d.addSource('catastro', { type: 'geojson', data: CATASTRO_DATA });
+      map3d.addLayer({
+        id: 'catastro-fill', type: 'fill', source: 'catastro',
+        paint: {
+          'fill-color': ['match', ['get', 'tipo'], 'urbano', '#2563eb', 'rural', '#10b981', 'expansion', '#f59e0b', 'cp_magola', '#8b6f47', '#666666'],
+          'fill-opacity': 0.35
+        }
+      });
+      map3d.addLayer({
+        id: 'catastro-line', type: 'line', source: 'catastro',
+        paint: {
+          'line-color': ['match', ['get', 'tipo'], 'urbano', '#2563eb', 'rural', '#10b981', 'expansion', '#f59e0b', 'cp_magola', '#8b6f47', '#666666'],
+          'line-width': 1, 'line-opacity': 0.7
+        }
+      });
+      map3d.on('click', 'catastro-fill', function(e) {
+        if (e.features && e.features.length > 0) {
+          var props = e.features[0].properties;
+          if (typeof props.u === 'string') { try { props.u = JSON.parse(props.u); } catch(ex) { props.u = []; } }
+          showPredioInfo({properties: props, geometry: e.features[0].geometry});
+        }
+      });
+      map3d.on('mouseenter', 'catastro-fill', function() { map3d.getCanvas().style.cursor = 'pointer'; });
+      map3d.on('mouseleave', 'catastro-fill', function() { map3d.getCanvas().style.cursor = ''; });
+    }
+  });
+  map3d.on('mousemove', function(e) {
+    document.getElementById('coords').textContent = e.lngLat.lat.toFixed(5) + ', ' + e.lngLat.lng.toFixed(5);
+  });
+}
+
+function activate3D() {
+  if (!map3d) init3DMap();
+  var center = map.getCenter();
+  var zoom = map.getZoom();
+  document.getElementById('map').style.display = 'none';
+  document.getElementById('map3d').style.display = 'block';
+  document.getElementById('mode3d-hint').style.display = 'block';
+  setTimeout(function(){ document.getElementById('mode3d-hint').style.opacity='0'; }, 4000);
+  setTimeout(function(){ document.getElementById('mode3d-hint').style.display='none'; document.getElementById('mode3d-hint').style.opacity='1'; }, 4500);
+  map3d.jumpTo({center:[center.lng, center.lat], zoom: Math.max(zoom - 1, 10)});
+  map3d.resize();
+  is3DMode = true;
+}
+
+function deactivate3D() {
+  if (map3d) {
+    var c = map3d.getCenter();
+    var z = map3d.getZoom();
+    map.setView([c.lat, c.lng], Math.min(z + 1, 18));
+  }
+  document.getElementById('map3d').style.display = 'none';
+  document.getElementById('map').style.display = 'block';
+  document.getElementById('mode3d-hint').style.display = 'none';
+  map.invalidateSize();
+  is3DMode = false;
+}
+
+function changeBaseMap(k) {
+  if (k === '3d') { activate3D(); return; }
+  if (is3DMode) deactivate3D();
+  map.removeLayer(curBM);
+  curBM = BM[k];
+  curBM.addTo(map);
+}
+
+// ============================================
+// LAYER STORAGE
+// ============================================
+var LY = {};
+var LAYER_STATE = {}; // track: 'loading', 'loaded', 'failed'
+var highlightedLayer = null;
+var searchResults = null;
+
+// ============================================
+// STYLE FUNCTION
+// ============================================
+function layerStyle(name, feature) {
+  var p = feature.properties || {};
+  var STYLES = {
+    limite_municipal:{color:'#0d3320',weight:2,fillOpacity:0,fillColor:'transparent',dashArray:'10,5',interactive:false},
+    limite_veredal:{color:'#6c757d',weight:1.5,fillOpacity:.04,fillColor:'#adb5bd',dashArray:'5,4'},
+    perimetro_urbano:{color:'#e63946',weight:3,fillOpacity:.08,fillColor:'#e63946'},
+    perimetro_expansion:{color:'#f4a261',weight:2.5,fillOpacity:.07,fillColor:'#f4a261',dashArray:'8,4'},
+    perimetro_cp_magola:{color:'#e76f51',weight:2.5,fillOpacity:.07,fillColor:'#e76f51',dashArray:'6,3'},
+    perimetro_rural:{color:'#2a9d8f',weight:2,fillOpacity:0,dashArray:'12,6'},
+    zonas_morfologicas:{color:'#78909c',weight:.5,fillOpacity:.15,fillColor:'#78909c'},
+    eep_urbana:{color:'#00695c',weight:2,fillOpacity:.35,fillColor:'#00695c'},
+    eep_cp_magola:{color:'#2e7d32',weight:2,fillOpacity:.35,fillColor:'#2e7d32'},
+    eep_drmi_tablazo:{color:'#1b5e20',weight:2,fillOpacity:.2,fillColor:'#1b5e20'},
+    eep_drmi_subachoque:{color:'#2e7d32',weight:2,fillOpacity:.2,fillColor:'#2e7d32'},
+    eep_paramo_guerrero:{color:'#33691e',weight:2,fillOpacity:.2,fillColor:'#33691e',dashArray:'6,3'},
+    eep_humedales:{color:'#0097a7',weight:2,fillOpacity:.4,fillColor:'#0097a7'},
+    eep_lagunas:{color:'#006064',weight:2,fillOpacity:.4,fillColor:'#006064'},
+    eep_rondas_hidricas:{color:'#0277bd',weight:1.5,fillOpacity:.25,fillColor:'#0277bd'},
+    eep_recarga_acuiferos:{color:'#00838f',weight:1.5,fillOpacity:.2,fillColor:'#00838f'},
+    eep_pendientes_45:{color:'#5d4037',weight:1.5,fillOpacity:.2,fillColor:'#5d4037'},
+    eep_capacidad_uso:{color:'#558b2f',weight:1,fillOpacity:.2,fillColor:'#558b2f'},
+    conector_ecologico_urbano:{color:'#66bb6a',weight:2,fillOpacity:.3,fillColor:'#66bb6a'},
+    vias_rurales:{color:'#795548',weight:1.5,fillOpacity:0},
+    vias_urbano:{color:'#546e7a',weight:2,fillOpacity:0},
+    vias_cp_magola:{color:'#8d6e63',weight:1.5,fillOpacity:0},
+    sistema_vial_urbano:{color:'#37474f',weight:2.5,fillOpacity:.1,fillColor:'#37474f'},
+    faja_retiro_vial:{color:'#4e342e',weight:1.5,fillOpacity:.15,fillColor:'#4e342e'},
+    drenajes_rurales:{color:'#0288d1',weight:1.2,fillOpacity:0},
+    drenajes_urbano:{color:'#0277bd',weight:1.5,fillOpacity:0},
+    rondas_drenaje_urbano:{color:'#4fc3f7',weight:1,fillOpacity:.2,fillColor:'#4fc3f7'},
+    titulos_mineros:{color:'#ff6f00',weight:2,fillOpacity:.25,fillColor:'#ff6f00'},
+    solicitudes_mineras:{color:'#e65100',weight:2,fillOpacity:.2,fillColor:'#e65100',dashArray:'5,3'},
+    planes_parciales:{color:'#ad1457',weight:2,fillOpacity:.2,fillColor:'#ad1457'},
+    proyectos_vis:{color:'#1565c0',weight:2,fillOpacity:.25,fillColor:'#1565c0'},
+    plan_mejoramiento_integral:{color:'#ef6c00',weight:2,fillOpacity:.2,fillColor:'#ef6c00'},
+    espacio_publico_urbano:{color:'#00897b',weight:1.5,fillOpacity:.3,fillColor:'#00897b'},
+    patrimonio_cultural:{color:'#6a1b9a',weight:2,fillOpacity:.3,fillColor:'#6a1b9a'},
+    servicios_publicos_rural:{color:'#5d4037',weight:1.5,fillOpacity:.25,fillColor:'#5d4037'},
+    poligonos_recreacion:{color:'#00bcd4',weight:2,fillOpacity:.25,fillColor:'#00bcd4'},
+    poligonos_vivienda_campestre:{color:'#ff7043',weight:2,fillOpacity:.25,fillColor:'#ff7043'},
+    poligono_suburbano:{color:'#ffa726',weight:2,fillOpacity:.25,fillColor:'#ffa726'},
+    equipamientos_predios_urbano:{color:'#880e4f',weight:1.5,fillOpacity:.3,fillColor:'#880e4f'},
+    predial_expansion:{color:'#ff9800',weight:1,fillOpacity:.3,fillColor:'#ff9800'},
+    predial_cp_magola:{color:'#795548',weight:1,fillOpacity:.3,fillColor:'#795548'},
+    areas_actividad_expansion:{color:'#f4a261',weight:1.5,fillOpacity:.3,fillColor:'#f4a261'},
+    bocatomas:{color:'#1565c0',weight:2,fillOpacity:.4,fillColor:'#1565c0'}
+  };
+
+  if (STYLES[name]) return STYLES[name];
+  if (name === 'usos_rurales') { var c = SUB_CLR[p.Subcategoria] || '#aaa'; return {color:c,weight:1.5,fillOpacity:.35,fillColor:c}; }
+  if (name === 'areas_actividad_urbano' || name === 'areas_actividad_cp_magola') { var c = AA_CLR[p.Areas_actividad || p.Uso] || '#999'; return {color:c,weight:1,fillOpacity:.45,fillColor:c}; }
+  if (name.indexOf('tratamientos') >= 0) { var c = TR_CLR[p.TRATAMIENTO || p.Tratamiento] || '#999'; return {color:c,weight:2,fillOpacity:.3,fillColor:c}; }
+  if (name === 'predial_urbano') { return {color:'#2196f3',weight:.8,fillOpacity:.3,fillColor:'#2196f3'}; }
+  if (name === 'predial_rural') { return {color:'#4caf50',weight:.4,fillOpacity:.2,fillColor:'#4caf50'}; }
+  return {color:'#555',weight:1,fillOpacity:.15,fillColor:'#555'};
+}
+
+// ============================================
+// LAYER DEFINITIONS
+// ============================================
+var PT_LAYERS = ['equipamientos_rurales','equipamientos_urbanos','equipamientos_cp_magola','bocatomas'];
+
+var GEOJSON_LAYERS = [
+  {name:'limite_municipal',group:'Límites y Perímetros',visible:true},
+  {name:'limite_veredal',group:'Límites y Perímetros',visible:false},
+  {name:'perimetro_urbano',group:'Límites y Perímetros',visible:true},
+  {name:'perimetro_expansion',group:'Límites y Perímetros',visible:false},
+  {name:'perimetro_cp_magola',group:'Límites y Perímetros',visible:true},
+  {name:'perimetro_rural',group:'Límites y Perímetros',visible:false},
+  {name:'usos_rurales',group:'Usos del Suelo Rural',visible:false},
+  {name:'poligono_suburbano',group:'Usos del Suelo Rural',visible:false},
+  {name:'poligonos_recreacion',group:'Usos del Suelo Rural',visible:false},
+  {name:'poligonos_vivienda_campestre',group:'Usos del Suelo Rural',visible:false},
+  {name:'areas_actividad_urbano',group:'Áreas Actividad (Art. 138)',visible:false},
+  {name:'areas_actividad_cp_magola',group:'Áreas Actividad (Art. 138)',visible:false},
+  {name:'areas_actividad_expansion',group:'Áreas Actividad (Art. 138)',visible:false},
+  {name:'tratamientos_urbanos',group:'Tratamientos Urbanísticos',visible:false},
+  {name:'tratamientos_cp_magola',group:'Tratamientos Urbanísticos',visible:false},
+  {name:'zonas_morfologicas',group:'Tratamientos Urbanísticos',visible:false},
+  {name:'plan_mejoramiento_integral',group:'Tratamientos Urbanísticos',visible:false},
+  {name:'predial_urbano',group:'Predios Originales',visible:false},
+  {name:'predial_rural',group:'Predios Originales',visible:false},
+  {name:'predial_expansion',group:'Predios Originales',visible:false},
+  {name:'predial_cp_magola',group:'Predios Originales',visible:false},
+  {name:'eep_urbana',group:'Estructura Ecológica',visible:false},
+  {name:'eep_cp_magola',group:'Estructura Ecológica',visible:false},
+  {name:'eep_drmi_tablazo',group:'Estructura Ecológica',visible:false},
+  {name:'eep_drmi_subachoque',group:'Estructura Ecológica',visible:false},
+  {name:'eep_paramo_guerrero',group:'Estructura Ecológica',visible:false},
+  {name:'eep_humedales',group:'Estructura Ecológica',visible:false},
+  {name:'eep_lagunas',group:'Estructura Ecológica',visible:false},
+  {name:'eep_rondas_hidricas',group:'Estructura Ecológica',visible:false},
+  {name:'eep_recarga_acuiferos',group:'Estructura Ecológica',visible:false},
+  {name:'eep_pendientes_45',group:'Estructura Ecológica',visible:false},
+  {name:'eep_capacidad_uso',group:'Estructura Ecológica',visible:false},
+  {name:'conector_ecologico_urbano',group:'Estructura Ecológica',visible:false},
+  {name:'equipamientos_rurales',group:'Equipamientos',visible:false},
+  {name:'equipamientos_urbanos',group:'Equipamientos',visible:false},
+  {name:'equipamientos_cp_magola',group:'Equipamientos',visible:false},
+  {name:'equipamientos_predios_urbano',group:'Equipamientos',visible:false},
+  {name:'drenajes_rurales',group:'Hidrografía',visible:false},
+  {name:'drenajes_urbano',group:'Hidrografía',visible:false},
+  {name:'rondas_drenaje_urbano',group:'Hidrografía',visible:false},
+  {name:'vias_rurales',group:'Infraestructura Vial',visible:false},
+  {name:'vias_urbano',group:'Infraestructura Vial',visible:false},
+  {name:'vias_cp_magola',group:'Infraestructura Vial',visible:false},
+  {name:'sistema_vial_urbano',group:'Infraestructura Vial',visible:false},
+  {name:'faja_retiro_vial',group:'Infraestructura Vial',visible:false},
+  {name:'servicios_publicos_rural',group:'Servicios Públicos',visible:false},
+  {name:'bocatomas',group:'Servicios Públicos',visible:false},
+  {name:'espacio_publico_urbano',group:'Gestión Territorial',visible:false},
+  {name:'planes_parciales',group:'Gestión Territorial',visible:false},
+  {name:'proyectos_vis',group:'Gestión Territorial',visible:false},
+  {name:'patrimonio_cultural',group:'Gestión Territorial',visible:false},
+  {name:'titulos_mineros',group:'Minería',visible:false},
+  {name:'solicitudes_mineras',group:'Minería',visible:false}
+];
+
+// ============================================
+// LOAD CATASTRO LAYER
+// ============================================
+function loadCatastroLayer() {
+  if (typeof CATASTRO_DATA === 'undefined') { console.error('CATASTRO_DATA not loaded'); return; }
+  setStatus('Cargando ' + CATASTRO_DATA.features.length + ' predios...');
+  var ly = L.geoJSON(CATASTRO_DATA, {
+    style: function(f) {
+      var c = CLASE_COLORS[f.properties.tipo] || '#666';
+      return {color:c,weight:1,opacity:0.7,fillOpacity:0.35,fillColor:c};
+    },
+    onEachFeature: function(f, layer) {
+      layer.on('click', function() { showPredioInfo(f); });
+      layer.on('mouseover', function() { if (this.setStyle) this.setStyle({weight:3,fillOpacity:0.55}); });
+      layer.on('mouseout', function() {
+        var c = CLASE_COLORS[f.properties.tipo] || '#666';
+        if (this.setStyle) this.setStyle({color:c,weight:1,opacity:0.7,fillOpacity:0.35,fillColor:c});
+      });
+    }
+  });
+  LY['consulta_predial'] = ly;
+  LAYER_STATE['consulta_predial'] = 'loaded';
+  ly.addTo(map);
+  console.log('Catastro loaded:', CATASTRO_DATA.features.length, 'predios');
+}
+
+// ============================================
+// LOAD GEOJSON via <script> tag (file:// safe!)
+// Each .js file calls window.__layerLoaded(name, data)
+// This works on file:// unlike XMLHttpRequest
+// ============================================
+var LAYER_CALLBACKS = {};
+
+window.__layerLoaded = function(name, data) {
+  console.log('Script loaded:', name, data ? '(' + (data.features||[]).length + ' features)' : '(null)');
+  if (LAYER_CALLBACKS[name]) {
+    var cb = LAYER_CALLBACKS[name];
+    delete LAYER_CALLBACKS[name];
+    cb(data && data.features ? data : null);
+  }
+};
+
+function loadGeoJSON(name, callback) {
+  LAYER_CALLBACKS[name] = callback;
+  var script = document.createElement('script');
+  script.src = 'data/' + name + '.js';
+  script.onload = function() {
+    // If callback wasn't called by the script (file missing/empty),
+    // it means the .js didn't contain __layerLoaded call
+    // Give it a moment then check
+    setTimeout(function() {
+      if (LAYER_CALLBACKS[name]) {
+        console.warn('Script loaded but no data for:', name);
+        var cb = LAYER_CALLBACKS[name];
+        delete LAYER_CALLBACKS[name];
+        cb(null);
+      }
+    }, 100);
+  };
+  script.onerror = function() {
+    console.warn('Script error loading:', name);
+    if (LAYER_CALLBACKS[name]) {
+      var cb = LAYER_CALLBACKS[name];
+      delete LAYER_CALLBACKS[name];
+      cb(null);
+    }
+  };
+  document.body.appendChild(script);
+}
+
+var loadedCount = 0;
+function loadAllLayers() {
+  var visibleLayers = GEOJSON_LAYERS.filter(function(cfg) { return cfg.visible; });
+  var totalVisible = visibleLayers.length;
+
+  for (var i = 0; i < visibleLayers.length; i++) {
+    (function(cfg) {
+      loadSingleLayer(cfg.name, function(success) {
+        loadedCount++;
+        setStatus('Capas: ' + loadedCount + '/' + totalVisible);
+        if (success && cfg.visible) LY[cfg.name].addTo(map);
+        if (loadedCount >= totalVisible) {
+          console.log('All visible layers loaded.');
+          hideLoading();
+        }
+      });
+    })(visibleLayers[i]);
+  }
+  if (visibleLayers.length === 0) hideLoading();
+}
+
+// ============================================
+// SHOW LAYER INFO (non-catastro)
+// ============================================
+function showLayerInfo(name, props) {
+  var html = '';
+  for (var key in props) {
+    if (props.hasOwnProperty(key) && props[key] !== null && props[key] !== '') {
+      html += '<div class="info-row"><span class="info-label">' + key + '</span><span class="info-value">' + props[key] + '</span></div>';
+    }
+  }
+  document.getElementById('info-content').innerHTML = html;
+  document.getElementById('info-panel').classList.add('active');
+}
+
+// ============================================
+// SHOW PREDIO INFO
+// ============================================
+function showPredioInfo(feature) {
+  var p = feature.properties;
+  var clase = p.tipo;
+  var claseLabel = CLASE_LABELS[clase] || clase;
+
+  var usosHTML = '';
+  var usos = p.u;
+  if (typeof usos === 'string') { try { usos = JSON.parse(usos); } catch(e) { usos = []; } }
+  if (usos && usos.length > 0) {
+    usosHTML = '<div class="usos-header">Usos del Suelo (EOT):</div>';
+    for (var i = 0; i < usos.length; i++) {
+      var uso = usos[i];
+      usosHTML += '<div class="uso-item">' +
+        '<div class="uso-nombre">' + (uso.nombre || 'Sin nombre') + '</div>' +
+        '<div class="uso-cat"><strong>Categoría:</strong> ' + (uso.categoria || 'N/A') + '</div>' +
+        '<div class="uso-cat"><strong>Subcategoría:</strong> ' + (uso.subcategoria || 'N/A') + '</div>' +
+        '<div class="uso-cat"><strong>Uso:</strong> ' + (uso.uso || 'N/A') + '</div>' +
+        (uso.observacion ? '<div class="uso-cat"><strong>Obs:</strong> ' + uso.observacion + '</div>' : '') +
+        '<div class="uso-area">Área: ' + ((uso.area_m2||0).toLocaleString('es-CO')) + ' m² (' + ((uso.pct||0).toFixed(1)) + '%)</div>' +
+        '</div>';
+    }
+  }
+
+  var html =
+    '<div class="info-row"><span class="info-label">Código:</span><span class="info-value"><code style="font-size:10px;word-break:break-all">' + (p.k||'N/A') + '</code></span></div>' +
+    '<div class="info-row"><span class="info-label">Dirección:</span><span class="info-value">' + (p.dir||'No registrada') + '</span></div>' +
+    '<div class="info-row"><span class="info-label">Propietario:</span><span class="info-value">' + (p.o||'No registrado') + '</span></div>' +
+    '<div class="info-row"><span class="info-label">Destino:</span><span class="info-value">' + (p.d||'N/A') + '</span></div>' +
+    '<div class="info-row"><span class="info-label">Matrícula:</span><span class="info-value">' + (p.mat||'N/A') + '</span></div>' +
+    '<div class="info-row"><span class="info-label">Clase Suelo:</span><span class="info-value"><span class="clase-badge clase-' + clase + '">' + claseLabel + '</span></span></div>' +
+    '<div class="info-row"><span class="info-label">Área:</span><span class="info-value">' + ((p.am2||0).toLocaleString('es-CO')) + ' m² (' + ((p.aha||0).toFixed(2)) + ' Ha)</span></div>' +
+    usosHTML +
+    '<div class="verification-note">&#10003; Clasificación verificada — Acuerdo No. 14 del 13 Sep 2023 | Catastro actualizado 2023 | V8.0</div>';
+
+  document.getElementById('info-content').innerHTML = html;
+  document.getElementById('info-panel').classList.add('active');
+
+  if (!is3DMode && feature.geometry) {
+    if (highlightedLayer) map.removeLayer(highlightedLayer);
+    highlightedLayer = L.geoJSON(feature, {
+      style: {color:'#ffe100',weight:5,fillOpacity:0.4,fillColor:'#ffe100'}
+    }).addTo(map);
+    var bounds = L.geoJSON(feature).getBounds();
+    map.fitBounds(bounds, {maxZoom:18,padding:[50,50]});
+  }
+}
+
+// ============================================
+// SEARCH
+// ============================================
+var searchInput = document.getElementById('search-input');
+var searchTimeout = null;
+
+searchInput.addEventListener('input', function() {
+  clearTimeout(searchTimeout);
+  var val = this.value;
+  searchTimeout = setTimeout(function() { performSearch(val); }, 300);
+});
+
+searchInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { this.value = ''; clearSearch(); }
+});
+
+function performSearch(query) {
+  if (!query || !query.trim()) { clearSearch(); return; }
+  var q = query.toLowerCase();
+  var layer = LY.consulta_predial;
+  if (!layer) return;
+
+  if (searchResults) {
+    searchResults.forEach(function(r) {
+      var c = CLASE_COLORS[r.feature.properties.tipo] || '#666';
+      r.setStyle({weight:1,opacity:0.7,fillOpacity:0.35,color:c,fillColor:c});
+    });
+  }
+
+  var results = [];
+  layer.eachLayer(function(fl) {
+    var p = fl.feature.properties;
+    if ((p.k && p.k.toLowerCase().indexOf(q) >= 0) ||
+        (p.dir && p.dir.toLowerCase().indexOf(q) >= 0) ||
+        (p.o && p.o.toLowerCase().indexOf(q) >= 0) ||
+        (p.mat && p.mat.toLowerCase().indexOf(q) >= 0)) {
+      results.push(fl);
+    }
+  });
+
+  var sr = document.getElementById('search-results');
+  if (results.length > 0) {
+    searchResults = results;
+    sr.textContent = results.length + ' resultado(s) encontrado(s)';
+    sr.style.display = 'block';
+    showPredioInfo(results[0].feature);
+    results.forEach(function(r) { r.setStyle({weight:3,opacity:0.9,fillOpacity:0.6,color:'#ffe100',fillColor:'#ffe100'}); });
+    if (results.length > 1 && results.length <= 30) {
+      var group = L.featureGroup(results);
+      map.fitBounds(group.getBounds(), {maxZoom:17,padding:[50,50]});
+    }
+  } else {
+    sr.textContent = 'Sin resultados';
+    sr.style.display = 'block';
+    searchResults = null;
+  }
+}
+
+function clearSearch() {
+  var sr = document.getElementById('search-results');
+  sr.style.display = 'none';
+  if (searchResults) {
+    searchResults.forEach(function(r) {
+      var c = CLASE_COLORS[r.feature.properties.tipo] || '#666';
+      r.setStyle({weight:1,opacity:0.7,fillOpacity:0.35,color:c,fillColor:c});
+    });
+    searchResults = null;
+  }
+}
+
+// ============================================
+// LAYER TOGGLE — COMPLETELY REWRITTEN FOR V6
+// Key fix: uses LAYER_STATE to track load status
+// and properly adds/removes layers from the map
+// ============================================
+function toggleLayer(name) {
+  var cb = document.getElementById('c_' + name);
+  var wantOn = cb ? cb.checked : true;
+  var item = cb ? cb.closest('.layer-item') : null;
+
+  // CASE 1: Layer already loaded — just toggle on/off
+  if (LAYER_STATE[name] === 'loaded' && LY[name]) {
+    if (wantOn) {
+      if (!map.hasLayer(LY[name])) {
+        LY[name].addTo(map);
+        console.log('Layer ON:', name);
+      }
+    } else {
+      if (map.hasLayer(LY[name])) {
+        map.removeLayer(LY[name]);
+        console.log('Layer OFF:', name);
+      }
+    }
+    return;
+  }
+
+  // CASE 2: Layer is currently loading — just wait
+  if (LAYER_STATE[name] === 'loading') {
+    console.log('Layer still loading:', name);
+    return;
+  }
+
+  // CASE 3: Layer failed before — try again
+  if (LAYER_STATE[name] === 'failed') {
+    if (!wantOn) return; // unchecking a failed layer, nothing to do
+    if (item) item.classList.remove('failed'); // remove failed styling
+    // Fall through to load
+  }
+
+  // CASE 4: Layer not loaded yet — load on demand
+  if (!wantOn) {
+    // User unchecked something that was never loaded — nothing to do
+    return;
+  }
+
+  LAYER_STATE[name] = 'loading';
+  if (item) item.classList.add('loading');
+  console.log('Loading on demand:', name);
+
+  loadSingleLayer(name, function(success) {
+    if (item) item.classList.remove('loading');
+
+    if (success) {
+      LAYER_STATE[name] = 'loaded';
+      // Check if user still wants it on (might have unchecked while loading)
+      var stillChecked = cb ? cb.checked : true;
+      if (stillChecked) {
+        LY[name].addTo(map);
+        console.log('Layer loaded & ON:', name);
+      } else {
+        console.log('Layer loaded but user unchecked:', name);
+      }
+    } else {
+      LAYER_STATE[name] = 'failed';
+      if (cb) cb.checked = false;
+      console.warn('Layer FAILED:', name);
+      // Show brief error tooltip
+      if (item) {
+        item.style.background = '#fff0f0';
+        setTimeout(function(){ item.style.background = ''; }, 2000);
+      }
+    }
+  });
+}
+
+function loadSingleLayer(name, callback) {
+  loadGeoJSON(name, function(data) {
+    if (!data) {
+      if (callback) callback(false);
+      return;
+    }
+    var isPoint = PT_LAYERS.indexOf(name) >= 0 ||
+      (data.features.length > 0 && data.features[0].geometry && data.features[0].geometry.type === 'Point');
+
+    var ly;
+    if (isPoint) {
+      ly = L.geoJSON(data, {
+        pointToLayer: function(f, ll) {
+          var p = f.properties || {};
+          var t = p.TIPO_EQUIPAMIENTO || p.TIPO || '';
+          var cl = '#e91e63';
+          if (t.indexOf('Educ') >= 0) cl = '#ff5722';
+          else if (t.indexOf('Salud') >= 0) cl = '#f44336';
+          else if (t.indexOf('Deport') >= 0 || t.indexOf('Recre') >= 0) cl = '#00bcd4';
+          else if (t.indexOf('Social') >= 0 || t.indexOf('Bienestar') >= 0) cl = '#9c27b0';
+          else if (name === 'bocatomas') cl = '#1565c0';
+          return L.circleMarker(ll, {radius:7,fillColor:cl,color:'#fff',weight:2,fillOpacity:.9});
+        },
+        onEachFeature: function(f, l) {
+          l.on('click', function() { showLayerInfo(name, f.properties); });
+          var lb = f.properties.Equipamiento || f.properties.DESCRIPCION || f.properties.Nombre || '';
+          if (lb) l.bindTooltip(lb.trim(), {direction:'top',offset:[0,-8]});
+        }
+      });
+    } else {
+      // limite_municipal: non-interactive, lowest z
+      // Perimeters (urbano, expansion, magola, rural): interactive but below predios
+      // limite_veredal: interactive with click info, below predios
+      var isNonInteractive = (name === 'limite_municipal');
+      var isBelowPredios = (name === 'perimetro_urbano' || name === 'perimetro_expansion' ||
+        name === 'perimetro_cp_magola' || name === 'perimetro_rural' || name === 'limite_veredal');
+
+      var opts = {
+        style: function(f) { return layerStyle(name, f); }
+      };
+
+      if (isNonInteractive) {
+        opts.interactive = false;
+        opts.pane = 'tilePane';
+      } else if (isBelowPredios) {
+        opts.pane = 'boundaryPane';
+        opts.onEachFeature = function(f, l) {
+          l.on('click', function() { showLayerInfo(name, f.properties); });
+        };
+      } else {
+        opts.onEachFeature = function(f, l) {
+          l.on('click', function() { showLayerInfo(name, f.properties); });
+          l.on('mouseover', function() { if (this.setStyle) this.setStyle({weight:3,fillOpacity:.55}); });
+          l.on('mouseout', function() { if (this.setStyle) this.setStyle(layerStyle(name, f)); });
+        };
+      }
+      ly = L.geoJSON(data, opts);
+    }
+
+    LY[name] = ly;
+    console.log('Parsed:', name, '(' + data.features.length + ' features)');
+    if (callback) callback(true);
+  });
+}
+
+// ============================================
+// BUILD LAYERS UI
+// ============================================
+function buildLayersUI() {
+  var tab = document.getElementById('tab-layers');
+  var groups = {};
+  for (var i = 0; i < GEOJSON_LAYERS.length; i++) {
+    var cfg = GEOJSON_LAYERS[i];
+    if (!groups[cfg.group]) groups[cfg.group] = [];
+    groups[cfg.group].push(cfg);
+  }
+
+  var html = '';
+  var gNames = Object.keys(groups);
+  for (var g = 0; g < gNames.length; g++) {
+    var gn = gNames[g];
+    var layers = groups[gn];
+    html += '<div class="layer-group"><div class="group-title" onclick="toggleGroup(this)"><i class="fas fa-chevron-right chev"></i><span>' + gn + ' <small style=\'color:#999\'>(' + layers.length + ')</small></span></div><div class="group-content">';
+    for (var j = 0; j < layers.length; j++) {
+      var ly = layers[j];
+      var s = layerStyle(ly.name, {properties:{}});
+      var color = s.color || s.fillColor || '#666';
+      var label = ly.name.replace(/_/g,' ').replace(/\b\w/g, function(c){return c.toUpperCase();});
+      html += '<div class="layer-item"><input type="checkbox" id="c_' + ly.name + '" onchange="toggleLayer(\'' + ly.name + '\')"' + (ly.visible?' checked':'') + '><label for="c_' + ly.name + '">' + label + '</label><div class="swatch" style="background:' + color + '"></div></div>';
+    }
+    html += '</div></div>';
+  }
+  tab.innerHTML = html;
+}
+
+function toggleGroup(el) {
+  var icon = el.querySelector('i.chev');
+  var content = el.nextElementSibling;
+  if (content.style.display === 'none' || content.style.display === '') {
+    content.style.display = 'block';
+    icon.classList.add('open');
+  } else {
+    content.style.display = 'none';
+    icon.classList.remove('open');
+  }
+}
+
+// ============================================
+// TABS
+// ============================================
+var tabBtns = document.querySelectorAll('.tab-btn');
+for (var t = 0; t < tabBtns.length; t++) {
+  tabBtns[t].addEventListener('click', function() {
+    var tab = this.getAttribute('data-tab');
+    var all = document.querySelectorAll('.tab-btn');
+    var tabs = document.querySelectorAll('.tab-content');
+    for (var i = 0; i < all.length; i++) all[i].classList.remove('active');
+    for (var i = 0; i < tabs.length; i++) tabs[i].style.display = 'none';
+    this.classList.add('active');
+    document.getElementById('tab-' + tab).style.display = 'block';
+  });
+}
+
+// ============================================
+// SIDEBAR
+// ============================================
+document.querySelector('.sb-toggle').addEventListener('click', function() {
+  document.getElementById('sidebar').classList.remove('closed');
+  this.classList.remove('show');
+});
+document.querySelector('.close-sb').addEventListener('click', function() {
+  document.getElementById('sidebar').classList.add('closed');
+  document.querySelector('.sb-toggle').classList.add('show');
+});
+
+// ============================================
+// INFO PANEL CLOSE
+// ============================================
+document.querySelector('.close-info').addEventListener('click', function() {
+  document.getElementById('info-panel').classList.remove('active');
+  if (highlightedLayer) { map.removeLayer(highlightedLayer); highlightedLayer = null; }
+  clearSearch();
+});
+
+// ============================================
+// LOADING HELPERS
+// ============================================
+function setStatus(msg) {
+  var el = document.getElementById('load-status');
+  if (el) el.textContent = msg;
+}
+
+function hideLoading() {
+  var el = document.getElementById('loading');
+  if (el) { el.style.opacity = '0'; el.style.transition = 'opacity 0.5s'; setTimeout(function(){el.style.display='none';}, 500); }
+}
+
+// ============================================
+// INIT
+// ============================================
+setStatus('Cargando catastro...');
+buildLayersUI();
+loadCatastroLayer();
+loadAllLayers();
+
+setTimeout(hideLoading, 8000);
+</script>
+</body>
+</html>

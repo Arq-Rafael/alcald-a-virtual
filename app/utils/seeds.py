@@ -57,6 +57,24 @@ def seed_metas():
                 "meta_cuatrenio": 10,
                 "meta_producto": "Mejoramiento de 10 sedes educativas rurales",
                 "avance_actual": 2
+            },
+            {
+                "linea_estrategica": "POR EL SUPATÁ SOÑADO AVANZAMOS JUNTOS EN LA LÍNEA ESTRATÉGICA INSTITUCIONAL",
+                "sector": "Desarrollo Comunitario",
+                "programa": "Infraestructura Comunitaria",
+                "unidad": "Adecuaciones",
+                "meta_cuatrenio": 3,
+                "meta_producto": "Realizar 3 adecuaciones a salones comunales",
+                "avance_actual": 0
+            },
+            {
+                "linea_estrategica": "POR EL SUPATÁ SOÑADO AVANZAMOS JUNTOS EN LA LÍNEA ESTRATÉGICA INSTITUCIONAL",
+                "sector": "Desarrollo Comunitario",
+                "programa": "Asesoría y Asistencia Comunitaria",
+                "unidad": "Oficina",
+                "meta_cuatrenio": 1,
+                "meta_producto": "Crear la oficina de asesoria y asistencia a organismos comunales",
+                "avance_actual": 0
             }
         ]
         

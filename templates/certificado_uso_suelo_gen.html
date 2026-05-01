@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Certificado de Uso del Suelo | Supatá</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--verde:#1a5c2e;--verde2:#3a7a20;--lima:#b8d400;--azul:#1a3a6a;--bg:#e2dfd6;--text:#1a1a1a;--muted:#666;--r:4px}
+body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+#app{display:flex;flex:1}
+
+/* ─── SIDEBAR ─── */
+#sidebar{width:370px;min-width:340px;background:#0e1e0e;color:#c8e0b8;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.sb-top{background:#091409;padding:10px 14px;border-bottom:3px solid #b8d400;display:flex;align-items:center;gap:10px}
+.sb-top-icon{font-size:20px;flex-shrink:0}
+.sb-top-info h1{font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#b8d400;margin-bottom:2px;font-family:'IBM Plex Sans',sans-serif}
+.sb-top-info p{font-size:8px;color:#3a5a3a}
+.sb-back{display:flex;align-items:center;gap:6px;color:#4a7a4a;font-size:8.5px;font-family:'IBM Plex Sans',sans-serif;text-decoration:none;padding:6px 14px;border-bottom:1px solid #162816;transition:.15s}
+.sb-back:hover{color:#b8d400;background:#101e10}
+.sb-body{flex:1;overflow-y:auto;padding:10px 12px}
+.sb-body::-webkit-scrollbar{width:4px}
+.sb-body::-webkit-scrollbar-thumb{background:#2a5020;border-radius:2px}
+
+.sec{margin-bottom:12px}
+.sec-t{font-size:7.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#b8d400;margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid #1a3a1a;font-family:'IBM Plex Sans',sans-serif}
+.row{display:flex;gap:5px;margin-bottom:4px}
+.f{flex:1;display:flex;flex-direction:column;gap:2px}
+.f label{font-size:8px;font-weight:700;color:#4a6a4a;letter-spacing:.04em;text-transform:uppercase;font-family:'IBM Plex Sans',sans-serif}
+.f input,.f select,.f textarea{background:#162816;border:1px solid #243824;color:#c8e0b8;padding:4px 7px;border-radius:var(--r);font-size:10.5px;font-family:'Lato',sans-serif;transition:.15s;width:100%}
+.f input:focus,.f select:focus,.f textarea:focus{outline:none;border-color:#b8d400;background:#1a301a}
+.f input::placeholder{color:#2e4a2e}
+.f textarea{resize:vertical;min-height:36px;line-height:1.4}
+.f select option{background:#162816}
+
+.btn{display:block;width:100%;padding:7px;border:none;border-radius:var(--r);font-family:'IBM Plex Sans',sans-serif;font-size:10.5px;font-weight:700;cursor:pointer;transition:.15s;margin-bottom:4px;letter-spacing:.02em}
+.btn-p{background:#2a5c14;color:#fff}.btn-p:hover{background:#1e4410}
+.btn-s{background:transparent;color:#b8d400;border:1px solid #243824}.btn-s:hover{background:rgba(184,212,0,.05)}
+
+.uso-it{background:#162816;border:1px solid #243824;border-radius:var(--r);padding:7px;margin-bottom:5px;position:relative}
+.uso-it:hover{border-color:#3a5a3a}
+.uso-it .rb{position:absolute;top:5px;right:5px;background:none;border:none;color:#8a3030;cursor:pointer;font-size:13px;line-height:1}
+.uso-it .rb:hover{color:#cc6060}
+.pct-bar{height:4px;border-radius:2px;background:#1a3a1a;margin-top:8px;overflow:hidden}
+.pct-bar-fill{height:100%;background:#b8d400;transition:.3s;border-radius:2px}
+.pct-bar-fill.over{background:#cc4444}
+.pct-total{font-size:8px;font-family:'IBM Plex Mono',monospace;color:#4a7a4a;text-align:right;margin-top:2px}
+.pct-total.over{color:#cc6060}
+.btn-a{display:block;background:transparent;border:1px dashed #243824;color:#3a5a3a;font-size:9.5px;padding:4px;cursor:pointer;border-radius:var(--r);width:100%;font-family:'IBM Plex Sans',sans-serif;margin-bottom:5px}
+.btn-a:hover{border-color:#b8d400;color:#b8d400}
+
+/* ─── PREVIEW ─── */
+#preview{flex:1;background:#aaa8a0;overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:20px 10px}
+#preview::-webkit-scrollbar{width:6px}
+#preview::-webkit-scrollbar-thumb{background:#888480;border-radius:3px}
+
+/* ─── DOCUMENT ─── */
+#doc-wrap{background:#fff;width:794px;box-shadow:0 4px 28px rgba(0,0,0,.3);font-family:'Lato',sans-serif;font-size:10pt}
+#doc-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.pg-hdr,.pg-ftr{padding:0;line-height:0}
+.pg-hdr .doc-header-band{background:linear-gradient(90deg,#1a5c2e,#3a7a20);padding:8px 18px;display:flex;align-items:center;gap:12px;border-bottom:3px solid #b8d400}
+.pg-hdr .doc-header-band img{height:48px;width:auto}
+.pg-hdr .doc-header-text{color:#fff}
+.pg-hdr .doc-header-text h2{font-size:10pt;font-weight:700;font-family:'IBM Plex Sans',sans-serif;letter-spacing:.03em;text-transform:uppercase}
+.pg-hdr .doc-header-text p{font-size:8pt;opacity:.85;margin-top:1px}
+.pg-ftr .doc-footer-band{background:#f0f7eb;border-top:1px solid #c0d8b0;padding:6px 18px;display:flex;justify-content:space-between;align-items:center}
+.pg-ftr .doc-footer-band span{font-size:8pt;color:#3a6a2a;font-family:'IBM Plex Sans',sans-serif}
+.pg-body{padding:10px 48px 14px 48px;vertical-align:top}
+
+/* ─── DOC Typography ─── */
+.cert-tit{font-size:12pt;font-weight:700;text-align:center;text-transform:uppercase;color:var(--verde);letter-spacing:.06em;margin-bottom:3px;font-family:'IBM Plex Sans',sans-serif}
+.cert-sub{font-size:9.5pt;font-weight:700;text-align:center;text-transform:uppercase;color:#444;letter-spacing:.04em;margin-bottom:10px;font-family:'IBM Plex Sans',sans-serif;border-bottom:2px solid var(--verde);padding-bottom:6px}
+.rad-row{width:100%;border-collapse:collapse;margin-bottom:10px}
+.rad-row td{border:1px solid #ccc;padding:5px 8px;font-size:9.5pt}
+.rad-row td:first-child{width:55%}
+.s-hdr{font-size:9.5pt;font-weight:700;font-family:'IBM Plex Sans',sans-serif;text-transform:uppercase;letter-spacing:.05em;color:#fff;background:var(--verde);padding:4px 8px;margin:12px 0 0 0}
+.s-hdr-sub{font-size:8.5pt;font-weight:700;font-family:'IBM Plex Sans',sans-serif;text-transform:uppercase;letter-spacing:.04em;color:var(--verde);border-bottom:1px solid var(--verde);padding-bottom:2px;margin:8px 0 4px 0}
+.dt-info{width:100%;border-collapse:collapse;font-size:9.5pt}
+.dt-info td{padding:4px 8px;border:1px solid #d5d5d5;line-height:1.4;vertical-align:top}
+.dt-info td:first-child{background:#f0f7eb;font-weight:700;width:42%;color:#1a4a1a}
+.dt-dist{width:100%;border-collapse:collapse;font-size:9.5pt;margin-top:4px}
+.dt-dist th{background:var(--verde);color:#fff;padding:5px 8px;text-align:left;font-size:8.5pt;font-weight:700}
+.dt-dist td{padding:5px 8px;border-bottom:1px solid #ddeedd;vertical-align:top}
+.dt-dist tr:nth-child(even) td{background:#f4faf4}
+.dt-dist td:nth-child(3){font-weight:700;color:var(--verde);text-align:center}
+.nota-tec{background:#fffbe8;border-left:3px solid #c8a010;padding:6px 10px;margin-top:6px;font-size:8.5pt;line-height:1.5}
+.nota-tec b{color:#8a6000}
+.norm-list{margin:4px 0 0 0;padding:0;list-style:none}
+.norm-list li{font-size:9pt;line-height:1.6;padding:3px 0 3px 12px;border-bottom:1px solid #f0f0f0;position:relative}
+.norm-list li::before{content:'▸';position:absolute;left:0;color:var(--verde);font-size:8pt;top:5px}
+.norm-list li b{color:var(--verde)}
+.vig-box{background:#f0f7ff;border-left:3px solid var(--azul);padding:7px 10px;font-size:9.5pt;line-height:1.6;margin-top:8px}
+.vig-box b{color:var(--azul)}
+.p{font-size:9.5pt;line-height:1.65;margin-bottom:7px;text-align:justify}
+.p b{font-weight:700}
+.doc-cierre{margin-top:18px;page-break-inside:avoid;break-inside:avoid}
+.firma-line{border-bottom:1px solid #333;height:34px;width:220px}
+.firma-nom{font-size:9.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.02em}
+.firma-car{font-size:8.5pt;color:var(--muted)}
+.doc-proy{margin-top:10px;padding-top:5px;border-top:1px dashed #ddd;font-size:8pt;color:var(--muted);line-height:1.6}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 40px;color:#bbb;text-align:center;font-size:12px}
+.empty-icon{font-size:48px;margin-bottom:12px;opacity:.4}
+
+/* ─── PRINT ─── */
+@page{size:Letter;margin:0}
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact}
+  html,body{background:#fff!important;margin:0!important;padding:0!important;width:100%!important}
+  #app{display:block!important;background:#fff!important;width:100%!important}
+  #sidebar{display:none!important}
+  #preview{display:block!important;background:none!important;padding:0!important;margin:0!important;overflow:visible!important;width:100%!important}
+  #doc-wrap{display:block!important;box-shadow:none!important;width:100%!important;margin:0!important}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ══ SIDEBAR ══════════════════════════════════════════════ -->
+<aside id="sidebar">
+  <div class="sb-top">
+    <div class="sb-top-icon">📋</div>
+    <div class="sb-top-info">
+      <h1>Certificado de Uso del Suelo — Supatá</h1>
+      <p>EOT · Acuerdo 014 de 2023 · Secretaría de Planeación y Obras Públicas</p>
+    </div>
+  </div>
+
+  <a href="/geoportal" class="sb-back">← Volver al Geoportal</a>
+
+  <div class="sb-body">
+
+    <div class="sec">
+      <div class="sec-t">Radicado y Fecha</div>
+      <div class="row">
+        <div class="f"><label>N° Radicado</label><input type="text" id="rad" placeholder="2026-PLN-001" oninput="rd()"></div>
+        <div class="f"><label>Fecha</label><input type="date" id="fch" oninput="rd()"></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-t">Solicitante / Propietario</div>
+      <div class="row">
+        <div class="f"><label>Tratamiento</label>
+          <select id="trat" onchange="rd()">
+            <option>Señor</option><option>Señora</option><option>Señores</option>
+            <option>Doctor</option><option>Doctora</option><option>Entidad</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="f"><label>Nombre completo / Razón social</label><input type="text" id="nom" placeholder="Nombre del solicitante" oninput="rd()"></div>
+      </div>
+      <div class="row">
+        <div class="f"><label>Cédula / NIT</label><input type="text" id="cc" placeholder="C.C. / NIT" oninput="rd()"></div>
+        <div class="f"><label>Personería (si aplica)</label><input type="text" id="nit2" placeholder="Personería Jurídica No." oninput="rd()"></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-t">Datos del Predio</div>
+      <div class="row">
+        <div class="f"><label>Nombre del predio</label><input type="text" id="npred" placeholder="Finca La Esperanza" oninput="rd()"></div>
+        <div class="f"><label>Vereda / Sector / Barrio</label><input type="text" id="vereda" placeholder="Vda. San Marcos" oninput="rd()"></div>
+      </div>
+      <div class="row">
+        <div class="f"><label>Registro Catastral (N° Predial)</label><input type="text" id="cat" placeholder="25-777-00-01-…" oninput="rd()"></div>
+      </div>
+      <div class="row">
+        <div class="f"><label>Folio de Matrícula Inmobiliaria</label><input type="text" id="mat" placeholder="170-XXXXX – Ofc. Registro Pacho" oninput="rd()"></div>
+      </div>
+      <div class="row">
+        <div class="f"><label>Área total</label><input type="text" id="area" placeholder="2,5 ha / 2.500 m²" oninput="rd()"></div>
+        <div class="f"><label>Municipio</label><input type="text" id="mpio" value="Supatá – Cundinamarca" oninput="rd()"></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-t">Coordenadas (opcional)</div>
+      <div class="row">
+        <div class="f"><label>Latitud N</label><input type="text" id="lat" placeholder="5°01'…" oninput="rd()"></div>
+        <div class="f"><label>Longitud W</label><input type="text" id="lng" placeholder="74°12'…" oninput="rd()"></div>
+        <div class="f"><label>Altitud (m.s.n.m.)</label><input type="text" id="alt" placeholder="1.800" oninput="rd()"></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-t">Clasificación del Suelo (EOT)</div>
+      <div class="f" style="margin-bottom:6px">
+        <label>Clasificación general</label>
+        <select id="clsf-gen" onchange="rd()">
+          <option value="urbano">Suelo Urbano</option>
+          <option value="expansion">Suelo de Expansión Urbana</option>
+          <option value="rural" selected>Suelo Rural</option>
+          <option value="suburbano">Suelo Suburbano</option>
+          <option value="proteccion">Suelo de Protección</option>
+        </select>
+      </div>
+
+      <!-- Usos dinámicos -->
+      <div id="usos-c"></div>
+      <div class="pct-bar"><div class="pct-bar-fill" id="pct-fill" style="width:0%"></div></div>
+      <div class="pct-total" id="pct-lbl">0% asignado</div>
+      <button class="btn-a" onclick="addUso()" style="margin-top:4px">+ Agregar categoría de uso</button>
+    </div>
+
+    <div class="sec">
+      <div class="sec-t">Normas aplicables</div>
+      <div class="f"><textarea id="normas" rows="3" placeholder="Ej: Art. 45 EOT Acuerdo 014/2023 – Usos permitidos en suelo rural productivo…" oninput="rd()"></textarea></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-t">Funcionario</div>
+      <div class="row">
+        <div class="f"><label>Nombre</label><input type="text" id="fn" value="AR. RAFAEL ANTONIO PERAFÁN MEDINA" oninput="rd()"></div>
+      </div>
+      <div class="row">
+        <div class="f"><label>Cargo</label><input type="text" id="fc" value="Secretario de Planeación y Obras Públicas" oninput="rd()"></div>
+      </div>
+      <div class="row">
+        <div class="f"><label>Proyectó</label><input type="text" id="fproy" value="Claudia B. Gómez – Auxiliar Administrativo" oninput="rd()"></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-t">Observaciones adicionales</div>
+      <div class="f"><textarea id="obs" rows="2" placeholder="Notas especiales para este certificado…" oninput="rd()"></textarea></div>
+    </div>
+
+    <button class="btn btn-p" onclick="window.print()">🖨 Imprimir / Guardar PDF</button>
+    <button class="btn btn-s" onclick="limpiar()">✕ Limpiar formulario</button>
+  </div>
+</aside>
+
+<!-- ══ PREVIEW ══════════════════════════════════════════════ -->
+<div id="preview">
+  <div id="doc-wrap">
+    <div class="empty">
+      <div class="empty-icon">📄</div>
+      <b>Complete el formulario</b><br>
+      <span>El certificado se generará automáticamente al ingresar los datos</span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<script>
+// ─── Usos dinámicos ───────────────────────────────────────
+let usos = [];
+
+// Categorías EOT Supatá – Acuerdo 014 de 2023
+const CATS = {
+  rondas: {
+    label: 'Suelo de Protección — Rondas Hídricas',
+    clsf: 'proteccion',
+    regimen: {
+      principal:    'Conservación y restauración ecológica de márgenes hídricas. Reforestación con especies nativas. Recuperación ambiental.',
+      compatible:   'Investigación científica y monitoreo ambiental. Senderos ecológicos sin infraestructura permanente.',
+      condicionado: 'Aprovechamientos forestales domésticos previa autorización ambiental (CAR). Obras de estabilización de taludes.',
+      prohibido:    'Vivienda permanente o temporal. Actividades agropecuarias intensivas. Rellenos sanitarios. Explotación minera. Cualquier obra civil que altere el cauce natural.'
+    },
+    norma_nac:  ['Decreto 2811/1974 – Código de Recursos Naturales (Art. 83)', 'Ley 99/1993 – Art. 111 protección de cuencas', 'Decreto 1076/2015 – Art. 2.2.1.1.18.1 rondas hídricas'],
+    norma_mpal: ['EOT Acuerdo 014/2023 – Art. 28, 30 y 31 (Suelo de Protección)', 'Plan de Gestión Ambiental Regional CAR Cundinamarca'],
+  },
+  forestal_prot: {
+    label: 'Suelo Rural — Forestal Protector',
+    clsf: 'proteccion',
+    regimen: {
+      principal:    'Protección, conservación y restauración de coberturas boscosas nativas. Aislamiento de nacimientos y quebradas.',
+      compatible:   'Silvicultura preventiva. Investigación y ecoturismo de bajo impacto con senderos no pavimentados. Apicultura.',
+      condicionado: 'Aprovechamiento de productos secundarios del bosque (no maderables) previa autorización CAR. Ganadería extensiva de muy baja carga en áreas degradadas.',
+      prohibido:    'Tala rasa. Quemas. Actividades agropecuarias intensivas. Loteos y urbanización. Minería a cielo abierto.'
+    },
+    norma_nac:  ['Decreto 2811/1974 – Art. 202 a 217 (áreas forestales)', 'Ley 99/1993 – Art. 63', 'Decreto 1076/2015 – Sección 5 flora y bosques'],
+    norma_mpal: ['EOT Acuerdo 014/2023 – Art. 32 a 38 (Área Forestal Protectora)'],
+  },
+  forestal_pp: {
+    label: 'Suelo Rural — Forestal Protector-Productor',
+    clsf: 'rural',
+    regimen: {
+      principal:    'Aprovechamiento forestal sostenible de plantaciones y bosques secundarios. Reforestación comercial con especies nativas o introducidas.',
+      compatible:   'Ganadería semi-extensiva de baja carga. Sistemas silvopastoriles y agroforestales. Turismo rural.',
+      condicionado: 'Proyectos agroindustriales forestales previa EIA. Infraestructura vial de acceso (menor escala).',
+      prohibido:    'Urbanización. Minería sin plan de manejo aprobado. Tala sin Plan de Aprovechamiento Forestal (CAR).'
+    },
+    norma_nac:  ['Decreto 1791/1996 – Régimen de aprovechamientos forestales', 'Resolución 1740/2016 MADS', 'Decreto 1076/2015'],
+    norma_mpal: ['EOT Acuerdo 014/2023 – Art. 39 a 44 (Área Forestal Protectora-Productora)'],
+  },
+  agropecuario: {
+    label: 'Suelo Rural — Agropecuario',
+    clsf: 'rural',
+    regimen: {
+      principal:    'Agricultura, ganadería extensiva y semi-intensiva. Producción de panela, café, papa, maíz. Horticultura y fruticultura.',
+      compatible:   'Agroindustria de pequeña escala. Vivienda campesina del productor. Vías veredales. Infraestructura de riego.',
+      condicionado: 'Parcelaciones de vivienda campestre. Establecimientos agropecuarios de gran escala previa EIA. Acuicultura.',
+      prohibido:    'Urbanizaciones. Industria contaminante. Minería sin licencia. Disposición final de residuos sólidos.'
+    },
+    norma_nac:  ['Ley 160/1994 – Reforma agraria y uso rural', 'Resolución 64/2018 UPRA – Determinantes rurales', 'Decreto 1077/2015 Art. 2.2.2.1.2.1'],
+    norma_mpal: ['EOT Acuerdo 014/2023 – Art. 45 a 55 (Suelo Rural Agropecuario)'],
+  },
+  viv_campestre: {
+    label: 'Suelo Rural — Vivienda Campestre',
+    clsf: 'rural',
+    regimen: {
+      principal:    'Vivienda campestre unifamiliar de baja densidad. Área mínima de lote: 1 ha. Índice de ocupación máximo: 30%.',
+      compatible:   'Agricultura orgánica de pequeña escala. Turismo rural y alojamiento. Huertas domésticas.',
+      condicionado: 'Subdivisión predial hasta área mínima autorizada. Servicios de hospedaje previa concepto Planeación.',
+      prohibido:    'Vivienda multifamiliar. Industria. Comercio de gran escala. Parcelaciones por debajo del área mínima.'
+    },
+    norma_nac:  ['Decreto 1077/2015 – Art. 2.2.2.3 (vivienda campestre)', 'Ley 388/1997 Art. 33', 'Circular 0006/2009 MVCT'],
+    norma_mpal: ['EOT Acuerdo 014/2023 – Art. 56 a 62 (Vivienda Campestre)'],
+  },
+  recreacion: {
+    label: 'Suelo Rural — Recreación y Turismo',
+    clsf: 'rural',
+    regimen: {
+      principal:    'Parques recreativos, ecoturismo, deportes al aire libre, senderismo, camping organizado.',
+      compatible:   'Alojamiento rural (máx. 20 habitaciones). Restaurantes típicos. Servicios complementarios.',
+      condicionado: 'Infraestructura de gran escala previa licencia ambiental CAR. Vías de acceso nuevas.',
+      prohibido:    'Vivienda permanente no asociada al uso. Industria. Actividades extractivas.'
+    },
+    norma_nac:  ['Ley 300/1996 – Ley de Turismo', 'Decreto 1076/2015 – Sección ecoturismo', 'Ley 99/1993'],
+    norma_mpal: ['EOT Acuerdo 014/2023 – Art. 63 a 68 (Suelo de Recreación y Turismo Rural)'],
+  },
+  snap_drmi: {
+    label: 'Suelo de Protección — SNAP / DRMI',
+    clsf: 'proteccion',
+    regimen: {
+      principal:    'Conservación estricta de ecosistemas estratégicos. Recuperación y restauración activa. Investigación científica.',
+      compatible:   'Ecoturismo de muy bajo impacto con guía autorizado. Monitoreo ambiental.',
+      condicionado: 'Aprovechamientos de subsistencia previa autorización Autoridad Ambiental (PNN o CAR).',
+      prohibido:    'Cualquier actividad agropecuaria, minera, constructiva o de loteo. Introducción de especies foráneas.'
+    },
+    norma_nac:  ['Decreto 2372/2010 – Sistema Nacional de Áreas Protegidas (SINAP)', 'Resolución MADS sobre DRMI Río Negro', 'Ley 99/1993 – Art. 107'],
+    norma_mpal: ['EOT Acuerdo 014/2023 – Art. 20 a 27 (Determinantes Ambientales Superiores)'],
+  },
+  semi_mecanizado: {
+    label: 'Suelo Rural — Semi-mecanizado',
+    clsf: 'rural',
+    regimen: {
+      principal:    'Agricultura semi-mecanizada: cereales, tubérculos, hortalizas. Implementación de maquinaria agrícola de mediana escala.',
+      compatible:   'Ganadería de doble propósito. Invernaderos. Sistemas de riego tecnificado.',
+      condicionado: 'Agroindustria de transformación primaria. Almacenamiento de insumos agrícolas.',
+      prohibido:    'Urbanización. Minería a cielo abierto. Actividades que generen contaminación hídrica.'
+    },
+    norma_nac:  ['Ley 101/1993 – Ley General Agropecuaria', 'Resolución 64/2018 UPRA', 'Decreto 1076/2015'],
+    norma_mpal: ['EOT Acuerdo 014/2023 – Art. 46, 50 a 53 (Área Semi-mecanizada)'],
+  },
+  suburbano_viv: {
+    label: 'Suelo Suburbano — Vivienda',
+    clsf: 'suburbano',
+    regimen: {
+      principal:    'Vivienda suburbana con servicios básicos. Densidad máxima: 4 viviendas/ha. Lote mínimo: 2.500 m².',
+      compatible:   'Comercio local de bajo impacto. Dotacional educativo y de salud de pequeña escala.',
+      condicionado: 'Servicios de alojamiento. Agroindustria compatible. Dotacionales de mediana escala.',
+      prohibido:    'Industria. Parcelaciones por debajo de lote mínimo. Urbanizaciones sin plan parcial aprobado.'
+    },
+    norma_nac:  ['Decreto 3600/2007 – Suelo suburbano (actualizado por Decreto 4066/2008)', 'Ley 388/1997 Art. 34', 'Decreto 1077/2015'],
+    norma_mpal: ['EOT Acuerdo 014/2023 – Art. 69 a 78 (Suelo Suburbano)'],
+  },
+  urb_consolid_equip: {
+    label: 'Suelo Urbano — Consolidado con Equipamiento',
+    clsf: 'urbano',
+    regimen: {
+      principal:    'Equipamiento colectivo: educación, salud, bienestar social, cultura, deporte, administración pública.',
+      compatible:   'Residencial plurifamiliar. Comercio vecinal. Servicios personales.',
+      condicionado: 'Comercio de mediana escala. Parqueaderos públicos. Dotacionales de nivel zonal.',
+      prohibido:    'Industria transformadora. Usos que generen impacto alto por ruido, tráfico o contaminación.'
+    },
+    norma_nac:  ['Ley 388/1997 – Planes de Ordenamiento', 'Decreto 1077/2015', 'Normas sismo-resistentes NSR-10'],
+    norma_mpal: ['EOT Acuerdo 014/2023 – Art. 79 a 88 (Tratamiento de Consolidación con Equipamiento)'],
+  },
+  consolid_residencial: {
+    label: 'Suelo Urbano — Consolidado Residencial',
+    clsf: 'urbano',
+    regimen: {
+      principal:    'Vivienda unifamiliar y bifamiliar. Densificación predial moderada. Conservación del tejido urbano existente.',
+      compatible:   'Comercio vecinal de bajo impacto (tiendas, misceláneas). Servicios personales en primer piso.',
+      condicionado: 'Multifamiliares de hasta 3 pisos. Talleres artesanales sin emisiones. Alojamiento temporal.',
+      prohibido:    'Industria. Comercio de alto impacto. Cantinas o establecimientos nocturnos. Parqueaderos masivos.'
+    },
+    norma_nac:  ['Ley 388/1997', 'Decreto 1077/2015', 'NSR-10 Título A y E'],
+    norma_mpal: ['EOT Acuerdo 014/2023 – Art. 89 a 97 (Consolidación Residencial)'],
+  },
+  consolid_comercial: {
+    label: 'Suelo Urbano — Consolidado Comercial',
+    clsf: 'urbano',
+    regimen: {
+      principal:    'Comercio de escala local y sectorial. Actividades mercantiles, supermercados, droguerías, ferreterías.',
+      compatible:   'Vivienda en pisos superiores. Servicios de oficinas. Bancos y entidades financieras.',
+      condicionado: 'Establecimientos de entretenimiento nocturno con plan de manejo de impactos. Parqueaderos.',
+      prohibido:    'Industria pesada. Usos de alto impacto ambiental o social no mitigables.'
+    },
+    norma_nac:  ['Ley 232/1995 – Establecimientos comerciales', 'Decreto 1977/1989', 'Ley 388/1997'],
+    norma_mpal: ['EOT Acuerdo 014/2023 – Art. 98 a 105 (Consolidación Comercial)'],
+  },
+  consolid_servicios: {
+    label: 'Suelo Urbano — Consolidado Servicios',
+    clsf: 'urbano',
+    regimen: {
+      principal:    'Prestación de servicios empresariales, profesionales y personales. Oficinas. Consultorios.',
+      compatible:   'Comercio complementario. Vivienda asociada al uso. Hotelería de pequeña escala.',
+      condicionado: 'Servicios de escala zonal previa concepto de Planeación. Dotacionales mixtos.',
+      prohibido:    'Industria. Comercio de alto impacto. Usos residenciales masivos sin compatible con servicios.'
+    },
+    norma_nac:  ['Ley 388/1997', 'Decreto 1077/2015 Título 2'],
+    norma_mpal: ['EOT Acuerdo 014/2023 – Art. 106 a 112 (Consolidación de Servicios)'],
+  },
+  mejora_residencial: {
+    label: 'Suelo Urbano — Mejoramiento Residencial',
+    clsf: 'urbano',
+    regimen: {
+      principal:    'Mejoramiento integral de vivienda existente. Legalización urbanística. Titulación predial.',
+      compatible:   'Comercio de subsistencia (panaderías, tiendas). Dotacional educativo de pequeña escala.',
+      condicionado: 'Nuevas construcciones previa disponibilidad de servicios públicos. Densificación moderada.',
+      prohibido:    'Industria. Comercio de alto impacto. Nuevas urbanizaciones sin plan de mejoramiento integral.'
+    },
+    norma_nac:  ['Ley 388/1997 Art. 39 – Tratamiento de Mejoramiento Integral', 'CONPES 3604/2009', 'Decreto 1077/2015'],
+    norma_mpal: ['EOT Acuerdo 014/2023 – Art. 113 a 120 (Mejoramiento Integral Residencial)'],
+  },
+  mejora_comercial: {
+    label: 'Suelo Urbano — Mejoramiento Comercial',
+    clsf: 'urbano',
+    regimen: {
+      principal:    'Formalización y mejoramiento de establecimientos comerciales. Adecuación de locales existentes.',
+      compatible:   'Servicios personales. Vivienda en segundo piso. Talleres artesanales limpios.',
+      condicionado: 'Nuevas construcciones comerciales con acreditación de servicios. Actividades nocturnas reguladas.',
+      prohibido:    'Industria pesada. Actividades de alto impacto sin plan de manejo aprobado.'
+    },
+    norma_nac:  ['Ley 232/1995', 'Ley 388/1997', 'Decreto 1504/1998 – Espacio público'],
+    norma_mpal: ['EOT Acuerdo 014/2023 – Art. 121 a 127 (Mejoramiento Comercial)'],
+  },
+  expansion: {
+    label: 'Suelo de Expansión Urbana',
+    clsf: 'expansion',
+    regimen: {
+      principal:    'Desarrollo urbanístico ordenado mediante Plan Parcial. Vivienda VIS, VIP y no VIS. Dotacional.',
+      compatible:   'Comercio vecinal planificado. Equipamientos comunitarios previstos en Plan Parcial.',
+      condicionado: 'Usos mixtos en zonas de borde. Proyectos especiales previa concertación con Planeación Municipal.',
+      prohibido:    'Actividades agropecuarias sobre suelos en proceso de urbanización. Urbanizaciones sin Plan Parcial aprobado. Industria contaminante.'
+    },
+    norma_nac:  ['Ley 388/1997 Art. 31, 36 – Suelo de expansión', 'Decreto 1077/2015 Sección 2.2.3', 'Decreto 075/2013'],
+    norma_mpal: ['EOT Acuerdo 014/2023 – Art. 128 a 138 (Suelo de Expansión Urbana)', 'Plan Parcial requerido antes de desarrollo'],
+  },
+  magola_proteccion: {
+    label: 'Sector La Magola — Protección',
+    clsf: 'proteccion',
+    regimen: {
+      principal:    'Conservación del ecosistema estratégico del sector La Magola. Protección de cuencas y biodiversidad.',
+      compatible:   'Investigación ambiental. Senderos ecológicos sin impacto.',
+      condicionado: 'Obras de mitigación de riesgo previa aprobación UNGRD y CAR.',
+      prohibido:    'Construcción de cualquier tipo. Tala. Actividades agropecuarias. Disposición de residuos.'
+    },
+    norma_nac:  ['Ley 99/1993', 'Decreto 1076/2015', 'Decreto 2372/2010'],
+    norma_mpal: ['EOT Acuerdo 014/2023 – Art. 139 a 143 (Sector La Magola – Tratamiento de Protección)'],
+  },
+  magola_mejoramiento: {
+    label: 'Sector La Magola — Mejoramiento Integral',
+    clsf: 'urbano',
+    regimen: {
+      principal:    'Mejoramiento integral de asentamiento existente en sector La Magola. Legalización y titulación.',
+      compatible:   'Comercio de subsistencia. Equipamiento comunitario de pequeña escala.',
+      condicionado: 'Nuevas construcciones bajo normas sismo-resistentes y previa verificación de riesgo.',
+      prohibido:    'Nuevas urbanizaciones. Densificación sin plan de mejoramiento. Actividades de alto impacto.'
+    },
+    norma_nac:  ['Ley 388/1997 Art. 39', 'CONPES 3604/2009', 'Decreto 1077/2015'],
+    norma_mpal: ['EOT Acuerdo 014/2023 – Art. 144 a 150 (Sector La Magola – Mejoramiento Integral)'],
+  },
+};
+
+// Lista plana de categorías para el select
+const USO_CATS = Object.entries(CATS).map(([k, v]) => ({ key: k, label: v.label }));
+
+function addUso(preKey) {
+  const id = Date.now();
+  usos.push({ id, key: preKey || '', pct: 0 });
+  renderUsos();
+}
+
+function removeUso(id) {
+  usos = usos.filter(u => u.id !== id);
+  renderUsos();
+  rd();
+}
+
+function renderUsos() {
+  const c = document.getElementById('usos-c');
+  c.innerHTML = '';
+  usos.forEach(u => {
+    const div = document.createElement('div');
+    div.className = 'uso-it';
+    div.innerHTML = `
+      <button class="rb" onclick="removeUso(${u.id})">✕</button>
+      <div class="row">
+        <div class="f">
+          <label>Categoría de uso (EOT)</label>
+          <select onchange="usos.find(x=>x.id===${u.id}).key=this.value;rd()">
+            <option value="">— Seleccionar —</option>
+            ${USO_CATS.map(c=>`<option value="${c.key}" ${u.key===c.key?'selected':''}>${c.label}</option>`).join('')}
+          </select>
+        </div>
+        <div class="f" style="max-width:72px">
+          <label>%</label>
+          <input type="number" min="0" max="100" value="${u.pct}"
+            onchange="usos.find(x=>x.id===${u.id}).pct=+this.value;updatePct();rd()">
+        </div>
+      </div>
+    `;
+    c.appendChild(div);
+  });
+  updatePct();
+}
+
+function updatePct() {
+  const total = usos.reduce((s, u) => s + (u.pct || 0), 0);
+  const fill  = document.getElementById('pct-fill');
+  const lbl   = document.getElementById('pct-lbl');
+  const w = Math.min(total, 100);
+  fill.style.width = w + '%';
+  fill.className = 'pct-bar-fill' + (total > 100 ? ' over' : '');
+  lbl.textContent = total + '% asignado' + (total > 100 ? ' ⚠ Excede 100%' : total === 100 ? ' ✓' : '');
+  lbl.className = 'pct-total' + (total > 100 ? ' over' : '');
+}
+
+// ─── Limpiar ──────────────────────────────────────────────
+// ─── Inicialización desde URL params (desde geoportal) ────
+(function initFromUrl() {
+  const p = new URLSearchParams(window.location.search);
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+
+  if (p.get('cc'))  set('cat', p.get('cc'));
+  if (p.get('mat')) set('mat', p.get('mat'));
+  if (p.get('dir')) set('npred', p.get('dir'));
+  if (p.get('ver')) set('vereda', p.get('ver'));
+  if (p.get('area')) {
+    const aVal = parseFloat(p.get('area'));
+    set('area', isNaN(aVal) ? p.get('area') : aVal.toFixed(4) + ' ha');
+  }
+
+  // Si hay uso del suelo, intentar mapear al CATS key
+  const usoParam = p.get('uso') || '';
+  if (usoParam) {
+    const usoNorm = usoParam.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    let bestKey = '';
+    for (const [key, cat] of Object.entries(CATS)) {
+      const catNorm = cat.label.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+      if (catNorm.includes(usoNorm.substring(0,8)) || usoNorm.includes(key.substring(0,5))) {
+        bestKey = key;
+        break;
+      }
+    }
+    if (bestKey) {
+      usos = [{ id: Date.now(), key: bestKey, pct: 100 }];
+      // Set clasificación general según CATS
+      const clsfEl = document.getElementById('clsf-gen');
+      if (clsfEl && CATS[bestKey]) clsfEl.value = CATS[bestKey].clsf || 'rural';
+      renderUsos();
+    }
+  }
+
+  // Auto-render si hay datos suficientes
+  const today = new Date().toISOString().split('T')[0];
+  const fechaEl = document.getElementById('fch');
+  if (fechaEl && !fechaEl.value) fechaEl.value = today;
+
+  if (p.get('cc') || p.get('mat') || p.get('dir')) {
+    // Lanzar render con pequeño delay para que el DOM se establezca
+    setTimeout(rd, 50);
+  }
+})();
+
+function limpiar() {
+  ['rad','nom','cc','nit2','npred','vereda','cat','mat','area','lat','lng','alt','normas','obs'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('fch').value = '';
+  document.getElementById('trat').selectedIndex = 0;
+  document.getElementById('clsf-gen').selectedIndex = 2;
+  document.getElementById('fn').value = 'AR. RAFAEL ANTONIO PERAFÁN MEDINA';
+  document.getElementById('fc').value = 'Secretario de Planeación y Obras Públicas';
+  document.getElementById('fproy').value = 'Claudia B. Gómez – Auxiliar Administrativo';
+  usos = [];
+  renderUsos();
+  document.getElementById('doc-wrap').innerHTML = `
+    <div class="empty">
+      <div class="empty-icon">📄</div>
+      <b>Complete el formulario</b><br>
+      <span>El certificado se generará automáticamente al ingresar los datos</span>
+    </div>`;
+}
+
+// ─── Render documento ─────────────────────────────────────
+function g(id) { return (document.getElementById(id)||{value:''}).value.trim(); }
+
+function fmtDate(s) {
+  if (!s) return '';
+  const [y,m,d] = s.split('-');
+  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  return `${parseInt(d)} de ${meses[parseInt(m)-1]} de ${y}`;
+}
+
+function clsfLabel(v) {
+  return { urbano:'Suelo Urbano', expansion:'Suelo de Expansión Urbana',
+           rural:'Suelo Rural', suburbano:'Suelo Suburbano', proteccion:'Suelo de Protección' }[v] || v;
+}
+
+function rd() {
+  const rad = g('rad'), nom = g('nom'), cc = g('cc');
+  // Mostrar documento vacío hasta que haya datos mínimos
+  if (!nom && !rad && !g('npred')) {
+    document.getElementById('doc-wrap').innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">📄</div>
+        <b>Complete el formulario</b><br>
+        <span>El certificado se generará automáticamente al ingresar los datos</span>
+      </div>`;
+    return;
+  }
+
+  const trat  = g('trat');
+  const nit2  = g('nit2');
+  const npred = g('npred');
+  const vereda= g('vereda');
+  const catP  = g('cat');
+  const mat   = g('mat');
+  const area  = g('area');
+  const mpio  = g('mpio') || 'Supatá – Cundinamarca';
+  const lat   = g('lat');
+  const lng   = g('lng');
+  const alt   = g('alt');
+  const clsf  = g('clsf-gen') || 'rural';
+  const normas= g('normas');
+  const fn    = g('fn');
+  const fc    = g('fc');
+  const fproy = g('fproy');
+  const obs   = g('obs');
+  const fch   = g('fch');
+  const fchFmt = fmtDate(fch) || '_____ de __________ de _____';
+  const today  = fmtDate(new Date().toISOString().split('T')[0]);
+
+  // ── Usos table rows (usa key → CATS)
+  const usosValidos = usos.filter(u => u.key && CATS[u.key]);
+  const usosRows = usosValidos.map(u => {
+    const cat = CATS[u.key];
+    return `<tr>
+      <td>${cat.label.split('—')[0].trim()}</td>
+      <td>${cat.label.split('—').slice(1).join('—').trim() || cat.label}</td>
+      <td>${u.pct}%</td>
+    </tr>`;
+  }).join('');
+
+  // ── Secciones de régimen por cada categoría seleccionada
+  const regimenSecciones = usosValidos.map((u, idx) => {
+    const cat = CATS[u.key];
+    const reg = cat.regimen || {};
+    const normNac  = (cat.norma_nac  || []).map(n=>`<li><b>${n.split('–')[0].trim()}</b>${n.includes('–')?(' – '+n.split('–').slice(1).join('–').trim()):''}.</li>`).join('');
+    const normMpal = (cat.norma_mpal || []).map(n=>`<li><b>${n.split('–')[0].trim()}</b>${n.includes('–')?(' – '+n.split('–').slice(1).join('–').trim()):''}.</li>`).join('');
+    return `
+      <div class="s-hdr-sub" style="margin-top:14px">${idx+1}. ${cat.label}</div>
+      <table class="dt-dist" style="margin-top:4px">
+        <tr><th style="width:160px">Régimen</th><th>Descripción</th></tr>
+        ${reg.principal    ? `<tr><td><b>Uso Principal</b></td><td>${reg.principal}</td></tr>` : ''}
+        ${reg.compatible   ? `<tr><td><b>Compatibles</b></td><td>${reg.compatible}</td></tr>` : ''}
+        ${reg.condicionado ? `<tr><td><b>Condicionados</b></td><td>${reg.condicionado}</td></tr>` : ''}
+        ${reg.prohibido    ? `<tr><td style="color:#cc3333"><b>Prohibidos</b></td><td style="color:#cc3333">${reg.prohibido}</td></tr>` : ''}
+      </table>
+      ${normNac || normMpal ? `
+      <div class="nota-tec" style="margin-top:4px">
+        <b>Normativa aplicable:</b>
+        <ul class="norm-list" style="margin-top:4px">
+          ${normNac}${normMpal}
+        </ul>
+      </div>` : ''}
+    `;
+  }).join('');
+
+  // ── Normas list (manual override o genérica)
+  const normasHtml = normas
+    ? normas.split('\n').filter(l=>l.trim()).map(l=>`<li>${l}</li>`).join('')
+    : '<li><b>EOT Acuerdo 014 de 2023</b> – Artículos aplicables según clasificación del suelo</li><li><b>Ley 388 de 1997</b> – Desarrollo Territorial</li><li><b>Decreto 1077 de 2015</b> – Compilatorio sector vivienda, ciudad y territorio</li>';
+
+  // ── Coord row
+  const coordRow = (lat || lng || alt) ? `
+    <tr><td>Coordenadas</td>
+    <td>${lat ? 'Lat: '+lat : ''} ${lng ? '  Lon: '+lng : ''} ${alt ? '  Alt: '+alt+' m.s.n.m.' : ''}</td></tr>` : '';
+
+  // ── Identidad NIT
+  const nitRow = nit2 ? `<tr><td>Personería Jurídica</td><td>${nit2}</td></tr>` : '';
+
+  // ── Observaciones
+  const obsBlock = obs ? `
+    <div class="nota-tec" style="margin-top:10px"><b>Observaciones: </b>${obs}</div>` : '';
+
+  document.getElementById('doc-wrap').innerHTML = `
+<table id="doc-table">
+  <thead>
+    <tr>
+      <th class="pg-hdr">
+        <div class="doc-header-band">
+          <img src="/static/imagenes/escudo.png" alt="Escudo Supatá" onerror="this.style.display='none'">
+          <div class="doc-header-text">
+            <h2>Alcaldía Municipal de Supatá</h2>
+            <p>Secretaría de Planeación y Obras Públicas · NIT 800.091.018-3</p>
+          </div>
+        </div>
+      </th>
+    </tr>
+  </thead>
+  <tfoot>
+    <tr>
+      <td class="pg-ftr">
+        <div class="doc-footer-band">
+          <span>Municipio de Supatá · Cundinamarca · Colombia</span>
+          <span>EOT Acuerdo 014/2023 · Tel. (1) 855-XXXX</span>
+        </div>
+      </td>
+    </tr>
+  </tfoot>
+  <tbody>
+    <tr>
+      <td class="pg-body">
+
+        <div class="cert-tit">Certificado de Uso del Suelo</div>
+        <div class="cert-sub">Secretaría de Planeación y Obras Públicas · Municipio de Supatá</div>
+
+        <!-- Radicado y fecha -->
+        <table class="rad-row">
+          <tr>
+            <td><b>Radicado N°:</b> ${rad || '__________________'}</td>
+            <td><b>Fecha:</b> ${fchFmt}</td>
+          </tr>
+        </table>
+
+        <!-- Saludo -->
+        <p class="p">
+          <b>${trat} ${nom || '__________________________'}:</b><br>
+          La Secretaría de Planeación y Obras Públicas del Municipio de Supatá,
+          en ejercicio de sus atribuciones legales y en cumplimiento de lo establecido
+          en el Esquema de Ordenamiento Territorial (EOT), adoptado mediante
+          <b>Acuerdo 014 del 2023</b>, expide el presente certificado de uso del suelo,
+          con fines informativos y urbanísticos.
+        </p>
+
+        <!-- I. DATOS DEL SOLICITANTE -->
+        <div class="s-hdr">I. Datos del Solicitante</div>
+        <table class="dt-info" style="margin-top:4px">
+          <tr><td>Nombre / Razón Social</td><td>${nom || '—'}</td></tr>
+          <tr><td>Identificación</td><td>${cc || '—'}</td></tr>
+          ${nitRow}
+        </table>
+
+        <!-- II. IDENTIFICACIÓN DEL PREDIO -->
+        <div class="s-hdr">II. Identificación del Predio</div>
+        <table class="dt-info" style="margin-top:4px">
+          ${npred ? `<tr><td>Nombre del predio</td><td>${npred}</td></tr>` : ''}
+          ${vereda ? `<tr><td>Vereda / Sector / Barrio</td><td>${vereda}</td></tr>` : ''}
+          <tr><td>Municipio</td><td>${mpio}</td></tr>
+          ${catP ? `<tr><td>Registro Catastral (N° Predial)</td><td>${catP}</td></tr>` : ''}
+          ${mat  ? `<tr><td>Folio de Matrícula Inmobiliaria</td><td>${mat}</td></tr>` : ''}
+          ${area ? `<tr><td>Área total del predio</td><td>${area}</td></tr>` : ''}
+          ${coordRow}
+        </table>
+
+        <!-- III. CLASIFICACIÓN DEL SUELO -->
+        <div class="s-hdr">III. Clasificación del Suelo (EOT)</div>
+        <table class="dt-info" style="margin-top:4px">
+          <tr>
+            <td>Clasificación general</td>
+            <td><b>${clsfLabel(clsf)}</b></td>
+          </tr>
+        </table>
+
+        ${usosRows ? `
+        <!-- IV. DISTRIBUCIÓN DE USOS -->
+        <div class="s-hdr">IV. Distribución de Categorías de Uso del Suelo</div>
+        <table class="dt-dist" style="margin-top:4px">
+          <tr>
+            <th>Clasificación</th>
+            <th>Categoría EOT</th>
+            <th>Porcentaje</th>
+          </tr>
+          ${usosRows}
+        </table>
+        <div class="nota-tec"><b>Nota técnica: </b>Los porcentajes indicados corresponden a la distribución del suelo
+        según el EOT vigente (Acuerdo 014/2023). El uso principal es prioritario; los usos condicionados requieren
+        concepto previo favorable de la Secretaría de Planeación y Obras Públicas.</div>
+
+        <!-- V. RÉGIMEN DE USOS POR CATEGORÍA -->
+        <div class="s-hdr" style="margin-top:10px">V. Régimen de Usos por Categoría</div>
+        ${regimenSecciones}
+        ` : ''}
+
+        <!-- VI. NORMAS APLICABLES -->
+        <div class="s-hdr">${usosRows ? 'VI' : 'IV'}. Marco Normativo Aplicable</div>
+        <ul class="norm-list" style="margin-top:4px">
+          ${normasHtml}
+        </ul>
+
+        <!-- VII. VIGENCIA -->
+        <div class="s-hdr">${usosRows ? 'VII' : 'V'}. Vigencia y Condiciones</div>
+        <div class="vig-box" style="margin-top:4px">
+          <p class="p" style="margin-bottom:0">
+            El presente certificado tiene una <b>vigencia de seis (6) meses</b> contados a partir
+            de su fecha de expedición. No constituye licencia de construcción, subdivisión o
+            parcelación, ni implica la aprobación de ningún proyecto. Es válido únicamente como
+            concepto de uso del suelo conforme al EOT vigente del Municipio de Supatá.<br><br>
+            <b>Se expide a los:</b> ${today}.
+          </p>
+        </div>
+
+        ${obsBlock}
+
+        <!-- CIERRE Y FIRMA -->
+        <div class="doc-cierre">
+          <p class="p" style="margin-top:14px">Cordialmente,</p>
+          <div style="margin-top:28px">
+            <div class="firma-line"></div>
+            <p class="firma-nom">${fn || 'Secretario/a de Planeación'}</p>
+            <p class="firma-car">${fc || 'Secretaría de Planeación y Obras Públicas'}</p>
+            <p class="firma-car">Municipio de Supatá — Cundinamarca</p>
+          </div>
+          ${fproy ? `<div class="doc-proy">Proyectó: ${fproy}</div>` : ''}
+        </div>
+
+      </td>
+    </tr>
+  </tbody>
+</table>`;
+}
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app, jsonify, send_from_directory
 from app import db
 from app.models.usuario import Usuario
 import os
@@ -68,13 +68,12 @@ def perfil():
                     return jsonify(success=False, error='Formato de imagen no permitido')
                 return redirect(url_for('perfil.perfil'))
             
-            upload_dir = os.path.join(str(current_app.config.get('BASE_DIR', os.getcwd())), 'uploads', 'perfiles')
-            os.makedirs(upload_dir, exist_ok=True)
+            upload_dir = _avatar_upload_dir()
             filename = secure_filename(f"{user.usuario}.{ext}")
             path = os.path.join(upload_dir, filename)
             file.save(path)
-            
-            user.foto_perfil = f"uploads/perfiles/{filename}"
+
+            user.foto_perfil = f"perfil/foto/{filename}"
             db.session.commit()
             # Respuesta según tipo de solicitud
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -132,15 +131,20 @@ def avatar_upload():
 
     # Eliminar foto anterior si era una subida personalizada
     old_foto = user.foto_perfil or ''
-    if old_foto.startswith('uploads/perfiles/'):
-        old_path = os.path.join(str(current_app.config.get('BASE_DIR', '')), old_foto)
+    old_name = None
+    if old_foto.startswith('perfil/foto/'):
+        old_name = old_foto.replace('perfil/foto/', '')
+    elif old_foto.startswith('uploads/perfiles/'):
+        old_name = old_foto.replace('uploads/perfiles/', '')
+    if old_name:
+        old_path = os.path.join(upload_dir, old_name)
         if os.path.exists(old_path):
             try:
                 os.remove(old_path)
             except OSError:
                 pass
 
-    user.foto_perfil = f"uploads/perfiles/{filename}"
+    user.foto_perfil = f"perfil/foto/{filename}"
     db.session.commit()
 
     return jsonify({
@@ -174,6 +178,12 @@ def avatar_select():
                     'avatar_collection': avatar_collection})
 
 
+@perfil_bp.route('/foto/<path:filename>')
+def servir_foto(filename):
+    """Sirve fotos de perfil subidas por los usuarios."""
+    return send_from_directory(_avatar_upload_dir(), filename)
+
+
 @perfil_bp.route('/update', methods=['POST'])
 def perfil_update():
     """Actualiza datos básicos del perfil: nombre visible y/o preferencias de tema."""
@@ -191,7 +201,7 @@ def perfil_update():
         user.nombre_completo = nombre
 
     prefs = user.get_preferencias()
-    for campo in ('tema', 'tamano_fuente', 'tipo_fuente', 'idioma'):
+    for campo in ('tema', 'tamano_fuente', 'tipo_fuente', 'idioma', 'color_acento'):
         if campo in data:
             prefs[campo] = data[campo]
     if 'notificaciones' in data:

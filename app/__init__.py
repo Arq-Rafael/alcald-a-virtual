@@ -57,6 +57,7 @@ def create_app(config_class=Config):
     from .routes.backup_api import backup_api
     from .routes.weather_api import weather_bp
     from .routes.correo_inteligente import correo_inteligente_bp
+    from .routes.licencias_bp import licencias_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
@@ -84,8 +85,8 @@ def create_app(config_class=Config):
     app.register_blueprint(backup_api)
     app.register_blueprint(weather_bp)
     app.register_blueprint(correo_inteligente_bp)
+    app.register_blueprint(licencias_bp)
 
-    
     # Context Processors (for templates)
     @app.context_processor
     def inject_utilities():

@@ -893,161 +893,190 @@
   <!-- Global notifications container -->
   <div id="notificationsContainer"></div>
 
-  <!-- iOS26 Floating Profile Panel — Paleta institucional azul -->
+  <!-- Panel de Personalización de Usuario -->
   {% if session.user %}
   <div id="profileQuickPanel" style="display:none; position:fixed; inset:0; z-index:1200;">
-    <div id="profileQuickBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,0.35); backdrop-filter:blur(10px);"></div>
-    <div id="profileQuickCard" style="position:absolute; width:440px; max-width:96vw; border-radius:24px; padding:0; z-index:1210; background:linear-gradient(160deg, rgba(255,255,255,0.97), rgba(240,247,255,0.95)); -webkit-backdrop-filter:blur(40px) saturate(200%); backdrop-filter:blur(40px) saturate(200%); border:1.5px solid rgba(21,101,192,0.18); box-shadow:0 20px 60px rgba(15,76,129,0.18), 0 6px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95); overflow:hidden;">
+    <div id="profileQuickBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,0.4); backdrop-filter:blur(8px);"></div>
+    <div id="profileQuickCard" style="position:absolute; width:420px; max-width:96vw; border-radius:20px; padding:0; z-index:1210; background:#fff; border:1px solid rgba(21,101,192,0.15); box-shadow:0 24px 64px rgba(15,76,129,0.22), 0 4px 16px rgba(0,0,0,0.1); overflow:hidden;">
 
       <!-- ── Cabecera ── -->
-      <div style="background:linear-gradient(130deg,#0f4c81 0%,#1565c0 55%,#0ea5e9 100%); padding:1.25rem 1.5rem; display:flex; align-items:center; justify-content:space-between;">
-        <div style="display:flex; align-items:center; gap:0.85rem;">
-          <div id="avatarPreviewMini" style="width:46px; height:46px; border-radius:50%; overflow:hidden; border:2.5px solid rgba(255,255,255,0.6); flex-shrink:0; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; color:white; font-size:1.3rem;">
+      <div style="background:linear-gradient(130deg,#0f4c81 0%,#1565c0 55%,#0ea5e9 100%); padding:1rem 1.25rem; display:flex; align-items:center; justify-content:space-between; gap:0.75rem;">
+        <div style="display:flex; align-items:center; gap:0.75rem;">
+          <div id="avatarPreviewMini" style="width:42px; height:42px; border-radius:50%; overflow:hidden; border:2px solid rgba(255,255,255,0.55); flex-shrink:0; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; color:white; font-size:1.2rem;">
             {% if current_user_foto %}<img src="/{{ current_user_foto }}" style="width:100%;height:100%;object-fit:cover;" alt="">
             {% else %}<i class="bi bi-person-fill"></i>{% endif %}
           </div>
           <div>
-            <div style="color:white; font-weight:700; font-size:1rem; line-height:1.2;">{{ current_user_nombre }}</div>
-            <div style="color:rgba(255,255,255,0.75); font-size:0.76rem;">{{ session.user_role|title if session.user_role else 'Funcionario' }}</div>
+            <div style="color:white; font-weight:700; font-size:0.95rem; line-height:1.25;">{{ current_user_nombre }}</div>
+            <div style="color:rgba(255,255,255,0.7); font-size:0.72rem;">{{ session.get('role','Funcionario')|title }}</div>
           </div>
         </div>
-        <button id="profileQuickClose" type="button" style="background:rgba(255,255,255,0.15); border:none; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; color:white; cursor:pointer; transition:background 0.2s;" title="Cerrar"><i class="bi bi-x-lg" style="font-size:0.95rem;"></i></button>
+        <button id="profileQuickClose" type="button" style="background:rgba(255,255,255,0.15); border:none; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; color:white; cursor:pointer; flex-shrink:0;" title="Cerrar"><i class="bi bi-x-lg" style="font-size:0.9rem;"></i></button>
+      </div>
+
+      <!-- ── Tabs de navegación ── -->
+      <div style="display:flex; border-bottom:1px solid #e5e7eb; background:#f9fafb;">
+        <button class="pqp-tab active" data-tab="avatar" style="flex:1; padding:0.65rem 0.5rem; background:none; border:none; border-bottom:2px solid #1565c0; font-size:0.78rem; font-weight:600; color:#1565c0; cursor:pointer;">
+          <i class="bi bi-person-circle"></i> Avatar
+        </button>
+        <button class="pqp-tab" data-tab="tema" style="flex:1; padding:0.65rem 0.5rem; background:none; border:none; border-bottom:2px solid transparent; font-size:0.78rem; font-weight:600; color:#6b7280; cursor:pointer;">
+          <i class="bi bi-palette"></i> Tema
+        </button>
+        <button class="pqp-tab" data-tab="cuenta" style="flex:1; padding:0.65rem 0.5rem; background:none; border:none; border-bottom:2px solid transparent; font-size:0.78rem; font-weight:600; color:#6b7280; cursor:pointer;">
+          <i class="bi bi-gear"></i> Cuenta
+        </button>
       </div>
 
       <!-- ── Cuerpo scrollable ── -->
-      <div style="padding:1.25rem 1.5rem 1.5rem; max-height:calc(100vh - 200px); overflow-y:auto;">
+      <div style="max-height:calc(100vh - 220px); overflow-y:auto;">
 
-        <!-- Avatar grande + estado -->
-        <div style="text-align:center; margin-bottom:1.25rem;">
-          <div style="display:inline-block; position:relative;">
-            <div id="avatarPreview" style="width:90px; height:90px; border-radius:50%; overflow:hidden; border:3px solid #1565c0; box-shadow:0 6px 20px rgba(15,76,129,0.25); margin:0 auto; background:linear-gradient(135deg,#0f4c81,#1565c0); display:flex; align-items:center; justify-content:center; color:white; font-size:2.2rem;">
-              {% if current_user_foto %}<img src="/{{ current_user_foto }}" style="width:100%;height:100%;object-fit:cover;" alt="Foto perfil">
-              {% else %}<i class="bi bi-person-fill"></i>{% endif %}
+        <!-- ═══ TAB AVATAR ═══ -->
+        <div class="pqp-pane" id="pane-avatar" style="padding:1.1rem 1.25rem 1.25rem;">
+
+          <!-- Avatar grande -->
+          <div style="text-align:center; margin-bottom:1rem;">
+            <div style="position:relative; display:inline-block;">
+              <div id="avatarPreview" style="width:84px; height:84px; border-radius:50%; overflow:hidden; border:3px solid #1565c0; box-shadow:0 4px 16px rgba(15,76,129,0.22); margin:0 auto; background:linear-gradient(135deg,#0f4c81,#1565c0); display:flex; align-items:center; justify-content:center; color:white; font-size:2rem;">
+                {% if current_user_foto %}<img src="/{{ current_user_foto }}" style="width:100%;height:100%;object-fit:cover;" alt="Foto perfil">
+                {% else %}<i class="bi bi-person-fill"></i>{% endif %}
+              </div>
+              <label for="fotoInputFast" style="position:absolute; bottom:0; right:0; width:24px; height:24px; background:#1565c0; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; border:2px solid #fff;" title="Cambiar foto">
+                <i class="bi bi-camera-fill" style="font-size:0.6rem; color:white;"></i>
+              </label>
+              <input type="file" id="fotoInputFast" accept="image/png,image/jpeg,image/webp" style="display:none;">
+            </div>
+            <div id="avatarStatus" style="margin-top:0.5rem; font-size:0.72rem; color:#6b7280; font-weight:500;">
+              {% if current_user_foto %}Foto guardada{% else %}Sin foto · elige un avatar{% endif %}
             </div>
           </div>
-          <div id="avatarStatus" style="margin-top:0.6rem; font-size:0.76rem; color:#6b7280; font-weight:500;">
-            {% if current_user_foto %}✅ Foto guardada{% else %}Sin foto — elige un avatar{% endif %}
+
+          <!-- Subir foto expandida -->
+          <div id="uploadExpandido" style="display:none; margin-bottom:1rem;">
+            <form id="formSubirFoto" enctype="multipart/form-data">
+              <div id="dropZone" style="border:2px dashed rgba(21,101,192,0.35); border-radius:10px; padding:0.75rem; text-align:center; cursor:pointer; background:rgba(21,101,192,0.03);" onclick="document.getElementById('fotoInput').click()">
+                <i class="bi bi-cloud-upload" style="font-size:1.3rem; color:#1565c0; display:block; margin-bottom:0.25rem;"></i>
+                <div style="font-size:0.78rem; color:#6b7280;">Haz clic o arrastra una imagen</div>
+                <div style="font-size:0.7rem; color:#9ca3af; margin-top:0.15rem;">JPG, PNG, WEBP · Máx 2 MB</div>
+              </div>
+              <input type="file" id="fotoInput" name="foto" accept="image/png,image/jpeg,image/webp" style="display:none;">
+              <div id="fotoNombre" style="display:none; margin-top:0.35rem; font-size:0.78rem; color:#374151;"></div>
+              <div id="fotoError" style="display:none; margin-top:0.35rem; font-size:0.78rem; color:#ef4444;"></div>
+              <button type="submit" id="btnSubirFoto" style="display:none; width:100%; margin-top:0.5rem; padding:0.5rem; background:linear-gradient(135deg,#1565c0,#0f4c81); color:white; border:none; border-radius:9px; cursor:pointer; font-size:0.84rem; font-weight:600;">
+                <i class="bi bi-upload"></i> Subir foto
+              </button>
+            </form>
           </div>
+          <button id="btnToggleUpload" style="width:100%; margin-bottom:1rem; padding:0.45rem; background:rgba(21,101,192,0.07); border:1px solid rgba(21,101,192,0.2); border-radius:9px; color:#1565c0; font-size:0.8rem; font-weight:600; cursor:pointer;">
+            <i class="bi bi-camera"></i> Subir foto personal
+          </button>
+
+          <!-- Avatares Predefinidos -->
+          <div style="font-size:0.78rem; color:#374151; font-weight:700; margin-bottom:0.5rem; letter-spacing:0.01em;">Avatares predefinidos</div>
+          <div id="avatarCollections" style="max-height:220px; overflow-y:auto; padding-right:0.2rem;"></div>
         </div>
 
-        <!-- Nombre visible -->
-        <div style="margin-bottom:1rem;">
-          <label style="display:block; font-size:0.8rem; color:#374151; font-weight:600; margin-bottom:0.4rem;">👤 Nombre visible</label>
-          <div style="display:flex; gap:0.5rem;">
-            <input type="text" id="inputNombreVisible" value="{{ current_user_nombre }}" placeholder="Tu nombre completo" style="flex:1; padding:0.5rem 0.75rem; border:1.5px solid rgba(15,76,129,0.2); border-radius:10px; font-size:0.875rem; outline:none; font-family:inherit; transition:border-color 0.2s;" onfocus="this.style.borderColor='#1565c0'" onblur="this.style.borderColor='rgba(15,76,129,0.2)'">
-            <button id="btnGuardarNombre" title="Guardar nombre" style="padding:0.5rem 0.9rem; background:linear-gradient(135deg,#1565c0,#0f4c81); color:white; border:none; border-radius:10px; cursor:pointer; font-size:0.85rem; transition:opacity 0.2s;"><i class="bi bi-check-lg"></i></button>
-          </div>
-        </div>
+        <!-- ═══ TAB TEMA ═══ -->
+        <div class="pqp-pane" id="pane-tema" style="display:none; padding:1.1rem 1.25rem 1.25rem;">
 
-        <!-- Subir foto -->
-        <div style="margin-bottom:1.25rem;">
-          <label style="display:block; font-size:0.8rem; color:#374151; font-weight:600; margin-bottom:0.5rem;">📸 Subir foto personal</label>
-          <form id="formSubirFoto" enctype="multipart/form-data">
-            <div id="dropZone" style="border:2px dashed rgba(21,101,192,0.3); border-radius:12px; padding:0.85rem; text-align:center; cursor:pointer; transition:all 0.2s; background:rgba(21,101,192,0.03);" onclick="document.getElementById('fotoInput').click()">
-              <i class="bi bi-cloud-upload" style="font-size:1.4rem; color:#1565c0; display:block; margin-bottom:0.3rem;"></i>
-              <div style="font-size:0.8rem; color:#6b7280;">Haz clic o arrastra una imagen aquí</div>
-              <div style="font-size:0.72rem; color:#9ca3af; margin-top:0.2rem;">JPG, PNG, WEBP · Máx 2 MB</div>
+          <!-- Modo oscuro -->
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem; background:#f8fafc; border-radius:10px; margin-bottom:0.75rem;">
+            <div>
+              <div style="font-size:0.84rem; font-weight:600; color:#1f2937;">🌙 Modo oscuro</div>
+              <div style="font-size:0.72rem; color:#6b7280; margin-top:0.15rem;">Cambia el fondo de la interfaz</div>
             </div>
-            <input type="file" id="fotoInput" name="foto" accept="image/png,image/jpeg,image/webp" style="display:none;">
-            <div id="fotoNombre" style="display:none; margin-top:0.4rem; font-size:0.8rem; color:#374151; padding:0 0.2rem;"></div>
-            <div id="fotoError" style="display:none; margin-top:0.4rem; font-size:0.8rem; color:#ef4444; padding:0 0.2rem;"></div>
-            <button type="submit" id="btnSubirFoto" style="display:none; width:100%; margin-top:0.6rem; padding:0.55rem; background:linear-gradient(135deg,#1565c0,#0f4c81); color:white; border:none; border-radius:10px; cursor:pointer; font-size:0.875rem; font-weight:600; transition:opacity 0.2s;">
-              <i class="bi bi-upload"></i> Subir foto
-            </button>
-          </form>
-        </div>
-
-        <!-- Avatares Predefinidos -->
-        <div style="margin-bottom:1.25rem;">
-          <div style="font-size:0.8rem; color:#374151; font-weight:600; margin-bottom:0.6rem;">🎨 Avatares alternativos</div>
-          <div id="avatarCollections" style="max-height:240px; overflow-y:auto; padding-right:0.4rem;"></div>
-        </div>
-
-        <!-- Preferencias -->
-        <div style="padding-top:1rem; border-top:1px solid rgba(15,76,129,0.1);">
-          <div style="font-size:0.8rem; color:#374151; font-weight:600; margin-bottom:0.75rem;">⚙️ Preferencias visuales</div>
-          <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="toggleTema" {% if user_preferences and user_preferences.tema=='dark' %}checked{% endif %}>
-            <label class="form-check-label" for="toggleTema" style="font-size:0.875rem; color:#374151;">🌙 Modo oscuro</label>
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="toggleTema" style="width:2.4rem; height:1.25rem; cursor:pointer;" {% if user_preferences and user_preferences.tema=='dark' %}checked{% endif %}>
+            </div>
           </div>
+
+          <!-- Tamaño de texto -->
+          <div style="padding:0.75rem; background:#f8fafc; border-radius:10px; margin-bottom:0.75rem;">
+            <div style="font-size:0.84rem; font-weight:600; color:#1f2937; margin-bottom:0.6rem;">🔤 Tamaño de texto</div>
+            <div style="display:flex; gap:0.4rem;">
+              {% for sz, lbl in [('small','Peq'), ('medium','Med'), ('large','Gde'), ('extra-large','XL')] %}
+              <button class="pqp-size-btn {% if user_preferences and user_preferences.get('tamano_fuente','medium')==sz %}active{% endif %}"
+                data-size="{{ sz }}"
+                style="flex:1; padding:0.4rem 0; background:{% if user_preferences and user_preferences.get('tamano_fuente','medium')==sz %}#1565c0{% else %}#fff{% endif %}; color:{% if user_preferences and user_preferences.get('tamano_fuente','medium')==sz %}#fff{% else %}#374151{% endif %}; border:1.5px solid {% if user_preferences and user_preferences.get('tamano_fuente','medium')==sz %}#1565c0{% else %}#e5e7eb{% endif %}; border-radius:8px; font-size:0.78rem; font-weight:600; cursor:pointer; transition:all 0.15s;">{{ lbl }}</button>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Color de acento -->
+          <div style="padding:0.75rem; background:#f8fafc; border-radius:10px; margin-bottom:0.75rem;">
+            <div style="font-size:0.84rem; font-weight:600; color:#1f2937; margin-bottom:0.6rem;">🎨 Color de acento</div>
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+              {% set acento_actual = user_preferences.get('color_acento','azul') if user_preferences else 'azul' %}
+              {% for cid, cval, clbl in [('azul','#1565c0','Azul'),('verde','#1a5c2e','Verde'),('rojo','#b3322a','Rojo'),('morado','#6d28d9','Morado'),('naranja','#d97706','Naranja'),('gris','#374151','Gris')] %}
+              <button class="pqp-color-btn" data-color="{{ cid }}"
+                title="{{ clbl }}"
+                style="width:28px; height:28px; border-radius:50%; background:{{ cval }}; border:3px solid {% if acento_actual==cid %}#0f172a{% else %}transparent{% endif %}; cursor:pointer; transition:all 0.15s; box-shadow:0 2px 6px rgba(0,0,0,0.15);"></button>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Nombre visible -->
+          <div style="padding:0.75rem; background:#f8fafc; border-radius:10px;">
+            <div style="font-size:0.84rem; font-weight:600; color:#1f2937; margin-bottom:0.5rem;">👤 Nombre visible</div>
+            <div style="display:flex; gap:0.4rem;">
+              <input type="text" id="inputNombreVisible" value="{{ current_user_nombre }}" placeholder="Tu nombre completo"
+                style="flex:1; padding:0.45rem 0.7rem; border:1.5px solid #e5e7eb; border-radius:8px; font-size:0.84rem; outline:none; font-family:inherit;"
+                onfocus="this.style.borderColor='#1565c0'" onblur="this.style.borderColor='#e5e7eb'">
+              <button id="btnGuardarNombre" title="Guardar" style="padding:0.45rem 0.8rem; background:#1565c0; color:white; border:none; border-radius:8px; cursor:pointer; font-size:0.84rem;">
+                <i class="bi bi-check-lg"></i>
+              </button>
+            </div>
+          </div>
+
         </div>
 
-        <button type="button" id="btnIrPerfil" style="width:100%; margin-top:1rem; padding:0.6rem; background:transparent; border:1.5px solid rgba(15,76,129,0.25); border-radius:12px; color:#0f4c81; font-size:0.875rem; font-weight:600; cursor:pointer; transition:all 0.2s;">
-          <i class="bi bi-gear"></i> Ir a Perfil Completo
-        </button>
+        <!-- ═══ TAB CUENTA ═══ -->
+        <div class="pqp-pane" id="pane-cuenta" style="display:none; padding:1.1rem 1.25rem 1.25rem;">
+
+          <div style="background:#f8fafc; border-radius:10px; padding:0.75rem; margin-bottom:0.75rem;">
+            <div style="font-size:0.72rem; color:#6b7280; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:0.5rem;">Información</div>
+            <div style="display:flex; flex-direction:column; gap:0.35rem;">
+              <div style="display:flex; justify-content:space-between; font-size:0.82rem;">
+                <span style="color:#6b7280;">Usuario</span>
+                <span style="font-weight:600; color:#0f172a;">{{ session.get('user','') }}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:0.82rem;">
+                <span style="color:#6b7280;">Rol</span>
+                <span style="font-weight:600; color:#0f172a;">{{ session.get('role','Funcionario')|title }}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:0.82rem;">
+                <span style="color:#6b7280;">Dependencia</span>
+                <span style="font-weight:600; color:#0f172a;">{{ session.get('secretaria','—') }}</span>
+              </div>
+            </div>
+          </div>
+
+          <a href="{{ url_for('perfil.perfil') }}" style="display:flex; align-items:center; gap:0.6rem; width:100%; padding:0.65rem 0.9rem; background:#f0f7ff; border:1.5px solid rgba(21,101,192,0.2); border-radius:10px; color:#0f4c81; font-size:0.84rem; font-weight:600; text-decoration:none; margin-bottom:0.5rem;">
+            <i class="bi bi-person-gear"></i> Perfil completo y configuración
+          </a>
+          <a href="{{ url_for('auth.logout') }}" style="display:flex; align-items:center; gap:0.6rem; width:100%; padding:0.65rem 0.9rem; background:#fff5f5; border:1.5px solid rgba(239,68,68,0.2); border-radius:10px; color:#dc2626; font-size:0.84rem; font-weight:600; text-decoration:none;">
+            <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+          </a>
+
+        </div>
 
       </div><!-- /body -->
     </div><!-- /card -->
   </div><!-- /panel -->
 
   <style>
-    /* ── Avatar Gallery ── */
-    .avatar-gallery {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0.6rem;
-      margin: 0.5rem 0;
-    }
-    .avatar-item {
-      cursor: pointer;
-      border-radius: 10px;
-      padding: 0.45rem;
-      background: #fff;
-      border: 2px solid #e5e7eb;
-      transition: all 0.22s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 60px;
-      overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    }
-    .avatar-item:hover {
-      border-color: #1565c0;
-      transform: scale(1.06);
-      box-shadow: 0 4px 12px rgba(15,76,129,0.2);
-    }
-    .avatar-item.selected {
-      border-color: #1565c0;
-      background: linear-gradient(135deg, rgba(21,101,192,0.08), rgba(14,165,233,0.06));
-      box-shadow: 0 0 0 3px rgba(21,101,192,0.15), 0 4px 10px rgba(15,76,129,0.18);
-    }
+    .pqp-tab { transition: color 0.15s, border-color 0.15s; }
+    .pqp-tab:hover { color: #1565c0 !important; }
+    .avatar-gallery { display:grid; grid-template-columns:repeat(4,1fr); gap:0.5rem; margin:0.4rem 0; }
+    .avatar-item { cursor:pointer; border-radius:9px; padding:0.4rem; background:#fff; border:2px solid #e5e7eb; transition:all 0.18s; display:flex; align-items:center; justify-content:center; min-height:54px; overflow:hidden; }
+    .avatar-item:hover { border-color:#1565c0; transform:scale(1.06); box-shadow:0 4px 10px rgba(15,76,129,0.18); }
+    .avatar-item.selected { border-color:#1565c0; background:linear-gradient(135deg,rgba(21,101,192,0.08),rgba(14,165,233,0.05)); box-shadow:0 0 0 2px rgba(21,101,192,0.2); }
     .avatar-item img, .avatar-item svg { width:100%; height:100%; object-fit:contain; }
-    /* ── Ripple default avatar ── */
-    .avatar-wave {
-      background: linear-gradient(135deg, #0f4c81, #1565c0);
-      color: #fff;
-      border-radius: 50%;
-      position: relative;
-      overflow: visible;
-    }
-    .avatar-wave::before, .avatar-wave::after {
-      content: '';
-      position: absolute;
-      left: 50%; top: 50%;
-      width: 100%; height: 100%;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      border: 2px solid rgba(21, 101, 192, 0.5);
-      animation: ripple 2.8s ease-out infinite;
-    }
-    .avatar-wave::after {
-      border-color: rgba(14, 165, 233, 0.3);
-      animation-delay: 1.2s;
-    }
-    @keyframes ripple {
-      0%   { opacity: 0.7; transform: translate(-50%,-50%) scale(1);   }
-      70%  { opacity: 0.15; transform: translate(-50%,-50%) scale(1.8); }
-      100% { opacity: 0;   transform: translate(-50%,-50%) scale(2.1); }
-    }
-    /* ── Drop zone drag-over ── */
-    #dropZone.dragover {
-      border-color: #1565c0;
-      background: rgba(21,101,192,0.06);
-    }
-    /* ── Avatar collections scrollbar ── */
-    #avatarCollections::-webkit-scrollbar { width: 4px; }
-    #avatarCollections::-webkit-scrollbar-thumb { background: rgba(15,76,129,0.2); border-radius: 2px; }
+    #dropZone.dragover { border-color:#1565c0; background:rgba(21,101,192,0.06); }
+    #avatarCollections::-webkit-scrollbar { width:3px; }
+    #avatarCollections::-webkit-scrollbar-thumb { background:rgba(15,76,129,0.18); border-radius:2px; }
+    .pqp-size-btn.active { background:#1565c0 !important; color:#fff !important; border-color:#1565c0 !important; }
+    .pqp-color-btn:hover { transform:scale(1.2); }
+    .pqp-color-btn.selected { border-color:#0f172a !important; }
   </style>
   {% endif %}
 
@@ -1069,7 +1098,7 @@
   </script>
   <!-- ripple CSS already declared in profileQuickPanel block -->
 
-  <!-- Quick Profile Panel Logic — versión corregida -->
+  <!-- Panel de Personalización — JavaScript -->
   {% if session.user %}
   <script>
   (function(){
@@ -1106,10 +1135,47 @@
     closeBtn  && closeBtn.addEventListener('click', closePanel);
     backdrop  && backdrop.addEventListener('click', closePanel);
 
-    /* ── Ir a perfil ── */
-    const btnIrPerfil = document.getElementById('btnIrPerfil');
-    btnIrPerfil && btnIrPerfil.addEventListener('click', () => {
-      window.location.href = '{{ url_for("perfil.perfil") }}';
+    /* ── Tabs ── */
+    document.querySelectorAll('.pqp-tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.pqp-tab').forEach(t => {
+          t.style.borderBottomColor = 'transparent';
+          t.style.color = '#6b7280';
+        });
+        document.querySelectorAll('.pqp-pane').forEach(p => p.style.display = 'none');
+        this.style.borderBottomColor = '#1565c0';
+        this.style.color = '#1565c0';
+        const pane = document.getElementById('pane-' + this.dataset.tab);
+        if (pane) pane.style.display = 'block';
+      });
+    });
+
+    /* ── Toggle expandir subida ── */
+    const btnToggleUpload = document.getElementById('btnToggleUpload');
+    const uploadExpandido = document.getElementById('uploadExpandido');
+    btnToggleUpload && btnToggleUpload.addEventListener('click', () => {
+      const visible = uploadExpandido.style.display !== 'none';
+      uploadExpandido.style.display = visible ? 'none' : 'block';
+      btnToggleUpload.style.background = visible ? 'rgba(21,101,192,0.07)' : 'rgba(21,101,192,0.14)';
+    });
+
+    /* ── Foto rápida (botón cámara sobre el avatar) ── */
+    const fotoInputFast = document.getElementById('fotoInputFast');
+    fotoInputFast && fotoInputFast.addEventListener('change', async function() {
+      const file = this.files[0];
+      if (!file) return;
+      const fd = new FormData();
+      fd.append('foto', file);
+      try {
+        const res  = await fetch('/perfil/avatar/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success && data.url) {
+          const src = data.url + '?t=' + Date.now();
+          _setPreviewImg(src); _setMiniImg(src); _setThumb(src);
+          document.getElementById('avatarStatus').textContent = 'Foto guardada';
+          window.showNotification && window.showNotification('Foto actualizada', 'Tu foto de perfil fue guardada.', 'success');
+        }
+      } catch(e) { console.error('upload fast:', e); }
     });
 
     /* ── Helpers: actualizar preview + thumbnail ── */
@@ -1138,16 +1204,15 @@
         thumb.src = src;
       } else {
         const img = document.createElement('img');
-        img.id = 'avatarThumb';
-        img.src = src; img.alt = 'Foto';
+        img.id = 'avatarThumb'; img.src = src; img.alt = 'Foto';
         img.className = 'av-user-avatar';
         thumb.parentNode.replaceChild(img, thumb);
       }
     }
 
-    /* ── Drag & drop en la zona de subida ── */
-    const dropZone  = document.getElementById('dropZone');
-    const fotoInput = document.getElementById('fotoInput');
+    /* ── Drag & drop zona de subida ── */
+    const dropZone     = document.getElementById('dropZone');
+    const fotoInput    = document.getElementById('fotoInput');
     const fotoNombreEl = document.getElementById('fotoNombre');
     const fotoErrorEl  = document.getElementById('fotoError');
     const btnSubir     = document.getElementById('btnSubirFoto');
@@ -1155,22 +1220,19 @@
     function _validarArchivo(file) {
       fotoNombreEl.style.display = 'none';
       fotoErrorEl.style.display  = 'none';
-      btnSubir.style.display     = 'none';
+      if (btnSubir) btnSubir.style.display = 'none';
       if (!file) return false;
       const ext = file.name.split('.').pop().toLowerCase();
       if (!['jpg','jpeg','png','webp'].includes(ext)) {
-        fotoErrorEl.textContent = 'Formato no permitido. Usa JPG, PNG o WEBP.';
-        fotoErrorEl.style.display = 'block';
+        if (fotoErrorEl) { fotoErrorEl.textContent = 'Formato no permitido. Usa JPG, PNG o WEBP.'; fotoErrorEl.style.display = 'block'; }
         return false;
       }
       if (file.size > 2 * 1024 * 1024) {
-        fotoErrorEl.textContent = 'El archivo supera 2 MB.';
-        fotoErrorEl.style.display = 'block';
+        if (fotoErrorEl) { fotoErrorEl.textContent = 'El archivo supera 2 MB.'; fotoErrorEl.style.display = 'block'; }
         return false;
       }
-      fotoNombreEl.textContent = '📎 ' + file.name + ' (' + (file.size / 1024).toFixed(0) + ' KB)';
-      fotoNombreEl.style.display = 'block';
-      btnSubir.style.display = 'block';
+      if (fotoNombreEl) { fotoNombreEl.textContent = '📎 ' + file.name + ' (' + (file.size / 1024).toFixed(0) + ' KB)'; fotoNombreEl.style.display = 'block'; }
+      if (btnSubir) btnSubir.style.display = 'block';
       return true;
     }
 
@@ -1185,7 +1247,7 @@
     }
     fotoInput && fotoInput.addEventListener('change', () => _validarArchivo(fotoInput.files[0]));
 
-    /* ── Subir foto — FIX: usa /perfil/avatar/upload (endpoint dedicado) ── */
+    /* ── Subir foto (formulario expandido) ── */
     const formFoto = document.getElementById('formSubirFoto');
     if (formFoto) {
       formFoto.addEventListener('submit', async function(e) {
@@ -1201,19 +1263,17 @@
           if (data.success && data.url) {
             const src = data.url + '?t=' + Date.now();
             _setPreviewImg(src); _setMiniImg(src); _setThumb(src);
-            const statusEl = document.getElementById('avatarStatus');
-            if (statusEl) statusEl.textContent = '✅ Foto guardada';
-            fotoNombreEl.style.display = 'none';
-            btnSubir.style.display     = 'none';
+            document.getElementById('avatarStatus').textContent = 'Foto guardada';
+            if (fotoNombreEl) fotoNombreEl.style.display = 'none';
+            btnSubir.style.display = 'none';
             fotoInput.value = '';
+            uploadExpandido && (uploadExpandido.style.display = 'none');
             window.showNotification && window.showNotification('Foto actualizada', 'Tu foto de perfil fue guardada.', 'success');
           } else {
-            fotoErrorEl.textContent = data.error || 'Error al subir la foto.';
-            fotoErrorEl.style.display = 'block';
+            if (fotoErrorEl) { fotoErrorEl.textContent = data.error || 'Error al subir la foto.'; fotoErrorEl.style.display = 'block'; }
           }
         } catch(err) {
-          fotoErrorEl.textContent = 'Error de conexión. Intenta de nuevo.';
-          fotoErrorEl.style.display = 'block';
+          if (fotoErrorEl) { fotoErrorEl.textContent = 'Error de conexión. Intenta de nuevo.'; fotoErrorEl.style.display = 'block'; }
         } finally {
           btnSubir.disabled = false;
           btnSubir.innerHTML = '<i class="bi bi-upload"></i> Subir foto';
@@ -1228,25 +1288,21 @@
       if (!nombre.trim()) return;
       try {
         const res  = await fetch('/perfil/update', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ nombre_completo: nombre.trim() }),
         });
         const data = await res.json();
-        if (data.success) {
-          window.showNotification && window.showNotification('Nombre guardado', 'Tu nombre fue actualizado.', 'success');
-        }
+        if (data.success) window.showNotification && window.showNotification('Nombre guardado', 'Tu nombre fue actualizado.', 'success');
       } catch(err) { console.error('Error guardando nombre', err); }
     });
 
-    /* ── Toggle de tema oscuro — usa /perfil/update ── */
+    /* ── Toggle de tema oscuro ── */
     const toggleTema = document.getElementById('toggleTema');
     toggleTema && toggleTema.addEventListener('change', async function() {
       const tema = this.checked ? 'dark' : 'light';
       try {
         await fetch('/perfil/update', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ tema }),
         });
         const cssRes = await fetch('{{ url_for("api_prefs.get_preferences_css") }}', { cache: 'no-store' });
@@ -1256,14 +1312,57 @@
           if (!tag) { tag = document.createElement('style'); tag.id = 'dynamicPrefs'; document.head.appendChild(tag); }
           tag.textContent = css;
         }
-        window.showNotification && window.showNotification(
-          'Tema ' + (tema === 'dark' ? 'oscuro' : 'claro'),
-          'Preferencia guardada y aplicada.', 'success'
-        );
+        window.showNotification && window.showNotification('Tema ' + (tema === 'dark' ? 'oscuro' : 'claro'), 'Preferencia guardada.', 'success');
       } catch(err) { console.error('Error tema', err); }
     });
 
-    /* ── Colecciones de avatares — usa /perfil/avatar/select ── */
+    /* ── Tamaño de texto ── */
+    document.querySelectorAll('.pqp-size-btn').forEach(btn => {
+      btn.addEventListener('click', async function() {
+        document.querySelectorAll('.pqp-size-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        const sz = this.dataset.size;
+        try {
+          await fetch('/perfil/update', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tamano_fuente: sz }),
+          });
+          const cssRes = await fetch('{{ url_for("api_prefs.get_preferences_css") }}', { cache: 'no-store' });
+          if (cssRes.ok) {
+            const css = await cssRes.text();
+            let tag = document.getElementById('dynamicPrefs');
+            if (!tag) { tag = document.createElement('style'); tag.id = 'dynamicPrefs'; document.head.appendChild(tag); }
+            tag.textContent = css;
+          }
+        } catch(e) { console.error('size:', e); }
+      });
+    });
+
+    /* ── Color de acento ── */
+    const colorMap = { azul:'#1565c0', verde:'#1a5c2e', rojo:'#b3322a', morado:'#6d28d9', naranja:'#d97706', gris:'#374151' };
+    document.querySelectorAll('.pqp-color-btn').forEach(btn => {
+      btn.addEventListener('click', async function() {
+        document.querySelectorAll('.pqp-color-btn').forEach(b => b.style.borderColor = 'transparent');
+        this.style.borderColor = '#0f172a';
+        const color = this.dataset.color;
+        try {
+          await fetch('/perfil/update', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ color_acento: color }),
+          });
+          const cssRes = await fetch('{{ url_for("api_prefs.get_preferences_css") }}', { cache: 'no-store' });
+          if (cssRes.ok) {
+            const css = await cssRes.text();
+            let tag = document.getElementById('dynamicPrefs');
+            if (!tag) { tag = document.createElement('style'); tag.id = 'dynamicPrefs'; document.head.appendChild(tag); }
+            tag.textContent = css;
+          }
+          window.showNotification && window.showNotification('Color actualizado', 'El acento de color fue guardado.', 'success');
+        } catch(e) { console.error('color:', e); }
+      });
+    });
+
+    /* ── Colecciones de avatares ── */
     let selStyle = '{{ user_preferences.get("avatar_style", "siluetas") if user_preferences else "siluetas" }}';
     let selColl  = '{{ user_preferences.get("avatar_collection", "") if user_preferences else "" }}';
 
@@ -1274,40 +1373,32 @@
         const container = document.getElementById('avatarCollections');
         if (!container) return;
         container.innerHTML = '';
-
         for (const [key, col] of Object.entries(cols)) {
           const label = document.createElement('div');
-          label.style.cssText = 'font-size:0.76rem;font-weight:600;color:#0f4c81;margin:0.6rem 0 0.4rem;';
+          label.style.cssText = 'font-size:0.72rem;font-weight:700;color:#0f4c81;margin:0.5rem 0 0.35rem;letter-spacing:0.02em;';
           label.textContent = col.name;
           container.appendChild(label);
-
           const gallery = document.createElement('div');
           gallery.className = 'avatar-gallery';
-
           col.avatars.forEach(av => {
             const item = document.createElement('div');
-            item.className = 'avatar-item';
-            if (selColl === av.id) item.classList.add('selected');
+            item.className = 'avatar-item' + (selColl === av.id ? ' selected' : '');
             const img = document.createElement('img');
             img.src = `{{ url_for("avatares.avatar_dinamico", usuario=session.user) }}?style=${key}&collection=${av.id}`;
             img.alt = av.id;
             item.appendChild(img);
-
             item.addEventListener('click', async () => {
               container.querySelectorAll('.avatar-item').forEach(x => x.classList.remove('selected'));
               item.classList.add('selected');
               selStyle = key; selColl = av.id;
-              const src = img.src;
-              _setPreviewImg(src); _setMiniImg(src); _setThumb(src);
-              const statusEl = document.getElementById('avatarStatus');
-              if (statusEl) statusEl.textContent = '✅ Avatar guardado';
+              _setPreviewImg(img.src); _setMiniImg(img.src); _setThumb(img.src);
+              document.getElementById('avatarStatus').textContent = 'Avatar guardado';
               try {
                 await fetch('/perfil/avatar/select', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
+                  method: 'POST', headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ avatar_style: key, avatar_key: av.id }),
                 });
-              } catch(err) { console.error('Error seleccionando avatar', err); }
+              } catch(err) { console.error('Error avatar select', err); }
             });
             gallery.appendChild(item);
           });

@@ -243,6 +243,18 @@ def _get_fallback_plan():
             "sector": "Educación",
             "meta de producto": "Mejoramiento de 10 sedes educativas rurales",
             "codigo bpim": "2024-005"
+        },
+        {
+            "eje": "POR EL SUPATÁ SOÑADO AVANZAMOS JUNTOS EN LA LÍNEA ESTRATÉGICA INSTITUCIONAL",
+            "sector": "DESARROLLO COMUNITARIO",
+            "meta de producto": "Realizar 3 adecuaciones a salones comunales",
+            "codigo bpim": "2024257770032"
+        },
+        {
+            "eje": "POR EL SUPATÁ SOÑADO AVANZAMOS JUNTOS EN LA LÍNEA ESTRATÉGICA INSTITUCIONAL",
+            "sector": "DESARROLLO COMUNITARIO",
+            "meta de producto": "Crear la oficina de asesoria y asistencia a organismos comunales",
+            "codigo bpim": "2024257770032"
         }
     ]
 

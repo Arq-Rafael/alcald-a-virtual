@@ -49,19 +49,70 @@
     justify-content: flex-end;
   }
 
-  .lp-left-bg {
+  /* ── Slideshow ── */
+  .lp-slideshow {
     position: absolute;
     inset: 0;
-    background-image: url("{{ url_for('static', filename='rana dorada de supata.JPG') }}");
-    background-size: cover;
-    background-position: center 40%;
     z-index: 0;
-    transition: transform 8s ease;
   }
 
-  /* Sin overlay para mostrar la imagen completa */
+  .lp-slide {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 1.8s ease;
+    will-change: opacity;
+  }
+
+  .lp-slide.active {
+    opacity: 1;
+  }
+
+  /* Overlay sutil para dar legibilidad al texto */
+  .lp-left::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.18) 0%,
+      rgba(0,0,0,0.05) 50%,
+      rgba(0,0,0,0.55) 100%
+    );
+    z-index: 1;
+    pointer-events: none;
+  }
+
   .lp-left::before {
     display: none !important;
+  }
+
+  /* ── Dots indicadores ── */
+  .lp-dots {
+    position: absolute;
+    bottom: 7rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .lp-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.35);
+    cursor: pointer;
+    transition: all 0.4s ease;
+  }
+
+  .lp-dot.active {
+    background: #fff;
+    width: 22px;
   }
 
   .lp-left-content {
@@ -118,56 +169,25 @@
   }
 
   .lp-hero-text {
-    padding: 0 3rem 3rem;
+    padding: 0 2.5rem 2.8rem;
     position: relative;
-    z-index: 2;
+    z-index: 3;
   }
 
-  .lp-hero-text h2 {
-    font-size: clamp(1.8rem, 3vw, 2.6rem);
-    font-weight: 800;
-    color: #fff;
-    line-height: 1.2;
-    letter-spacing: -0.5px;
-    margin-bottom: 0.75rem;
+  .lp-joya-title {
+    font-size: clamp(1.4rem, 2.5vw, 2rem);
+    font-weight: 300;
+    color: rgba(255,255,255,0.92);
+    letter-spacing: 0.5px;
+    line-height: 1.3;
+    text-shadow: 0 2px 16px rgba(0,0,0,0.4);
   }
 
-  .lp-hero-text h2 em {
+  .lp-joya-title em {
     font-style: normal;
-    color: #7dd3fc; /* sky-300 */
-  }
-
-  .lp-hero-text p {
-    font-size: 0.95rem;
-    color: rgba(255,255,255,0.65);
-    max-width: 380px;
-    line-height: 1.7;
-    margin: 0 0 1.5rem;
-  }
-
-  .lp-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .lp-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.18);
-    color: rgba(255,255,255,0.85);
-    font-size: 0.75rem;
-    font-weight: 500;
-    padding: 0.35rem 0.75rem;
-    border-radius: 999px;
-    backdrop-filter: blur(8px);
-  }
-
-  .lp-badge i {
-    font-size: 0.8rem;
-    color: #7dd3fc;
+    font-weight: 700;
+    color: #86efac;
+    text-shadow: 0 0 20px rgba(134,239,172,0.35);
   }
 
   /* =====================================================
@@ -588,7 +608,40 @@
 
   <!-- ===== PANEL IZQUIERDO ===== -->
   <div class="lp-left">
-    <div class="lp-left-bg" id="lpBg"></div>
+
+    <!-- Slideshow de imágenes municipales -->
+    <div class="lp-slideshow" id="lpSlideshow">
+      {% set slides = [
+        'img_municipio/IMG_1198.jpg',
+        'img_municipio/IMG_1223.jpg',
+        'img_municipio/IMG_1230.jpg',
+        'img_municipio/IMG_1345.jpg',
+        'img_municipio/IMG_3568.jpg',
+        'img_municipio/IMG_3592.jpg',
+        'img_municipio/IMG_3615.jpg',
+        'img_municipio/IMG_3662.jpg',
+        'img_municipio/IMG_3730.jpg',
+        'img_municipio/IMG_3731_1.jpg',
+        'img_municipio/IMG_3731_2.jpg',
+        'img_municipio/IMG_3759.jpg',
+        'img_municipio/IMG_3771_3.jpg',
+        'img_municipio/IMG_3800.jpg',
+        'img_municipio/TAS1866_50_1.jpg',
+        'img_municipio/TAS1869_18.jpg'
+      ] %}
+      {% for img in slides %}
+      <div class="lp-slide{% if loop.first %} active{% endif %}"
+           style="background-image:url('{{ url_for('static', filename=img) }}')">
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Dots indicadores -->
+    <div class="lp-dots" id="lpDots">
+      {% for img in slides %}
+      <div class="lp-dot{% if loop.first %} active{% endif %}" onclick="goSlide({{ loop.index0 }})"></div>
+      {% endfor %}
+    </div>
 
     <!-- Brand top-left -->
     <div class="lp-brand">
@@ -600,14 +653,9 @@
       </div>
     </div>
 
-    <!-- Hero text bottom-left -->
+    <!-- Etiqueta Joya ecológica -->
     <div class="lp-hero-text">
-      <h2>Municipio conectado<br>con su <em>comunidad</em></h2>
-      <p>
-        Accede a los servicios institucionales de Supatá de forma rápida,
-        segura y desde cualquier lugar.
-      </p>
-      <!-- Badges removed as per homepage design requirements -->
+      <span class="lp-joya-title">Joya ecológica del <em>Gualivá</em></span>
     </div>
   </div>
 
@@ -723,15 +771,36 @@
     });
   }
 
-  // Efecto parallax suave en la imagen de fondo
-  const lpBg = document.getElementById('lpBg');
-  if (lpBg) {
-    document.addEventListener('mousemove', (e) => {
-      const x = (e.clientX / window.innerWidth  - 0.5) * 6;
-      const y = (e.clientY / window.innerHeight - 0.5) * 6;
-      lpBg.style.transform = `translate(${x}px, ${y}px) scale(1.04)`;
-    });
-  }
+  // Slideshow automático de imágenes municipales
+  (function () {
+    var slides = document.querySelectorAll('.lp-slide');
+    var dots   = document.querySelectorAll('.lp-dot');
+    if (!slides.length) return;
+
+    var current = 0;
+    var total   = slides.length;
+    var timer   = null;
+
+    function show(n) {
+      slides[current].classList.remove('active');
+      if (dots[current]) dots[current].classList.remove('active');
+      current = (n + total) % total;
+      slides[current].classList.add('active');
+      if (dots[current]) dots[current].classList.add('active');
+    }
+
+    function next() { show(current + 1); }
+
+    function startTimer() {
+      clearInterval(timer);
+      timer = setInterval(next, 5500);
+    }
+
+    // Exponer para los dots
+    window.goSlide = function (n) { show(n); startTimer(); };
+
+    startTimer();
+  })();
 </script>
 
 <style>

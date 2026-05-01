@@ -1,0 +1,350 @@
+{% extends "base.html" %}
+{% block title %}Tala de Árboles — Gestión del Riesgo{% endblock %}
+
+{% block styles %}
+<style>
+.tala-surface {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 28px 24px 60px;
+}
+.tala-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 24px;
+}
+.tala-breadcrumb a { color: #0f4c81; text-decoration: none; }
+.tala-breadcrumb a:hover { text-decoration: underline; }
+.tala-header {
+  margin-bottom: 32px;
+}
+.tala-header h1 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 6px;
+}
+.tala-header p {
+  font-size: 14px;
+  color: #475569;
+  margin: 0;
+}
+
+/* Flujo de pasos */
+.tala-flow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 36px;
+}
+.tala-step-num {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1a5c2e, #2e8b57);
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tala-flow-label {
+  font-size: 12px;
+  color: #475569;
+  font-weight: 600;
+  margin: 0 12px;
+}
+.tala-flow-arrow {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, #b8d400, #1a5c2e);
+  position: relative;
+  max-width: 80px;
+}
+.tala-flow-arrow::after {
+  content: '›';
+  position: absolute;
+  right: -8px;
+  top: -10px;
+  font-size: 20px;
+  color: #1a5c2e;
+  font-weight: 700;
+}
+
+/* Cards de fases */
+.tala-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+@media (max-width: 640px) { .tala-cards { grid-template-columns: 1fr; } }
+
+.tala-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  transition: box-shadow .2s, transform .2s;
+}
+.tala-card:hover {
+  box-shadow: 0 6px 28px rgba(0,0,0,.12);
+  transform: translateY(-2px);
+}
+.tala-card-header {
+  padding: 20px 20px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.tala-card-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.tala-card-phase {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.tala-card-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px;
+}
+.tala-card-desc {
+  font-size: 12.5px;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0;
+}
+.tala-card-body {
+  padding: 0 20px 20px;
+}
+.tala-card-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 18px;
+}
+.tala-card-features li {
+  font-size: 12px;
+  color: #475569;
+  padding: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tala-card-features li::before {
+  content: '✓';
+  font-weight: 700;
+  font-size: 11px;
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.tala-btn {
+  display: block;
+  width: 100%;
+  padding: 11px 16px;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all .15s;
+  letter-spacing: .02em;
+}
+
+/* Fase 1 — verde */
+.tala-card.fase1 .tala-card-icon { background: linear-gradient(135deg, #1a5c2e, #2e8b57); }
+.tala-card.fase1 .tala-card-phase { color: #1a5c2e; }
+.tala-card.fase1 .tala-card-features li::before { color: #1a5c2e; }
+.tala-btn.fase1-btn { background: linear-gradient(135deg, #1a5c2e, #2e8b57); color: #fff; }
+.tala-btn.fase1-btn:hover { background: linear-gradient(135deg, #134820, #1a5c2e); color: #fff; }
+
+/* Fase 2 — azul */
+.tala-card.fase2 .tala-card-icon { background: linear-gradient(135deg, #1a3a6a, #1565c0); }
+.tala-card.fase2 .tala-card-phase { color: #1a3a6a; }
+.tala-card.fase2 .tala-card-features li::before { color: #1565c0; }
+.tala-btn.fase2-btn { background: linear-gradient(135deg, #1a3a6a, #1565c0); color: #fff; }
+.tala-btn.fase2-btn:hover { background: linear-gradient(135deg, #112848, #1a3a6a); color: #fff; }
+
+/* Nota de integración */
+.tala-integration-note {
+  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.tala-integration-note .note-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.tala-integration-note h4 { font-size: 13px; font-weight: 700; color: #064e3b; margin: 0 0 4px; }
+.tala-integration-note p { font-size: 12px; color: #065f46; margin: 0; line-height: 1.6; }
+
+.tala-ls-status {
+  margin-top: 24px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 12px;
+  color: #475569;
+  display: none;
+}
+.tala-ls-status.visible { display: flex; align-items: center; gap: 10px; }
+.tala-ls-status .ls-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="tala-surface">
+
+  <!-- Breadcrumb -->
+  <div class="tala-breadcrumb">
+    <i class="bi bi-house-fill"></i>
+    <a href="{{ url_for('main.dashboard') }}">Inicio</a>
+    <span>›</span>
+    <a href="{{ url_for('main.gestion_riesgo') }}">Gestión del Riesgo</a>
+    <span>›</span>
+    <span>Tala de Árboles</span>
+  </div>
+
+  <!-- Header -->
+  <div class="tala-header">
+    <h1>🌳 Tala de Árboles</h1>
+    <p>Gestión completa de solicitudes de intervención arbórea: informe de visita técnica y aprobación del Comité CMGRD.</p>
+  </div>
+
+  <!-- Flujo visual -->
+  <div class="tala-flow">
+    <div class="tala-step-num">1</div>
+    <span class="tala-flow-label">Visita Técnica</span>
+    <div class="tala-flow-arrow"></div>
+    <span class="tala-flow-label">Exportar datos</span>
+    <div class="tala-flow-arrow"></div>
+    <div class="tala-step-num">2</div>
+    <span class="tala-flow-label">Aprobación Comité</span>
+  </div>
+
+  <!-- Cards de fases -->
+  <div class="tala-cards">
+
+    <!-- Fase 1: Visita Técnica -->
+    <div class="tala-card fase1">
+      <div class="tala-card-header">
+        <div class="tala-card-icon">🔍</div>
+        <div>
+          <div class="tala-card-phase">Fase 1</div>
+          <div class="tala-card-title">Visita Técnica</div>
+          <p class="tala-card-desc">Informe oficial de visita arbórea con evaluación de riesgo, mapa y recomendaciones.</p>
+        </div>
+      </div>
+      <div class="tala-card-body">
+        <ul class="tala-card-features">
+          <li>Búsqueda catastral del predio</li>
+          <li>Mapa interactivo con marcador del árbol</li>
+          <li>Evaluación de nivel de riesgo</li>
+          <li>Galería fotográfica de campo</li>
+          <li>Generación del informe en PDF</li>
+          <li>Exportación de datos para el Comité</li>
+        </ul>
+        <a href="{{ url_for('main.riesgo_tala_visita') }}" class="tala-btn fase1-btn">
+          <i class="bi bi-clipboard2-check"></i> &nbsp;Abrir Visita Técnica
+        </a>
+      </div>
+    </div>
+
+    <!-- Fase 2: Aprobación Comité -->
+    <div class="tala-card fase2">
+      <div class="tala-card-header">
+        <div class="tala-card-icon">⚖️</div>
+        <div>
+          <div class="tala-card-phase">Fase 2</div>
+          <div class="tala-card-title">Aprobación Comité</div>
+          <p class="tala-card-desc">Acta oficial del CMGRD con votación de los 8 miembros y compensación ambiental.</p>
+        </div>
+      </div>
+      <div class="tala-card-body">
+        <ul class="tala-card-features">
+          <li>Carga automática desde Fase 1</li>
+          <li>Votación de los 8 miembros del CMGRD</li>
+          <li>Decisión: Aprobado / Rechazado / Condicionado</li>
+          <li>Cálculo de compensación (CAR 317/2019)</li>
+          <li>Acta oficial en PDF con firmas</li>
+          <li>Registro en el sistema</li>
+        </ul>
+        <a href="{{ url_for('main.riesgo_tala_aprobacion') }}" class="tala-btn fase2-btn">
+          <i class="bi bi-check2-square"></i> &nbsp;Abrir Aprobación Comité
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Nota de integración -->
+  <div class="tala-integration-note">
+    <div class="note-icon">🔗</div>
+    <div>
+      <h4>Integración automática entre fases</h4>
+      <p>
+        Al completar la <strong>Visita Técnica</strong>, haga clic en <em>"Exportar para Comité"</em>.
+        Los datos se guardarán automáticamente y estarán disponibles cuando abra la <strong>Aprobación del Comité</strong>,
+        sin necesidad de cargar archivos manualmente.
+      </p>
+    </div>
+  </div>
+
+  <!-- Estado del localStorage -->
+  <div class="tala-ls-status" id="ls-status">
+    <div class="ls-dot"></div>
+    <span id="ls-status-txt"></span>
+    <button onclick="borrarDatosVisita()" style="margin-left:auto;background:none;border:1px solid #cbd5e1;border-radius:6px;padding:3px 10px;font-size:11px;color:#64748b;cursor:pointer;">
+      Borrar datos
+    </button>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var raw = localStorage.getItem('tala_visita_data');
+  var ts  = localStorage.getItem('tala_visita_ts');
+  if(!raw) return;
+  try {
+    var d = JSON.parse(raw);
+    var fecha = ts ? new Date(ts).toLocaleString('es-CO') : 'Fecha desconocida';
+    var status = document.getElementById('ls-status');
+    var txt    = document.getElementById('ls-status-txt');
+    txt.innerHTML = '📋 Datos de visita disponibles: <strong>' +
+      (d.radicado || 'Sin radicado') + '</strong> — ' +
+      (d.solicitante || '') + ' · Guardado: ' + fecha;
+    status.classList.add('visible');
+  } catch(e){}
+})();
+
+function borrarDatosVisita(){
+  if(confirm('¿Eliminar los datos de visita guardados? Deberá volver a exportarlos desde la Visita Técnica.')){
+    localStorage.removeItem('tala_visita_data');
+    localStorage.removeItem('tala_visita_ts');
+    document.getElementById('ls-status').classList.remove('visible');
+  }
+}
+</script>
+{% endblock %}
