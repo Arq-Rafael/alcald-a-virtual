@@ -177,6 +177,69 @@
       });
     }
 
+    // Agregar al Calendario
+    var addToCalBtn = document.getElementById('addToCalendarBtn');
+    var calModal = document.getElementById('calendarModal');
+    var closeCalModal = document.getElementById('closeCalendarModalBtn');
+    var cancelCalBtn = document.getElementById('cancelCalendarBtn');
+    var saveCalBtn = document.getElementById('saveCalendarEventBtn');
+
+    function openCalendarModal() {
+      if (!addToCalBtn || !calModal) return;
+      var asunto = addToCalBtn.dataset.asunto || '';
+      var resumen = addToCalBtn.dataset.resumen || '';
+      document.getElementById('calTitulo').value = asunto;
+      document.getElementById('calDescripcion').value = resumen;
+      // Default: mañana a las 08:00
+      var tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(8, 0, 0, 0);
+      var pad = function(n) { return String(n).padStart(2, '0'); };
+      var fmt = function(d) {
+        return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+      };
+      var end = new Date(tomorrow); end.setHours(9, 0, 0, 0);
+      document.getElementById('calFechaInicio').value = fmt(tomorrow);
+      document.getElementById('calFechaFin').value = fmt(end);
+      calModal.classList.add('show');
+    }
+
+    if (addToCalBtn) addToCalBtn.addEventListener('click', openCalendarModal);
+    if (closeCalModal) closeCalModal.addEventListener('click', function() { calModal.classList.remove('show'); });
+    if (cancelCalBtn) cancelCalBtn.addEventListener('click', function() { calModal.classList.remove('show'); });
+
+    if (saveCalBtn) {
+      saveCalBtn.addEventListener('click', async function() {
+        var msgId = addToCalBtn ? addToCalBtn.dataset.messageId : null;
+        if (!msgId) return alert('No hay correo seleccionado');
+        var titulo = document.getElementById('calTitulo').value.trim();
+        var fechaInicio = document.getElementById('calFechaInicio').value;
+        if (!titulo) return alert('El título es obligatorio');
+        if (!fechaInicio) return alert('La fecha de inicio es obligatoria');
+        saveCalBtn.disabled = true;
+        var orig = saveCalBtn.innerHTML;
+        saveCalBtn.innerHTML = '<i class="bi bi-hourglass"></i> Guardando...';
+        try {
+          var result = await postJson('/correo-inteligente/api/message/' + msgId + '/add-to-calendar', {
+            titulo: titulo,
+            descripcion: document.getElementById('calDescripcion').value.trim(),
+            fecha_inicio: fechaInicio,
+            fecha_fin: document.getElementById('calFechaFin').value || null,
+            categoria: document.getElementById('calCategoria').value,
+            ubicacion: document.getElementById('calUbicacion').value.trim(),
+          });
+          if (!result.success) throw new Error(result.error || 'No se pudo crear el evento');
+          calModal.classList.remove('show');
+          alert('Evento "' + result.titulo + '" creado en el calendario.');
+        } catch(e) {
+          alert(e.message || 'Error al crear evento');
+        } finally {
+          saveCalBtn.disabled = false;
+          saveCalBtn.innerHTML = orig;
+        }
+      });
+    }
+
     document.querySelectorAll('[data-reanalyze]').forEach(function (btn) {
       btn.addEventListener('click', async function () {
         btn.disabled = true;

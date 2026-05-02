@@ -60,14 +60,21 @@
     position: absolute;
     inset: 0;
     background-size: cover;
-    background-position: center;
+    background-position: center 30%;
     opacity: 0;
     transition: opacity 1.8s ease;
-    will-change: opacity;
+    will-change: opacity, transform;
+    transform: scale(1.0);
   }
 
   .lp-slide.active {
     opacity: 1;
+    animation: kenBurns 12s ease-in-out forwards;
+  }
+
+  @keyframes kenBurns {
+    from { transform: scale(1.0) translate(0, 0); }
+    to   { transform: scale(1.06) translate(-1%, 1%); }
   }
 
   /* Overlay sutil para dar legibilidad al texto */

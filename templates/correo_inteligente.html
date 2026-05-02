@@ -187,6 +187,12 @@
           <button class="btn-mail btn-mail-success" data-status="respondido" data-message-id="{{ selected_message.id }}">
             <i class="bi bi-check2-circle"></i> Marcar respondido
           </button>
+          <button class="btn-mail btn-mail-info" id="addToCalendarBtn"
+            data-message-id="{{ selected_message.id }}"
+            data-asunto="{{ selected_message.asunto or '' }}"
+            data-resumen="{{ (selected_message.resumen_ejecutivo or '') | truncate(300, True, '...') }}">
+            <i class="bi bi-calendar-plus"></i> Agregar al Calendario
+          </button>
         </div>
       </div>
 
@@ -282,6 +288,60 @@
     <div class="compose-footer-tools">
       <button class="btn-compose-tool" title="Adjuntar archivos"><i class="bi bi-paperclip"></i></button>
       <button class="btn-compose-tool" title="Descartar borrador" id="discardDraftBtn"><i class="bi bi-trash"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Agregar al Calendario -->
+<div id="calendarModal" class="mail-compose-modal" style="width:480px;height:auto;bottom:0;right:2rem;top:auto;">
+  <div class="compose-header">
+    <div class="compose-title"><i class="bi bi-calendar-plus"></i> Agregar al Calendario</div>
+    <div class="compose-actions">
+      <button type="button" class="btn-compose-icon" id="closeCalendarModalBtn"><i class="bi bi-x-lg"></i></button>
+    </div>
+  </div>
+  <div class="compose-body" style="padding:1rem;">
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Título del evento</label>
+      <input type="text" id="calTitulo" class="form-control" maxlength="200">
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Descripción</label>
+      <textarea id="calDescripcion" class="form-control" rows="3"></textarea>
+    </div>
+    <div class="row g-2 mb-3">
+      <div class="col">
+        <label class="form-label fw-semibold">Fecha y hora inicio</label>
+        <input type="datetime-local" id="calFechaInicio" class="form-control">
+      </div>
+      <div class="col">
+        <label class="form-label fw-semibold">Fecha y hora fin</label>
+        <input type="datetime-local" id="calFechaFin" class="form-control">
+      </div>
+    </div>
+    <div class="row g-2 mb-3">
+      <div class="col">
+        <label class="form-label fw-semibold">Categoría</label>
+        <select id="calCategoria" class="form-select">
+          <option value="reunion">Reunión</option>
+          <option value="tarea">Tarea</option>
+          <option value="recordatorio">Recordatorio</option>
+          <option value="trabajo">Trabajo</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="col">
+        <label class="form-label fw-semibold">Ubicación</label>
+        <input type="text" id="calUbicacion" class="form-control" placeholder="Opcional">
+      </div>
+    </div>
+  </div>
+  <div class="compose-footer">
+    <button class="btn-mail btn-mail-primary" id="saveCalendarEventBtn">
+      <i class="bi bi-calendar-check"></i> Guardar evento
+    </button>
+    <div class="compose-footer-tools">
+      <button class="btn-compose-tool" title="Cancelar" id="cancelCalendarBtn"><i class="bi bi-x-circle"></i></button>
     </div>
   </div>
 </div>

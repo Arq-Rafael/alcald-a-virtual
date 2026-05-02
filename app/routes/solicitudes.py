@@ -559,6 +559,13 @@ def calendario():
     mes_anterior = {'año': año if mes > 1 else año - 1, 'mes': mes - 1 if mes > 1 else 12}
     mes_siguiente = {'año': año if mes < 12 else año + 1, 'mes': mes + 1 if mes < 12 else 1}
     
+    hoy = datetime.datetime.now()
+
+    # Días del mes anterior para rellenar la primera semana
+    primer_dia = datetime.date(año, mes, 1)
+    ultimo_prev = primer_dia - datetime.timedelta(days=1)
+    prev_last_day = ultimo_prev.day  # último día del mes anterior
+
     return render_template('calendario.html',
         año=año,
         mes=mes,
@@ -570,7 +577,11 @@ def calendario():
         eventos_notificacion=eventos_notificacion,
         mes_anterior=mes_anterior,
         mes_siguiente=mes_siguiente,
-        usuario_id=usuario_id
+        usuario_id=usuario_id,
+        now_day=hoy.day,
+        now_mes=hoy.month,
+        now_año=hoy.year,
+        prev_last_day=prev_last_day,
     )
 
 @solicitudes_bp.route('/evento/crear', methods=['POST'])

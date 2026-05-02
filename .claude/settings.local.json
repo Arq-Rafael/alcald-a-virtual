@@ -17,7 +17,24 @@
       "Bash(python -m py_compile app/routes/main.py app/routes/api_prefs.py)",
       "Bash(python -c \"from app import create_app; app = create_app\\(\\); print\\('App OK'\\)\")",
       "Bash(python -m py_compile app/routes/main.py)",
-      "Bash(python -m py_compile app/routes/perfil.py)"
+      "Bash(python -m py_compile app/routes/perfil.py)",
+      "Bash(Select-String -List \"\\(correo|gmail\\)\")",
+      "Bash(grep -E \"\\(app\\\\.py|__init__\\\\.py|main\\\\.py\\)$\")",
+      "Bash(python run.py)",
+      "Bash(set PYTHONIOENCODING=utf-8)",
+      "Bash(ping -n 5 127.0.0.1)",
+      "Bash(unzip -l \"documentos_generados/Calendario/focus-flow-calendar.zip\")",
+      "Bash(unzip -q \"focus-flow-calendar.zip\")",
+      "Read(//c/c/Users/rafa_/Downloads/AlcaldiaVirtualWeb/documentos_generados/Calendario/**)",
+      "PowerShell(\\(Get-Content \"c:\\\\Users\\\\rafa_\\\\Downloads\\\\AlcaldiaVirtualWeb\\\\documentos_generados\\\\Calendario\\\\Calendario.standalone.html\"\\).Count)",
+      "PowerShell(Copy-Item \"c:\\\\Users\\\\rafa_\\\\Downloads\\\\AlcaldiaVirtualWeb\\\\documentos_generados\\\\Calendario\\\\Calendario.standalone.html\" \"c:\\\\Users\\\\rafa_\\\\Downloads\\\\AlcaldiaVirtualWeb\\\\static\\\\calendario_preview.html\")",
+      "PowerShell(netstat -ano)",
+      "PowerShell(Invoke-WebRequest -Uri \"http://127.0.0.1:5000/calendario\" -UseBasicParsing -TimeoutSec 10)",
+      "PowerShell($r = Invoke-WebRequest -Uri \"http://127.0.0.1:5000/calendario\" -UseBasicParsing -TimeoutSec 10; $r.Content.Substring\\(0,500\\))",
+      "PowerShell($r = Invoke-WebRequest -Uri \"http://127.0.0.1:5000/calendario\" -UseBasicParsing -TimeoutSec 10; if\\($r.Content -match \"gc-shell\"\\) { \"OK: gc-shell found\" } else { \"MISSING: gc-shell\" }; if\\($r.Content -match \"Nuevo evento\"\\) { \"OK: sidebar button found\" } else { \"MISSING: sidebar\" }; if\\($r.Content -match \"gc-days\"\\) { \"OK: calendar grid found\" } else { \"MISSING: grid\" }; if\\($r.Content -match \"LUN\"\\) { \"OK: weekday headers found\" } else { \"MISSING: weekday headers\" })",
+      "Bash(git stash *)",
+      "Bash(git restore *)",
+      "Bash(python -c \"import csv; f=open\\('datos/solicitudes.csv','r',encoding='utf-8'\\); r=list\\(csv.DictReader\\(f\\)\\); f.close\\(\\); [print\\(i, row.get\\('estado','?'\\), row.get\\('objeto','?'\\)[:60]\\) for i,row in enumerate\\(r\\)]\")"
     ]
   }
 }

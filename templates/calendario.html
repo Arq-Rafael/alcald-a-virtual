@@ -1,1795 +1,1243 @@
 {% extends "base.html" %}
 {% block title %}Calendario – {{ mes_nombre }} {{ año }}{% endblock %}
-
-{% block content_classes %}container-fluid{% endblock %}
+{% block content_classes %}p-0{% endblock %}
 
 {% block styles %}
 <style>
-    /* ===== ESTILOS iOS26 - CALENDAR MODULE ===== */
-    
-    :root {
-        --primary-green: #7cb342;
-        --primary-green-light: #a5d6a7;
-        --primary-green-dark: #558b2f;
-        --glass-bg: rgba(255, 255, 255, 0.7);
-        --glass-border: rgba(255, 255, 255, 0.3);
-        --text-primary: #1a1a1a;
-        --text-secondary: #666666;
-        --text-muted: #999999;
-    }
+/* ══════════════════════════════════════════
+   GOOGLE CALENDAR REPLICA — Institutional
+   ══════════════════════════════════════════ */
+:root {
+  --gc-blue:    #1a73e8;
+  --gc-indigo:  #6366f1;
+  --gc-green:   #10b981;
+  --gc-red:     #ef4444;
+  --gc-amber:   #f59e0b;
+  --gc-purple:  #8b5cf6;
+  --gc-gray:    #a1a1aa;
+  --gc-border:  #e5e7eb;
+  --gc-bg:      #ffffff;
+  --gc-surface: #f9fafb;
+  --gc-text:    #111827;
+  --gc-muted:   #6b7280;
+  --gc-light:   #f3f4f6;
+}
 
-    /* Login Glass Effect - Premium Glassmorphism */
-    .login-glass {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: white;
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-    }
+/* Reset page padding */
+main.main-content { padding: 0 !important; margin: 0 !important; }
+body { background: var(--gc-bg) !important; }
 
-    /* Apply login-glass to calendar panels */
-    .calendar-panel.premium,
-    .sidebar-card.premium,
-    .event-detail-panel.premium,
-    .create-event-panel.premium,
-    .quick-event-modal.premium,
-    .event-modal-content.premium {
-        background: rgba(255, 255, 255, 0.1) !important;
-        backdrop-filter: blur(10px) !important;
-        border-radius: 20px !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37) !important;
-    }
-    
-    .calendar-container {
-        min-height: 100vh;
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        padding: 2rem 1rem;
-        position: relative;
-    }
-    
-    @media (max-width: 1400px) {
-        .create-event-panel {
-            position: sticky !important;
-            right: auto !important;
-            top: 80px;
-            width: 100% !important;
-        }
-        
-        .create-event-panel.show {
-            right: auto !important;
-        }
-    }
-    
-    @media (max-width: 1200px) {
-        .calendar-container[style*="display: grid"] {
-            grid-template-columns: 1fr !important;
-        }
-        
-        .create-event-panel {
-            position: fixed;
-            right: -380px;
-            top: 80px;
-            width: 360px;
-            transition: right 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        
-        .create-event-panel.show {
-            right: 1rem;
-        }
-    }
-    
-    @media (max-width: 768px) {
-        .create-event-panel {
-            width: 90%;
-            right: -100%;
-            left: 5%;
-            top: auto;
-            bottom: 0;
-            max-height: 80vh;
-            border-radius: 24px 24px 0 0;
-            position: fixed;
-        }
-        
-        .create-event-panel.show {
-            right: auto;
-            bottom: 0;
-        }
-        
-        .floating-action-btn {
-            display: flex !important;
-            bottom: 1.5rem;
-            left: 1.5rem;
-        }
-    }
+/* ── Shell ── */
+.gc-shell {
+  display: flex;
+  height: calc(100vh - 64px);
+  overflow: hidden;
+  font-family: 'Google Sans', 'Segoe UI', system-ui, sans-serif;
+  background: var(--gc-bg);
+}
 
-    
-    /* Header con navegación */
-    .calendar-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 2rem;
-        padding: 0 1rem;
-    }
-    
-    .calendar-header h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        margin: 0;
-        letter-spacing: -0.5px;
-    }
-    
-    .nav-buttons {
-        display: flex;
-        gap: 0.75rem;
-    }
-    
-    .nav-btn {
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        border: none;
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--primary-green);
-        font-size: 1.2rem;
-        transition: all 0.3s ease;
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
-        text-decoration: none;
-    }
-    
-    .nav-btn:hover {
-        background: rgba(124, 179, 66, 0.15);
-        transform: scale(1.05);
-        box-shadow: 0 12px 48px 0 rgba(31, 38, 135, 0.3);
-        color: var(--primary-green);
-    }
-    
-    .nav-btn:active {
-        transform: scale(0.95);
-    }
-    
-    /* Main calendar grid */
-    .main-grid {
-        display: grid;
-        grid-template-columns: 1fr 300px;
-        gap: 2.5rem;
-        max-width: 100%;
-        margin: 0 auto;
-        padding: 0 2rem;
-    }
-    
-    @media (max-width: 1024px) {
-        .main-grid {
-            grid-template-columns: 1fr;
-        }
-        .sidebar {
-            display: grid !important;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-        }
-    }
-    
-    @media (max-width: 768px) {
-        .main-grid {
-            gap: 1rem;
-        }
-        .sidebar {
-            display: flex !important;
-            flex-direction: column;
-        }
-    }
-    
-    /* Calendar panel glassmorphic */
-    .calendar-panel {
-        background: #ffffff;
-        border-radius: 24px;
-        padding: 2.5rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        width: 100%;
-    }
-    
-    /* Grid de días */
-    .weekdays {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-    }
-    
-    .weekday-label {
-        text-align: center;
-        font-weight: 600;
-        color: var(--primary-green);
-        font-size: 0.875rem;
-        padding: 0.75rem 0;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .days-grid {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 1rem;
-    }
-    
-    .day-cell {
-        aspect-ratio: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-        background: rgba(255, 255, 255, 0.8);
-        border-radius: 16px;
-        border: 2px solid rgba(124, 179, 66, 0.1);
-        cursor: pointer;
-        transition: all 0.3s ease;
-        position: relative;
-        font-weight: 500;
-        color: var(--text-primary);
-        min-height: 120px;
-        padding: 0.75rem;
-        overflow: hidden;
-    }
-    
-    .day-cell:hover:not(.empty):not(.other-month) {
-        background: rgba(124, 179, 66, 0.08);
-        transform: translateY(-4px);
-        box-shadow: 0 12px 24px rgba(124, 179, 66, 0.2);
-        border-color: rgba(124, 179, 66, 0.3);
-    }
-    
-    .day-cell.empty {
-        background: transparent;
-        border: none;
-        cursor: default;
-    }
-    
-    .day-cell.other-month {
-        color: var(--text-muted);
-        background: rgba(0, 0, 0, 0.02);
-        opacity: 0.5;
-    }
-    
-    .day-cell.has-events {
-        background: rgba(124, 179, 66, 0.1);
-        border: 2px solid var(--primary-green);
-    }
-    
-    .day-number {
-        font-size: 1rem;
-        line-height: 1;
-    }
-    
-    .event-indicators {
-        display: flex;
-        gap: 2px;
-        margin-top: 2px;
-        justify-content: center;
-        flex-wrap: wrap;
-        width: 100%;
-    }
-    
-    .event-dot {
-        width: 4px;
-        height: 4px;
-        border-radius: 50%;
-        background: var(--primary-green);
-    }
-    
-    /* Eventos en celdas */
-    .cell-events {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-        margin-top: 0.5rem;
-        flex: 1;
-        min-width: 0;
-    }
-    
-    .cell-event-badge {
-        background: linear-gradient(135deg, var(--primary-green-light), var(--primary-green));
-        color: white;
-        padding: 0.25rem 0.5rem;
-        border-radius: 6px;
-        font-size: 0.6rem;
-        font-weight: 600;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        box-shadow: 0 2px 6px rgba(124, 179, 66, 0.2);
-    }
-    
-    .cell-event-badge:hover {
-        transform: scale(1.05);
-        box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
-    }
-    
-    /* Sidebar */
-    .sidebar {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-    
-    .sidebar-card {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 1.5rem;
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-    }
-    
-    .sidebar-title {
-        font-size: 1rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        margin: 0 0 1rem 0;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .sidebar-title i {
-        color: var(--primary-green);
-        font-size: 1.2rem;
-    }
-    
-    /* Formulario de nuevo evento */
-    .new-event-form {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .form-group label {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: var(--text-primary);
-    }
-    
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-        padding: 0.75rem;
-        border-radius: 12px;
-        border: 1px solid rgba(124, 179, 66, 0.2);
-        background: rgba(255, 255, 255, 0.7);
-        font-size: 0.875rem;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        transition: all 0.2s ease;
-    }
-    
-    .form-group input:focus,
-    .form-group textarea:focus,
-    .form-group select:focus {
-        outline: none;
-        border-color: var(--primary-green);
-        background: rgba(255, 255, 255, 0.9);
-        box-shadow: 0 0 0 3px rgba(124, 179, 66, 0.1);
-    }
-    
-    .form-group textarea {
-        resize: vertical;
-        min-height: 60px;
-    }
-    
-    .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-    }
-    
-    .color-picker {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-    }
-    
-    .color-option {
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        border: 2px solid transparent;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    
-    .color-option.primary {
-        background: #6a85f1;
-    }
-    
-    .color-option.success {
-        background: var(--primary-green);
-    }
-    
-    .color-option.warning {
-        background: #ffb64d;
-    }
-    
-    .color-option.danger {
-        background: #ff6b6b;
-    }
-    
-    .color-option.info {
-        background: #17a2b8;
-    }
-    
-    .color-option.selected {
-        border-color: var(--text-primary);
-        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7), 0 0 0 4px var(--text-primary);
-    }
-    
-    .btn-create-event {
-        padding: 0.875rem;
-        border-radius: 12px;
-        border: none;
-        background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
-        color: white;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 0.875rem;
-        box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
-    }
-    
-    .btn-create-event:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(124, 179, 66, 0.4);
-    }
-    
-    .btn-create-event:active {
-        transform: translateY(0);
-    }
-    
-    /* Próximos eventos */
-    .events-list {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        max-height: 400px;
-        overflow-y: auto;
-    }
-    
-    .events-list::-webkit-scrollbar {
-        width: 6px;
-    }
-    
-    .events-list::-webkit-scrollbar-track {
-        background: transparent;
-    }
-    
-    .events-list::-webkit-scrollbar-thumb {
-        background: rgba(124, 179, 66, 0.3);
-        border-radius: 3px;
-    }
-    
-    .events-list::-webkit-scrollbar-thumb:hover {
-        background: rgba(124, 179, 66, 0.5);
-    }
-    
-    .event-item {
-        background: rgba(124, 179, 66, 0.08);
-        border-left: 3px solid var(--primary-green);
-        border-radius: 8px;
-        padding: 0.75rem;
-        transition: all 0.2s ease;
-        cursor: pointer;
-    }
-    
-    .event-item:hover {
-        background: rgba(124, 179, 66, 0.15);
-        transform: translateX(2px);
-    }
-    
-    .event-time {
-        font-size: 0.75rem;
-        color: var(--primary-green);
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .event-title {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: var(--text-primary);
-        margin: 0.25rem 0;
-    }
-    
-    .event-desc {
-        font-size: 0.75rem;
-        color: var(--text-secondary);
-    }
-    
-    /* Notificación flotante */
-    .notification-toast {
-        position: fixed;
-        bottom: 2rem;
-        right: 2rem;
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 1rem 1.5rem;
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-        max-width: 350px;
-        z-index: 1100;
-        animation: slideIn 0.3s ease;
-    }
-    
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(100px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .notification-toast.show {
-        animation: slideIn 0.3s ease forwards;
-    }
-    
-    .notification-header {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 0.75rem;
-    }
-    
-    .notification-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--primary-green-light), var(--primary-green));
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 1.2rem;
-    }
-    
-    .notification-title {
-        font-weight: 700;
-        color: var(--text-primary);
-        font-size: 0.95rem;
-    }
-    
-    .notification-text {
-        font-size: 0.875rem;
-        color: var(--text-secondary);
-        line-height: 1.4;
-    }
-    
-    /* Empty state */
-    .empty-state {
-        text-align: center;
-        padding: 2rem;
-        color: var(--text-muted);
-    }
-    
-    .empty-state-icon {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-        opacity: 0.5;
-    }
-    
-    .empty-state-text {
-        font-size: 0.875rem;
-    }
-    
-    @media (max-width: 768px) {
-        .calendar-container {
-            padding: 1rem;
-        }
-        
-        .calendar-header {
-            padding: 0;
-        }
-        
-        .calendar-header h1 {
-            font-size: 2rem;
-        }
-        
-        .calendar-panel {
-            padding: 1rem;
-        }
-    }
-    
-    /* Panel de detalles del evento */
-    .event-detail-panel {
-        position: fixed;
-        right: -400px;
-        top: 0;
-        width: 400px;
-        height: 100vh;
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border-left: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: -8px 0 32px 0 rgba(31, 38, 135, 0.37);
-        overflow-y: auto;
-        z-index: 1050;
-        transition: right 0.3s ease;
-        padding: 2rem 1.5rem;
-    }
-    
-    .event-detail-panel.show {
-        right: 0;
-    }
-    
-    .event-detail-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-    }
-    
-    .event-detail-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        margin: 0;
-    }
-    
-    .close-detail-btn {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        border: none;
-        background: rgba(124, 179, 66, 0.1);
-        color: var(--primary-green);
-        cursor: pointer;
-        font-size: 1.2rem;
-        transition: all 0.2s ease;
-    }
-    
-    .close-detail-btn:hover {
-        background: rgba(124, 179, 66, 0.2);
-    }
-    
-    .event-detail-item {
-        margin-bottom: 1.5rem;
-    }
-    
-    .event-detail-label {
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: var(--primary-green);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 0.5rem;
-    }
-    
-    .event-detail-value {
-        font-size: 0.95rem;
-        color: var(--text-primary);
-        line-height: 1.5;
-    }
-    
-    .event-detail-actions {
-        display: flex;
-        gap: 0.75rem;
-        margin-top: 2rem;
-        padding-top: 2rem;
-        border-top: 1px solid rgba(124, 179, 66, 0.1);
-    }
-    
-    .event-action-btn {
-        flex: 1;
-        padding: 0.75rem;
-        border-radius: 12px;
-        border: none;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-size: 0.875rem;
-    }
-    
-    .event-action-complete {
-        background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
-        color: white;
-        box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
-    }
-    
-    .event-action-complete:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(124, 179, 66, 0.4);
-    }
-    
-    .event-action-delete {
-        background: rgba(255, 107, 107, 0.1);
-        color: #ff6b6b;
-        border: 1px solid rgba(255, 107, 107, 0.2);
-    }
-    
-    .event-action-delete:hover {
-        background: rgba(255, 107, 107, 0.2);
-    }
-    
-    @media (max-width: 1024px) {
-        .event-detail-panel {
-            width: 100%;
-            right: -100%;
-        }
-    }
-    
-    /* Modal flotante para crear evento */
-    .floating-action-btn {
-        position: fixed;
-        bottom: 2rem;
-        left: 2rem;
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
-        border: none;
-        color: white;
-        font-size: 1.5rem;
-        cursor: pointer;
-        box-shadow: 0 4px 16px rgba(124, 179, 66, 0.3);
-        transition: all 0.3s ease;
-        z-index: 999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .floating-action-btn:hover {
-        transform: scale(1.1);
-        box-shadow: 0 6px 24px rgba(124, 179, 66, 0.4);
-    }
-    
-    .floating-action-btn:active {
-        transform: scale(0.95);
-    }
-    
-    /* Quick event creation modal */
-    .quick-event-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(8px);
-        z-index: 2000;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .quick-event-overlay.show {
-        display: flex;
-    }
-    
-    .quick-event-modal {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 20px;
-        padding: 3rem;
-        max-width: 600px;
-        width: 95%;
-        box-shadow: 0 25px 65px 0 rgba(31, 38, 135, 0.37);
-        animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    
-    @keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(50px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .quick-event-header {
-        margin-bottom: 2rem;
-    }
-    
-    .quick-event-header h2 {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        margin: 0 0 0.5rem 0;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-    
-    .quick-event-header p {
-        font-size: 0.95rem;
-        color: var(--text-secondary);
-        margin: 0;
-    }
-    
-    .quick-event-form {
-        display: flex;
-        flex-direction: column;
-        gap: 1.25rem;
-    }
-    
-    .quick-event-form .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .quick-event-form label {
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: var(--text-primary);
-    }
-    
-    .quick-event-form input,
-    .quick-event-form textarea {
-        padding: 0.85rem;
-        border-radius: 12px;
-        border: 1px solid rgba(124, 179, 66, 0.25);
-        background: rgba(255, 255, 255, 0.8);
-        font-size: 0.95rem;
-        font-family: inherit;
-        transition: all 0.2s ease;
-    }
-    
-    .quick-event-form input:focus,
-    .quick-event-form textarea:focus {
-        outline: none;
-        border-color: var(--primary-green);
-        box-shadow: 0 0 0 3px rgba(124, 179, 66, 0.1);
-        background: white;
-    }
-    
-    .quick-event-form textarea {
-        resize: vertical;
-        min-height: 100px;
-    }
-    
-    .quick-event-actions {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        margin-top: 2rem;
-    }
-    
-    .quick-event-btn {
-        padding: 0.85rem 1.5rem;
-        border-radius: 12px;
-        border: none;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-size: 0.95rem;
-    }
-    
-    .quick-event-btn-primary {
-        background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
-        color: white;
-        box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
-    }
-    
-    .quick-event-btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(124, 179, 66, 0.4);
-    }
-    
-    .quick-event-btn-secondary {
-        background: rgba(124, 179, 66, 0.1);
-        color: var(--primary-green);
-        border: 1px solid var(--primary-green);
-    }
-    
-    .quick-event-btn-secondary:hover {
-        background: rgba(124, 179, 66, 0.15);
-    }
-    
-    /* Modal de crear evento */
-    .event-modal-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(4px);
-        z-index: 2000;
-        animation: fadeIn 0.2s ease;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .event-modal-overlay.show {
-        display: flex;
-    }
-    
-    .event-modal-content {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 2rem;
-        max-width: 500px;
-        width: 90%;
-        max-height: 90vh;
-        overflow-y: auto;
-        box-shadow: 0 20px 60px 0 rgba(31, 38, 135, 0.37);
-    }
-    
-    .event-modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid rgba(124, 179, 66, 0.1);
-    }
-    
-    .event-modal-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        margin: 0;
-    }
-    
-    .event-modal-close {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        border: none;
-        background: rgba(124, 179, 66, 0.1);
-        color: var(--primary-green);
-        cursor: pointer;
-        font-size: 1.3rem;
-        transition: all 0.2s ease;
-    }
-    
-    .event-modal-close:hover {
-        background: rgba(124, 179, 66, 0.2);
-    }
-    
-    @media (max-width: 768px) {
-        .floating-action-btn {
-            bottom: 1.5rem;
-            left: 1.5rem;
-        }
-        
-        .event-modal-content {
-            width: 95%;
-        }
-    }
+/* ══════════════════
+   SIDEBAR
+   ══════════════════ */
+.gc-sidebar {
+  width: 256px;
+  min-width: 256px;
+  border-right: 1px solid var(--gc-border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.5rem 0 1rem;
+  background: var(--gc-bg);
+}
+.gc-sidebar::-webkit-scrollbar { width: 4px; }
+.gc-sidebar::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 4px; }
 
-    /* Inline-to-class cleanup */
-    .cal-no-side-margins { margin-left: 0; margin-right: 0; }
-    .cal-layout-grid {
-        display: grid;
-        grid-template-columns: 1fr 420px;
-        gap: 2rem;
-        max-width: 100%;
-        align-items: start;
-        padding-right: 2rem;
-    }
-    .cal-main-width { max-width: 1000px; width: 100%; }
-    .cal-right-head { width: 100%; text-align: right; padding-bottom: 0.25rem; }
-    .cal-time-muted { font-size: 0.65rem; color: var(--text-muted); text-align: center; margin-top: 0.25rem; }
-    .cal-hidden { display: none; }
-    .cal-flex-list { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
-    .cal-event-box {
-        background: rgba(124, 179, 66, 0.08);
-        border: 1px solid rgba(124, 179, 66, 0.2);
-        border-radius: 12px;
-        padding: 1rem;
-        cursor: pointer;
-    }
-    .cal-event-title { font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem; }
-    .cal-event-sub { font-size: 0.85rem; color: var(--text-secondary); }
-    .cal-event-desc { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; }
-    .cal-empty {
-        text-align: center;
-        padding: 2rem;
-        color: var(--text-muted);
-    }
-    .cal-empty-icon { font-size: 2rem; margin-bottom: 0.5rem; }
-    .cal-platform-wrap { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(124, 179, 66, 0.1); }
-    .cal-platform-title {
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    .cal-platform-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-    .cal-platform-btn {
-        padding: 0.7rem;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        font-size: 0.8rem;
-        transition: all 0.2s;
-        border: 1px solid transparent;
-    }
-    .cal-platform-btn i { margin-right: 0.3rem; }
-    .cal-platform-btn.meet { background: rgba(59, 89, 152, 0.15); border-color: rgba(59, 89, 152, 0.3); color: #3B5998; }
-    .cal-platform-btn.zoom { background: rgba(0, 102, 204, 0.15); border-color: rgba(0, 102, 204, 0.3); color: #0066CC; }
-    .cal-platform-btn.teams { background: rgba(31, 131, 255, 0.15); border-color: rgba(31, 131, 255, 0.3); color: #1F83FF; }
-    .cal-platform-btn.other { background: rgba(124, 179, 66, 0.15); border-color: rgba(124, 179, 66, 0.3); color: var(--primary-green); }
-    .cal-platform-btn.meet:hover { background: rgba(59, 89, 152, 0.25); }
-    .cal-platform-btn.zoom:hover { background: rgba(0, 102, 204, 0.25); }
-    .cal-platform-btn.teams:hover { background: rgba(31, 131, 255, 0.25); }
-    .cal-platform-btn.other:hover { background: rgba(124, 179, 66, 0.25); }
-    .fab-hidden { display: none; }
-    .mr-8 { margin-right: 0.5rem; }
+/* Logo row */
+.gc-sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 1rem 0.75rem;
+}
+.gc-sidebar-logo i { font-size: 1.4rem; color: var(--gc-blue); }
+.gc-sidebar-logo span { font-size: 1.1rem; font-weight: 500; color: var(--gc-text); }
+
+/* New event button */
+.gc-new-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0.75rem 0.75rem;
+  padding: 0.6rem 1.2rem;
+  background: var(--gc-blue);
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  width: calc(100% - 1.5rem);
+  justify-content: center;
+}
+.gc-new-btn:hover { background: #1557b0; box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
+
+/* Search */
+.gc-search-wrap {
+  padding: 0 0.75rem 0.5rem;
+}
+.gc-search {
+  width: 100%;
+  padding: 0.45rem 0.75rem 0.45rem 2rem;
+  border: 1px solid var(--gc-border);
+  border-radius: 24px;
+  font-size: 0.8rem;
+  color: var(--gc-text);
+  background: var(--gc-surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.868-3.833zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E") no-repeat 0.6rem center;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+.gc-search:focus { border-color: var(--gc-blue); background-color: #fff; }
+
+/* ── Mini calendar ── */
+.gc-mini {
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.25rem;
+}
+.gc-mini-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+.gc-mini-month {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gc-text);
+}
+.gc-mini-nav {
+  display: flex;
+  gap: 0;
+}
+.gc-mini-nav button {
+  width: 24px; height: 24px;
+  background: none; border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--gc-muted);
+  font-size: 0.75rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.1s;
+}
+.gc-mini-nav button:hover { background: var(--gc-light); }
+
+.gc-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+}
+.gc-mini-wday {
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: var(--gc-muted);
+  text-align: center;
+  padding: 2px 0 4px;
+}
+.gc-mini-day {
+  font-size: 0.72rem;
+  color: var(--gc-text);
+  text-align: center;
+  padding: 3px 2px;
+  border-radius: 50%;
+  cursor: pointer;
+  line-height: 1.6;
+  transition: background 0.1s;
+  aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+.gc-mini-day:hover { background: var(--gc-light); }
+.gc-mini-day.other-month { color: var(--gc-gray); }
+.gc-mini-day.today {
+  background: var(--gc-blue);
+  color: #fff;
+  font-weight: 700;
+}
+.gc-mini-day.selected { outline: 2px solid var(--gc-blue); }
+
+/* ── Section labels ── */
+.gc-section-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gc-muted);
+  padding: 0.6rem 1rem 0.3rem;
+}
+
+/* ── Calendar categories ── */
+.gc-cat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.3rem 1rem;
+  cursor: pointer;
+  border-radius: 0 24px 24px 0;
+  margin-right: 0.5rem;
+  transition: background 0.1s;
+}
+.gc-cat-item:hover { background: var(--gc-light); }
+.gc-cat-check {
+  width: 16px; height: 16px;
+  border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  color: #fff;
+}
+.gc-cat-name { font-size: 0.8rem; color: var(--gc-text); }
+
+/* ── Virtual meeting links ── */
+.gc-meet-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.3rem 1rem;
+  cursor: pointer;
+  border-radius: 0 24px 24px 0;
+  margin-right: 0.5rem;
+  text-decoration: none;
+  transition: background 0.1s;
+}
+.gc-meet-item:hover { background: var(--gc-light); }
+.gc-meet-icon { width: 16px; font-size: 0.85rem; text-align: center; }
+.gc-meet-name { font-size: 0.8rem; color: var(--gc-text); }
+
+/* ── Próximos eventos ── */
+.gc-upcoming-item {
+  padding: 0.4rem 0.75rem 0.4rem 0.6rem;
+  margin: 0 0.3rem 0.15rem;
+  border-radius: 6px;
+  border-left: 3px solid var(--gc-blue);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.gc-upcoming-item:hover { background: var(--gc-light); }
+.gc-upcoming-title { font-size: 0.8rem; font-weight: 600; color: var(--gc-text); line-height: 1.3; }
+.gc-upcoming-meta  { font-size: 0.7rem; color: var(--gc-muted); margin-top: 1px; display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
+.gc-upcoming-chip {
+  font-size: 0.6rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: var(--gc-light);
+  color: var(--gc-muted);
+}
+.gc-upcoming-chip.meet  { background: #e8f5e9; color: #2e7d32; }
+.gc-upcoming-chip.zoom  { background: #e3f2fd; color: #1565c0; }
+.gc-upcoming-chip.teams { background: #ede7f6; color: #4527a0; }
+
+/* ══════════════════
+   MAIN AREA
+   ══════════════════ */
+.gc-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ── Top bar ── */
+.gc-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--gc-border);
+  flex-shrink: 0;
+  gap: 0.75rem;
+}
+.gc-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.gc-topbar-title {
+  font-size: 1.375rem;
+  font-weight: 400;
+  color: var(--gc-text);
+  white-space: nowrap;
+}
+.gc-hoy-btn {
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--gc-border);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--gc-text);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.12s;
+  white-space: nowrap;
+}
+.gc-hoy-btn:hover { background: var(--gc-light); color: var(--gc-text); }
+.gc-nav-btn {
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  border: none; background: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--gc-muted);
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: background 0.1s;
+}
+.gc-nav-btn:hover { background: var(--gc-light); color: var(--gc-text); }
+
+/* View switcher */
+.gc-view-tabs {
+  display: flex;
+  border: 1px solid var(--gc-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.gc-view-tab {
+  padding: 0.35rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--gc-muted);
+  cursor: pointer;
+  border: none;
+  background: #fff;
+  border-right: 1px solid var(--gc-border);
+  transition: background 0.1s;
+  white-space: nowrap;
+}
+.gc-view-tab:last-child { border-right: none; }
+.gc-view-tab.active { background: var(--gc-light); color: var(--gc-text); }
+.gc-view-tab:hover:not(.active) { background: #f9f9f9; }
+
+/* ── Calendar grid ── */
+.gc-grid-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.gc-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid var(--gc-border);
+  flex-shrink: 0;
+}
+.gc-wday {
+  padding: 0.4rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gc-muted);
+  text-align: right;
+}
+
+.gc-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  flex: 1;
+  overflow-y: auto;
+}
+.gc-days::-webkit-scrollbar { width: 6px; }
+.gc-days::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 4px; }
+
+/* Day cell */
+.gc-cell {
+  border-right: 1px solid var(--gc-border);
+  border-bottom: 1px solid var(--gc-border);
+  padding: 0.3rem 0.25rem 0.25rem;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: background 0.1s;
+  position: relative;
+  overflow: hidden;
+}
+.gc-cell:nth-child(7n) { border-right: none; }
+.gc-cell:hover { background: #f8f9ff; }
+
+.gc-cell-num {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--gc-muted);
+  text-align: right;
+  padding: 0 0.25rem 0.2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.gc-cell.out-month .gc-cell-num { color: #d1d5db; }
+.gc-cell.is-today .gc-cell-num {
+  font-weight: 700;
+  color: #fff;
+}
+.gc-today-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: var(--gc-blue);
+  border-radius: 50%;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fff;
+  float: right;
+}
+
+/* Events in cell */
+.gc-cell-events { flex: 1; overflow: hidden; }
+.gc-event-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 3px;
+  border-radius: 3px;
+  margin-bottom: 1px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--gc-text);
+  transition: filter 0.1s;
+}
+.gc-event-row:hover { filter: brightness(0.95); }
+.gc-event-bar {
+  width: 3px;
+  min-width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.gc-event-time { color: var(--gc-muted); flex-shrink: 0; font-size: 0.67rem; }
+.gc-event-title { overflow: hidden; text-overflow: ellipsis; }
+
+.gc-more-link {
+  font-size: 0.67rem;
+  color: var(--gc-muted);
+  padding: 0 3px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.gc-more-link:hover { color: var(--gc-blue); }
+
+/* ══════════════════
+   MODAL — create event
+   ══════════════════ */
+.gc-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 9990;
+  align-items: center;
+  justify-content: center;
+}
+.gc-overlay.show { display: flex; }
+
+.gc-modal {
+  background: #fff;
+  border-radius: 12px;
+  width: 400px;
+  max-width: 95vw;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  overflow: hidden;
+}
+.gc-modal-head {
+  background: var(--gc-blue);
+  color: #fff;
+  padding: 1rem 1.25rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.gc-modal-head h2 { font-size: 1rem; font-weight: 500; margin: 0; }
+.gc-modal-close { background: none; border: none; color: rgba(255,255,255,0.8); cursor: pointer; font-size: 1.1rem; line-height: 1; }
+.gc-modal-close:hover { color: #fff; }
+.gc-modal-body { padding: 1.25rem; }
+
+.gc-field { margin-bottom: 1rem; }
+.gc-field label { display: block; font-size: 0.72rem; font-weight: 600; color: var(--gc-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.3rem; }
+.gc-field input,
+.gc-field textarea,
+.gc-field select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--gc-border);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: var(--gc-text);
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+  font-family: inherit;
+  background: #fff;
+}
+.gc-field input:focus,
+.gc-field textarea:focus,
+.gc-field select:focus { border-color: var(--gc-blue); }
+.gc-field textarea { resize: vertical; min-height: 64px; }
+.gc-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+.gc-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0 1.25rem 1.25rem;
+}
+.gc-btn { padding: 0.5rem 1.25rem; border-radius: 6px; font-size: 0.85rem; font-weight: 500; cursor: pointer; border: none; font-family: inherit; transition: all 0.15s; }
+.gc-btn-ghost { background: none; color: var(--gc-muted); }
+.gc-btn-ghost:hover { background: var(--gc-light); }
+.gc-btn-primary { background: var(--gc-blue); color: #fff; }
+.gc-btn-primary:hover { background: #1557b0; }
+
+/* ══════════════════
+   EVENT DETAIL POPOVER
+   ══════════════════ */
+.gc-popover {
+  position: fixed;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 6px 28px rgba(0,0,0,0.18);
+  width: 300px;
+  z-index: 8000;
+  display: none;
+  padding: 0;
+  overflow: hidden;
+}
+.gc-popover.show { display: block; }
+.gc-pop-head {
+  padding: 1rem 1rem 0.75rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.gc-pop-color-bar { width: 14px; min-width: 14px; height: 14px; border-radius: 3px; margin-top: 2px; }
+.gc-pop-title { font-size: 0.95rem; font-weight: 600; color: var(--gc-text); flex: 1; }
+.gc-pop-close { background: none; border: none; color: var(--gc-muted); cursor: pointer; font-size: 1rem; line-height: 1; flex-shrink: 0; }
+.gc-pop-row { display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.25rem 1rem; font-size: 0.8rem; color: var(--gc-text); }
+.gc-pop-row i { color: var(--gc-muted); width: 16px; text-align: center; flex-shrink: 0; margin-top: 1px; }
+.gc-pop-actions { display: flex; gap: 0.4rem; padding: 0.75rem 1rem; border-top: 1px solid var(--gc-border); margin-top: 0.25rem; }
+.gc-pop-btn { flex: 1; padding: 0.4rem; border-radius: 6px; font-size: 0.75rem; font-weight: 500; cursor: pointer; border: none; font-family: inherit; transition: all 0.15s; }
+.gc-pop-complete { background: #ecfdf5; color: #065f46; }
+.gc-pop-complete:hover { background: #d1fae5; }
+.gc-pop-delete { background: #fef2f2; color: #991b1b; }
+.gc-pop-delete:hover { background: #fee2e2; }
+
+/* ── Toast ── */
+#gc-toasts { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 99999; display: flex; flex-direction: column; gap: 0.4rem; }
+.gc-toast { background: #323232; color: #fff; border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.82rem; min-width: 220px; animation: gcTIn .25s ease; }
+@keyframes gcTIn { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .gc-sidebar { width: 200px; min-width: 200px; }
+  .gc-cell { min-height: 70px; }
+  .gc-event-time { display: none; }
+}
+@media (max-width: 540px) {
+  .gc-sidebar { display: none; }
+  .gc-topbar-title { font-size: 1rem; }
+}
+
+/* ══════════════════════════════════════
+   WEEK / DAY VIEWS
+   ══════════════════════════════════════ */
+#gcWeekView, #gcDayView {
+  flex-direction: column;
+  overflow: hidden;
+  flex: 1;
+}
+.gcw-header, .gcd-header {
+  display: grid;
+  border-bottom: 1px solid var(--gc-border);
+  flex-shrink: 0;
+  background: #fff;
+}
+.gcw-header { grid-template-columns: 60px repeat(7, 1fr); }
+.gcd-header { grid-template-columns: 60px 1fr; }
+.gcw-gutter { width: 60px; border-right: 1px solid var(--gc-border); }
+.gcw-dhead {
+  padding: 0.4rem 0.25rem;
+  text-align: center;
+  border-left: 1px solid var(--gc-border);
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.gcd-dhead {
+  padding: 0.6rem 1rem;
+  display: flex; align-items: center; gap: 0.5rem;
+  border-left: 1px solid var(--gc-border);
+}
+.gcw-dname {
+  font-size: 0.62rem; font-weight: 700; color: var(--gc-muted);
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.gcw-dnum {
+  width: 28px; height: 28px; border-radius: 50%;
+  font-size: 0.92rem; font-weight: 400; color: var(--gc-text);
+  display: flex; align-items: center; justify-content: center;
+}
+.gcw-dnum-today { background: var(--gc-blue); color: #fff !important; font-weight: 700; }
+.gcd-dname { font-size: 0.92rem; font-weight: 500; color: var(--gc-text); }
+
+.gcw-body {
+  display: grid;
+  grid-template-columns: 60px repeat(7, 1fr);
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #fff;
+}
+.gcw-timecol { border-right: 1px solid var(--gc-border); }
+.gcw-hlabel {
+  height: 56px;
+  padding: 2px 6px 0;
+  font-size: 0.62rem; color: var(--gc-muted);
+  text-align: right;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex; align-items: flex-start; justify-content: flex-end;
+}
+.gcw-daycol, .gcd-daycol {
+  border-left: 1px solid var(--gc-border);
+  position: relative;
+  min-height: 840px; /* 15h × 56px */
+}
+.gcw-col-today { background: rgba(26,115,232,.025); }
+.gcw-hslot { height: 56px; border-bottom: 1px solid #f3f3f3; }
+
+.gcw-event, .gcd-event {
+  position: absolute;
+  left: 2px; right: 2px;
+  border-radius: 4px;
+  padding: 2px 5px;
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 2;
+  transition: filter .1s;
+}
+.gcw-event:hover, .gcd-event:hover { filter: brightness(.94); }
+.gcd-daycol { min-height: 840px; }
+.gcd-event  { left: 6px; right: 6px; border-radius: 6px; padding: 4px 8px; }
+
+.gcw-event-time, .gcd-event-time {
+  font-size: 0.62rem; font-weight: 700; opacity: .65;
+}
+.gcw-event-title, .gcd-event-title {
+  font-size: 0.72rem; font-weight: 500;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.gcd-event-title { font-size: 0.82rem; white-space: normal; }
+
+.gcd-empty {
+  position: absolute; top: 4rem; left: 50%;
+  transform: translateX(-50%);
+  color: var(--gc-muted); font-size: .85rem; white-space: nowrap;
+}
+
+/* ── Category toggle off state ── */
+.gc-cat-item { user-select: none; }
+.gc-cat-item.cat-off .gc-cat-name { color: var(--gc-muted); }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4 cal-no-side-margins">
-<div class="calendar-container cal-layout-grid">
-    <div>
-    <!-- Header con navegación -->
-    <div class="calendar-header">
-        <h1>{{ mes_nombre }} {{ año }}</h1>
-        <div class="nav-buttons">
-            <a href="{{ url_for('solicitudes.calendario', year=mes_anterior.año, month=mes_anterior.mes) }}" class="nav-btn" title="Mes anterior">
-                <i class="bi bi-chevron-left"></i>
-            </a>
-            <a href="{{ url_for('solicitudes.calendario') }}" class="nav-btn" title="Hoy">
-                <i class="bi bi-calendar3"></i>
-            </a>
-            <a href="{{ url_for('solicitudes.calendario', year=mes_siguiente.año, month=mes_siguiente.mes) }}" class="nav-btn" title="Próximo mes">
-                <i class="bi bi-chevron-right"></i>
-            </a>
-        </div>
-    </div>
-    
-    <!-- Calendario Principal -->
-    <div class="cal-main-width">
-        <div class="calendar-panel">
-            <!-- Weekday labels -->
-            <div class="weekdays">
-                {% for dia in dias_semana %}
-                    <div class="weekday-label">{{ dia }}</div>
-                {% endfor %}
-            </div>
-            
-            <!-- Days grid -->
-            <div class="days-grid">
-                {% for semana in calendario %}
-                    {% for dia in semana %}
-                        {% if dia == 0 %}
-                            <div class="day-cell empty"></div>
-                        {% else %}
-                            <div class="day-cell {% if eventos_por_dia.get(dia) %}has-events{% endif %}" onclick="abrirQuickModal({{ dia }})">
-                                <div class="cal-right-head">
-                                    <div class="day-number">{{ dia }}</div>
-                                </div>
-                                {% if eventos_por_dia.get(dia) %}
-                                    <div class="cell-events">
-                                        {% set eventos_list = eventos_por_dia.get(dia)[:2] %}
-                                        {% for evento in eventos_list %}
-                                            <div class="cell-event-badge" onclick="abrirDetalleEvento({{ evento.id }}, event)" title="{{ evento.titulo }}">
-                                                {{ evento.titulo[:12] }}{% if evento.titulo|length > 12 %}...{% endif %}
-                                            </div>
-                                        {% endfor %}
-                                        {% if eventos_por_dia.get(dia)|length > 2 %}
-                                            <div class="cal-time-muted">
-                                                +{{ eventos_por_dia.get(dia)|length - 2 }} más
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-                {% endfor %}
-            </div>
-        </div>
-    </div>
+{% set CAT_COLORS = {
+  'trabajo':      '#6366f1',
+  'reunion':      '#6366f1',
+  'personal':     '#10b981',
+  'salud':        '#ef4444',
+  'social':       '#f59e0b',
+  'tarea':        '#f59e0b',
+  'recordatorio': '#8b5cf6',
+  'otro':         '#a1a1aa'
+} %}
+
+<div class="gc-shell">
+
+  <!-- ══════════════ SIDEBAR ══════════════ -->
+  <aside class="gc-sidebar">
+
+    <!-- Logo -->
+    <div class="gc-sidebar-logo">
+      <i class="bi bi-calendar3"></i>
+      <span>Calendario</span>
     </div>
 
-    <!-- Panel flotante para crear evento (derecha) -->
-    <div class="create-event-panel" id="createEventPanel">
-        <!-- TAB 1: Crear Evento -->
-        <div id="tabCrearEvento" class="cal-hidden">
-            <div class="create-event-header">
-                <h3>
-                    <i class="bi bi-plus-circle"></i>
-                    Crear Evento
-                </h3>
-                <button class="create-event-close" onclick="toggleCreatePanel()">
-                    <i class="bi bi-x"></i>
-                </button>
-            </div>
-            
-            <form id="formNuevoEvento" class="new-event-form">
-                    <div class="form-group">
-                        <label for="evTitulo">Título</label>
-                        <input type="text" id="evTitulo" name="titulo" placeholder="Nombre del evento" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="evDesc">Descripción</label>
-                        <textarea id="evDesc" name="descripcion" placeholder="Detalles opcionales"></textarea>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="evInicio">Inicio</label>
-                            <input type="datetime-local" id="evInicio" name="fecha_inicio" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="evFin">Fin</label>
-                            <input type="datetime-local" id="evFin" name="fecha_fin">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Categoría</label>
-                        <select name="categoria" id="evCategoria">
-                            <option value="personal">Personal</option>
-                            <option value="trabajo">Trabajo</option>
-                            <option value="recordatorio">Recordatorio</option>
-                            <option value="tarea">Tarea</option>
-                            <option value="reunion">Reunión</option>
-                            <option value="otro">Otro</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Color</label>
-                        <div class="color-picker">
-                            <div class="color-option primary selected" data-color="primary"></div>
-                            <div class="color-option success" data-color="success"></div>
-                            <div class="color-option warning" data-color="warning"></div>
-                            <div class="color-option danger" data-color="danger"></div>
-                            <div class="color-option info" data-color="info"></div>
-                        </div>
-                        <input type="hidden" id="evColor" name="color" value="primary">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="evNotif">Notificación</label>
-                        <select id="evNotif" name="notificacion_minutos">
-                            <option value="5">5 minutos antes</option>
-                            <option value="15" selected>15 minutos antes</option>
-                            <option value="30">30 minutos antes</option>
-                            <option value="60">1 hora antes</option>
-                            <option value="1440">1 día antes</option>
-                        </select>
-                    </div>
-                    
-                    <button type="submit" class="btn-create-event">
-                        <i class="bi bi-check2-circle" class="mr-8"></i>
-                        Crear Evento
-                    </button>
-            </form>
+    <!-- New event button -->
+    <button class="gc-new-btn" onclick="abrirModal({{ now_day }})">
+      <i class="bi bi-plus-lg"></i> Nuevo evento
+    </button>
+
+    <!-- Search -->
+    <div class="gc-search-wrap">
+      <input class="gc-search" type="text" id="gcSearch" placeholder="Buscar eventos..." oninput="filtrarEventos(this.value)">
+    </div>
+
+    <!-- Mini calendar -->
+    <div class="gc-mini">
+      <div class="gc-mini-header">
+        <span class="gc-mini-month" id="miniMonthLabel">{{ mes_nombre }} {{ año }}</span>
+        <div class="gc-mini-nav">
+          <button onclick="window.location='{{ url_for('solicitudes.calendario', year=mes_anterior.año, month=mes_anterior.mes) }}'" title="Mes anterior"><i class="bi bi-chevron-left"></i></button>
+          <button onclick="window.location='{{ url_for('solicitudes.calendario', year=mes_siguiente.año, month=mes_siguiente.mes) }}'" title="Mes siguiente"><i class="bi bi-chevron-right"></i></button>
         </div>
-        
-        <!-- TAB 2: Historial y Próximos Eventos -->
-        <div id="tabHistorialEventos" >
-            <div class="create-event-header">
-                <h3>
-                    <i class="bi bi-clock-history"></i>
-                    Próximos Eventos
-                </h3>
-            </div>
-            
-            <!-- Próximos eventos -->
-            <div id="proximosEventosList" class="cal-flex-list">
-                {% if proximos_eventos %}
-                    {% for evento in proximos_eventos %}
-                        <div class="cal-event-box" onclick="abrirDetalleEvento({{ evento.id }}, null)">
-                            <div class="cal-event-title">{{ evento.titulo }}</div>
-                            <div class="cal-event-sub">
-                                <i class="bi bi-clock"></i> {{ evento.fecha_inicio_formato }}
-                            </div>
-                            {% if evento.descripcion %}
-                                <div class="cal-event-desc">{{ evento.descripcion[:50] }}{% if evento.descripcion|length > 50 %}...{% endif %}</div>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="cal-empty">
-                        <div class="cal-empty-icon">📅</div>
-                        <div>No hay eventos próximos</div>
-                    </div>
-                {% endif %}
-            </div>
-            
-            <!-- Opción para agregar reunión virtual -->
-            <div class="cal-platform-wrap">
-                <h4 class="cal-platform-title">
-                    <i class="bi bi-camera-video"></i>
-                    Agregar Reunión Virtual
-                </h4>
-                
-                <div class="cal-platform-grid">
-                    <button type="button" class="cal-platform-btn meet" onclick="agregarPlataforma('meet')">
-                        <i class="bi bi-google" ></i>
-                        Google Meet
-                    </button>
-                    <button type="button" class="cal-platform-btn zoom" onclick="agregarPlataforma('zoom')">
-                        <i class="bi bi-camera-video" ></i>
-                        Zoom
-                    </button>
-                    <button type="button" class="cal-platform-btn teams" onclick="agregarPlataforma('teams')">
-                        <i class="bi bi-microsoft" ></i>
-                        Teams
-                    </button>
-                    <button type="button" class="cal-platform-btn other" onclick="agregarPlataforma('otra')">
-                        <i class="bi bi-plus-lg" ></i>
-                        Otra
-                    </button>
+      </div>
+      <div class="gc-mini-grid">
+        {% for d in ['L','M','M','J','V','S','D'] %}
+          <div class="gc-mini-wday">{{ d }}</div>
+        {% endfor %}
+        {# Leading empty cells (prev month) #}
+        {% set first_row = calendario[0] %}
+        {% set leading = first_row | select('equalto', 0) | list | length %}
+        {% for i in range(leading) %}
+          {% set d = prev_last_day - leading + i + 1 %}
+          <div class="gc-mini-day other-month">{{ d }}</div>
+        {% endfor %}
+        {# Current month days #}
+        {% for semana in calendario %}
+          {% for dia in semana %}
+            {% if dia != 0 %}
+              {% set is_today = (dia == now_day and mes == now_mes and año == now_año) %}
+              <div class="gc-mini-day{% if is_today %} today{% endif %}"
+                   onclick="abrirModal({{ dia }})">{{ dia }}</div>
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- CALENDARIOS -->
+    <div class="gc-section-label">Calendarios</div>
+    {% set cats = [
+      ('Trabajo',    '#6366f1', 'trabajo,reunion'),
+      ('Personal',   '#10b981', 'personal'),
+      ('Salud',      '#ef4444', 'salud'),
+      ('Social',     '#f59e0b', 'social,tarea'),
+      ('Focus time', '#8b5cf6', 'recordatorio,otro'),
+    ] %}
+    {% for nombre, color, filtros in cats %}
+    <div class="gc-cat-item" onclick="toggleCategoria(this)"
+         data-filter="{{ filtros }}" data-color="{{ color }}">
+      <div class="gc-cat-check" style="background:{{ color }};">
+        <i class="bi bi-check2" style="font-size:.6rem;"></i>
+      </div>
+      <span class="gc-cat-name">{{ nombre }}</span>
+    </div>
+    {% endfor %}
+
+    <!-- REUNIÓN VIRTUAL -->
+    <div class="gc-section-label">Reunión Virtual</div>
+    <a class="gc-meet-item" href="https://meet.google.com/new" target="_blank">
+      <i class="bi bi-google gc-meet-icon" style="color:#34a853;"></i>
+      <span class="gc-meet-name">Google Meet</span>
+    </a>
+    <a class="gc-meet-item" href="https://zoom.us/" target="_blank">
+      <i class="bi bi-camera-video gc-meet-icon" style="color:#2d8cff;"></i>
+      <span class="gc-meet-name">Zoom</span>
+    </a>
+    <a class="gc-meet-item" href="https://teams.microsoft.com/" target="_blank">
+      <i class="bi bi-microsoft gc-meet-icon" style="color:#6264a7;"></i>
+      <span class="gc-meet-name">Teams</span>
+    </a>
+    <div class="gc-meet-item" onclick="pedirUrlOtra()">
+      <i class="bi bi-link-45deg gc-meet-icon" style="color:var(--gc-muted);"></i>
+      <span class="gc-meet-name">Otra</span>
+    </div>
+
+    <!-- PRÓXIMOS EVENTOS -->
+    {% if proximos_eventos %}
+    <div class="gc-section-label">Próximos Eventos</div>
+    {% for ev in proximos_eventos[:6] %}
+    {% set color = CAT_COLORS.get(ev.categoria, '#a1a1aa') %}
+    <div class="gc-upcoming-item" style="border-left-color:{{ color }};"
+         onclick="mostrarPopover({{ ev.id }}, event)">
+      <div class="gc-upcoming-title">{{ ev.titulo }}</div>
+      <div class="gc-upcoming-meta">
+        <span>{{ ev.fecha_inicio_formato }}</span>
+      </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+  </aside><!-- /sidebar -->
+
+  <!-- ══════════════ MAIN ══════════════ -->
+  <div class="gc-main">
+
+    <!-- Top bar -->
+    <div class="gc-topbar">
+      <div class="gc-topbar-left">
+        <span class="gc-topbar-title">{{ mes_nombre }} {{ año }}</span>
+        <a class="gc-hoy-btn" href="{{ url_for('solicitudes.calendario') }}">Hoy</a>
+        <a class="gc-nav-btn" href="{{ url_for('solicitudes.calendario', year=mes_anterior.año, month=mes_anterior.mes) }}">
+          <i class="bi bi-chevron-left"></i>
+        </a>
+        <a class="gc-nav-btn" href="{{ url_for('solicitudes.calendario', year=mes_siguiente.año, month=mes_siguiente.mes) }}">
+          <i class="bi bi-chevron-right"></i>
+        </a>
+      </div>
+      <div class="gc-view-tabs">
+        <button class="gc-view-tab active" data-view="mes"    onclick="switchView('mes')">Mes</button>
+        <button class="gc-view-tab"        data-view="semana" onclick="switchView('semana')">Semana</button>
+        <button class="gc-view-tab"        data-view="dia"    onclick="switchView('dia')">Día</button>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="gc-grid-wrap" id="gcMonthView">
+      <!-- Weekday headers -->
+      <div class="gc-weekdays">
+        {% for d in ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'] %}
+          <div class="gc-wday">{{ d }}</div>
+        {% endfor %}
+      </div>
+
+      <!-- Days -->
+      <div class="gc-days" id="gcDays">
+        {# Leading days from prev month #}
+        {% set first_row = calendario[0] %}
+        {% set leading = [] %}
+        {% for d in first_row %}{% if d == 0 %}{% set _ = leading.append(d) %}{% endif %}{% endfor %}
+        {% set n_lead = leading | length %}
+        {% for i in range(n_lead) %}
+          {% set prev_day = prev_last_day - n_lead + i + 1 %}
+          <div class="gc-cell out-month" onclick="abrirModal(1)">
+            <div class="gc-cell-num">{{ prev_day }}</div>
+          </div>
+        {% endfor %}
+
+        {# Current month days #}
+        {% for semana in calendario %}
+          {% for dia in semana %}
+            {% if dia != 0 %}
+              {% set is_today = (dia == now_day and mes == now_mes and año == now_año) %}
+              {% set evs = eventos_por_dia.get(dia, []) %}
+              <div class="gc-cell{% if is_today %} is-today{% endif %}"
+                   onclick="abrirModal({{ dia }})"
+                   data-dia="{{ dia }}">
+                <div class="gc-cell-num">
+                  {% if is_today %}
+                    <span class="gc-today-circle">{{ dia }}</span>
+                  {% else %}
+                    {{ dia }}
+                  {% endif %}
                 </div>
-            </div>
-        </div>
+                <div class="gc-cell-events">
+                  {% for ev in evs[:3] %}
+                    {% set color = CAT_COLORS.get(ev.categoria, '#a1a1aa') %}
+                    <div class="gc-event-row"
+                         onclick="event.stopPropagation(); mostrarPopover({{ ev.id }}, event)"
+                         data-id="{{ ev.id }}"
+                         data-titulo="{{ ev.titulo | e }}"
+                         data-cat="{{ ev.categoria }}"
+                         data-color="{{ color }}"
+                         data-inicio="{{ ev.fecha_inicio }}"
+                         data-desc="{{ (ev.descripcion or '') | e }}">
+                      <div class="gc-event-bar" style="background:{{ color }};"></div>
+                      <span class="gc-event-time">
+                        {{ ev.fecha_inicio[11:16] if ev.fecha_inicio|length > 10 else '' }}
+                      </span>
+                      <span class="gc-event-title">{{ ev.titulo }}</span>
+                    </div>
+                  {% endfor %}
+                  {% if evs | length > 3 %}
+                    <div class="gc-more-link" onclick="event.stopPropagation();">
+                      +{{ evs | length - 3 }} más
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+
+        {# Trailing days from next month #}
+        {% set last_row = calendario[-1] %}
+        {% set trailing_count = last_row | select('equalto', 0) | list | length %}
+        {% for i in range(trailing_count) %}
+          <div class="gc-cell out-month" onclick="abrirModal({{ now_day }})">
+            <div class="gc-cell-num">{{ i + 1 }}</div>
+          </div>
+        {% endfor %}
+      </div>
     </div>
 
-<!-- Botón flotante para abrir panel (solo en mobile) -->
-<button class="floating-action-btn" onclick="toggleCreatePanel()" title="Crear nuevo evento" class="cal-hidden">
-    <i class="bi bi-plus-lg"></i>
-</button>
+    <!-- Week view (built by JS) -->
+    <div id="gcWeekView" style="display:none;"></div>
+    <!-- Day view (built by JS) -->
+    <div id="gcDayView" style="display:none;"></div>
 
-<!-- Notificaciones flotantes -->
-<div id="notificationsContainer"></div>
+  </div><!-- /main -->
+</div><!-- /shell -->
 
-<!-- Modal rápido para crear evento (al hacer click en un día) -->
-<div class="quick-event-overlay" id="quickEventModal">
-    <div class="quick-event-modal" onclick="event.stopPropagation()">
-        <div class="quick-event-header">
-            <h2>
-                <i class="bi bi-calendar-plus"></i>
-                Nuevo Evento
-            </h2>
-            <p id="quickEventDate">Selecciona una fecha</p>
-        </div>
-        
-        <form id="formQuickEvento" class="quick-event-form">
-            <div class="form-group">
-                <label for="quickEvTitulo">Evento</label>
-                <input type="text" id="quickEvTitulo" name="titulo" placeholder="Nombre del evento" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="quickEvHora">Hora</label>
-                <input type="time" id="quickEvHora" name="hora" value="09:00" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="quickEvDesc">Descripción</label>
-                <textarea id="quickEvDesc" name="descripcion" placeholder="Detalles del evento"></textarea>
-            </div>
-            
-            <input type="hidden" id="quickEvFecha" name="fecha_inicio">
-            
-            <div class="quick-event-actions">
-                <button type="button" class="quick-event-btn quick-event-btn-secondary" onclick="cerrarQuickModal()">
-                    Cancelar
-                </button>
-                <button type="submit" class="quick-event-btn quick-event-btn-primary">
-                    <i class="bi bi-check-circle" class="mr-8"></i>
-                    Crear
-                </button>
-            </div>
-        </form>
-    </div>
+<!-- Toasts -->
+<div id="gc-toasts"></div>
+
+<!-- ══════════════ EVENT DETAIL POPOVER ══════════════ -->
+<div id="gcPopover" class="gc-popover">
+  <div class="gc-pop-head">
+    <div class="gc-pop-color-bar" id="popColor"></div>
+    <div class="gc-pop-title" id="popTitle">-</div>
+    <button class="gc-pop-close" onclick="cerrarPopover()"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="gc-pop-row"><i class="bi bi-clock"></i><span id="popTime">-</span></div>
+  <div class="gc-pop-row" id="popDescRow" style="display:none;"><i class="bi bi-text-left"></i><span id="popDesc">-</span></div>
+  <div class="gc-pop-row"><i class="bi bi-tag"></i><span id="popCat">-</span></div>
+  <div class="gc-pop-actions">
+    <button class="gc-pop-btn gc-pop-complete" onclick="completarDesdePopover()">Completado</button>
+    <button class="gc-pop-btn gc-pop-delete" onclick="eliminarDesdePopover()">Eliminar</button>
+  </div>
 </div>
 
-<!-- Panel de detalles del evento -->
-<div id="eventDetailPanel" class="event-detail-panel">
-    <div class="event-detail-header">
-        <h2 class="event-detail-title" id="detailTitle">Evento</h2>
-        <button class="close-detail-btn" onclick="cerrarDetalleEvento()">
-            <i class="bi bi-x"></i>
-        </button>
+<!-- ══════════════ CREATE EVENT MODAL ══════════════ -->
+<div class="gc-overlay" id="gcOverlay">
+  <div class="gc-modal" onclick="event.stopPropagation()">
+    <div class="gc-modal-head">
+      <h2>Nuevo evento</h2>
+      <button class="gc-modal-close" onclick="cerrarModal()"><i class="bi bi-x-lg"></i></button>
     </div>
-    
-    <div id="detailContent" class="cal-hidden">
-        <div class="event-detail-item">
-            <div class="event-detail-label">⏰ Hora</div>
-            <div class="event-detail-value" id="detailTime">-</div>
+    <div class="gc-modal-body">
+      <form id="gcForm">
+        <div class="gc-field">
+          <label>Título</label>
+          <input type="text" id="gfTitulo" placeholder="Añade un título" required>
         </div>
-        
-        <div class="event-detail-item">
-            <div class="event-detail-label">📅 Fecha</div>
-            <div class="event-detail-value" id="detailDate">-</div>
+        <div class="gc-field gc-field-row">
+          <div>
+            <label>Inicio</label>
+            <input type="datetime-local" id="gfInicio" required>
+          </div>
+          <div>
+            <label>Fin</label>
+            <input type="datetime-local" id="gfFin">
+          </div>
         </div>
-        
-        <div class="event-detail-item" id="detailDescContainer" class="cal-hidden">
-            <div class="event-detail-label">📝 Descripción</div>
-            <div class="event-detail-value" id="detailDesc">-</div>
+        <div class="gc-field">
+          <label>Categoría</label>
+          <select id="gfCategoria">
+            <option value="reunion">Reunión</option>
+            <option value="trabajo">Trabajo</option>
+            <option value="personal">Personal</option>
+            <option value="tarea">Tarea</option>
+            <option value="salud">Salud</option>
+            <option value="social">Social</option>
+            <option value="recordatorio">Recordatorio</option>
+            <option value="otro">Otro</option>
+          </select>
         </div>
-        
-        <div class="event-detail-item">
-            <div class="event-detail-label">🏷️ Categoría</div>
-            <div class="event-detail-value" id="detailCategory">-</div>
+        <div class="gc-field">
+          <label>Descripción</label>
+          <textarea id="gfDesc" placeholder="Añade una descripción"></textarea>
         </div>
-        
-        <div class="event-detail-item">
-            <div class="event-detail-label">🔔 Notificación</div>
-            <div class="event-detail-value" id="detailNotification">-</div>
+        <div class="gc-field">
+          <label>Notificación</label>
+          <select id="gfNotif">
+            <option value="5">5 min antes</option>
+            <option value="15" selected>15 min antes</option>
+            <option value="30">30 min antes</option>
+            <option value="60">1 hora antes</option>
+            <option value="1440">1 día antes</option>
+          </select>
         </div>
-        
-        <div class="event-detail-actions">
-            <button class="event-action-btn event-action-complete" onclick="completarEventoDesdePanel()" id="btnCompleteDetail">
-                Marcar completado
-            </button>
-            <button class="event-action-btn event-action-delete" onclick="eliminarEventoDesdePanel()">
-                Eliminar
-            </button>
-        </div>
+      </form>
     </div>
+    <div class="gc-modal-footer">
+      <button class="gc-btn gc-btn-ghost" onclick="cerrarModal()">Cancelar</button>
+      <button class="gc-btn gc-btn-primary" onclick="guardarEvento()">
+        <i class="bi bi-check2"></i> Guardar
+      </button>
+    </div>
+  </div>
 </div>
 
 <script>
-    // ===== JAVASCRIPT: CALENDAR FUNCTIONALITY =====
-    
-    let selectedColor = 'primary';
-    let currentEventId = null;
-    
-    // Alternar panel de crear evento
-    function toggleCreatePanel() {
-        const panel = document.getElementById('createEventPanel');
-        panel.classList.toggle('show');
-    }
-    
-    // Abrir panel de crear evento
-    function abrirCreatePanel() {
-        document.getElementById('createEventPanel').classList.add('show');
-    }
-    
-    // Cerrar panel de crear evento
-    function cerrarCreatePanel() {
-        document.getElementById('createEventPanel').classList.remove('show');
-    }
-    
-    // ===== QUICK EVENT MODAL FUNCTIONS =====
-    
-    let selectedQuickDate = null;
-    
-    // Abrir modal rápido al hacer click en un día
-    function abrirQuickModal(dia) {
-        const mes = {{ mes }};
-        const año = {{ año }};
-        
-        // Crear fecha completa
-        const fecha = new Date(año, mes - 1, dia);
-        selectedQuickDate = fecha;
-        
-        // Mostrar fecha formateada
-        const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        const fechaFormato = fecha.toLocaleDateString('es-ES', opciones);
-        document.getElementById('quickEventDate').textContent = '📅 ' + fechaFormato;
-        
-        // Establecer la fecha oculta
-        document.getElementById('quickEvFecha').value = fecha.toISOString().split('T')[0];
-        
-        // Limpiar form
-        document.getElementById('formQuickEvento').reset();
-        document.getElementById('quickEvHora').value = '09:00';
-        
-        // Mostrar modal
-        document.getElementById('quickEventModal').classList.add('show');
-        document.getElementById('quickEvTitulo').focus();
-    }
-    
-    // Cerrar modal rápido
-    function cerrarQuickModal() {
-        document.getElementById('quickEventModal').classList.remove('show');
-        selectedQuickDate = null;
-    }
-    
-    // Crear evento desde modal rápido
-    const formQuick = document.getElementById('formQuickEvento');
-    if (formQuick) {
-        formQuick.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            if (!selectedQuickDate) return;
-            
-            const titulo = document.getElementById('quickEvTitulo').value;
-            const hora = document.getElementById('quickEvHora').value;
-            const descripcion = document.getElementById('quickEvDesc').value;
-            
-            // Crear datetime completo - CORRECCIÓN: usar zona local (no UTC)
-            const [hours, minutes] = hora.split(':');
-            const fechaInicio = new Date(selectedQuickDate);
-            fechaInicio.setHours(parseInt(hours), parseInt(minutes));
-            
-            // Convertir a ISO string local (sin conversión a UTC)
-            const año = fechaInicio.getFullYear();
-            const mes = String(fechaInicio.getMonth() + 1).padStart(2, '0');
-            const dia = String(fechaInicio.getDate()).padStart(2, '0');
-            const h = String(fechaInicio.getHours()).padStart(2, '0');
-            const m = String(fechaInicio.getMinutes()).padStart(2, '0');
-            const isoLocal = `${año}-${mes}-${dia}T${h}:${m}:00`;
-            
-            const formData = new FormData();
-            formData.append('titulo', titulo);
-            formData.append('descripcion', descripcion);
-            formData.append('fecha_inicio', isoLocal);
-            formData.append('fecha_fin', isoLocal);
-            formData.append('categoria', 'personal');
-            formData.append('color', 'primary');
-            formData.append('notificacion_minutos', 15);
-            
-            try {
-                const response = await fetch('{{ url_for("solicitudes.crear_evento") }}', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    // Reproducir sonido de notificación tipo iPhone
-                    reproducirSonidoNotificacion();
-                    showNotification('Evento creado', '✅ ' + data.message, 'success');
-                    cerrarQuickModal();
-                    setTimeout(() => location.reload(), 1000);
-                } else {
-                    reproducirSonidoNotificacion('error');
-                    showNotification('Error', '❌ ' + data.error, 'error');
-                }
-            } catch (error) {
-                showNotification('Error', '❌ No se pudo crear el evento', 'error');
-                console.error(error);
-            }
-        });
-    }
-    
-    // Cerrar modal al hacer click fuera
-    document.getElementById('quickEventModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            cerrarQuickModal();
-        }
-    });
-    
-    // Color picker
-    document.querySelectorAll('.color-option').forEach(option => {
-        option.addEventListener('click', function() {
-            document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
-            this.classList.add('selected');
-            selectedColor = this.dataset.color;
-            document.getElementById('evColor').value = selectedColor;
-        });
-    });
-    
-    // Form submission
-    const form = document.getElementById('formNuevoEvento');
-    if (form) {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = new FormData(e.target);
-            
-            try {
-                const response = await fetch('{{ url_for("solicitudes.crear_evento") }}', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    showNotification('Evento creado', '✅ ' + data.message, 'success');
-                    e.target.reset();
-                    selectedColor = 'primary';
-                    cerrarModalEvento();
-                    document.querySelector('.color-option.primary').classList.add('selected');
-                    
-                    // Recargar después de 1 segundo
-                    setTimeout(() => location.reload(), 1000);
-                } else {
-                    showNotification('Error', '❌ ' + data.error, 'error');
-                }
-            } catch (error) {
-                showNotification('Error', '❌ No se pudo crear el evento', 'error');
-                console.error(error);
-            }
-        });
-    }
-    
-    // Mostrar notificación flotante
-    function showNotification(title, text, type = 'info') {
-        const container = document.getElementById('notificationsContainer');
-        const notification = document.createElement('div');
-        notification.className = 'notification-toast show';
-        
-        const iconClass = type === 'success' ? 'bi-check-circle' : type === 'error' ? 'bi-exclamation-circle' : 'bi-info-circle';
-        
-        notification.innerHTML = `
-            <div class="notification-header">
-                <div class="notification-icon">
-                    <i class="bi ${iconClass}"></i>
-                </div>
-                <div class="notification-title">${title}</div>
-            </div>
-            <div class="notification-text">${text}</div>
-        `;
-        
-        container.appendChild(notification);
-        
-        // Auto-remove después de 4 segundos
-        setTimeout(() => {
-            notification.style.animation = 'slideIn 0.3s ease reverse';
-            setTimeout(() => notification.remove(), 300);
-        }, 4000);
-    }
-    
-    // Agregar plataforma de reunión virtual
-    function agregarPlataforma(plataforma) {
-        let url = '';
-        let titulo = '';
-        
-        switch(plataforma) {
-            case 'meet':
-                url = 'https://meet.google.com/new';
-                titulo = 'Google Meet';
-                break;
-            case 'zoom':
-                url = 'https://zoom.us/';
-                titulo = 'Zoom';
-                break;
-            case 'teams':
-                url = 'https://teams.microsoft.com/';
-                titulo = 'Microsoft Teams';
-                break;
-            case 'otra':
-                url = prompt('Ingresa la URL de la plataforma de reunión:');
-                if (!url) return;
-                titulo = 'Reunión Virtual';
-                break;
-        }
-        
-        showNotification('Plataforma', `✅ Abre ${titulo} en una nueva ventana`, 'success');
-        window.open(url, '_blank');
-    }
-    
-    // Abrir detalles del evento
-    function abrirDetalleEvento(eventoId, event) {
-        if (event) event.stopPropagation();
-        currentEventId = eventoId;
-        
-        // Obtener datos del evento
-        const eventos = {{ eventos_por_dia | tojson }};
-        let eventoEncontrado = null;
-        
-        for (let dia in eventos) {
-            for (let evento of eventos[dia]) {
-                if (evento.id === eventoId) {
-                    eventoEncontrado = evento;
-                    break;
-                }
-            }
-            if (eventoEncontrado) break;
-        }
-        
-        if (eventoEncontrado) {
-            // Llenar panel de detalles
-            document.getElementById('detailTitle').textContent = eventoEncontrado.titulo;
-            
-            const fechaInicio = new Date(eventoEncontrado.fecha_inicio);
-            document.getElementById('detailTime').textContent = fechaInicio.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('detailDate').textContent = fechaInicio.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            
-            if (eventoEncontrado.descripcion) {
-                document.getElementById('detailDesc').textContent = eventoEncontrado.descripcion;
-                document.getElementById('detailDescContainer').style.display = 'block';
-            } else {
-                document.getElementById('detailDescContainer').style.display = 'none';
-            }
-            
-            document.getElementById('detailCategory').textContent = eventoEncontrado.categoria.charAt(0).toUpperCase() + eventoEncontrado.categoria.slice(1);
-            document.getElementById('detailNotification').textContent = eventoEncontrado.notificacion_minutos + ' minutos antes';
-            
-            document.getElementById('detailContent').style.display = 'block';
-            document.getElementById('eventDetailPanel').classList.add('show');
-        }
-    }
-    
-    // Cerrar panel de detalles
-    function cerrarDetalleEvento() {
-        document.getElementById('eventDetailPanel').classList.remove('show');
-        currentEventId = null;
-    }
-    
-    // Completar evento desde el panel
-    async function completarEventoDesdePanel() {
-        if (!currentEventId) return;
-        
-        try {
-            const response = await fetch(`{{ url_for('solicitudes.completar_evento', evento_id=0) }}`.replace('/0/', '/' + currentEventId + '/'), {
-                method: 'POST'
-            });
-            
-            const data = await response.json();
-            if (data.success) {
-                showNotification('Éxito', '✅ Evento marcado como ' + (data.completado ? 'completado' : 'pendiente'), 'success');
-                cerrarDetalleEvento();
-                setTimeout(() => location.reload(), 1000);
-            }
-        } catch (error) {
-            showNotification('Error', '❌ No se pudo completar el evento', 'error');
-        }
-    }
-    
-    // Eliminar evento desde el panel
-    async function eliminarEventoDesdePanel() {
-        if (!currentEventId || !confirm('¿Eliminar este evento permanentemente?')) return;
-        
-        try {
-            const response = await fetch(`{{ url_for('solicitudes.eliminar_evento', evento_id=0) }}`.replace('/0/', '/' + currentEventId + '/'), {
-                method: 'POST'
-            });
-            
-            const data = await response.json();
-            if (data.success) {
-                showNotification('Éxito', '✅ Evento eliminado', 'success');
-                cerrarDetalleEvento();
-                setTimeout(() => location.reload(), 1000);
-            }
-        } catch (error) {
-            showNotification('Error', '❌ No se pudo eliminar el evento', 'error');
-        }
-    }
-    
-    // Cerrar panel al hacer clic fuera
-    document.addEventListener('click', function(event) {
-        const panel = document.getElementById('eventDetailPanel');
-        if (panel && !panel.contains(event.target) && !event.target.closest('.cell-event-badge')) {
-            cerrarDetalleEvento();
-        }
-    });
-    
-    // Mostrar eventos próximos
-    function mostrarEventosDia(dia, event) {
-        if (event) event.stopPropagation();
-    }
-    
-    // Actualizar lista de próximos eventos cada 30 segundos
-    async function actualizarProximosEventos() {
-        try {
-            const response = await fetch('{{ url_for("solicitudes.obtener_proximos_eventos") }}');
-            const eventos = await response.json();
-            const container = document.getElementById('proximosEventosList');
-            
-            if (eventos.length === 0) {
-                container.innerHTML = `
-                    <div class="cal-empty">
-                        <div class="cal-empty-icon">📅</div>
-                        <div>No hay eventos próximos</div>
-                    </div>
-                `;
-            } else {
-                container.innerHTML = eventos.map(evento => `
-                    <div class="cal-event-box" onclick="abrirDetalleEvento(${evento.id}, null)">
-                        <div class="cal-event-title">${evento.titulo}</div>
-                        <div class="cal-event-sub">
-                            <i class="bi bi-clock"></i> ${evento.fecha_inicio_formato}
-                        </div>
-                        ${evento.descripcion ? `<div class="cal-event-desc">${evento.descripcion.substring(0, 50)}${evento.descripcion.length > 50 ? '...' : ''}</div>` : ''}
-                    </div>
-                `).join('');
-            }
-        } catch (error) {
-            console.error('Error actualizando próximos eventos:', error);
-        }
-    }
-    
-    // Actualizar ahora y cada 30 segundos
-    actualizarProximosEventos();
-    setInterval(actualizarProximosEventos, 30000);
-    
-    // Inicializar panel en desktop
-    window.addEventListener('DOMContentLoaded', () => {
-        if (window.innerWidth > 1200) {
-            document.getElementById('createEventPanel').classList.add('show');
-        }
-        // Abrir detalle si se llega con ?open_event=ID
-        try {
-            const params = new URLSearchParams(window.location.search);
-            const openId = params.get('open_event');
-            if (openId) {
-                setTimeout(() => { if (typeof abrirDetalleEvento === 'function') abrirDetalleEvento(parseInt(openId), null); }, 500);
-            }
-        } catch {}
-    });
-    
-    // Monitorear cambios de tamaño
-    window.addEventListener('resize', () => {
-        const panel = document.getElementById('createEventPanel');
-        if (window.innerWidth > 1200) {
-            panel.classList.add('show');
-        } else if (window.innerWidth <= 768) {
-            panel.classList.remove('show');
-        }
-    });
-    
-    // ===== SONIDO DE NOTIFICACIÓN TIPO IPHONE =====
-    // Crear sonido sintetizado tipo notificación de iPhone
-    function reproducirSonidoNotificacion(tipo = 'success') {
-        try {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const ahora = audioContext.currentTime;
-            
-            if (tipo === 'success') {
-                // Sonido de éxito: dos notas ascendentes
-                const osc1 = audioContext.createOscillator();
-                const osc2 = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                osc1.frequency.setValueAtTime(1000, ahora);
-                osc2.frequency.setValueAtTime(1200, ahora);
-                
-                osc1.type = 'sine';
-                osc2.type = 'sine';
-                
-                gainNode.gain.setValueAtTime(0.25, ahora);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, ahora + 0.3);
-                
-                osc1.connect(gainNode);
-                osc2.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                osc1.start(ahora);
-                osc2.start(ahora + 0.1);
-                osc1.stop(ahora + 0.15);
-                osc2.stop(ahora + 0.25);
-            } else if (tipo === 'error') {
-                // Sonido de error: nota baja
-                const osc = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                osc.frequency.setValueAtTime(400, ahora);
-                osc.type = 'sine';
-                
-                gainNode.gain.setValueAtTime(0.25, ahora);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, ahora + 0.4);
-                
-                osc.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                osc.start(ahora);
-                osc.stop(ahora + 0.4);
-            }
-        } catch (error) {
-            console.log('Audio context no disponible, notificación visual solamente');
-        }
-    }
-    
-    // Reproducir sonido cuando el recordatorio se dispara
-    // Usar la función anterior cuando se verifiquen notificaciones
+const _MES  = {{ mes }};
+const _AÑO  = {{ año }};
+const _EVENTOS = {{ eventos_por_dia | tojson }};
+const _PROXIMOS = {{ proximos_eventos | tojson }};
+let _currentId = null;
+let _modalDia  = null;
+const _NOW_DAY = {{ now_day }};
+const _NOW_MES = {{ now_mes }};
+const _NOW_YEAR = {{ now_año }};
+const _activeCats = new Set(['trabajo','reunion','personal','salud','social','tarea','recordatorio','otro']);
 
+const CAT_COLORS = {
+  trabajo:'#6366f1', reunion:'#6366f1', personal:'#10b981',
+  salud:'#ef4444', social:'#f59e0b', tarea:'#f59e0b',
+  recordatorio:'#8b5cf6', otro:'#a1a1aa'
+};
 
+function pad(n){ return String(n).padStart(2,'0'); }
+function isoLocal(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00`; }
+
+// ── MODAL ──
+function abrirModal(dia) {
+  _modalDia = dia;
+  const f = new Date(_AÑO, _MES-1, dia, 9, 0);
+  const fEnd = new Date(_AÑO, _MES-1, dia, 10, 0);
+  document.getElementById('gfInicio').value = isoLocal(f);
+  document.getElementById('gfFin').value    = isoLocal(fEnd);
+  document.getElementById('gcForm').reset();
+  document.getElementById('gfInicio').value = isoLocal(f);
+  document.getElementById('gfFin').value    = isoLocal(fEnd);
+  document.getElementById('gcOverlay').classList.add('show');
+  setTimeout(()=>document.getElementById('gfTitulo').focus(), 60);
+}
+function cerrarModal() {
+  document.getElementById('gcOverlay').classList.remove('show');
+}
+document.getElementById('gcOverlay').addEventListener('click', e => { if(e.target===e.currentTarget) cerrarModal(); });
+
+async function guardarEvento() {
+  const titulo = document.getElementById('gfTitulo').value.trim();
+  const inicio = document.getElementById('gfInicio').value;
+  if(!titulo || !inicio){ toast('Completa el título y la fecha'); return; }
+  const fd = new FormData();
+  fd.append('titulo', titulo);
+  fd.append('descripcion', document.getElementById('gfDesc').value);
+  fd.append('fecha_inicio', inicio);
+  fd.append('fecha_fin', document.getElementById('gfFin').value || inicio);
+  fd.append('categoria', document.getElementById('gfCategoria').value);
+  fd.append('color', 'primary');
+  fd.append('notificacion_minutos', document.getElementById('gfNotif').value);
+  try {
+    const r = await fetch('{{ url_for("solicitudes.crear_evento") }}', {method:'POST', body:fd});
+    const d = await r.json();
+    if(d.success){ toast('Evento creado'); cerrarModal(); setTimeout(()=>location.reload(), 800); }
+    else toast('Error: ' + d.error);
+  } catch { toast('No se pudo crear el evento'); }
+}
+
+// ── POPOVER ──
+function _findEv(id){
+  for(const k in _EVENTOS) for(const e of _EVENTOS[k]) if(e.id===id) return e;
+  for(const e of _PROXIMOS) if(e.id===id) return e;
+  return null;
+}
+
+function mostrarPopover(id, e) {
+  e.stopPropagation();
+  _currentId = id;
+  const ev = _findEv(id); if(!ev) return;
+  const color = CAT_COLORS[ev.categoria] || '#a1a1aa';
+  document.getElementById('popColor').style.background = color;
+  document.getElementById('popTitle').textContent = ev.titulo;
+  const fi = new Date(ev.fecha_inicio);
+  document.getElementById('popTime').textContent =
+    fi.toLocaleString('es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  if(ev.descripcion){
+    document.getElementById('popDesc').textContent = ev.descripcion;
+    document.getElementById('popDescRow').style.display = 'flex';
+  } else {
+    document.getElementById('popDescRow').style.display = 'none';
+  }
+  const cat = ev.categoria || 'otro';
+  document.getElementById('popCat').textContent = cat.charAt(0).toUpperCase()+cat.slice(1);
+  const pop = document.getElementById('gcPopover');
+  pop.style.display = 'block';
+  // Position near click
+  const rect = { x: e.clientX, y: e.clientY };
+  const pw = 300; const ph = 200;
+  let left = rect.x + 8;
+  let top  = rect.y - 20;
+  if(left + pw > window.innerWidth - 8) left = rect.x - pw - 8;
+  if(top + ph > window.innerHeight - 8) top  = window.innerHeight - ph - 8;
+  pop.style.left = left + 'px';
+  pop.style.top  = top  + 'px';
+  pop.classList.add('show');
+}
+function cerrarPopover(){
+  document.getElementById('gcPopover').classList.remove('show');
+  _currentId = null;
+}
+document.addEventListener('click', e => {
+  const pop = document.getElementById('gcPopover');
+  if(pop && !pop.contains(e.target)) cerrarPopover();
+});
+
+async function completarDesdePopover(){
+  if(!_currentId) return;
+  const r = await fetch(`{{ url_for('solicitudes.completar_evento', evento_id=0) }}`.replace('/0/','/'+_currentId+'/'),{method:'POST'});
+  const d = await r.json();
+  if(d.success){ toast(d.completado?'Evento completado':'Evento pendiente'); cerrarPopover(); setTimeout(()=>location.reload(),800); }
+}
+async function eliminarDesdePopover(){
+  if(!_currentId||!confirm('¿Eliminar este evento?')) return;
+  const r = await fetch(`{{ url_for('solicitudes.eliminar_evento', evento_id=0) }}`.replace('/0/','/'+_currentId+'/'),{method:'POST'});
+  const d = await r.json();
+  if(d.success){ toast('Evento eliminado'); cerrarPopover(); setTimeout(()=>location.reload(),800); }
+}
+
+// ── SEARCH & FILTER ──
+function filtrarEventos() { applyFilters(); }
+
+function applyFilters() {
+  const q = (document.getElementById('gcSearch')?.value || '').toLowerCase();
+  document.querySelectorAll('.gc-event-row, .gcw-event, .gcd-event').forEach(row => {
+    const cat    = (row.dataset.cat || 'otro').trim();
+    const titulo = (row.dataset.titulo || '').toLowerCase();
+    row.style.display = (_activeCats.has(cat) && (!q || titulo.includes(q))) ? '' : 'none';
+  });
+}
+
+// ── CATEGORY TOGGLE ──
+function toggleCategoria(el) {
+  const filters = (el.dataset.filter || '').split(',').map(s => s.trim()).filter(Boolean);
+  const checkEl = el.querySelector('.gc-cat-check');
+  const color   = el.dataset.color || '#6366f1';
+  if (!el.classList.contains('cat-off')) {
+    el.classList.add('cat-off');
+    checkEl.style.background = 'transparent';
+    checkEl.style.border = `2px solid ${color}`;
+    checkEl.innerHTML = '';
+    filters.forEach(c => _activeCats.delete(c));
+  } else {
+    el.classList.remove('cat-off');
+    checkEl.style.background = color;
+    checkEl.style.border = '';
+    checkEl.innerHTML = '<i class="bi bi-check2" style="font-size:.6rem;"></i>';
+    filters.forEach(c => _activeCats.add(c));
+  }
+  applyFilters();
+}
+
+// ── VIEW SWITCHING ──
+function switchView(v) {
+  document.querySelectorAll('.gc-view-tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.view === v)
+  );
+  document.getElementById('gcMonthView').style.display = v === 'mes'    ? '' : 'none';
+  document.getElementById('gcWeekView').style.display  = v === 'semana' ? 'flex' : 'none';
+  document.getElementById('gcDayView').style.display   = v === 'dia'    ? 'flex' : 'none';
+  if (v === 'semana') buildSemanaView();
+  if (v === 'dia')    buildDiaView();
+}
+
+// ── WEEK & DAY VIEW BUILDERS ──
+const HOURS   = Array.from({length:15}, (_,i) => i + 7); // 7:00–21:00
+const SLOT_H  = 56;
+const D_SHORT = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const D_LONG  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const M_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                 'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+function getWeekDays() {
+  const isNow  = (_MES === _NOW_MES && _AÑO === _NOW_YEAR);
+  const anchor = isNow ? _NOW_DAY : 1;
+  const d0  = new Date(_AÑO, _MES - 1, anchor);
+  const dow = (d0.getDay() + 6) % 7; // Mon = 0
+  return Array.from({length:7}, (_,i) => new Date(_AÑO, _MES - 1, anchor - dow + i));
+}
+
+function _escape(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+}
+
+function _evBlock(ev, cls) {
+  const fi = new Date(ev.fecha_inicio);
+  const ff = ev.fecha_fin ? new Date(ev.fecha_fin) : new Date(fi.getTime() + 3600000);
+  const sh = fi.getHours() + fi.getMinutes() / 60;
+  const eh = ff.getHours() + ff.getMinutes() / 60;
+  if (sh < 7 || sh >= 22) return '';
+  const top    = (sh - 7) * SLOT_H;
+  const height = Math.max(22, (eh - sh) * SLOT_H);
+  const color  = CAT_COLORS[ev.categoria] || '#a1a1aa';
+  const te     = _escape(ev.titulo);
+  const de     = _escape(ev.descripcion);
+  return `<div class="${cls}" onclick="mostrarPopover(${ev.id},event)"
+    style="top:${top}px;height:${height}px;background:${color}18;border-left:3px solid ${color};"
+    data-id="${ev.id}" data-titulo="${te}" data-cat="${ev.categoria||'otro'}"
+    data-color="${color}" data-inicio="${ev.fecha_inicio}" data-desc="${de}">
+    <div class="${cls}-time">${pad(fi.getHours())}:${pad(fi.getMinutes())}</div>
+    <div class="${cls}-title">${te}</div>
+  </div>`;
+}
+
+function buildSemanaView() {
+  const days = getWeekDays();
+  let h = `<div class="gcw-header"><div class="gcw-gutter"></div>`;
+  days.forEach((d, i) => {
+    const isT = d.getDate()===_NOW_DAY && d.getMonth()+1===_NOW_MES && d.getFullYear()===_NOW_YEAR;
+    h += `<div class="gcw-dhead${isT?' gcw-today':''}">
+      <span class="gcw-dname">${D_SHORT[i]}</span>
+      <span class="gcw-dnum${isT?' gcw-dnum-today':''}">${d.getDate()}</span>
+    </div>`;
+  });
+  h += `</div><div class="gcw-body"><div class="gcw-timecol">`;
+  HOURS.forEach(hr => h += `<div class="gcw-hlabel">${pad(hr)}:00</div>`);
+  h += `</div>`;
+  days.forEach(d => {
+    const inMon = d.getMonth()+1 === _MES && d.getFullYear() === _AÑO;
+    const evs   = inMon ? (_EVENTOS[d.getDate()] || []) : [];
+    const isT   = d.getDate()===_NOW_DAY && d.getMonth()+1===_NOW_MES && d.getFullYear()===_NOW_YEAR;
+    h += `<div class="gcw-daycol${isT?' gcw-col-today':''}">`;
+    HOURS.forEach(() => h += `<div class="gcw-hslot"></div>`);
+    evs.forEach(ev => { h += _evBlock(ev, 'gcw-event'); });
+    h += `</div>`;
+  });
+  h += `</div>`;
+  document.getElementById('gcWeekView').innerHTML = h;
+  applyFilters();
+}
+
+function buildDiaView() {
+  const isNow = (_MES === _NOW_MES && _AÑO === _NOW_YEAR);
+  const day   = isNow ? _NOW_DAY : 1;
+  const evs   = _EVENTOS[day] || [];
+  const date  = new Date(_AÑO, _MES - 1, day);
+  let h = `<div class="gcd-header"><div class="gcw-gutter"></div>
+    <div class="gcd-dhead">
+      <span class="gcd-dname">${D_LONG[date.getDay()]}, ${day} de ${M_NAMES[_MES-1]} ${_AÑO}</span>
+    </div>
+  </div>
+  <div class="gcw-body" style="grid-template-columns:60px 1fr;">
+    <div class="gcw-timecol">`;
+  HOURS.forEach(hr => h += `<div class="gcw-hlabel">${pad(hr)}:00</div>`);
+  h += `</div><div class="gcd-daycol">`;
+  HOURS.forEach(() => h += `<div class="gcw-hslot"></div>`);
+  evs.forEach(ev => { h += _evBlock(ev, 'gcd-event'); });
+  if (!evs.length) h += `<div class="gcd-empty">Sin eventos para este día</div>`;
+  h += `</div></div>`;
+  document.getElementById('gcDayView').innerHTML = h;
+  applyFilters();
+}
+
+// ── PLATFORMS ──
+function pedirUrlOtra(){
+  const url = prompt('URL de la plataforma de reunión:');
+  if(url) window.open(url,'_blank');
+}
+
+// ── TOAST ──
+function toast(msg){
+  const c = document.getElementById('gc-toasts');
+  const el = document.createElement('div'); el.className='gc-toast';
+  el.textContent = msg; c.appendChild(el);
+  setTimeout(()=>{ el.style.transition='opacity .3s'; el.style.opacity='0'; setTimeout(()=>el.remove(),300); }, 3500);
+}
+
+// Open from URL param
+window.addEventListener('DOMContentLoaded', ()=>{
+  try {
+    const id = new URLSearchParams(window.location.search).get('open_event');
+    if(id) setTimeout(()=>mostrarPopover(parseInt(id),{clientX:window.innerWidth/2, clientY:200, stopPropagation:()=>{}}),400);
+  } catch {}
+});
 </script>
-
 {% endblock %}
-

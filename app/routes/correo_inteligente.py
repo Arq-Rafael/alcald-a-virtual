@@ -554,6 +554,57 @@ def analytics_api():
     })
 
 
+@correo_inteligente_bp.route('/api/message/<int:message_id>/add-to-calendar', methods=['POST'])
+def add_to_calendar(message_id):
+    denial = _require_session_and_permission()
+    if denial:
+        return jsonify({'error': 'unauthorized'}), 401
+
+    msg = _get_message_for_user(message_id)
+    if not msg:
+        return jsonify({'error': 'not_found'}), 404
+
+    payload = request.get_json(silent=True) or {}
+    titulo = (payload.get('titulo') or msg.asunto or 'Evento sin título').strip()[:200]
+    descripcion = (payload.get('descripcion') or '').strip()
+    fecha_inicio_str = (payload.get('fecha_inicio') or '').strip()
+    fecha_fin_str = (payload.get('fecha_fin') or '').strip()
+    categoria = (payload.get('categoria') or 'reunion').strip()
+    ubicacion = (payload.get('ubicacion') or '').strip()
+
+    if not fecha_inicio_str:
+        return jsonify({'success': False, 'error': 'La fecha de inicio es obligatoria'}), 400
+
+    try:
+        fecha_inicio = datetime.fromisoformat(fecha_inicio_str)
+    except ValueError:
+        return jsonify({'success': False, 'error': 'Formato de fecha incorrecto'}), 400
+
+    fecha_fin = None
+    if fecha_fin_str:
+        try:
+            fecha_fin = datetime.fromisoformat(fecha_fin_str)
+        except ValueError:
+            pass
+
+    from app.models.calendario import EventoCalendario
+    usuario_id = session.get('usuario_id', 'anonimo')
+    evento = EventoCalendario(
+        usuario_id=usuario_id,
+        titulo=titulo,
+        descripcion=descripcion or None,
+        fecha_inicio=fecha_inicio,
+        fecha_fin=fecha_fin,
+        categoria=categoria,
+        ubicacion=ubicacion or None,
+        color='primary',
+    )
+    db.session.add(evento)
+    db.session.commit()
+
+    return jsonify({'success': True, 'evento_id': evento.id, 'titulo': evento.titulo})
+
+
 def _build_trend_last_7_days(account_id):
     today = datetime.utcnow().date()
     labels = [(today - timedelta(days=offset)) for offset in range(6, -1, -1)]

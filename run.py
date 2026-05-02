@@ -9,9 +9,9 @@ except ImportError:
     # En Railway, dotenv no está disponible (no es necesario)
     pass
 
-print("🚀 [RAILWAY] Iniciando aplicación desde run.py...")
+print("[RAILWAY] Iniciando aplicacion desde run.py...")
 app = create_app()
-print("✅ [RAILWAY] Aplicación creada correctamente.")
+print("[RAILWAY] Aplicacion creada correctamente.")
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
