@@ -2,25 +2,32 @@
 {% block title %}Participación Ciudadana - Alcaldía Virtual Supatá{% endblock %}
 
 {% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-glass-2026.css') }}">
 <link href="{{ url_for('static', filename='css/participacion-ios26.css') }}" rel="stylesheet" />
 {% endblock %}
 
 {% block content %}
-<div class="participacion-container">
-    <!-- HEADER -->
-    <div class="participacion-header">
-        <div>
-            <h1><i class="bi bi-file-earmark-check me-2"></i>Participación Ciudadana</h1>
-        </div>
-        <div class="header-actions">
-            {% if puede_radicar %}
-            <button class="btn-radicar-nuevo" id="btnRadicarNuevo" onclick="abrirModalRadicar()">
-                <i class="bi bi-plus-circle"></i>
-                Radicar Nuevo
-            </button>
-            {% endif %}
-        </div>
+<div class="lg-module">
+
+  <!-- ── BANNER ── -->
+  <div class="lg-mod-banner lg-banner--rose">
+    <div class="lg-mod-banner-left">
+      <div class="lg-mod-banner-icon"><i class="bi bi-people-fill"></i></div>
+      <div class="lg-mod-banner-text">
+        <h1 class="lg-mod-banner-title">Participación Ciudadana</h1>
+        <p class="lg-mod-banner-sub">PQRS y derechos de petición · Alcaldía Municipal de Supatá</p>
+      </div>
     </div>
+    <div class="lg-mod-banner-actions">
+      {% if puede_radicar %}
+      <button class="lg-mod-banner-btn lg-mod-banner-btn--solid" onclick="abrirModalRadicar()">
+        <i class="bi bi-plus-circle-fill"></i> Radicar Nuevo
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+<div class="participacion-container">
 
     <!-- ESTADÍSTICAS RÁPIDAS -->
     <div class="stats-grid">
@@ -548,4 +555,6 @@
     document.head.appendChild(style);
 </script>
 
+</div>{# /participacion-container #}
+</div>{# /lg-module #}
 {% endblock %}

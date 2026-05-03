@@ -1,322 +1,149 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Plataforma de Licencias Urbanísticas — Supatá</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --azul:#0f4c81;--azul2:#1565c0;--azul3:#0ea5e9;
-  --verde:#0d3320;--dorado:#b8860b;--dorado2:#d4a017;
-}
-html,body{height:100%;font-family:'Inter',sans-serif;overflow:hidden}
+{% extends "base.html" %}
+{% block title %}Licencias Urbanísticas — Alcaldía Virtual Supatá{% endblock %}
 
-/* ── Fondo ── */
-.bg{
-  position:fixed;inset:0;
-  background:linear-gradient(145deg,#060e20 0%,#0a1f3d 40%,#0f2d4a 70%,#091825 100%);
-}
-.bg::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 80% 60% at 50% -10%, rgba(14,165,233,.15) 0%, transparent 70%);
-}
-.stars{position:absolute;inset:0;overflow:hidden}
-.star{
-  position:absolute;border-radius:50%;background:#fff;
-  animation:twinkle var(--d,3s) ease-in-out infinite;
-  opacity:0;
-}
-@keyframes twinkle{0%,100%{opacity:0}50%{opacity:var(--op,.8)}}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-glass-2026.css') }}">
+{% endblock %}
 
-/* ── Layout ── */
-.wrap{
-  position:relative;z-index:10;height:100vh;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:0;padding:24px;
-}
+{% block content %}
+<div class="lg-module">
 
-/* ── Escudo / ícono ── */
-.escudo{
-  width:100px;height:100px;border-radius:50%;
-  background:linear-gradient(135deg,var(--azul) 0%,var(--azul2) 60%,var(--azul3) 100%);
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 0 0 1px rgba(255,255,255,.12), 0 8px 32px rgba(15,76,129,.5),
-             0 0 60px rgba(14,165,233,.2);
-  margin-bottom:28px;
-  animation:pulse-ring 3s ease-in-out infinite;
-}
-.escudo i{font-size:42px;color:#fff;opacity:.95}
-@keyframes pulse-ring{
-  0%,100%{box-shadow:0 0 0 1px rgba(255,255,255,.12),0 8px 32px rgba(15,76,129,.5),0 0 60px rgba(14,165,233,.2)}
-  50%{box-shadow:0 0 0 1px rgba(255,255,255,.2),0 8px 40px rgba(15,76,129,.7),0 0 100px rgba(14,165,233,.35)}
-}
-
-/* ── Texto ── */
-.eyebrow{
-  font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;
-  color:var(--azul3);margin-bottom:10px;
-}
-.title{
-  font-size:clamp(26px,4vw,42px);font-weight:800;color:#fff;
-  text-align:center;line-height:1.15;margin-bottom:8px;
-  text-shadow:0 2px 20px rgba(14,165,233,.3);
-}
-.subtitle{
-  font-size:15px;font-weight:400;color:rgba(255,255,255,.5);
-  text-align:center;margin-bottom:40px;letter-spacing:.3px;
-}
-
-/* ── Tarjetas de acceso ── */
-.cards{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-bottom:36px}
-.card{
-  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
-  border-radius:16px;padding:28px 32px;width:220px;cursor:pointer;
-  text-decoration:none;
-  display:flex;flex-direction:column;align-items:center;gap:12px;
-  transition:all .25s ease;
-  backdrop-filter:blur(12px);
-}
-.card:hover{
-  background:rgba(255,255,255,.1);border-color:rgba(14,165,233,.5);
-  transform:translateY(-4px);
-  box-shadow:0 12px 40px rgba(14,165,233,.2);
-}
-.card .c-icon{
-  width:52px;height:52px;border-radius:12px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:22px;color:#fff;
-}
-.card .c-icon.azul{background:linear-gradient(135deg,var(--azul),var(--azul2))}
-.card .c-icon.verde{background:linear-gradient(135deg,#0d3320,#1a5c38)}
-.card .c-icon.gold{background:linear-gradient(135deg,#7a5a00,var(--dorado2))}
-.card .c-icon.teal{background:linear-gradient(135deg,#006064,#00838f)}
-.card .c-title{font-size:13px;font-weight:700;color:#fff;text-align:center;line-height:1.3}
-.card .c-desc{font-size:11px;color:rgba(255,255,255,.45);text-align:center;line-height:1.4}
-
-/* ── Divisor ── */
-.divider{
-  width:100%;max-width:680px;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);
-  margin-bottom:20px;
-}
-
-/* ── Pie ── */
-.footer-bar{
-  display:flex;align-items:center;gap:24px;
-  font-size:11px;color:rgba(255,255,255,.3);
-  flex-wrap:wrap;justify-content:center;
-}
-.footer-bar a{color:rgba(255,255,255,.3);text-decoration:none}
-.footer-bar a:hover{color:rgba(255,255,255,.6)}
-.dot{opacity:.4}
-
-/* ── Modal tratamiento ── */
-.modal-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.75);
-  display:flex;align-items:center;justify-content:center;
-  z-index:1000;backdrop-filter:blur(6px);
-  animation:fade-in .3s ease;
-}
-.modal-overlay.hidden{display:none}
-@keyframes fade-in{from{opacity:0}to{opacity:1}}
-.modal{
-  background:linear-gradient(160deg,#0d1f3c 0%,#0a1528 100%);
-  border:1px solid rgba(255,255,255,.12);border-radius:20px;
-  padding:40px 36px;max-width:520px;width:90%;
-  box-shadow:0 24px 60px rgba(0,0,0,.6);
-  animation:slide-up .35s ease;
-}
-@keyframes slide-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.modal-logo{
-  width:56px;height:56px;border-radius:12px;
-  background:linear-gradient(135deg,var(--azul),var(--azul3));
-  display:flex;align-items:center;justify-content:center;
-  font-size:24px;color:#fff;margin:0 auto 20px;
-}
-.modal h2{
-  font-size:20px;font-weight:700;color:#fff;
-  text-align:center;margin-bottom:6px;
-}
-.modal .modal-sub{
-  font-size:12px;color:rgba(255,255,255,.4);
-  text-align:center;margin-bottom:24px;letter-spacing:.3px;
-}
-.modal-body{
-  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
-  border-radius:10px;padding:18px;font-size:12.5px;
-  color:rgba(255,255,255,.65);line-height:1.7;max-height:200px;overflow-y:auto;
-  margin-bottom:20px;
-}
-.modal-body strong{color:rgba(255,255,255,.85)}
-.modal-body p{margin-bottom:8px}
-.modal-body p:last-child{margin-bottom:0}
-.modal-check{
-  display:flex;align-items:flex-start;gap:10px;
-  font-size:12.5px;color:rgba(255,255,255,.7);
-  margin-bottom:20px;cursor:pointer;
-}
-.modal-check input{margin-top:2px;cursor:pointer;accent-color:var(--azul3)}
-.btn-aceptar{
-  width:100%;padding:14px;border:none;border-radius:10px;
-  background:linear-gradient(135deg,var(--azul),var(--azul2));
-  color:#fff;font-size:14px;font-weight:700;
-  cursor:pointer;transition:all .2s;
-  opacity:.45;pointer-events:none;
-}
-.btn-aceptar.active{opacity:1;pointer-events:all}
-.btn-aceptar.active:hover{
-  background:linear-gradient(135deg,var(--azul2),var(--azul3));
-  transform:translateY(-1px);
-}
-
-/* ── Usuario badge ── */
-.user-badge{
-  position:fixed;top:20px;right:24px;z-index:20;
-  display:flex;align-items:center;gap:10px;
-  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
-  border-radius:50px;padding:8px 16px;
-  font-size:12px;color:rgba(255,255,255,.7);
-  backdrop-filter:blur(10px);
-}
-.user-badge i{color:var(--azul3)}
-.back-btn{
-  position:fixed;top:20px;left:24px;z-index:20;
-  display:flex;align-items:center;gap:8px;
-  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
-  border-radius:50px;padding:8px 16px;
-  font-size:12px;color:rgba(255,255,255,.6);
-  text-decoration:none;backdrop-filter:blur(10px);
-  transition:all .2s;
-}
-.back-btn:hover{background:rgba(255,255,255,.12);color:#fff}
-
-@media(max-width:600px){
-  .cards{flex-direction:column;align-items:center}
-  .card{width:100%;max-width:300px}
-  .escudo{width:80px;height:80px}
-  .escudo i{font-size:32px}
-}
-</style>
-</head>
-<body>
-
-<!-- Fondo con estrellas -->
-<div class="bg">
-  <div class="stars" id="stars"></div>
-</div>
-
-<!-- Badge usuario -->
-<a href="/dashboard" class="back-btn"><i class="fas fa-arrow-left"></i> Panel de Inicio</a>
-<div class="user-badge"><i class="fas fa-user-shield"></i> {{ session.get('user','') }} — Planeación</div>
-
-<!-- Modal tratamiento de datos -->
-<div class="modal-overlay" id="modalDatos">
-  <div class="modal">
-    <div class="modal-logo"><i class="fas fa-shield-halved"></i></div>
-    <h2>Tratamiento de Datos Personales</h2>
-    <p class="modal-sub">PLATAFORMA DE LICENCIAS URBANÍSTICAS — SUPATÁ</p>
-    <div class="modal-body">
-      <p><strong>Responsable del tratamiento:</strong> Alcaldía Municipal de Supatá — Secretaría de Planeación.</p>
-      <p><strong>Finalidad:</strong> Los datos personales recopilados en esta plataforma serán utilizados exclusivamente para la gestión, trámite y seguimiento de licencias urbanísticas conforme al EOT del Municipio de Supatá (Acuerdo N° 14 del 13 Sep 2023) y la normativa nacional vigente (Ley 388 de 1997 y Decreto 1077 de 2015).</p>
-      <p><strong>Datos recolectados:</strong> Nombre, documento de identidad, datos de contacto, información predial y catastral, y datos técnicos del proyecto urbanístico.</p>
-      <p><strong>Derechos del titular:</strong> Usted tiene derecho a conocer, actualizar, rectificar y suprimir sus datos, así como a revocar la autorización otorgada. Puede ejercer estos derechos mediante comunicación escrita dirigida a la Secretaría de Planeación.</p>
-      <p><strong>Base legal:</strong> Ley 1581 de 2012 y sus decretos reglamentarios. La recolección de datos para trámites ante entidades públicas está autorizada sin necesidad de consentimiento expreso conforme al artículo 10 literal c) de la Ley 1581 de 2012.</p>
+  <!-- ── BANNER ── -->
+  <div class="lg-mod-banner lg-banner--teal">
+    <div class="lg-mod-banner-left">
+      <div class="lg-mod-banner-icon"><i class="bi bi-buildings-fill"></i></div>
+      <div class="lg-mod-banner-text">
+        <h1 class="lg-mod-banner-title">Licencias Urbanísticas</h1>
+        <p class="lg-mod-banner-sub">Plataforma de radicación y seguimiento · Secretaría de Planeación · Supatá</p>
+      </div>
     </div>
-    <label class="modal-check">
-      <input type="checkbox" id="chk-acepto" onchange="toggleAceptar()">
+    <div class="lg-mod-banner-actions">
+      <a href="/licencias/radicar" class="lg-mod-banner-btn lg-mod-banner-btn--solid">
+        <i class="bi bi-plus-circle-fill"></i> Nueva Radicación
+      </a>
+      <a href="/licencias/plataforma" class="lg-mod-banner-btn">
+        <i class="bi bi-table"></i> Ver Expedientes
+      </a>
+    </div>
+  </div>
+
+  <!-- ── HERRAMIENTAS ── -->
+  <div class="lg-section-label">
+    <i class="bi bi-tools"></i> Módulos de la plataforma
+  </div>
+  <div class="lg-tool-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px,1fr));">
+
+    <div class="lg-tool-card">
+      <div class="lg-tool-icon lg-icon-blue"><i class="bi bi-pencil-square"></i></div>
+      <div class="lg-tool-name">Nueva Radicación</div>
+      <div class="lg-tool-desc">Radicar solicitud de licencia urbanística nueva o de ampliación</div>
+      <a href="/licencias/radicar" class="lg-tool-btn lg-tool-btn--blue">
+        Radicar <i class="bi bi-arrow-up-right"></i>
+      </a>
+    </div>
+
+    <div class="lg-tool-card">
+      <div class="lg-tool-icon lg-icon-emerald"><i class="bi bi-list-check"></i></div>
+      <div class="lg-tool-name">Ver Expedientes</div>
+      <div class="lg-tool-desc">Gestionar expedientes activos y buscar radicados por número</div>
+      <a href="/licencias/plataforma" class="lg-tool-btn lg-tool-btn--green">
+        Abrir <i class="bi bi-arrow-up-right"></i>
+      </a>
+    </div>
+
+    <div class="lg-tool-card">
+      <div class="lg-tool-icon lg-icon-amber"><i class="bi bi-file-earmark-text-fill"></i></div>
+      <div class="lg-tool-name">Acta de Observaciones</div>
+      <div class="lg-tool-desc">Generar acta técnica de observaciones para un expediente</div>
+      <a href="/licencias/acta" class="lg-tool-btn lg-tool-btn--orange">
+        Generar acta <i class="bi bi-arrow-up-right"></i>
+      </a>
+    </div>
+
+    <div class="lg-tool-card">
+      <div class="lg-tool-icon lg-icon-teal"><i class="bi bi-search"></i></div>
+      <div class="lg-tool-name">Revisión / Subsanación</div>
+      <div class="lg-tool-desc">Resolución de aprobación, negación o subsanación de documentos</div>
+      <a href="/licencias/subsanacion" class="lg-tool-btn" style="background:linear-gradient(135deg,#0EA5E9,#0284C7); color:#fff !important; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; height:42px; border-radius:12px; font-size:.88rem; font-weight:700; text-decoration:none !important; transition:transform .15s, opacity .15s;">
+        Revisar <i class="bi bi-arrow-up-right"></i>
+      </a>
+    </div>
+
+    <div class="lg-tool-card">
+      <div class="lg-tool-icon lg-icon-violet"><i class="bi bi-calculator-fill"></i></div>
+      <div class="lg-tool-name">Liquidador de Delineación</div>
+      <div class="lg-tool-desc">Calcular liquidación del impuesto de delineación urbana</div>
+      <a href="/licencias/liquidador" class="lg-tool-btn lg-tool-btn--violet">
+        Calcular <i class="bi bi-arrow-up-right"></i>
+      </a>
+    </div>
+
+  </div>
+
+  <!-- ── INFO LEGAL ── -->
+  <div class="lg-alert-list" style="margin-top: 1rem;">
+    <div class="lg-alert-item">
+      <div class="lg-alert-icon" style="background:linear-gradient(135deg,#0f4c81,#0ea5e9)"><i class="bi bi-info-circle-fill"></i></div>
+      <div class="lg-alert-body">
+        <p class="lg-alert-name">Marco normativo</p>
+        <p class="lg-alert-sub">EOT Supatá — Acuerdo N° 14 del 13 Sep 2023 · Ley 388/1997 · Decreto 1077/2015</p>
+      </div>
+      <a href="#" class="lg-alert-action" onclick="document.getElementById('modalDatos').classList.remove('hidden'); return false;">
+        Política de datos
+      </a>
+    </div>
+  </div>
+
+</div>{# /lg-module #}
+
+<!-- ── MODAL TRATAMIENTO DE DATOS ── -->
+<div class="modal-overlay" id="modalDatos" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); display:flex; align-items:center; justify-content:center; z-index:1050; backdrop-filter:blur(6px);">
+  <div style="background:#fff; border-radius:20px; padding:36px; max-width:520px; width:90%; box-shadow:0 24px 60px rgba(0,0,0,.3);">
+    <div style="width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#0f4c81,#0ea5e9);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;margin:0 auto 16px;">
+      <i class="bi bi-shield-fill-check"></i>
+    </div>
+    <h2 style="text-align:center;font-size:1.2rem;font-weight:800;margin-bottom:4px;">Tratamiento de Datos Personales</h2>
+    <p style="text-align:center;font-size:.8rem;color:#64748b;margin-bottom:20px;">PLATAFORMA DE LICENCIAS URBANÍSTICAS — SUPATÁ</p>
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;font-size:.82rem;color:#475569;line-height:1.7;max-height:200px;overflow-y:auto;margin-bottom:18px;">
+      <p><strong>Responsable:</strong> Alcaldía Municipal de Supatá — Secretaría de Planeación.</p>
+      <p><strong>Finalidad:</strong> Los datos personales recopilados serán utilizados para la gestión de licencias urbanísticas conforme al EOT 2023 y normativa nacional (Ley 388/1997, Decreto 1077/2015).</p>
+      <p><strong>Datos recolectados:</strong> Nombre, documento, datos de contacto, información predial y datos técnicos del proyecto urbanístico.</p>
+      <p><strong>Derechos:</strong> Puede conocer, actualizar, rectificar y suprimir sus datos mediante comunicación a la Secretaría de Planeación. Base legal: Ley 1581 de 2012.</p>
+    </div>
+    <label style="display:flex;align-items:flex-start;gap:10px;font-size:.82rem;color:#475569;margin-bottom:18px;cursor:pointer;">
+      <input type="checkbox" id="chk-acepto" onchange="toggleAceptar()" style="margin-top:2px;cursor:pointer;accent-color:#0f4c81;">
       He leído y entiendo el tratamiento de mis datos personales en esta plataforma.
     </label>
-    <button class="btn-aceptar" id="btn-aceptar" onclick="aceptarDatos()">
-      <i class="fas fa-check-circle"></i> Aceptar e Ingresar a la Plataforma
+    <button id="btn-aceptar" onclick="aceptarDatos()" style="width:100%;padding:13px;border:none;border-radius:10px;background:linear-gradient(135deg,#0f4c81,#0ea5e9);color:#fff;font-size:.9rem;font-weight:700;cursor:pointer;opacity:.45;pointer-events:none;transition:opacity .2s;">
+      <i class="bi bi-check-circle-fill"></i> Aceptar e Ingresar
     </button>
   </div>
 </div>
+{% endblock %}
 
-<!-- Contenido principal -->
-<div class="wrap">
-
-  <div class="escudo"><i class="fas fa-file-contract"></i></div>
-
-  <div class="eyebrow">Secretaría de Planeación · Supatá</div>
-  <h1 class="title">Plataforma de Licencias<br>Urbanísticas</h1>
-  <p class="subtitle">Sistema integrado de radicación y seguimiento de trámites</p>
-
-  <div class="cards">
-    <a href="/licencias/radicar" class="card">
-      <div class="c-icon azul"><i class="fas fa-pen-to-square"></i></div>
-      <span class="c-title">Nueva Radicación</span>
-      <span class="c-desc">Radicar solicitud de licencia urbanística</span>
-    </a>
-    <a href="/licencias/plataforma" class="card">
-      <div class="c-icon verde"><i class="fas fa-table-list"></i></div>
-      <span class="c-title">Ver Expedientes</span>
-      <span class="c-desc">Gestionar expedientes activos y buscar radicados</span>
-    </a>
-    <a href="/licencias/acta" class="card">
-      <div class="c-icon gold"><i class="fas fa-file-lines"></i></div>
-      <span class="c-title">Acta de Observaciones</span>
-      <span class="c-desc">Generar acta técnica de observaciones</span>
-    </a>
-    <a href="/licencias/subsanacion" class="card">
-      <div class="c-icon teal"><i class="fas fa-magnifying-glass-chart"></i></div>
-      <span class="c-title">Revisión / Subsanación</span>
-      <span class="c-desc">Resolución de aprobación o negación</span>
-    </a>
-    <a href="/licencias/liquidador" class="card">
-      <div class="c-icon" style="background:linear-gradient(135deg,#4a1942,#7b2d8b)"><i class="fas fa-calculator"></i></div>
-      <span class="c-title">Liquidador de Delineación</span>
-      <span class="c-desc">Calcular liquidación de impuesto de delineación urbana</span>
-    </a>
-  </div>
-
-  <div class="divider"></div>
-
-  <div class="footer-bar">
-    <span><i class="fas fa-building-columns"></i> Alcaldía Municipal de Supatá</span>
-    <span class="dot">·</span>
-    <span>Plataforma v8.0 · EOT 2023</span>
-  </div>
-
-</div>
-
+{% block scripts %}
 <script>
-// Estrellas animadas
-(function(){
-  var s=document.getElementById('stars');
-  for(var i=0;i<120;i++){
-    var el=document.createElement('div');
-    el.className='star';
-    var size=Math.random()*2.5+.5;
-    el.style.cssText=[
-      'width:'+size+'px','height:'+size+'px',
-      'top:'+Math.random()*100+'%','left:'+Math.random()*100+'%',
-      '--d:'+(Math.random()*4+2)+'s',
-      '--op:'+(Math.random()*.7+.2),
-      'animation-delay:'+(Math.random()*5)+'s'
-    ].join(';');
-    s.appendChild(el);
-  }
-})();
-
-// Modal tratamiento
-function toggleAceptar(){
-  var btn=document.getElementById('btn-aceptar');
-  btn.classList.toggle('active', document.getElementById('chk-acepto').checked);
+function toggleAceptar() {
+  var btn = document.getElementById('btn-aceptar');
+  var ok = document.getElementById('chk-acepto').checked;
+  btn.style.opacity = ok ? '1' : '.45';
+  btn.style.pointerEvents = ok ? 'all' : 'none';
 }
-function aceptarDatos(){
-  try{ localStorage.setItem('lic_datos_ok','1'); }catch(e){}
-  document.getElementById('modalDatos').classList.add('hidden');
+function aceptarDatos() {
+  try { localStorage.setItem('lic_datos_ok','1'); } catch(e) {}
+  document.getElementById('modalDatos').style.display = 'none';
 }
-window.addEventListener('DOMContentLoaded',function(){
-  try{
-    if(localStorage.getItem('lic_datos_ok')==='1'){
-      document.getElementById('modalDatos').classList.add('hidden');
+document.addEventListener('DOMContentLoaded', function() {
+  var modal = document.getElementById('modalDatos');
+  try {
+    if (localStorage.getItem('lic_datos_ok') !== '1') {
+      modal.style.display = 'flex';
+    } else {
+      modal.style.display = 'none';
     }
-  }catch(e){}
+  } catch(e) {
+    modal.style.display = 'flex';
+  }
 });
 </script>
-</body>
-</html>
+{% endblock %}

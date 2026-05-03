@@ -1,22 +1,27 @@
 {% extends "base.html" %}
 {% block title %}Configuración - Alcaldía Virtual Supatá{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-glass-2026.css') }}">
+{% endblock %}
+
 {% block content %}
 <style>
   .stat-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2D9F5C 0%, #0EA5E9 100%);
     color: white;
     padding: 1.5rem;
     border-radius: 12px;
     margin-bottom: 1rem;
   }
   .stat-card.danger {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #FF375F 0%, #FF1744 100%);
   }
   .stat-card.success {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    background: linear-gradient(135deg, #0E8A4F 0%, #2D9F5C 100%);
   }
   .stat-card.warning {
-    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    background: linear-gradient(135deg, #FF9F0A 0%, #FFCC00 100%);
     color: #333;
   }
   .stat-card h5 {
@@ -35,7 +40,7 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
   .panel-section h4 {
-    border-bottom: 3px solid #667eea;
+    border-bottom: 3px solid #2D9F5C;
     padding-bottom: 0.75rem;
     margin-bottom: 1.5rem;
     font-weight: 600;
@@ -45,7 +50,7 @@
   }
   .user-row {
     background: #f8f9fa;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid #2D9F5C;
     padding: 1rem;
     border-radius: 8px;
     margin-bottom: 1rem;
@@ -54,8 +59,8 @@
     align-items: center;
   }
   .user-row:hover {
-    background: #f0f1ff;
-    box-shadow: 0 2px 12px rgba(102, 126, 234, 0.15);
+    background: #f0faf5;
+    box-shadow: 0 2px 12px rgba(45, 159, 92, 0.12);
   }
   .user-info {
     flex: 1;
@@ -85,12 +90,12 @@
     margin-bottom: 0.25rem;
   }
   .badge-admin {
-    background: #667eea;
+    background: #0f4c81;
     color: white;
   }
   .badge-user {
-    background: #e0e7ff;
-    color: #667eea;
+    background: #e0f2fe;
+    color: #0f4c81;
   }
   .badge-active {
     background: #d1fae5;
@@ -101,34 +106,41 @@
     color: #dc2626;
   }
   .form-section {
-    background: #f8f9fa;
+    background: #f8faf9;
     padding: 1.5rem;
     border-radius: 8px;
     margin-bottom: 1.5rem;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid #2D9F5C;
   }
   .btn-sm-custom {
     padding: 0.4rem 0.75rem;
     font-size: 0.85rem;
   }
-  .navbar-breadcrumb {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
-  }
+  .navbar-breadcrumb { display: none; }
 </style>
 
-<div class="container-fluid p-4">
-  
-  <!-- Header con Breadcrumb -->
-  <div class="navbar-breadcrumb">
-    <h2 class="mb-0">
-      <i class="bi bi-gear-fill"></i> Panel de Administración
-    </h2>
-    <small>Gestión completa del sistema</small>
+<div class="lg-module">
+
+  <!-- ── BANNER ── -->
+  <div class="lg-mod-banner lg-banner--blue">
+    <div class="lg-mod-banner-left">
+      <div class="lg-mod-banner-icon"><i class="bi bi-gear-fill"></i></div>
+      <div class="lg-mod-banner-text">
+        <h1 class="lg-mod-banner-title">Panel de Administración</h1>
+        <p class="lg-mod-banner-sub">Gestión completa del sistema · usuarios, permisos y configuración</p>
+      </div>
+    </div>
+    <div class="lg-mod-banner-actions">
+      <a href="{{ url_for('main.dashboard') }}" class="lg-mod-banner-btn">
+        <i class="bi bi-house-fill"></i> Dashboard
+      </a>
+      <a href="{{ url_for('reportes.dashboard') }}" class="lg-mod-banner-btn">
+        <i class="bi bi-bar-chart-fill"></i> Reportes
+      </a>
+    </div>
   </div>
+
+<div class="container-fluid px-0">
 
   <!-- Estadísticas -->
   <div class="row mb-4">
@@ -376,7 +388,7 @@
                   <span class="badge bg-primary ms-1">Admin</span>
                 {% endif %}
                 {% if '(planeacion)' in (u.usuario or '')|lower %}
-                  <span class="badge ms-1" style="background:#7c3aed;">Planeación</span>
+                  <span class="badge ms-1" style="background:#0f4c81;">Planeación</span>
                 {% endif %}
               </td>
               <td class="text-center">
@@ -627,7 +639,8 @@
     {% endif %}
   </div>
 
-</div>
+</div>{# /container-fluid #}
+</div>{# /lg-module #}
 
 <script>
 function promptPassword(userId, username, action) {

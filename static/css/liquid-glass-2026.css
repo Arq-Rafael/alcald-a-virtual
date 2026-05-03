@@ -1128,6 +1128,8 @@ body.has-sidebar:not(.lg-login-page) {
 .lg-banner--lime   { background: linear-gradient(135deg, #2D9F5C 0%, #65A30D 100%) !important; box-shadow: 0 16px 48px -16px rgba(45,159,92,.4) !important; }
 .lg-banner--sky    { background: linear-gradient(135deg, #0EA5E9 0%, #3B82F6 100%) !important; box-shadow: 0 16px 48px -16px rgba(14,165,233,.38) !important; }
 .lg-banner--indigo { background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%) !important; box-shadow: 0 16px 48px -16px rgba(79,70,229,.38) !important; }
+.lg-banner--rose   { background: linear-gradient(135deg, #FF375F 0%, #FF6B6B 100%) !important; box-shadow: 0 16px 48px -16px rgba(255,55,95,.38) !important; }
+.lg-banner--amber  { background: linear-gradient(135deg, #FF9F0A 0%, #FFCC00 100%) !important; box-shadow: 0 16px 48px -16px rgba(255,159,10,.38) !important; }
 
 /* ── KPI row ── */
 .lg-kpi-row { display: grid; gap: 14px; grid-template-columns: repeat(4, 1fr); margin-bottom: 1.5rem; }

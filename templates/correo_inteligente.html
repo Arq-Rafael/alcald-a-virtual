@@ -3,46 +3,44 @@
 {% block title %}Correo Inteligente Institucional{% endblock %}
 
 {% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-glass-2026.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/correo_inteligente.css') }}">
 {% endblock %}
 
 {% block content %}
-<div class="mail-smart-shell">
-  <section class="mail-hero">
-    <div class="mail-hero-left">
-      <h1><i class="bi bi-envelope-paper-heart"></i> Correo Inteligente Institucional</h1>
-      <p>Gestion operativa del correo oficial con sincronizacion Gmail, analitica institucional y asistencia inteligente.</p>
-      <div class="mail-status-row">
-        <span class="chip-status {{ 'connected' if account.conectada else 'disconnected' }}">
-          <i class="bi {{ 'bi-link-45deg' if account.conectada else 'bi-plug' }}"></i>
-          {{ 'Gmail conectado' if account.conectada else 'Gmail sin conectar' }}
-        </span>
-        <span class="chip-muted">
-          Ultima sincronizacion:
-          {% if account.ultima_sincronizacion %}
-            {{ account.ultima_sincronizacion.strftime('%Y-%m-%d %H:%M') }} UTC
-          {% else %}
-            Sin datos
-          {% endif %}
-        </span>
+<div class="lg-module">
+
+  <!-- ── BANNER ── -->
+  <div class="lg-mod-banner lg-banner--rose">
+    <div class="lg-mod-banner-left">
+      <div class="lg-mod-banner-icon"><i class="bi bi-envelope-paper-heart"></i></div>
+      <div class="lg-mod-banner-text">
+        <h1 class="lg-mod-banner-title">Correo Inteligente Institucional</h1>
+        <p class="lg-mod-banner-sub">
+          Gestión operativa con Gmail ·
+          <span class="{% if account.conectada %}lg-badge lg-badge--baja{% else %}lg-badge lg-badge--alta{% endif %}" style="vertical-align:middle;">
+            <i class="bi {{ 'bi-link-45deg' if account.conectada else 'bi-plug' }}"></i>
+            {{ 'Gmail conectado' if account.conectada else 'Sin conectar' }}
+          </span>
+        </p>
       </div>
     </div>
-    <div class="mail-hero-right">
-      <form method="POST" action="{{ url_for('correo_inteligente.oauth_connect') }}">
-        <button class="btn-mail btn-mail-primary" type="submit">
+    <div class="lg-mod-banner-actions">
+      <form method="POST" action="{{ url_for('correo_inteligente.oauth_connect') }}" style="margin:0;">
+        <button class="lg-mod-banner-btn lg-mod-banner-btn--solid" type="submit">
           <i class="bi bi-google"></i> Conectar Gmail
         </button>
       </form>
-      <form method="POST" action="{{ url_for('correo_inteligente.sync_messages') }}">
-        <button class="btn-mail btn-mail-success" type="submit">
-          <i class="bi bi-arrow-repeat"></i> Sincronizar Correos
+      <form method="POST" action="{{ url_for('correo_inteligente.sync_messages') }}" style="margin:0;">
+        <button class="lg-mod-banner-btn" type="submit">
+          <i class="bi bi-arrow-repeat"></i> Sincronizar
         </button>
       </form>
-      {% if account.mensaje_estado %}
-      <div class="mail-note">{{ account.mensaje_estado }}</div>
-      {% endif %}
     </div>
-  </section>
+  </div>
+
+<div class="mail-smart-shell">
+  <section class="mail-hero" style="display:none;"></section>
 
   <section class="mail-kpis">
     <article class="kpi-card">
@@ -344,7 +342,8 @@
       <button class="btn-compose-tool" title="Cancelar" id="cancelCalendarBtn"><i class="bi bi-x-circle"></i></button>
     </div>
   </div>
-</div>
+</div>{# /mail-smart-shell #}
+</div>{# /lg-module #}
 
 {% endblock %}
 

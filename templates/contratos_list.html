@@ -1,24 +1,71 @@
 {% extends "base.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-glass-2026.css') }}">
+{% endblock %}
+
 {% block content %}
+<div class="lg-module">
 
-<div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-    <div>
-        <h1 class="fw-bold text-success mb-0">Contratación Municipal</h1>
-        <small class="text-muted">Gestión, seguimiento y control de contratos institucionales</small>
-    </div>
-    <div class="text-end d-none d-md-block">
-        <span class="badge bg-success me-1">En curso</span>
-        <span class="badge bg-warning text-dark me-1">Por vencer</span>
-        <span class="badge bg-danger">Vencidos</span>
-    </div>
-</div>
-
-{# KPIs rápidos (se calculan aquí mismo) #}
+{# KPIs rápidos (se calculan aquí mismo) — definir antes del banner #}
 {% set cnt_total = rows|length %}
 {% set cnt_vencidos = rows|selectattr('dias','lt',0)|list|length %}
 {% set cnt_prox = rows|selectattr('dias','ge',0)|selectattr('dias','le',15)|list|length %}
 {% set cnt_en_curso = cnt_total - cnt_vencidos - cnt_prox %}
 {% set cnt_secop = rows|selectattr('tipo','equalto','SECOP')|list|length %}
+
+<!-- ── BANNER ── -->
+<div class="lg-mod-banner lg-banner--sky">
+  <div class="lg-mod-banner-left">
+    <div class="lg-mod-banner-icon"><i class="bi bi-briefcase-fill"></i></div>
+    <div class="lg-mod-banner-text">
+      <h1 class="lg-mod-banner-title">Contratación Municipal</h1>
+      <p class="lg-mod-banner-sub">Gestión, seguimiento y control de contratos institucionales</p>
+    </div>
+  </div>
+  <div class="lg-mod-banner-actions">
+    <a href="{{ url_for('contrat_nuevo') }}" class="lg-mod-banner-btn lg-mod-banner-btn--solid">
+      <i class="bi bi-plus-circle-fill"></i> Nuevo contrato
+    </a>
+    <a href="{{ url_for('contrat_export_csv') }}" class="lg-mod-banner-btn">
+      <i class="bi bi-download"></i> Exportar CSV
+    </a>
+  </div>
+</div>
+
+<!-- ── KPI ROW ── -->
+<div class="lg-kpi-row" style="grid-template-columns: repeat(5,1fr);">
+  <div class="lg-kpi-card kpi-sky">
+    <div class="lg-kpi-icon lg-icon-sky"><i class="bi bi-collection-fill"></i></div>
+    <div class="lg-kpi-val">{{ cnt_total }}</div>
+    <div class="lg-kpi-lbl">Total contratos</div>
+    <div class="lg-kpi-sub">en el sistema</div>
+  </div>
+  <div class="lg-kpi-card kpi-green">
+    <div class="lg-kpi-icon lg-icon-emerald"><i class="bi bi-check-circle-fill"></i></div>
+    <div class="lg-kpi-val">{{ cnt_en_curso }}</div>
+    <div class="lg-kpi-lbl">En curso</div>
+    <div class="lg-kpi-sub">vigentes</div>
+  </div>
+  <div class="lg-kpi-card kpi-amber">
+    <div class="lg-kpi-icon lg-icon-amber"><i class="bi bi-clock-history"></i></div>
+    <div class="lg-kpi-val">{{ cnt_prox }}</div>
+    <div class="lg-kpi-lbl">Por vencer</div>
+    <div class="lg-kpi-sub">≤ 15 días</div>
+  </div>
+  <div class="lg-kpi-card kpi-rose">
+    <div class="lg-kpi-icon lg-icon-rose"><i class="bi bi-exclamation-triangle-fill"></i></div>
+    <div class="lg-kpi-val">{{ cnt_vencidos }}</div>
+    <div class="lg-kpi-lbl">Vencidos</div>
+    <div class="lg-kpi-sub">requieren atención</div>
+  </div>
+  <div class="lg-kpi-card kpi-indigo">
+    <div class="lg-kpi-icon lg-icon-indigo"><i class="bi bi-box-arrow-up-right"></i></div>
+    <div class="lg-kpi-val">{{ cnt_secop }}</div>
+    <div class="lg-kpi-lbl">SECOP</div>
+    <div class="lg-kpi-sub">plataforma</div>
+  </div>
+</div>
 
 <div class="row g-3 mb-3">
     <div class="col-lg-8">
@@ -245,4 +292,5 @@
     })();
 </script>
 
+</div>{# /lg-module #}
 {% endblock %}
