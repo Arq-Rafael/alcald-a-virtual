@@ -1,46 +1,18 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Expedientes — Plataforma Licencias Urbanísticas</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+{% extends "base.html" %}
+{% block title %}Expedientes — Plataforma Licencias Urbanísticas{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-glass-2026.css') }}">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
 :root{
   --azul:#0f4c81;--azul2:#1565c0;--azul3:#0ea5e9;
   --bg:#f0f4f9;--card:#fff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b;
   --green:#16a34a;--amber:#d97706;--red:#dc2626;--blue:#2563eb;--purple:#7c3aed;
 }
-html,body{min-height:100vh;background:var(--bg);font-family:'Inter',sans-serif;color:var(--text)}
-
-/* ── Header ── */
-.hdr{
-  background:linear-gradient(135deg,#060e20 0%,#0f2d4a 60%,#0a1f3d 100%);
-  padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;
-  border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;z-index:100;
-}
-.hdr-left{display:flex;align-items:center;gap:14px}
-.hdr-logo{
-  width:36px;height:36px;border-radius:9px;
-  background:linear-gradient(135deg,var(--azul),var(--azul3));
-  display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;
-}
-.hdr-title{font-size:14px;font-weight:700;color:#fff}
-.hdr-sub{font-size:11px;color:rgba(255,255,255,.45);font-weight:400}
-.hdr-right{display:flex;align-items:center;gap:10px}
-.hdr-btn{
-  display:flex;align-items:center;gap:7px;padding:7px 14px;border-radius:8px;
-  font-size:12px;font-weight:600;text-decoration:none;border:none;cursor:pointer;transition:all .18s;
-}
-.hdr-btn.primary{background:var(--azul2);color:#fff}
-.hdr-btn.primary:hover{background:var(--azul3)}
-.hdr-btn.ghost{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.12)}
-.hdr-btn.ghost:hover{background:rgba(255,255,255,.15);color:#fff}
 
 /* ── Layout ── */
-.main{max-width:1300px;margin:0 auto;padding:28px 24px}
+.lic-main{max-width:1300px;margin:0 auto;padding:0 4px}
 
 /* ── KPIs ── */
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:28px}
@@ -147,59 +119,33 @@ td.td-fecha{color:var(--muted);font-size:12px;white-space:nowrap}
 .row-det{display:none;background:#f8fafc}
 .row-det td{padding:14px 20px;border-top:1px dashed var(--border)}
 .row-det.open{display:table-row}
-.det-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px 20px}
-.det-item label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:2px}
-.det-item span{font-size:12px;color:var(--text);font-weight:500}
+.det-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.det-item{display:flex;flex-direction:column;gap:3px}
+.det-item label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.det-item span{font-size:13px;font-weight:600;color:var(--text)}
 
-/* ── Modal archivos ── */
-.modal-bg{
-  display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
-  z-index:2000;align-items:center;justify-content:center;
-  backdrop-filter:blur(4px);
-}
+/* ── Modal Archivos ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1060;backdrop-filter:blur(4px)}
 .modal-bg.on{display:flex}
-.modal-arch{
-  background:#fff;border-radius:16px;width:90%;max-width:500px;
-  box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;
-  animation:slide-up .3s ease;
+.modal-arch{background:#fff;border-radius:16px;width:min(560px,94vw);max-height:80vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal-arch-hdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-arch-hdr h3{font-size:14px;font-weight:700;color:var(--text)}
+.modal-arch-hdr button{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);line-height:1}
+.modal-arch-body{padding:16px 20px;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+.arch-files{display:flex;flex-direction:column;gap:8px;min-height:60px}
+.arch-file-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f8fafc;border:1px solid var(--border);border-radius:8px;gap:8px}
+.arch-file-item a{font-size:13px;font-weight:600;color:var(--azul2);text-decoration:none;display:flex;align-items:center;gap:8px}
+.arch-file-meta{font-size:11px;color:var(--muted);white-space:nowrap}
+.arch-empty{text-align:center;padding:20px;color:var(--muted);font-size:13px}
+.arch-upload-zone{background:#f8fafc;border:1.5px dashed var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.arch-upload-zone label{font-size:13px;font-weight:600;color:var(--azul2);cursor:pointer}
+.arch-upload-zone input{display:none}
+.arch-file-name{font-size:11px;color:var(--muted)}
+#btn-arch-upload{
+  padding:9px 20px;border:none;border-radius:8px;
+  background:linear-gradient(135deg,var(--azul),var(--azul2));color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s;
 }
-@keyframes slide-up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-.modal-arch-hdr{
-  background:linear-gradient(135deg,var(--azul),var(--azul2));
-  color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;
-}
-.modal-arch-hdr h3{font-size:14px;font-weight:700}
-.modal-arch-hdr button{background:none;border:none;color:#fff;font-size:20px;cursor:pointer;opacity:.7;line-height:1}
-.modal-arch-hdr button:hover{opacity:1}
-.modal-arch-body{padding:20px}
-.arch-files{margin-bottom:16px;max-height:200px;overflow-y:auto}
-.arch-file-item{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:8px 12px;border-radius:8px;border:1px solid var(--border);margin-bottom:6px;
-}
-.arch-file-item a{font-size:12px;font-weight:600;color:var(--azul2);text-decoration:none;display:flex;align-items:center;gap:6px}
-.arch-file-item a:hover{color:var(--azul3);text-decoration:underline}
-.arch-file-meta{font-size:10px;color:var(--muted)}
-.arch-empty{color:var(--muted);font-size:12px;text-align:center;padding:20px}
-.arch-upload-zone{
-  border:2px dashed var(--border);border-radius:10px;padding:16px;text-align:center;
-  transition:border-color .18s;
-}
-.arch-upload-zone:hover{border-color:var(--azul3)}
-.arch-upload-zone label{display:block;font-size:13px;font-weight:600;color:var(--azul2);cursor:pointer;margin-bottom:8px}
-.arch-upload-zone input[type=file]{display:none}
-.arch-file-name{font-size:11px;color:var(--muted);margin-bottom:8px}
-.btn-upload{
-  background:var(--azul2);color:#fff;border:none;border-radius:8px;
-  padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;transition:background .18s;
-}
-.btn-upload:hover{background:var(--azul3)}
-.btn-upload:disabled{opacity:.5;cursor:not-allowed}
-
-/* ── Empty ── */
-.empty{padding:60px 20px;text-align:center;color:var(--muted)}
-.empty i{font-size:40px;margin-bottom:12px;opacity:.3}
-.empty p{font-size:14px}
+#btn-arch-upload:disabled{opacity:.45;cursor:not-allowed}
 
 /* ── Toast ── */
 .toast{
@@ -210,34 +156,42 @@ td.td-fecha{color:var(--muted);font-size:12px;white-space:nowrap}
 }
 .toast.show{transform:translateY(0);opacity:1}
 
+/* ── Empty state ── */
+.empty{padding:60px 20px;text-align:center;color:var(--muted)}
+.empty i{font-size:40px;margin-bottom:12px;opacity:.3}
+.empty p{font-size:14px}
+
 @media(max-width:768px){
-  .hdr{padding:0 16px}
-  .main{padding:16px}
   .kpis{grid-template-columns:repeat(3,1fr)}
   .quick-grid{grid-template-columns:1fr 1fr}
   .search-input{width:160px}
 }
 </style>
-</head>
-<body>
+{% endblock %}
 
-<!-- Header -->
-<header class="hdr">
-  <div class="hdr-left">
-    <div class="hdr-logo"><i class="fas fa-file-contract"></i></div>
-    <div>
-      <div class="hdr-title">Plataforma de Licencias Urbanísticas</div>
-      <div class="hdr-sub">Secretaría de Planeación — Supatá</div>
+{% block content %}
+<div class="lg-module">
+
+  <!-- ── BANNER ── -->
+  <div class="lg-mod-banner lg-banner--teal">
+    <div class="lg-mod-banner-left">
+      <div class="lg-mod-banner-icon"><i class="fas fa-folder-open"></i></div>
+      <div class="lg-mod-banner-text">
+        <h1 class="lg-mod-banner-title">Expedientes Urbanísticos</h1>
+        <p class="lg-mod-banner-sub">Plataforma de gestión — Secretaría de Planeación · Supatá</p>
+      </div>
+    </div>
+    <div class="lg-mod-banner-actions">
+      <a href="/licencias/radicar" class="lg-mod-banner-btn lg-mod-banner-btn--solid">
+        <i class="fas fa-plus"></i> Nueva Radicación
+      </a>
+      <a href="/licencias" class="lg-mod-banner-btn">
+        <i class="fas fa-grid-2"></i> Inicio Licencias
+      </a>
     </div>
   </div>
-  <div class="hdr-right">
-    <a href="/licencias/radicar" class="hdr-btn primary"><i class="fas fa-plus"></i> Nueva Radicación</a>
-    <a href="/licencias" class="hdr-btn ghost"><i class="fas fa-grid-2"></i> Inicio</a>
-    <a href="/dashboard" class="hdr-btn ghost"><i class="fas fa-arrow-left"></i> Panel de Inicio</a>
-  </div>
-</header>
 
-<main class="main">
+<div class="lic-main">
 
   <!-- KPIs -->
   <div class="kpis">
@@ -425,7 +379,8 @@ td.td-fecha{color:var(--muted);font-size:12px;white-space:nowrap}
     </div>
   </div>
 
-</main>
+</div>{# /lic-main #}
+</div>{# /lg-module #}
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
@@ -445,14 +400,16 @@ td.td-fecha{color:var(--muted);font-size:12px;white-space:nowrap}
         <label for="arch-file-input"><i class="fas fa-cloud-upload-alt"></i> Seleccionar documento (PDF, imagen, Word)</label>
         <input type="file" id="arch-file-input" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.tiff" onchange="archFileSelected(this)">
         <div class="arch-file-name" id="arch-file-name">Ningún archivo seleccionado</div>
-        <button class="btn-upload" id="btn-arch-upload" onclick="subirArchivo()" disabled>
+        <button id="btn-arch-upload" disabled onclick="subirArchivo()">
           <i class="fas fa-upload"></i> Subir documento
         </button>
       </div>
     </div>
   </div>
 </div>
+{% endblock %}
 
+{% block scripts %}
 <script>
 /* ── Filtrado ── */
 function filtrar(){
@@ -463,7 +420,6 @@ function filtrar(){
     var estado=(tr.dataset.estado||'').toLowerCase();
     var ok=(!q||txt.includes(q))&&(!est||estado.includes(est));
     tr.style.display=ok?'':'none';
-    // Ocultar también la fila de detalles
     var rowId=tr.id.replace('row-','');
     var det=document.getElementById('det-'+rowId);
     if(det) det.style.display=ok?'':'none';
@@ -496,39 +452,11 @@ function cambiarEstado(id, nuevo, sel){
   .then(function(d){
     if(d.ok){
       toast('Estado actualizado: '+nuevo, true);
-      // Actualizar badge y data-estado en la fila
       var row=document.getElementById('row-'+id);
-      if(row){
-        row.dataset.estado=nuevo;
-        var ecls=({
-          'Radicada':'radicada','En revisión':'revision',
-          'Subsanación':'subsanacion','Aprobada':'aprobada','Negada':'negada'
-        })[nuevo]||'radicada';
-        // Actualizar liquidador button
-        var acts=row.querySelector('.row-actions');
-        if(acts){
-          var liqA=acts.querySelector('.act-btn.liq,.act-btn.liq-dis');
-          if(liqA){
-            var href=liqA.href||'';
-            // Reconstruir botón liquidador según nuevo estado
-            var consec=href.match(/\/(\d+)$/)?href.match(/\/(\d+)$/)[1]:'';
-            if(!consec){
-              // Intentar extraer del data-txt
-              var txt=row.dataset.txt||'';
-            }
-            if(nuevo==='Aprobada'){
-              var newLiq=document.createElement('a');
-              newLiq.href='/licencias/liquidador/'+row.id.replace('row-','');
-              // We don't have consecutivo easily here — skip dynamic update, reload page
-            }
-          }
-        }
-      }
-      // Reload para actualizar botones
+      if(row) row.dataset.estado=nuevo;
       setTimeout(function(){ location.reload(); }, 1200);
     } else {
       toast('Error: '+(d.error||'desconocido'), false);
-      sel.value=sel.dataset.prev||sel.value;
     }
   }).catch(function(){toast('Error de conexión',false)});
 }
@@ -625,5 +553,4 @@ function escH(s){
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 </script>
-</body>
-</html>
+{% endblock %}
