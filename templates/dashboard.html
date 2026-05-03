@@ -17,20 +17,26 @@
       <div>
         <p class="lg-hero-date" id="lgHeroDate"></p>
         <h1 class="lg-hero-greeting" id="lgHeroGreeting">Hola, {{ session.user|title }}</h1>
-        <p class="lg-hero-sub">Panel de control · Alcaldía Municipal de Supatá</p>
+        <p class="lg-hero-sub" id="lgHeroSub">Panel de control · Alcaldía Municipal de Supatá</p>
       </div>
       <div class="lg-hero-pills">
         <span class="lg-hero-pill"><span class="lg-pulse"></span> Sesión verificada</span>
         <span class="lg-hero-pill"><i class="bi bi-person-badge-fill"></i> {{ session.user_role|upper }}</span>
+        <span class="lg-hero-pill"><i class="bi bi-geo-alt-fill"></i> Supatá · Cundinamarca</span>
       </div>
     </div>
-    <i class="bi bi-buildings lg-hero-glyph" aria-hidden="true"></i>
+    <div class="lg-hero-glyph" aria-hidden="true">
+      <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M80 8 C82 38 82 38 112 40 C82 42 82 42 80 72 C78 42 78 42 48 40 C78 38 78 38 80 8Z" fill="rgba(255,255,255,0.28)"/>
+        <path d="M30 68 C31 80 31 80 43 81 C31 82 31 82 30 94 C29 82 29 82 17 81 C29 80 29 80 30 68Z" fill="rgba(255,255,255,0.18)"/>
+      </svg>
+    </div>
   </div>
 
   <!-- ── ACCESOS DESTACADOS ── -->
   <section class="lg-section">
     <div class="lg-section-hdr">
-      <h2 class="lg-section-lbl"><i class="bi bi-bullseye"></i> Accesos destacados</h2>
+      <h2 class="lg-section-lbl"><i class="bi bi-grid-fill"></i> Accesos destacados</h2>
       <span class="lg-section-hint">Clic en ☆ para personalizar</span>
     </div>
 
@@ -46,44 +52,54 @@
         </div>
         <h3>{{ card.name }}</h3>
         <p>{{ card.desc }}</p>
-        <span class="lg-fav-open">Abrir <i class="bi bi-chevron-right"></i></span>
+        <span class="lg-fav-open lg-fav-open--{{ card.accent }}">Abrir <i class="bi bi-chevron-right"></i></span>
       </a>
       {% endfor %}
+      {% if featured_cards|length < 4 %}
+      <div class="lg-fav-card lg-fav-card--add">
+        <div class="lg-fav-add-icon"><i class="bi bi-plus-lg"></i></div>
+        <span class="lg-fav-add-label">Añadir acceso</span>
+      </div>
+      {% endif %}
     </div>
 
     {% else %}
-    <!-- Accesos por defecto cuando no hay favoritos -->
     <div class="lg-fav-grid">
       {% if can('solicitudes') %}
       <a href="{{ url_for('solicitudes.index') }}" class="lg-fav-card">
         <div class="lg-fav-top"><div class="lg-fav-icon lg-icon-blue"><i class="bi bi-file-earmark-text-fill"></i></div></div>
         <h3>Solicitudes</h3>
         <p>Gestiona radicados y solicitudes de contratación.</p>
-        <span class="lg-fav-open">Abrir <i class="bi bi-chevron-right"></i></span>
+        <span class="lg-fav-open lg-fav-open--blue">Abrir <i class="bi bi-chevron-right"></i></span>
       </a>
       {% endif %}
-      {% if can('certificados') %}
+      {% if can('geoportal') %}
+      <a href="{{ url_for('main.geoportal') }}" class="lg-fav-card">
+        <div class="lg-fav-top"><div class="lg-fav-icon lg-icon-teal"><i class="bi bi-globe-americas"></i></div></div>
+        <h3>Geoportal</h3>
+        <p>Mapa catastral y uso del suelo.</p>
+        <span class="lg-fav-open lg-fav-open--teal">Abrir <i class="bi bi-chevron-right"></i></span>
+      </a>
+      {% elif can('certificados') %}
       <a href="{{ url_for('certificados.index') }}" class="lg-fav-card">
         <div class="lg-fav-top"><div class="lg-fav-icon lg-icon-emerald"><i class="bi bi-patch-check-fill"></i></div></div>
         <h3>Certificados</h3>
         <p>Emite certificados municipales oficiales.</p>
-        <span class="lg-fav-open">Abrir <i class="bi bi-chevron-right"></i></span>
+        <span class="lg-fav-open lg-fav-open--emerald">Abrir <i class="bi bi-chevron-right"></i></span>
       </a>
       {% endif %}
-      {% if can('ia') %}
-      <a href="/ia/redactar" class="lg-fav-card">
-        <div class="lg-fav-top"><div class="lg-fav-icon lg-icon-amber"><i class="bi bi-pencil-square"></i></div></div>
-        <h3>Redactar Oficio</h3>
-        <p>Genera documentos institucionales con IA.</p>
-        <span class="lg-fav-open">Abrir <i class="bi bi-chevron-right"></i></span>
+      {% if can('licencias') and ('planeacion' in (session.get('secretaria','') or '')|lower or session.get('role','') == 'admin') %}
+      <a href="/licencias" class="lg-fav-card">
+        <div class="lg-fav-top"><div class="lg-fav-icon lg-icon-orange"><i class="bi bi-buildings-fill"></i></div></div>
+        <h3>Licencias</h3>
+        <p>Licencias urbanísticas vigentes.</p>
+        <span class="lg-fav-open lg-fav-open--orange">Abrir <i class="bi bi-chevron-right"></i></span>
       </a>
       {% endif %}
-      <a href="/calendario" class="lg-fav-card">
-        <div class="lg-fav-top"><div class="lg-fav-icon lg-icon-sky"><i class="bi bi-calendar-event-fill"></i></div></div>
-        <h3>Calendario</h3>
-        <p>Eventos y agenda institucional del municipio.</p>
-        <span class="lg-fav-open">Abrir <i class="bi bi-chevron-right"></i></span>
-      </a>
+      <div class="lg-fav-card lg-fav-card--add">
+        <div class="lg-fav-add-icon"><i class="bi bi-plus-lg"></i></div>
+        <span class="lg-fav-add-label">Añadir acceso</span>
+      </div>
     </div>
     {% endif %}
   </section>
@@ -98,86 +114,125 @@
       {% if can('solicitudes') %}
       <a href="{{ url_for('solicitudes.index') }}" class="lg-mod-item" data-module-id="solicitudes">
         <div class="lg-mod-icon lg-icon-blue"><i class="bi bi-file-earmark-text-fill"></i></div>
-        <span class="lg-mod-label">Solicitudes</span>
+        <div class="lg-mod-text">
+          <span class="lg-mod-label">Solicitudes</span>
+          <span class="lg-mod-desc">Gestiona y radica solicitudes ciudadanas</span>
+        </div>
       </a>
       {% endif %}
 
       {% if can('certificados') %}
       <a href="{{ url_for('certificados.index') }}" class="lg-mod-item" data-module-id="certificados">
         <div class="lg-mod-icon lg-icon-emerald"><i class="bi bi-patch-check-fill"></i></div>
-        <span class="lg-mod-label">Certificados</span>
+        <div class="lg-mod-text">
+          <span class="lg-mod-label">Certificados</span>
+          <span class="lg-mod-desc">Emisión y firma de certificados oficiales</span>
+        </div>
       </a>
       {% endif %}
 
       {% if can('licencias') and ('planeacion' in (session.get('secretaria','') or '')|lower or session.get('role','') == 'admin') %}
       <a href="/licencias" class="lg-mod-item" data-module-id="licencias">
         <div class="lg-mod-icon lg-icon-orange"><i class="bi bi-buildings-fill"></i></div>
-        <span class="lg-mod-label">Licencias</span>
+        <div class="lg-mod-text">
+          <span class="lg-mod-label">Licencias</span>
+          <span class="lg-mod-desc">Licencias urbanísticas y permisos</span>
+        </div>
       </a>
       {% endif %}
 
       {% if can('ia') %}
       <a href="{{ url_for('ia.index') }}" class="lg-mod-item" data-module-id="ia">
         <div class="lg-mod-icon lg-icon-violet"><i class="bi bi-cpu-fill"></i></div>
-        <span class="lg-mod-label">IA Municipal</span>
+        <div class="lg-mod-text">
+          <span class="lg-mod-label">IA Municipal</span>
+          <span class="lg-mod-desc">Asistente con IA para tareas administrativas</span>
+        </div>
       </a>
       {% endif %}
 
       {% if can('participacion') %}
       <a href="{{ url_for('participacion.index') }}" class="lg-mod-item" data-module-id="participacion">
         <div class="lg-mod-icon lg-icon-rose"><i class="bi bi-people-fill"></i></div>
-        <span class="lg-mod-label">Participación</span>
+        <div class="lg-mod-text">
+          <span class="lg-mod-label">Participación</span>
+          <span class="lg-mod-desc">Mecanismos de participación ciudadana</span>
+        </div>
       </a>
       {% endif %}
 
       {% if can('geoportal') %}
       <a href="{{ url_for('main.geoportal') }}" class="lg-mod-item" data-module-id="geoportal">
         <div class="lg-mod-icon lg-icon-teal"><i class="bi bi-globe-americas"></i></div>
-        <span class="lg-mod-label">Geoportal</span>
+        <div class="lg-mod-text">
+          <span class="lg-mod-label">Geoportal</span>
+          <span class="lg-mod-desc">Mapa catastral y uso del suelo</span>
+        </div>
       </a>
       {% endif %}
 
       {% if can('seguimiento') %}
       <a href="{{ url_for('seguimiento.metas_dashboard') }}" class="lg-mod-item" data-module-id="seguimiento">
         <div class="lg-mod-icon lg-icon-indigo"><i class="bi bi-graph-up-arrow"></i></div>
-        <span class="lg-mod-label">Seguimiento</span>
+        <div class="lg-mod-text">
+          <span class="lg-mod-label">Seguimiento</span>
+          <span class="lg-mod-desc">Seguimiento de metas e indicadores</span>
+        </div>
       </a>
       {% endif %}
 
       {% if can('riesgo') %}
       <a href="{{ url_for('main.gestion_riesgo') }}" class="lg-mod-item" data-module-id="riesgo">
         <div class="lg-mod-icon lg-icon-green"><i class="bi bi-tree-fill"></i></div>
-        <span class="lg-mod-label">Gestión Riesgo</span>
+        <div class="lg-mod-text">
+          <span class="lg-mod-label">Gestión Riesgo</span>
+          <span class="lg-mod-desc">Gestión del riesgo de desastres</span>
+        </div>
       </a>
       {% endif %}
 
       {% if can('contratos') %}
       <a href="/contratos" class="lg-mod-item" data-module-id="contratos">
         <div class="lg-mod-icon lg-icon-sky"><i class="bi bi-briefcase-fill"></i></div>
-        <span class="lg-mod-label">Contratación</span>
+        <div class="lg-mod-text">
+          <span class="lg-mod-label">Contratación</span>
+          <span class="lg-mod-desc">Gestión de contratos municipales</span>
+        </div>
       </a>
       {% endif %}
 
       {% if can('correo_inteligente') %}
       <a href="{{ url_for('correo_inteligente.inbox') }}" class="lg-mod-item" data-module-id="correo">
         <div class="lg-mod-icon lg-icon-rose"><i class="bi bi-envelope-fill"></i></div>
-        <span class="lg-mod-label">Correo IA</span>
+        <div class="lg-mod-text">
+          <span class="lg-mod-label">Correo IA</span>
+          <span class="lg-mod-desc">Bandeja de entrada inteligente</span>
+        </div>
       </a>
       {% endif %}
 
       <a href="/calendario" class="lg-mod-item">
         <div class="lg-mod-icon lg-icon-sky"><i class="bi bi-calendar-event-fill"></i></div>
-        <span class="lg-mod-label">Calendario</span>
+        <div class="lg-mod-text">
+          <span class="lg-mod-label">Calendario</span>
+          <span class="lg-mod-desc">Eventos y agenda institucional</span>
+        </div>
       </a>
 
       {% if session.user_role in ['admin', 'superadmin'] %}
       <a href="{{ url_for('configuracion.index') }}" class="lg-mod-item">
         <div class="lg-mod-icon lg-icon-slate"><i class="bi bi-gear-fill"></i></div>
-        <span class="lg-mod-label">Configuración</span>
+        <div class="lg-mod-text">
+          <span class="lg-mod-label">Configuración</span>
+          <span class="lg-mod-desc">Gestión de usuarios y sistema</span>
+        </div>
       </a>
       <a href="{{ url_for('reportes.dashboard') }}" class="lg-mod-item">
         <div class="lg-mod-icon lg-icon-indigo"><i class="bi bi-bar-chart-fill"></i></div>
-        <span class="lg-mod-label">Reportes</span>
+        <div class="lg-mod-text">
+          <span class="lg-mod-label">Reportes</span>
+          <span class="lg-mod-desc">Análisis y exportación de datos</span>
+        </div>
       </a>
       {% endif %}
 
@@ -195,65 +250,91 @@
     <div class="lg-stats-grid" id="lgStatsGrid">
 
       {% if can('solicitudes') %}
-      <div class="lg-stat lg-stat--m">
-        <div class="lg-stat-icon lg-icon-blue"><i class="bi bi-file-earmark-text-fill"></i></div>
+      <div class="lg-stat lg-stat--m lg-stat-green">
+        <div class="lg-stat-top">
+          <div class="lg-stat-icon lg-icon-emerald"><i class="bi bi-file-earmark-text-fill"></i></div>
+          <span class="lg-stat-badge">Solicitudes activas</span>
+        </div>
         <div class="lg-stat-val" id="lgStatSolTotal">—</div>
-        <div class="lg-stat-lbl">Solicitudes <span class="lg-stat-sub">total registradas</span></div>
+        <div class="lg-stat-lbl">Total registradas <span class="lg-stat-sub">en el sistema</span></div>
       </div>
-      <div class="lg-stat lg-stat--m">
-        <div class="lg-stat-icon lg-icon-amber"><i class="bi bi-hourglass-split"></i></div>
+      <div class="lg-stat lg-stat--m lg-stat-amber">
+        <div class="lg-stat-top">
+          <div class="lg-stat-icon lg-icon-amber"><i class="bi bi-hourglass-split"></i></div>
+          <span class="lg-stat-badge">En revisión</span>
+        </div>
         <div class="lg-stat-val" id="lgStatSolPend">—</div>
         <div class="lg-stat-lbl">Pendientes <span class="lg-stat-sub">sin revisar</span></div>
       </div>
       {% endif %}
 
       {% if can('participacion') %}
-      <div class="lg-stat lg-stat--s">
-        <div class="lg-stat-icon lg-icon-rose"><i class="bi bi-chat-dots-fill"></i></div>
+      <div class="lg-stat lg-stat--s lg-stat-rose">
+        <div class="lg-stat-top">
+          <div class="lg-stat-icon lg-icon-rose"><i class="bi bi-chat-dots-fill"></i></div>
+        </div>
         <div class="lg-stat-val" id="lgStatPqrsPend">—</div>
         <div class="lg-stat-lbl">PQRS <span class="lg-stat-sub">pendientes</span></div>
       </div>
-      <div class="lg-stat lg-stat--s">
-        <div class="lg-stat-icon lg-icon-orange"><i class="bi bi-arrow-repeat"></i></div>
+      <div class="lg-stat lg-stat--s lg-stat-orange">
+        <div class="lg-stat-top">
+          <div class="lg-stat-icon lg-icon-orange"><i class="bi bi-arrow-repeat"></i></div>
+          <span class="lg-stat-badge">En trámite</span>
+        </div>
         <div class="lg-stat-val" id="lgStatPqrsTramite">—</div>
-        <div class="lg-stat-lbl">En trámite <span class="lg-stat-sub">PQRS</span></div>
+        <div class="lg-stat-lbl">distribuidos <span class="lg-stat-sub">en áreas</span></div>
       </div>
       {% endif %}
 
       {% if can('contratos') %}
-      <div class="lg-stat lg-stat--m">
-        <div class="lg-stat-icon lg-icon-sky"><i class="bi bi-briefcase-fill"></i></div>
+      <div class="lg-stat lg-stat--m lg-stat-sky">
+        <div class="lg-stat-top">
+          <div class="lg-stat-icon lg-icon-sky"><i class="bi bi-briefcase-fill"></i></div>
+          <span class="lg-stat-badge">Contratación</span>
+        </div>
         <div class="lg-stat-val" id="lgStatCtTotal">—</div>
         <div class="lg-stat-lbl">Contratos <span class="lg-stat-sub">en el sistema</span></div>
       </div>
-      <div class="lg-stat lg-stat--s">
-        <div class="lg-stat-icon lg-icon-amber"><i class="bi bi-exclamation-triangle-fill"></i></div>
+      <div class="lg-stat lg-stat--s lg-stat-amber">
+        <div class="lg-stat-top">
+          <div class="lg-stat-icon lg-icon-amber"><i class="bi bi-exclamation-triangle-fill"></i></div>
+        </div>
         <div class="lg-stat-val" id="lgStatCtAlerta">—</div>
         <div class="lg-stat-lbl">Por vencer <span class="lg-stat-sub">contratos</span></div>
       </div>
       {% endif %}
 
       {% if can('riesgo') %}
-      <div class="lg-stat lg-stat--m">
-        <div class="lg-stat-icon lg-icon-green"><i class="bi bi-tree-fill"></i></div>
+      <div class="lg-stat lg-stat--m lg-stat-green">
+        <div class="lg-stat-top">
+          <div class="lg-stat-icon lg-icon-green"><i class="bi bi-tree-fill"></i></div>
+          <span class="lg-stat-badge">Gestión arbórea</span>
+        </div>
         <div class="lg-stat-val" id="lgStatRiesgoTotal">—</div>
-        <div class="lg-stat-lbl">Gestión arbórea <span class="lg-stat-sub">radicados</span></div>
+        <div class="lg-stat-lbl">Radicados <span class="lg-stat-sub">total</span></div>
       </div>
-      <div class="lg-stat lg-stat--s">
-        <div class="lg-stat-icon lg-icon-teal"><i class="bi bi-clipboard2-check-fill"></i></div>
+      <div class="lg-stat lg-stat--s lg-stat-teal">
+        <div class="lg-stat-top">
+          <div class="lg-stat-icon lg-icon-teal"><i class="bi bi-clipboard2-check-fill"></i></div>
+        </div>
         <div class="lg-stat-val" id="lgStatRiesgoPend">—</div>
         <div class="lg-stat-lbl">Sin dictamen <span class="lg-stat-sub">riesgo</span></div>
       </div>
       {% endif %}
 
       {% if session.user_role in ['admin', 'superadmin'] %}
-      <div class="lg-stat lg-stat--m">
-        <div class="lg-stat-icon lg-icon-violet"><i class="bi bi-people-fill"></i></div>
+      <div class="lg-stat lg-stat--m lg-stat-violet">
+        <div class="lg-stat-top">
+          <div class="lg-stat-icon lg-icon-violet"><i class="bi bi-people-fill"></i></div>
+          <span class="lg-stat-badge">Usuarios</span>
+        </div>
         <div class="lg-stat-val" id="lgStatUsTotal">—</div>
-        <div class="lg-stat-lbl">Usuarios <span class="lg-stat-sub">en el sistema</span></div>
+        <div class="lg-stat-lbl">En el sistema <span class="lg-stat-sub">registrados</span></div>
       </div>
-      <div class="lg-stat lg-stat--s">
-        <div class="lg-stat-icon lg-icon-slate"><i class="bi bi-person-check-fill"></i></div>
+      <div class="lg-stat lg-stat--s lg-stat-indigo">
+        <div class="lg-stat-top">
+          <div class="lg-stat-icon lg-icon-indigo"><i class="bi bi-person-check-fill"></i></div>
+        </div>
         <div class="lg-stat-val" id="lgStatUsActivos">—</div>
         <div class="lg-stat-lbl">Activos <span class="lg-stat-sub">sin bloqueo</span></div>
       </div>
@@ -292,7 +373,7 @@
   var dateEl = document.getElementById('lgHeroDate');
   if (dateEl) {
     var d = new Date().toLocaleDateString('es-CO', {
-      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      weekday: 'long', day: 'numeric', month: 'long'
     });
     dateEl.textContent = d.charAt(0).toUpperCase() + d.slice(1);
   }
@@ -324,6 +405,10 @@
       if (d.solicitudes) {
         setText('lgStatSolTotal', d.solicitudes.total);
         setText('lgStatSolPend',  d.solicitudes.pendientes);
+        var sub = document.getElementById('lgHeroSub');
+        if (sub && d.solicitudes.pendientes != null) {
+          sub.innerHTML = 'Tienes <strong>' + d.solicitudes.pendientes + ' solicitudes</strong> pendientes hoy.';
+        }
       }
       if (d.pqrs) {
         setText('lgStatPqrsPend',    d.pqrs.pendiente);
