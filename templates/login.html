@@ -2,884 +2,254 @@
 
 {% block title %}Ingresar — Alcaldía Virtual Supatá{% endblock %}
 
+{% block body_class %}class="lg-login-page"{% endblock %}
+
 {% block styles %}
-<style>
-  /* =====================================================
-     LOGIN PAGE — Diseño profesional dividido
-     Foto de Supatá + Formulario institucional
-     ===================================================== */
-
-  /* Ocultar el sidebar y el fondo animado global en la página de login */
-  body {
-    background: #0f172a !important;
-    animation: none !important;
-  }
-  .av-mobile-header,
-  #sidebarOffcanvas {
-    display: none !important;
-  }
-  .dock-container,
-  .d-lg-none.p-3 {
-    display: none !important;
-  }
-  main.main-content {
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  /* ---- Wrapper principal ---- */
-  .lp-wrapper {
-    display: flex;
-    min-height: 100dvh;
-    height: 100dvh;
-    width: 100%;
-  }
-
-  /* =====================================================
-     PANEL IZQUIERDO — Foto + Identidad
-     ===================================================== */
-  .lp-left {
-    position: relative;
-    flex: 1.1;
-    min-height: 100%;
-    height: 100%;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-  }
-
-  /* ── Slideshow ── */
-  .lp-slideshow {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-  }
-
-  .lp-slide {
-    position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center 30%;
-    opacity: 0;
-    transition: opacity 1.8s ease;
-    will-change: opacity, transform;
-    transform: scale(1.0);
-  }
-
-  .lp-slide.active {
-    opacity: 1;
-    animation: kenBurns 12s ease-in-out forwards;
-  }
-
-  @keyframes kenBurns {
-    from { transform: scale(1.0) translate(0, 0); }
-    to   { transform: scale(1.06) translate(-1%, 1%); }
-  }
-
-  /* Overlay sutil para dar legibilidad al texto */
-  .lp-left::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      to bottom,
-      rgba(0,0,0,0.18) 0%,
-      rgba(0,0,0,0.05) 50%,
-      rgba(0,0,0,0.55) 100%
-    );
-    z-index: 1;
-    pointer-events: none;
-  }
-
-  .lp-left::before {
-    display: none !important;
-  }
-
-  /* ── Dots indicadores ── */
-  .lp-dots {
-    position: absolute;
-    bottom: 7rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 3;
-    display: flex;
-    gap: 6px;
-    align-items: center;
-  }
-
-  .lp-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 3px;
-    background: rgba(255,255,255,0.35);
-    cursor: pointer;
-    transition: all 0.4s ease;
-  }
-
-  .lp-dot.active {
-    background: #fff;
-    width: 22px;
-  }
-
-  .lp-left-content {
-    position: relative;
-    z-index: 2;
-    padding: 3rem;
-  }
-
-  .lp-brand {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: auto;
-    padding: 1.5rem 3rem 2.5rem 3rem;
-    position: relative;
-    z-index: 2;
-  }
-
-  .lp-brand img {
-    width: 52px;
-    height: 52px;
-    object-fit: cover;
-    border-radius: 50%;
-    background: transparent;
-    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.18));
-  }
-
-  .lp-brand-sub {
-    display: block;
-    font-size: 0.72rem;
-    color: rgba(255,255,255,0.88);
-    margin-top: 4px;
-    font-weight: 600;
-    letter-spacing: 0.4px;
-  }
-
-  .lp-brand-text {
-    color: #fff;
-  }
-
-  .lp-brand-text h1 {
-    font-size: 1.15rem;
-    font-weight: 700;
-    margin: 0;
-    letter-spacing: -0.3px;
-    line-height: 1.2;
-  }
-
-  .lp-brand-text span {
-    font-size: 0.78rem;
-    font-weight: 400;
-    opacity: 0.75;
-    letter-spacing: 0.5px;
-  }
-
-  .lp-hero-text {
-    padding: 0 2.5rem 2.8rem;
-    position: relative;
-    z-index: 3;
-  }
-
-  .lp-joya-title {
-    font-size: clamp(1.4rem, 2.5vw, 2rem);
-    font-weight: 300;
-    color: rgba(255,255,255,0.92);
-    letter-spacing: 0.5px;
-    line-height: 1.3;
-    text-shadow: 0 2px 16px rgba(0,0,0,0.4);
-  }
-
-  .lp-joya-title em {
-    font-style: normal;
-    font-weight: 700;
-    color: #86efac;
-    text-shadow: 0 0 20px rgba(134,239,172,0.35);
-  }
-
-  /* =====================================================
-     PANEL DERECHO — Formulario
-     ===================================================== */
-  .lp-right {
-    flex: 0 0 460px;
-    background: #ffffff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem 3.5rem;
-    position: relative;
-    min-height: 100%;
-    height: 100%;
-    overflow-y: auto;
-    box-shadow: -2px 0 60px rgba(0,0,0,0.25);
-  }
-
-  .lp-form-header {
-    width: 100%;
-    text-align: center;
-    margin-bottom: 2.25rem;
-  }
-
-  .lp-form-header .lp-icon-wrap {
-    width: 64px;
-    height: 64px;
-    border-radius: 18px;
-    background: linear-gradient(135deg, #0f4c81 0%, #0ea5e9 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1.25rem;
-    box-shadow: 0 8px 24px rgba(15, 76, 129, 0.25);
-  }
-
-  .lp-form-header .lp-icon-wrap i {
-    font-size: 1.75rem;
-    color: #fff;
-  }
-
-  .lp-form-header h3 {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: #0f172a;
-    margin: 0 0 0.3rem;
-    letter-spacing: -0.4px;
-  }
-
-  .lp-form-header p {
-    font-size: 0.88rem;
-    color: #64748b;
-    margin: 0;
-  }
-
-  /* Flash messages */
-  .lp-flash {
-    width: 100%;
-    margin-bottom: 1.25rem;
-  }
-
-  .lp-flash .alert {
-    border-radius: 12px;
-    font-size: 0.875rem;
-    border: none;
-    padding: 0.75rem 1rem;
-  }
-
-  /* ---- Campos del formulario ---- */
-  .lp-form {
-    width: 100%;
-  }
-
-  .lp-field {
-    margin-bottom: 1.25rem;
-  }
-
-  .lp-field label {
-    display: block;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #334155;
-    margin-bottom: 0.5rem;
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
-  }
-
-  .lp-field .input-wrap {
-    position: relative;
-  }
-
-  .lp-field .input-wrap i {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #94a3b8;
-    font-size: 1rem;
-    pointer-events: none;
-    transition: color 0.2s;
-  }
-
-  .lp-field input {
-    width: 100%;
-    padding: 0.85rem 1rem 0.85rem 2.75rem;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 12px;
-    font-size: 0.95rem;
-    color: #0f172a;
-    background: #f8fafc;
-    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-    outline: none;
-    font-family: inherit;
-  }
-
-  .lp-field input:focus {
-    border-color: #0f4c81;
-    background: #fff;
-    box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.1);
-  }
-
-  .lp-field input:focus + i,
-  .lp-field .input-wrap:focus-within i {
-    color: #0f4c81;
-  }
-
-  /* Ícono contraseña toggle */
-  .lp-field .pw-toggle {
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #94a3b8;
-    padding: 0;
-    font-size: 1rem;
-    transition: color 0.2s;
-    pointer-events: all;
-  }
-  .lp-field .pw-toggle:hover {
-    color: #0f4c81;
-  }
-
-  /* ---- Botón principal ---- */
-  .lp-btn-submit {
-    width: 100%;
-    padding: 0.9rem;
-    background: linear-gradient(135deg, #0f4c81 0%, #1565c0 100%);
-    color: #fff;
-    font-size: 0.95rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    margin-top: 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s;
-    box-shadow: 0 4px 16px rgba(15, 76, 129, 0.3);
-    position: relative;
-    overflow: hidden;
-  }
-  .lp-btn-arrow {
-    font-size: 1.2rem;
-  }
-
-  .lp-btn-submit::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
-    pointer-events: none;
-  }
-
-  .lp-btn-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(15, 76, 129, 0.4);
-    background: linear-gradient(135deg, #1565c0 0%, #0f4c81 100%);
-  }
-
-  .lp-btn-submit:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(15, 76, 129, 0.3);
-  }
-
-  /* Loader en botón */
-  .lp-btn-submit .btn-spinner {
-    display: none;
-    width: 18px;
-    height: 18px;
-    border: 2.5px solid rgba(255,255,255,0.4);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  /* ---- Links secundarios ---- */
-  .lp-link-forgot {
-    display: block;
-    text-align: center;
-    margin-top: 1.25rem;
-    font-size: 0.84rem;
-    color: #64748b;
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-
-  .lp-link-forgot:hover {
-    color: #0f4c81;
-  }
-
-  /* ---- Separador ---- */
-  .lp-divider {
-    margin: 1.75rem 0;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    color: #cbd5e1;
-    font-size: 0.78rem;
-  }
-
-  .lp-divider::before,
-  .lp-divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: #e2e8f0;
-  }
-
-  /* ---- Footer del formulario ---- */
-  .lp-footer {
-    margin-top: 2rem;
-    text-align: center;
-    font-size: 0.78rem;
-    color: #94a3b8;
-  }
-
-  .lp-footer a {
-    color: #64748b;
-    text-decoration: none;
-  }
-
-  .lp-footer a:hover {
-    color: #0f4c81;
-  }
-
-  /* ---- Info cards en el panel derecho ---- */
-  .lp-info-row {
-    display: flex;
-    gap: 0.75rem;
-    margin-bottom: 1.75rem;
-    width: 100%;
-  }
-
-  .lp-info-card {
-    flex: 1;
-    background: #f0f7ff;
-    border: 1px solid #dbeafe;
-    border-radius: 12px;
-    padding: 0.75rem;
-    text-align: center;
-    font-size: 0.78rem;
-    color: #334155;
-  }
-
-  .lp-info-card i {
-    display: block;
-    font-size: 1.2rem;
-    color: #0f4c81;
-    margin-bottom: 0.3rem;
-  }
-
-  /* =====================================================
-     RESPONSIVE — Ocultar panel izquierdo en móvil
-     ===================================================== */
-  @media (max-width: 768px) {
-    .lp-wrapper {
-      position: relative;
-      display: block;
-      width: 100%;
-      height: 100dvh;
-      min-height: 100dvh;
-    }
-
-    .lp-left {
-      display: block;
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      min-height: 100%;
-    }
-
-    .lp-brand,
-    .lp-hero-text {
-      display: none;
-    }
-
-    .lp-right {
-      position: relative;
-      z-index: 3;
-      flex: 1;
-      width: min(92vw, 460px);
-      margin: 1rem auto;
-      padding: 1.1rem 1rem;
-      min-height: calc(100dvh - 2rem);
-      height: auto;
-      background: rgba(255, 255, 255, 0.94);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      border-radius: 16px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
-      overflow-y: auto;
-    }
-
-    .lp-form-header {
-      margin-bottom: 1.1rem;
-    }
-
-    .lp-form-header .lp-icon-wrap {
-      width: 52px;
-      height: 52px;
-      margin-bottom: 0.8rem;
-    }
-
-    .lp-form-header h3 {
-      font-size: 1.2rem;
-    }
-
-    .lp-form-header p {
-      font-size: 0.82rem;
-    }
-
-    .lp-field {
-      margin-bottom: 0.85rem;
-    }
-
-    .lp-field label {
-      font-size: 0.74rem;
-      margin-bottom: 0.35rem;
-    }
-
-    .lp-field input {
-      padding: 0.72rem 0.9rem 0.72rem 2.5rem;
-      font-size: 0.9rem;
-    }
-
-    .lp-field .input-wrap i {
-      left: 0.85rem;
-      font-size: 0.92rem;
-    }
-
-    .lp-btn-submit {
-      padding: 0.78rem;
-      font-size: 0.88rem;
-      margin-top: 0.2rem;
-    }
-
-    .lp-link-forgot {
-      margin-top: 0.9rem;
-      font-size: 0.8rem;
-    }
-
-    .lp-divider {
-      margin: 1rem 0;
-      font-size: 0.7rem;
-    }
-
-    .lp-footer {
-      margin-top: 1rem;
-      font-size: 0.72rem;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .lp-right {
-      padding: 1.5rem 1.25rem;
-    }
-    .lp-info-row {
-      flex-direction: column;
-    }
-  }
-
-  /* =====================================================
-     ANIMACIONES DE ENTRADA
-     ===================================================== */
-  @keyframes lp-fade-up {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes lp-fade-left {
-    from { opacity: 0; transform: translateX(-24px); }
-    to   { opacity: 1; transform: translateX(0); }
-  }
-
-  .lp-brand       { animation: lp-fade-left 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s both; }
-  .lp-hero-text   { animation: lp-fade-left 0.6s cubic-bezier(0.16,1,0.3,1) 0.2s both; }
-  .lp-form-header { animation: lp-fade-up 0.5s cubic-bezier(0.16,1,0.3,1) 0.15s both; }
-  .lp-info-row    { animation: lp-fade-up 0.5s cubic-bezier(0.16,1,0.3,1) 0.25s both; }
-  .lp-form        { animation: lp-fade-up 0.5s cubic-bezier(0.16,1,0.3,1) 0.3s both; }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-glass-2026.css') }}">
 {% endblock %}
 
 {% block content %}
-<div class="lp-wrapper">
+<main class="lg-login-stage">
 
-  <!-- ===== PANEL IZQUIERDO ===== -->
-  <div class="lp-left">
+  <!-- ===== LEFT — Photo carousel ===== -->
+  <section class="lg-login-photo">
 
-    <!-- Slideshow de imágenes municipales -->
-    <div class="lp-slideshow" id="lpSlideshow">
-      {% set slides = [
-        'img_municipio/IMG_1198.jpg',
-        'img_municipio/IMG_1223.jpg',
-        'img_municipio/IMG_1230.jpg',
-        'img_municipio/IMG_1345.jpg',
-        'img_municipio/IMG_3568.jpg',
-        'img_municipio/IMG_3592.jpg',
-        'img_municipio/IMG_3615.jpg',
-        'img_municipio/IMG_3662.jpg',
-        'img_municipio/IMG_3730.jpg',
-        'img_municipio/IMG_3731_1.jpg',
-        'img_municipio/IMG_3731_2.jpg',
-        'img_municipio/IMG_3759.jpg',
-        'img_municipio/IMG_3771_3.jpg',
-        'img_municipio/IMG_3800.jpg',
-        'img_municipio/TAS1866_50_1.jpg',
-        'img_municipio/TAS1869_18.jpg'
-      ] %}
-      {% for img in slides %}
-      <div class="lp-slide{% if loop.first %} active{% endif %}"
-           style="background-image:url('{{ url_for('static', filename=img) }}')">
+    <div class="lg-login-slides">
+      <div class="lg-login-slide active"  style="background-image:url('{{ url_for('static', filename='imagenes/gualiva/gualiva-1.jpg') }}')"></div>
+      <div class="lg-login-slide"        style="background-image:url('{{ url_for('static', filename='imagenes/gualiva/gualiva-2.jpg') }}')"></div>
+      <div class="lg-login-slide"        style="background-image:url('{{ url_for('static', filename='imagenes/gualiva/gualiva-3.jpg') }}')"></div>
+      <div class="lg-login-slide"        style="background-image:url('{{ url_for('static', filename='imagenes/gualiva/gualiva-4.jpg') }}')"></div>
+      <div class="lg-login-slide"        style="background-image:url('{{ url_for('static', filename='imagenes/gualiva/gualiva-5.jpg') }}')"></div>
+      <div class="lg-login-slide"        style="background-image:url('{{ url_for('static', filename='imagenes/gualiva/gualiva-6.jpg') }}')"></div>
+      <div class="lg-login-slide"        style="background-image:url('{{ url_for('static', filename='imagenes/gualiva/gualiva-7.jpg') }}')"></div>
+      <div class="lg-login-slide"        style="background-image:url('{{ url_for('static', filename='imagenes/gualiva/gualiva-8.jpg') }}')"></div>
+    </div>
+
+    <div class="lg-login-scrim"></div>
+    <div class="lg-login-glow"></div>
+
+    <!-- Brand chip -->
+    <div class="lg-login-brand">
+      <div class="lg-login-crest">
+        <img src="{{ url_for('static', filename='imagenes/escudo-supata.png') }}" alt="Escudo de Supatá">
       </div>
-      {% endfor %}
-    </div>
-
-    <!-- Dots indicadores -->
-    <div class="lp-dots" id="lpDots">
-      {% for img in slides %}
-      <div class="lp-dot{% if loop.first %} active{% endif %}" onclick="goSlide({{ loop.index0 }})"></div>
-      {% endfor %}
-    </div>
-
-    <!-- Brand top-left -->
-    <div class="lp-brand">
-      <img src="{{ url_for('static', filename='nuevo escudo.png') }}" alt="Escudo Supatá" />
-      <div class="lp-brand-text">
-        <h1>Alcaldía de Supatá</h1>
-        <span>Cundinamarca · Colombia</span>
-        <span class="lp-brand-sub">Secretaría de Planeación y Obras Públicas</span>
+      <div class="lg-login-brand-text">
+        <span class="t1">Alcaldía de Supatá</span>
+        <span class="t2">Cundinamarca · Colombia</span>
       </div>
     </div>
 
-    <!-- Etiqueta Joya ecológica -->
-    <div class="lp-hero-text">
-      <span class="lp-joya-title">Joya ecológica del <em>Gualivá</em></span>
+    <!-- Progress-bar indicators -->
+    <div class="lg-login-indicators" id="lgIndicators">
+      <i class="active"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
     </div>
-  </div>
 
-  <!-- ===== PANEL DERECHO ===== -->
-  <div class="lp-right">
-
-    <!-- Header del form -->
-    <div class="lp-form-header">
-      <div class="lp-icon-wrap">
-        <i class="bi bi-building-check"></i>
+    <!-- Slogan -->
+    <div class="lg-login-slogan">
+      <span class="lg-login-eyebrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 20s-2-7 3-12 12-5 12-5-1 8-5 12-10 5-10 5"/>
+          <path d="M6 20c2-6 6-9 11-11"/>
+        </svg>
+        Biodiversidad del Gualivá
+      </span>
+      <h1>
+        <span class="line">Joya ecológica</span>
+        <span class="line">del <em>Gualivá.</em></span>
+      </h1>
+      <div class="lg-login-slogan-sub">
+        <div class="bar"></div>
+        <div>Una sola plataforma para gobernar Supatá:<br>trámites, planeación y participación ciudadana.</div>
       </div>
-      <h3>Acceso Institucional</h3>
-      <p>Ingresa tus credenciales para continuar</p>
     </div>
 
-    <!-- Flash messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <div class="lp-flash">
-      {% for cat, msg in messages %}
-      <div class="alert alert-{{ 'danger' if cat == 'error' else cat }}">
-        <i class="bi bi-{{ 'exclamation-triangle' if cat in ['error','danger'] else 'info-circle' }}-fill me-2"></i>
-        {{ msg }}
+  </section><!-- /photo -->
+
+  <!-- ===== RIGHT — Form panel ===== -->
+  <section class="lg-login-panel">
+    <div class="lg-login-panel-inner">
+
+      <!-- App icon circular -->
+      <div class="lg-login-app-icon" aria-hidden="true">
+        <img src="{{ url_for('static', filename='imagenes/escudo-supata.png') }}" alt="Escudo de Supatá">
       </div>
-      {% endfor %}
-    </div>
-    {% endif %}
-    {% endwith %}
 
-    <!-- Quick info cards removed for simplified login screen -->
+      <h2 class="lg-login-title">Acceso Institucional</h2>
+      <p class="lg-login-subtitle">Ingresa tus credenciales para continuar.</p>
 
-    <!-- Formulario -->
-    <form method="POST" class="lp-form" id="loginForm" autocomplete="off">
+      <!-- Flash messages (glass style) -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="lg-login-flash-stack">
+        {% for category, msg in messages %}
+        <div class="lg-login-flash lg-login-flash--{{ category }}">{{ msg }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
 
-      <div class="lp-field">
-        <label for="usuario">Usuario</label>
-        <div class="input-wrap">
-          <input
-            type="text"
-            id="usuario"
-            name="usuario"
-            placeholder="Ej: planeacion"
-            required
-            autocomplete="username"
-          />
-          <i class="bi bi-person"></i>
+      <!-- Form — POST to Flask auth.login; names MUST stay 'usuario' and 'clave' -->
+      <form method="POST" id="loginForm" novalidate>
+
+        <div class="lg-login-field">
+          <label for="usuario">Usuario</label>
+          <div class="lg-login-input">
+            <svg class="lead" viewBox="0 0 24 24">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>
+            </svg>
+            <input
+              id="usuario"
+              name="usuario"
+              type="text"
+              autocomplete="username"
+              placeholder="Ej: planeacion"
+              required
+            >
+          </div>
+        </div>
+
+        <div class="lg-login-field">
+          <label for="clave">Contraseña</label>
+          <div class="lg-login-input">
+            <svg class="lead" viewBox="0 0 24 24">
+              <rect x="4" y="11" width="16" height="10" rx="2"/>
+              <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+            </svg>
+            <input
+              id="clave"
+              name="clave"
+              type="password"
+              autocomplete="current-password"
+              placeholder="••••••••"
+              required
+            >
+            <button type="button" class="reveal" id="reveal" aria-label="Mostrar contraseña">
+              <svg id="eyeIcon" viewBox="0 0 24 24">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="lg-login-row-helper">
+          <label class="lg-login-check">
+            <input type="checkbox" id="remember">
+            <span class="box">
+              <svg viewBox="0 0 24 24"><path d="M5 12 L10 17 L19 7"/></svg>
+            </span>
+            Mantener sesión
+          </label>
+          <a href="{{ url_for('recuperacion.solicitar_recuperacion') }}" class="lg-login-forgot">
+            ¿Olvidaste tu contraseña?
+          </a>
+        </div>
+
+        <button type="submit" class="lg-login-submit" id="submitBtn">
+          <span id="btnText">Ingresar</span>
+          <svg viewBox="0 0 24 24">
+            <path d="M5 12h14"/>
+            <path d="M13 6l6 6-6 6"/>
+          </svg>
+        </button>
+
+      </form>
+
+      <!-- Footer -->
+      <div class="lg-login-footer">
+        <div>© 2026 Alcaldía de Supatá</div>
+        <div class="lg-login-footer-links">
+          <a href="{{ url_for('main.politica_privacidad') }}">Privacidad</a>
+          <a href="#">Soporte</a>
+          <span class="lg-login-version">
+            <span class="vdot"></span> v2.4
+          </span>
         </div>
       </div>
 
-      <div class="lp-field">
-        <label for="clave">Contraseña</label>
-        <div class="input-wrap">
-          <input
-            type="password"
-            id="clave"
-            name="clave"
-            placeholder="••••••••"
-            required
-            autocomplete="current-password"
-          />
-          <i class="bi bi-lock"></i>
-          <button type="button" class="pw-toggle" id="pwToggle" aria-label="Mostrar contraseña">
-            <i class="bi bi-eye" id="pwIcon"></i>
-          </button>
-        </div>
-      </div>
+    </div><!-- /panel-inner -->
+  </section><!-- /panel -->
 
-      <button type="submit" class="lp-btn-submit" id="submitBtn">
-        <span class="btn-spinner" id="btnSpinner"></span>
-        <span id="btnText">Ingresar</span>
-        <i class="bi bi-arrow-right-short lp-btn-arrow" id="btnArrow"></i>
-      </button>
+</main>
+{% endblock %}
 
-    </form>
-
-    <a href="{{ url_for('recuperacion.solicitar_recuperacion') }}" class="lp-link-forgot">
-      <i class="bi bi-key me-1"></i>¿Olvidaste tu contraseña?
-    </a>
-
-    <div class="lp-divider">Acceso seguro con cifrado TLS</div>
-
-    <div class="lp-footer">
-      © 2026 Alcaldía Municipal de Supatá &mdash; Cundinamarca<br>
-      <a href="{{ url_for('main.politica_privacidad') }}">Política de privacidad</a> &middot; <a href="#">Soporte</a>
-    </div>
-
-  </div><!-- /lp-right -->
-
-</div><!-- /lp-wrapper -->
-
+{% block scripts %}
 <script>
-  // Toggle mostrar/ocultar contraseña
-  const pwToggle = document.getElementById('pwToggle');
-  const pwInput  = document.getElementById('clave');
-  const pwIcon   = document.getElementById('pwIcon');
-  if (pwToggle) {
-    pwToggle.addEventListener('click', () => {
-      const show = pwInput.type === 'password';
-      pwInput.type = show ? 'text' : 'password';
-      pwIcon.className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
+(function () {
+  'use strict';
+
+  // ── Toggle password visibility ──
+  var reveal   = document.getElementById('reveal');
+  var passInput = document.getElementById('clave');
+  var eyeIcon  = document.getElementById('eyeIcon');
+
+  if (reveal) {
+    reveal.addEventListener('click', function () {
+      var isPwd = passInput.type === 'password';
+      passInput.type = isPwd ? 'text' : 'password';
+      eyeIcon.innerHTML = isPwd
+        ? '<path d="M2 12s3.5-7 10-7c2.5 0 4.7 1 6.5 2.4M22 12s-3.5 7-10 7c-2.5 0-4.7-1-6.5-2.4"/><path d="M3 3 L21 21"/><circle cx="12" cy="12" r="3"/>'
+        : '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>';
     });
   }
 
-  // Loader en submit
-  const loginForm = document.getElementById('loginForm');
-  const submitBtn = document.getElementById('submitBtn');
+  // ── Submit loader (let Flask handle POST normally) ──
+  var loginForm = document.getElementById('loginForm');
+  var submitBtn = document.getElementById('submitBtn');
+  var btnText   = document.getElementById('btnText');
+
   if (loginForm) {
-    loginForm.addEventListener('submit', () => {
+    loginForm.addEventListener('submit', function () {
       submitBtn.disabled = true;
-      document.getElementById('btnSpinner').style.display = 'block';
-      document.getElementById('btnText').textContent = 'Verificando...';
-      document.getElementById('btnArrow').style.display = 'none';
+      submitBtn.style.opacity = '0.85';
+      btnText.textContent = 'Verificando…';
     });
   }
 
-  // Slideshow automático de imágenes municipales
-  (function () {
-    var slides = document.querySelectorAll('.lp-slide');
-    var dots   = document.querySelectorAll('.lp-dot');
-    if (!slides.length) return;
+  // ── Carousel ──
+  var slides = document.querySelectorAll('.lg-login-slide');
+  var indis  = document.querySelectorAll('.lg-login-indicators i');
+  var idx    = 0;
+  var TOTAL  = slides.length;
+  var DURATION = 7000;
 
-    var current = 0;
-    var total   = slides.length;
-    var timer   = null;
+  if (!TOTAL) return;
 
-    function show(n) {
-      slides[current].classList.remove('active');
-      if (dots[current]) dots[current].classList.remove('active');
-      current = (n + total) % total;
-      slides[current].classList.add('active');
-      if (dots[current]) dots[current].classList.add('active');
-    }
+  function setSlide(next) {
+    if (next === idx) return;
 
-    function next() { show(current + 1); }
+    slides[idx].classList.remove('active');
+    slides[next].classList.add('active');
 
-    function startTimer() {
+    indis.forEach(function (el, i) {
+      el.classList.remove('active');
+      if (i < next) el.classList.add('done');
+      else          el.classList.remove('done');
+    });
+
+    // Force reflow so the CSS transition re-fires on the new active bar
+    void indis[next].offsetWidth;
+    indis[next].classList.add('active');
+
+    idx = next;
+  }
+
+  var timer = setInterval(function () {
+    setSlide((idx + 1) % TOTAL);
+  }, DURATION);
+
+  // Click indicator to jump
+  indis.forEach(function (el, i) {
+    el.addEventListener('click', function () {
       clearInterval(timer);
-      timer = setInterval(next, 5500);
-    }
+      setSlide(i);
+      timer = setInterval(function () {
+        setSlide((idx + 1) % TOTAL);
+      }, DURATION);
+    });
+  });
 
-    // Exponer para los dots
-    window.goSlide = function (n) { show(n); startTimer(); };
-
-    startTimer();
-  })();
+})();
 </script>
-
-<style>
-  /* Forzar fondo oscuro y remover la barra/gradiente superior en la pantalla de login */
-  html, body {
-    background: #0f172a !important;
-    background-image: none !important;
-    animation: none !important;
-    overflow: hidden !important; /* quitar scroll global */
-    height: 100% !important;
-  }
-
-  /* Evitar scroll dentro de los paneles del login */
-  .lp-wrapper, .lp-left, .lp-right {
-    height: 100dvh !important;
-    overflow: hidden !important;
-  }
-
-  /* Oculta el bloque global de flashes de base para evitar franja superior */
-  main.main-content > .mb-4 {
-    display: none !important;
-  }
-
-  /* Asegurar que el contenido del formulario se centre sin scrollbar */
-  .lp-right { display:flex; align-items:center; justify-content:center; }
-
-  /* Si en pantallas pequeñas el contenido puede necesitar scroll, permitir solo dentro del form */
-  @media (max-width: 768px) {
-    html, body { overflow: hidden !important; }
-    .lp-right { padding: 1.25rem !important; }
-    .lp-form { max-height: calc(100dvh - 5rem); overflow:auto; }
-  }
-
-  /* Eliminar completamente la banda azul y cualquier overlay */
-  .lp-left::before {
-    display: none !important;
-  }
-
-  /* Animación cinematográfica: pan diagonal + zoom dinámico con brillo suave */
-  @keyframes lp-hero-cinematic {
-    0% {
-      background-position: center bottom;
-      background-size: 106%;
-      filter: brightness(1);
-    }
-    25% {
-      background-position: center 35%;
-      background-size: 103%;
-      filter: brightness(1.02);
-    }
-    50% {
-      background-position: center 45%;
-      background-size: 108%;
-      filter: brightness(1);
-    }
-    75% {
-      background-position: center 40%;
-      background-size: 102%;
-      filter: brightness(1.01);
-    }
-    100% {
-      background-position: center bottom;
-      background-size: 106%;
-      filter: brightness(1);
-    }
-  }
-
-  .lp-left-bg {
-    animation: lp-hero-cinematic 18s ease-in-out infinite;
-    will-change: background-position, background-size, filter;
-    background-repeat: no-repeat !important;
-    background-size: cover !important;
-  }
-</style>
 {% endblock %}

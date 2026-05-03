@@ -270,7 +270,7 @@
   </style>
 </head>
 
-<body>
+<body {% block body_class %}{% endblock %}>
 
   <!-- ========== SCREEN SAVER (Solo para usuarios autenticados) ========== -->
   {% if session.user %}
