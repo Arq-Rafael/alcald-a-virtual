@@ -1,839 +1,361 @@
 {% extends "base.html" %}
-
 {% block title %}Panel de Control — Alcaldía Virtual Supatá{% endblock %}
 
 {% block styles %}
-<style>
-/* =====================================================
-   DASHBOARD — Diseño profesional tipo SaaS
-   ===================================================== */
-
-body.has-sidebar {
-  background: #f1f5f9 !important;
-}
-
-.db-page {
-  padding: 1.75rem 2rem;
-  max-width: 1380px;
-  margin: 0 auto;
-  animation: db-fade-in 0.4s ease both;
-}
-
-@keyframes db-fade-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* =====================================================
-   BANNER DE BIENVENIDA
-   ===================================================== */
-.db-banner {
-  position: relative;
-  overflow: hidden;
-  border-radius: 18px;
-  background: linear-gradient(130deg, #0f4c81 0%, #1565c0 55%, #0ea5e9 100%);
-  padding: 2rem 2.25rem;
-  margin-bottom: 1.75rem;
-  box-shadow: 0 8px 32px rgba(15,76,129,0.22);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.db-banner::before {
-  content: '';
-  position: absolute;
-  right: -80px; top: -80px;
-  width: 320px; height: 320px;
-  background: rgba(255,255,255,0.07);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.db-banner::after {
-  content: '';
-  position: absolute;
-  right: 60px; bottom: -60px;
-  width: 200px; height: 200px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.db-banner-left { position: relative; z-index: 1; }
-.db-banner-right { position: relative; z-index: 1; flex-shrink: 0; }
-
-.db-banner-left h2 {
-  font-size: 1.75rem !important;
-  font-weight: 800 !important;
-  color: #fff !important;
-  margin: 0 0 0.3rem !important;
-  letter-spacing: -0.4px !important;
-  line-height: 1.2 !important;
-}
-
-.db-banner-left p {
-  font-size: 0.92rem;
-  color: rgba(255,255,255,0.75);
-  margin: 0 0 1.25rem;
-}
-
-.db-banner-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-
-.db-banner-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.2);
-  color: rgba(255,255,255,0.9);
-  font-size: 0.78rem;
-  font-weight: 500;
-  padding: 0.3rem 0.75rem;
-  border-radius: 999px;
-  backdrop-filter: blur(6px);
-}
-
-.db-banner-chip.chip-success i { color: #6ee7b7; }
-.db-banner-chip.chip-info    i { color: #bae6fd; }
-
-/* =====================================================
-   SECTION TITLE
-   ===================================================== */
-.db-section-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: #64748b;
-  margin-bottom: 1rem;
-}
-.db-section-title i { font-size: 1rem; color: #0f4c81; }
-
-/* =====================================================
-   HERO CARDS — ACCESOS DESTACADOS
-   ===================================================== */
-.db-hero-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1.75rem;
-}
-
-@media (max-width: 640px) { .db-hero-grid { grid-template-columns: 1fr; } }
-
-.db-hero-card {
-  border-radius: 18px;
-  border: 1.5px solid #e2e8f0;
-  background: #fff;
-  padding: 1.75rem 1.75rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  cursor: pointer;
-  text-decoration: none !important;
-  color: inherit;
-  position: relative;
-  overflow: hidden;
-  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-  animation: card-in 0.4s cubic-bezier(0.16,1,0.3,1) both;
-}
-
-.db-hero-card:nth-child(1) { animation-delay: 0.04s; }
-.db-hero-card:nth-child(2) { animation-delay: 0.08s; }
-
-.db-hero-card::after {
-  content: '';
-  position: absolute;
-  top: -40px; right: -40px;
-  width: 140px; height: 140px;
-  background: var(--hero-bubble, rgba(15,76,129,0.05));
-  border-radius: 50%;
-  pointer-events: none;
-  transition: transform 0.35s ease;
-}
-
-.db-hero-card:hover::after { transform: scale(1.25); }
-
-.db-hero-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  background: var(--card-accent, #0f4c81);
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.db-hero-card:hover::before { opacity: 1; }
-
-.db-hero-card:hover {
-  border-color: var(--card-accent, #0f4c81);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.09);
-  transform: translateY(-3px);
-  text-decoration: none !important;
-}
-
-.db-hero-card-icon {
-  width: 54px; height: 54px;
-  border-radius: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  background: var(--card-icon-bg, #fef3c7);
-  color: var(--card-accent, #d97706);
-  transition: background 0.2s, color 0.2s;
-  position: relative; z-index: 1;
-  flex-shrink: 0;
-}
-
-.db-hero-card:hover .db-hero-card-icon {
-  background: var(--card-accent, #d97706);
-  color: #fff;
-}
-
-.db-hero-card-title {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #1e293b;
-  line-height: 1.3;
-  margin: 0.4rem 0 0;
-  position: relative; z-index: 1;
-}
-
-.db-hero-card-desc {
-  font-size: 0.83rem;
-  color: #64748b;
-  line-height: 1.55;
-  flex: 1; margin: 0;
-  position: relative; z-index: 1;
-}
-
-.db-hero-card-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  background: var(--card-accent, #d97706);
-  color: #fff;
-  font-size: 0.78rem;
-  font-weight: 700;
-  padding: 0.45rem 1.1rem;
-  border-radius: 999px;
-  width: fit-content;
-  margin-top: 0.5rem;
-  position: relative; z-index: 1;
-  transition: opacity 0.2s, transform 0.2s;
-}
-
-.db-hero-card:hover .db-hero-card-btn {
-  opacity: 0.9;
-  transform: translateX(3px);
-}
-
-.db-hero-card[data-accent="amber"]  { --card-accent:#d97706; --card-icon-bg:#fef3c7; --hero-bubble:rgba(217,119,6,0.06); }
-.db-hero-card[data-accent="sky"]    { --card-accent:#0ea5e9; --card-icon-bg:#e0f2fe; --hero-bubble:rgba(14,165,233,0.06); }
-.db-hero-card[data-accent="blue"]   { --card-accent:#0f4c81; --card-icon-bg:#dbeafe; --hero-bubble:rgba(15,76,129,0.06); }
-
-/* =====================================================
-   QUICK ACCESS — MÓDULOS ESTILO iOS
-   ===================================================== */
-.db-quick-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem 1.5rem;
-  margin-bottom: 1.75rem;
-}
-
-.db-quick-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  text-decoration: none !important;
-  color: inherit;
-  width: 72px;
-  flex-shrink: 0;
-  animation: card-in 0.4s cubic-bezier(0.16,1,0.3,1) both;
-}
-
-.db-quick-item:nth-child(1)  { animation-delay: 0.06s; }
-.db-quick-item:nth-child(2)  { animation-delay: 0.10s; }
-.db-quick-item:nth-child(3)  { animation-delay: 0.14s; }
-.db-quick-item:nth-child(4)  { animation-delay: 0.18s; }
-.db-quick-item:nth-child(5)  { animation-delay: 0.22s; }
-.db-quick-item:nth-child(6)  { animation-delay: 0.26s; }
-.db-quick-item:nth-child(7)  { animation-delay: 0.30s; }
-.db-quick-item:nth-child(8)  { animation-delay: 0.34s; }
-.db-quick-item:nth-child(9)  { animation-delay: 0.38s; }
-.db-quick-item:nth-child(10) { animation-delay: 0.42s; }
-
-.db-quick-item:hover { text-decoration: none !important; }
-
-.db-quick-icon {
-  width: 62px; height: 62px;
-  border-radius: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  color: #fff;
-  background: var(--icon-gradient, linear-gradient(135deg, #0f4c81, #1565c0));
-  box-shadow: 0 4px 14px var(--icon-shadow, rgba(15,76,129,0.28));
-  transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
-  flex-shrink: 0;
-}
-
-.db-quick-item:hover .db-quick-icon {
-  transform: scale(1.1) translateY(-2px);
-  box-shadow: 0 8px 22px var(--icon-shadow, rgba(15,76,129,0.38));
-}
-
-.db-quick-label {
-  font-size: 0.67rem;
-  font-weight: 600;
-  color: #334155;
-  text-align: center;
-  line-height: 1.3;
-  max-width: 72px;
-}
-
-/* Gradientes iOS por acento */
-.db-quick-item[data-accent="blue"]    { --icon-gradient: linear-gradient(135deg, #0f4c81, #1565c0); --icon-shadow: rgba(15,76,129,0.30); }
-.db-quick-item[data-accent="sky"]     { --icon-gradient: linear-gradient(135deg, #0284c7, #0ea5e9); --icon-shadow: rgba(14,165,233,0.30); }
-.db-quick-item[data-accent="violet"]  { --icon-gradient: linear-gradient(135deg, #6d28d9, #7c3aed); --icon-shadow: rgba(124,58,237,0.30); }
-.db-quick-item[data-accent="emerald"] { --icon-gradient: linear-gradient(135deg, #047857, #059669); --icon-shadow: rgba(5,150,105,0.30); }
-.db-quick-item[data-accent="amber"]   { --icon-gradient: linear-gradient(135deg, #b45309, #d97706); --icon-shadow: rgba(217,119,6,0.30); }
-.db-quick-item[data-accent="rose"]    { --icon-gradient: linear-gradient(135deg, #be123c, #e11d48); --icon-shadow: rgba(225,29,72,0.30); }
-.db-quick-item[data-accent="teal"]    { --icon-gradient: linear-gradient(135deg, #0f766e, #0d9488); --icon-shadow: rgba(13,148,136,0.30); }
-.db-quick-item[data-accent="indigo"]  { --icon-gradient: linear-gradient(135deg, #4338ca, #4f46e5); --icon-shadow: rgba(79,70,229,0.30); }
-.db-quick-item[data-accent="orange"]  { --icon-gradient: linear-gradient(135deg, #c2410c, #ea580c); --icon-shadow: rgba(234,88,12,0.30); }
-.db-quick-item[data-accent="green"]   { --icon-gradient: linear-gradient(135deg, #15803d, #16a34a); --icon-shadow: rgba(22,163,74,0.30); }
-.db-quick-item[data-accent="slate"]   { --icon-gradient: linear-gradient(135deg, #334155, #475569); --icon-shadow: rgba(71,85,105,0.30); }
-
-/* =====================================================
-   STATS GRID — RESUMEN DEL SISTEMA
-   ===================================================== */
-.db-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 0.875rem;
-  margin-bottom: 1rem;
-}
-
-.db-stat-card {
-  border-radius: 18px;
-  padding: 1.25rem 1rem 1.1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.2rem;
-  position: relative;
-  overflow: hidden;
-  background: var(--stat-gradient, linear-gradient(130deg, #0f4c81, #1565c0));
-  animation: card-in 0.5s cubic-bezier(0.16,1,0.3,1) both;
-  cursor: default;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.db-stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.14);
-}
-
-/* Burbuja decorativa */
-.db-stat-card::after {
-  content: '';
-  position: absolute;
-  bottom: -20px; right: -20px;
-  width: 80px; height: 80px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 50%;
-}
-
-.db-stat-icon {
-  width: 34px; height: 34px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.95rem;
-  color: #fff;
-  margin-bottom: 0.4rem;
-  flex-shrink: 0;
-}
-
-.db-stat-num {
-  font-size: 2.1rem;
-  font-weight: 900;
-  color: #fff;
-  line-height: 1;
-  letter-spacing: -1.5px;
-}
-
-.db-stat-label {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: rgba(255,255,255,0.92);
-  margin-top: 0.1rem;
-}
-
-.db-stat-sub {
-  font-size: 0.67rem;
-  color: rgba(255,255,255,0.62);
-}
-
-/* Estado de carga (skeleton) */
-.db-stat-card.loading {
-  background: linear-gradient(90deg, #e2e8f0 25%, #cbd5e1 50%, #e2e8f0 75%) !important;
-  background-size: 200% 100% !important;
-  animation: skeleton-shimmer 1.4s ease infinite !important;
-}
-
-.db-stat-card.loading * { visibility: hidden; }
-
-@keyframes skeleton-shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-/* Gradientes por módulo */
-.db-stat-blue    { --stat-gradient: linear-gradient(130deg, #0c3d6b, #0f4c81); }
-.db-stat-sky     { --stat-gradient: linear-gradient(130deg, #0369a1, #0ea5e9); }
-.db-stat-amber   { --stat-gradient: linear-gradient(130deg, #92400e, #d97706); }
-.db-stat-rose    { --stat-gradient: linear-gradient(130deg, #9f1239, #e11d48); }
-.db-stat-emerald { --stat-gradient: linear-gradient(130deg, #065f46, #059669); }
-.db-stat-violet  { --stat-gradient: linear-gradient(130deg, #5b21b6, #7c3aed); }
-.db-stat-orange  { --stat-gradient: linear-gradient(130deg, #9a3412, #ea580c); }
-.db-stat-green   { --stat-gradient: linear-gradient(130deg, #14532d, #16a34a); }
-.db-stat-slate   { --stat-gradient: linear-gradient(130deg, #1e293b, #475569); }
-.db-stat-teal    { --stat-gradient: linear-gradient(130deg, #134e4a, #0d9488); }
-
-/* Retraso de entrada escalonado */
-.db-stat-card:nth-child(1) { animation-delay: 0.05s; }
-.db-stat-card:nth-child(2) { animation-delay: 0.09s; }
-.db-stat-card:nth-child(3) { animation-delay: 0.13s; }
-.db-stat-card:nth-child(4) { animation-delay: 0.17s; }
-.db-stat-card:nth-child(5) { animation-delay: 0.21s; }
-.db-stat-card:nth-child(6) { animation-delay: 0.25s; }
-.db-stat-card:nth-child(7) { animation-delay: 0.29s; }
-.db-stat-card:nth-child(8) { animation-delay: 0.33s; }
-
-/* =====================================================
-   ADMIN STATUS ROW
-   ===================================================== */
-.db-admin-status {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  background: #fff;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 0.7rem 1rem;
-  margin-bottom: 2rem;
-}
-
-.db-spill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-size: 0.76rem;
-  font-weight: 600;
-  padding: 0.22rem 0.6rem;
-  border-radius: 999px;
-}
-
-.db-spill.active  { background: #e0f2fe; color: #0f4c81; }
-.db-spill.active  i { font-size: 0.45rem; color: #0f4c81; }
-.db-spill.ok      { background: #d1fae5; color: #059669; }
-.db-spill.ok      i { font-size: 0.45rem; color: #059669; }
-.db-spill.pending { background: #fef3c7; color: #d97706; }
-.db-spill.pending i { font-size: 0.45rem; color: #d97706; }
-
-.db-admin-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: #0f4c81;
-  text-decoration: none;
-  margin-left: auto;
-}
-
-.db-admin-link:hover { text-decoration: underline; }
-
-/* =====================================================
-   SHARED ANIMATION
-   ===================================================== */
-@keyframes card-in {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@media (max-width: 768px) {
-  .db-page { padding: 1.25rem 1rem; }
-  .db-banner { padding: 1.5rem; }
-  .db-banner-left h2 { font-size: 1.4rem !important; }
-  .db-stats-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
-  .db-quick-row { gap: 0.75rem 1.1rem; }
-}
-
-/* ── Accesos destacados dinámicos ── */
-.db-featured-empty {
-  text-align: center;
-  padding: 2rem;
-  border: 2px dashed #e2e8f0;
-  border-radius: 16px;
-  color: #94a3b8;
-  margin-bottom: 1.75rem;
-  background: #f8fafc;
-}
-.db-featured-empty i { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
-.db-featured-empty p { font-size: 13px; margin: 0; }
-
-.db-featured-remove {
-  position: absolute; top: 10px; right: 12px;
-  background: rgba(0,0,0,0.07); border: none;
-  width: 22px; height: 22px; border-radius: 50%;
-  font-size: 14px; line-height: 1; cursor: pointer;
-  color: #64748b; display: flex; align-items: center; justify-content: center;
-  transition: background 0.15s, color 0.15s;
-  z-index: 5;
-}
-.db-featured-remove:hover { background: #fee2e2; color: #dc2626; }
-
-/* Estrella en módulos del sistema */
-.db-quick-item { position: relative; }
-.db-star-btn {
-  position: absolute; top: 4px; right: 4px;
-  background: none; border: none; cursor: pointer;
-  font-size: 15px; color: #cbd5e1; line-height: 1;
-  padding: 2px; border-radius: 4px; transition: color 0.15s, transform 0.15s;
-  z-index: 5;
-}
-.db-star-btn:hover { color: #f59e0b; transform: scale(1.2); }
-.db-star-btn.active { color: #f59e0b; }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-glass-2026.css') }}">
 {% endblock %}
 
 {% block content %}
-<div class="db-page">
+<div class="lg-page lg-dashboard">
 
-  <!-- ===== BANNER ===== -->
-  <div class="db-banner">
-    <div class="db-banner-left">
-      <h2>¡Hola, {{ session.user }}!</h2>
-      <p>Panel de control · Alcaldía Municipal de Supatá</p>
-      <div class="db-banner-chips">
-        <span class="db-banner-chip chip-success">
-          <i class="bi bi-shield-check-fill"></i> Sesión verificada
-        </span>
-        <span class="db-banner-chip chip-info">
-          <i class="bi bi-person-badge-fill"></i> {{ session.user_role|upper }}
-        </span>
+  <!-- ── HERO BANNER ── -->
+  <div class="lg-hero-banner">
+    <div class="lg-hero-orb-1"></div>
+    <div class="lg-hero-orb-2"></div>
+    <div class="lg-hero-orb-3"></div>
+    <div class="lg-hero-body">
+      <div>
+        <p class="lg-hero-date" id="lgHeroDate"></p>
+        <h1 class="lg-hero-greeting" id="lgHeroGreeting">Hola, {{ session.user|title }}</h1>
+        <p class="lg-hero-sub">Panel de control · Alcaldía Municipal de Supatá</p>
+      </div>
+      <div class="lg-hero-pills">
+        <span class="lg-hero-pill"><span class="lg-pulse"></span> Sesión verificada</span>
+        <span class="lg-hero-pill"><i class="bi bi-person-badge-fill"></i> {{ session.user_role|upper }}</span>
       </div>
     </div>
+    <i class="bi bi-buildings lg-hero-glyph" aria-hidden="true"></i>
   </div>
 
-  <!-- ===== ACCESOS DESTACADOS ===== -->
-  <div class="db-section-title">
-    <i class="bi bi-stars"></i>
-    Accesos Destacados
-    <span style="margin-left:auto;font-size:11px;font-weight:500;color:#94a3b8;cursor:help"
-          title="Haz clic en la estrella ☆ de cualquier módulo para añadirlo aquí">
-      <i class="bi bi-info-circle"></i> Clic en ☆ para personalizar
-    </span>
-  </div>
+  <!-- ── ACCESOS DESTACADOS ── -->
+  <section class="lg-section">
+    <div class="lg-section-hdr">
+      <h2 class="lg-section-lbl"><i class="bi bi-bullseye"></i> Accesos destacados</h2>
+      <span class="lg-section-hint">Clic en ☆ para personalizar</span>
+    </div>
 
-  {% if featured_cards %}
-  <div class="db-hero-grid">
-    {% for card in featured_cards %}
-    <a href="{{ card.url }}" class="db-hero-card" data-accent="{{ card.accent }}">
-      <button class="db-featured-remove" onclick="removeFeatured(event, '{{ card.id }}')" title="Quitar de destacados">×</button>
-      <div class="db-hero-card-icon"><i class="bi {{ card.icon }}"></i></div>
-      <div class="db-hero-card-title">{{ card.name }}</div>
-      <p class="db-hero-card-desc">{{ card.desc }}</p>
-      <div class="db-hero-card-btn"><i class="bi bi-arrow-right-short"></i> Abrir</div>
-    </a>
-    {% endfor %}
-  </div>
-  {% else %}
-  <div class="db-featured-empty">
-    <i class="bi bi-star"></i>
-    <p>Haz clic en <strong>☆</strong> en cualquier módulo para añadirlo como acceso destacado</p>
-  </div>
-  {% endif %}
+    {% if featured_cards %}
+    <div class="lg-fav-grid">
+      {% for card in featured_cards %}
+      <a href="{{ card.url }}" class="lg-fav-card">
+        <div class="lg-fav-top">
+          <div class="lg-fav-icon lg-icon-{{ card.accent }}"><i class="bi {{ card.icon }}"></i></div>
+          <button class="lg-fav-remove-btn" onclick="removeFeatured(event,'{{ card.id }}')" title="Quitar de destacados">
+            <i class="bi bi-x"></i>
+          </button>
+        </div>
+        <h3>{{ card.name }}</h3>
+        <p>{{ card.desc }}</p>
+        <span class="lg-fav-open">Abrir <i class="bi bi-chevron-right"></i></span>
+      </a>
+      {% endfor %}
+    </div>
 
-  <!-- ===== MÓDULOS DEL SISTEMA (estilo iOS) ===== -->
-  <div class="db-section-title">
-    <i class="bi bi-grid-3x3-gap-fill"></i>
-    Módulos del Sistema
-  </div>
-
-  <div class="db-quick-row">
-
-    {% if can('solicitudes') %}
-    <a href="{{ url_for('solicitudes.index') }}" class="db-quick-item" data-accent="blue" data-module-id="solicitudes">
-      <div class="db-quick-icon"><i class="bi bi-file-earmark-text-fill"></i></div>
-      <span class="db-quick-label">Solicitudes</span>
-    </a>
+    {% else %}
+    <!-- Accesos por defecto cuando no hay favoritos -->
+    <div class="lg-fav-grid">
+      {% if can('solicitudes') %}
+      <a href="{{ url_for('solicitudes.index') }}" class="lg-fav-card">
+        <div class="lg-fav-top"><div class="lg-fav-icon lg-icon-blue"><i class="bi bi-file-earmark-text-fill"></i></div></div>
+        <h3>Solicitudes</h3>
+        <p>Gestiona radicados y solicitudes de contratación.</p>
+        <span class="lg-fav-open">Abrir <i class="bi bi-chevron-right"></i></span>
+      </a>
+      {% endif %}
+      {% if can('certificados') %}
+      <a href="{{ url_for('certificados.index') }}" class="lg-fav-card">
+        <div class="lg-fav-top"><div class="lg-fav-icon lg-icon-emerald"><i class="bi bi-patch-check-fill"></i></div></div>
+        <h3>Certificados</h3>
+        <p>Emite certificados municipales oficiales.</p>
+        <span class="lg-fav-open">Abrir <i class="bi bi-chevron-right"></i></span>
+      </a>
+      {% endif %}
+      {% if can('ia') %}
+      <a href="/ia/redactar" class="lg-fav-card">
+        <div class="lg-fav-top"><div class="lg-fav-icon lg-icon-amber"><i class="bi bi-pencil-square"></i></div></div>
+        <h3>Redactar Oficio</h3>
+        <p>Genera documentos institucionales con IA.</p>
+        <span class="lg-fav-open">Abrir <i class="bi bi-chevron-right"></i></span>
+      </a>
+      {% endif %}
+      <a href="/calendario" class="lg-fav-card">
+        <div class="lg-fav-top"><div class="lg-fav-icon lg-icon-sky"><i class="bi bi-calendar-event-fill"></i></div></div>
+        <h3>Calendario</h3>
+        <p>Eventos y agenda institucional del municipio.</p>
+        <span class="lg-fav-open">Abrir <i class="bi bi-chevron-right"></i></span>
+      </a>
+    </div>
     {% endif %}
+  </section>
 
-    {% if can('certificados') %}
-    <a href="{{ url_for('certificados.index') }}" class="db-quick-item" data-accent="emerald" data-module-id="certificados">
-      <div class="db-quick-icon"><i class="bi bi-patch-check-fill"></i></div>
-      <span class="db-quick-label">Certificados</span>
-    </a>
-    {% endif %}
+  <!-- ── MÓDULOS DEL SISTEMA ── -->
+  <section class="lg-section">
+    <div class="lg-section-hdr">
+      <h2 class="lg-section-lbl"><i class="bi bi-grid-3x3-gap-fill"></i> Módulos del sistema</h2>
+    </div>
+    <div class="lg-mod-grid">
 
-    {% if can('licencias') and ('planeacion' in (session.get('secretaria','') or '')|lower or session.get('role','') == 'admin') %}
-    <a href="/licencias" class="db-quick-item" data-accent="orange" data-module-id="licencias">
-      <div class="db-quick-icon"><i class="bi bi-buildings-fill"></i></div>
-      <span class="db-quick-label">Licencias</span>
-    </a>
-    {% endif %}
+      {% if can('solicitudes') %}
+      <a href="{{ url_for('solicitudes.index') }}" class="lg-mod-item" data-module-id="solicitudes">
+        <div class="lg-mod-icon lg-icon-blue"><i class="bi bi-file-earmark-text-fill"></i></div>
+        <span class="lg-mod-label">Solicitudes</span>
+      </a>
+      {% endif %}
 
-    {% if can('ia') %}
-    <a href="{{ url_for('ia.index') }}" class="db-quick-item" data-accent="violet" data-module-id="ia">
-      <div class="db-quick-icon"><i class="bi bi-cpu-fill"></i></div>
-      <span class="db-quick-label">IA Municipal</span>
-    </a>
-    {% endif %}
+      {% if can('certificados') %}
+      <a href="{{ url_for('certificados.index') }}" class="lg-mod-item" data-module-id="certificados">
+        <div class="lg-mod-icon lg-icon-emerald"><i class="bi bi-patch-check-fill"></i></div>
+        <span class="lg-mod-label">Certificados</span>
+      </a>
+      {% endif %}
 
-    {% if can('participacion') %}
-    <a href="{{ url_for('participacion.index') }}" class="db-quick-item" data-accent="rose" data-module-id="participacion">
-      <div class="db-quick-icon"><i class="bi bi-people-fill"></i></div>
-      <span class="db-quick-label">Participación</span>
-    </a>
-    {% endif %}
+      {% if can('licencias') and ('planeacion' in (session.get('secretaria','') or '')|lower or session.get('role','') == 'admin') %}
+      <a href="/licencias" class="lg-mod-item" data-module-id="licencias">
+        <div class="lg-mod-icon lg-icon-orange"><i class="bi bi-buildings-fill"></i></div>
+        <span class="lg-mod-label">Licencias</span>
+      </a>
+      {% endif %}
 
-    {% if can('geoportal') %}
-    <a href="{{ url_for('main.geoportal') }}" class="db-quick-item" data-accent="teal" data-module-id="geoportal">
-      <div class="db-quick-icon"><i class="bi bi-globe-americas"></i></div>
-      <span class="db-quick-label">Geoportal</span>
-    </a>
-    {% endif %}
+      {% if can('ia') %}
+      <a href="{{ url_for('ia.index') }}" class="lg-mod-item" data-module-id="ia">
+        <div class="lg-mod-icon lg-icon-violet"><i class="bi bi-cpu-fill"></i></div>
+        <span class="lg-mod-label">IA Municipal</span>
+      </a>
+      {% endif %}
 
-    {% if can('seguimiento') %}
-    <a href="{{ url_for('seguimiento.metas_dashboard') }}" class="db-quick-item" data-accent="indigo" data-module-id="seguimiento">
-      <div class="db-quick-icon"><i class="bi bi-graph-up-arrow"></i></div>
-      <span class="db-quick-label">Seguimiento</span>
-    </a>
-    {% endif %}
+      {% if can('participacion') %}
+      <a href="{{ url_for('participacion.index') }}" class="lg-mod-item" data-module-id="participacion">
+        <div class="lg-mod-icon lg-icon-rose"><i class="bi bi-people-fill"></i></div>
+        <span class="lg-mod-label">Participación</span>
+      </a>
+      {% endif %}
 
-    {% if can('riesgo') %}
-    <a href="{{ url_for('main.gestion_riesgo') }}" class="db-quick-item" data-accent="green" data-module-id="riesgo">
-      <div class="db-quick-icon"><i class="bi bi-tree-fill"></i></div>
-      <span class="db-quick-label">Gestión Riesgo</span>
-    </a>
-    {% endif %}
+      {% if can('geoportal') %}
+      <a href="{{ url_for('main.geoportal') }}" class="lg-mod-item" data-module-id="geoportal">
+        <div class="lg-mod-icon lg-icon-teal"><i class="bi bi-globe-americas"></i></div>
+        <span class="lg-mod-label">Geoportal</span>
+      </a>
+      {% endif %}
 
-    {% if can('contratos') %}
-    <a href="/contratos" class="db-quick-item" data-accent="sky" data-module-id="contratos">
-      <div class="db-quick-icon"><i class="bi bi-briefcase-fill"></i></div>
-      <span class="db-quick-label">Contratación</span>
-    </a>
-    {% endif %}
+      {% if can('seguimiento') %}
+      <a href="{{ url_for('seguimiento.metas_dashboard') }}" class="lg-mod-item" data-module-id="seguimiento">
+        <div class="lg-mod-icon lg-icon-indigo"><i class="bi bi-graph-up-arrow"></i></div>
+        <span class="lg-mod-label">Seguimiento</span>
+      </a>
+      {% endif %}
 
-    {% if can('correo_inteligente') %}
-    <a href="{{ url_for('correo_inteligente.inbox') }}" class="db-quick-item" data-accent="rose" data-module-id="correo">
-      <div class="db-quick-icon"><i class="bi bi-envelope-paper-heart-fill"></i></div>
-      <span class="db-quick-label">Correo IA</span>
-    </a>
-    {% endif %}
+      {% if can('riesgo') %}
+      <a href="{{ url_for('main.gestion_riesgo') }}" class="lg-mod-item" data-module-id="riesgo">
+        <div class="lg-mod-icon lg-icon-green"><i class="bi bi-tree-fill"></i></div>
+        <span class="lg-mod-label">Gestión Riesgo</span>
+      </a>
+      {% endif %}
 
-    {% if session.user_role == 'admin' %}
-    <a href="{{ url_for('configuracion.index') }}" class="db-quick-item" data-accent="slate">
-      <div class="db-quick-icon"><i class="bi bi-gear-fill"></i></div>
-      <span class="db-quick-label">Configuración</span>
-    </a>
-    {% endif %}
+      {% if can('contratos') %}
+      <a href="/contratos" class="lg-mod-item" data-module-id="contratos">
+        <div class="lg-mod-icon lg-icon-sky"><i class="bi bi-briefcase-fill"></i></div>
+        <span class="lg-mod-label">Contratación</span>
+      </a>
+      {% endif %}
 
-  </div><!-- /db-quick-row -->
+      {% if can('correo_inteligente') %}
+      <a href="{{ url_for('correo_inteligente.inbox') }}" class="lg-mod-item" data-module-id="correo">
+        <div class="lg-mod-icon lg-icon-rose"><i class="bi bi-envelope-fill"></i></div>
+        <span class="lg-mod-label">Correo IA</span>
+      </a>
+      {% endif %}
 
-  <!-- ===== RESUMEN DEL SISTEMA ===== -->
+      <a href="/calendario" class="lg-mod-item">
+        <div class="lg-mod-icon lg-icon-sky"><i class="bi bi-calendar-event-fill"></i></div>
+        <span class="lg-mod-label">Calendario</span>
+      </a>
+
+      {% if session.user_role in ['admin', 'superadmin'] %}
+      <a href="{{ url_for('configuracion.index') }}" class="lg-mod-item">
+        <div class="lg-mod-icon lg-icon-slate"><i class="bi bi-gear-fill"></i></div>
+        <span class="lg-mod-label">Configuración</span>
+      </a>
+      <a href="{{ url_for('reportes.dashboard') }}" class="lg-mod-item">
+        <div class="lg-mod-icon lg-icon-indigo"><i class="bi bi-bar-chart-fill"></i></div>
+        <span class="lg-mod-label">Reportes</span>
+      </a>
+      {% endif %}
+
+    </div>
+  </section>
+
+  <!-- ── RESUMEN DEL SISTEMA ── -->
   {% set has_stats = can('solicitudes') or can('participacion') or can('contratos') or can('riesgo') or session.user_role in ['admin','superadmin'] %}
   {% if has_stats %}
-  <div class="db-section-title">
-    <i class="bi bi-bar-chart-fill"></i>
-    Resumen del Sistema
-  </div>
+  <section class="lg-section">
+    <div class="lg-section-hdr">
+      <h2 class="lg-section-lbl"><i class="bi bi-bar-chart-fill"></i> Resumen del sistema</h2>
+      <span class="lg-section-hint">Datos en vivo</span>
+    </div>
+    <div class="lg-stats-grid" id="lgStatsGrid">
 
-  <div class="db-stats-grid" id="statsGrid">
+      {% if can('solicitudes') %}
+      <div class="lg-stat lg-stat--m">
+        <div class="lg-stat-icon lg-icon-blue"><i class="bi bi-file-earmark-text-fill"></i></div>
+        <div class="lg-stat-val" id="lgStatSolTotal">—</div>
+        <div class="lg-stat-lbl">Solicitudes <span class="lg-stat-sub">total registradas</span></div>
+      </div>
+      <div class="lg-stat lg-stat--m">
+        <div class="lg-stat-icon lg-icon-amber"><i class="bi bi-hourglass-split"></i></div>
+        <div class="lg-stat-val" id="lgStatSolPend">—</div>
+        <div class="lg-stat-lbl">Pendientes <span class="lg-stat-sub">sin revisar</span></div>
+      </div>
+      {% endif %}
 
-    {% if can('solicitudes') %}
-    <div class="db-stat-card db-stat-blue loading">
-      <div class="db-stat-icon"><i class="bi bi-file-earmark-text-fill"></i></div>
-      <div class="db-stat-num" id="stat-sol-total">…</div>
-      <div class="db-stat-label">Solicitudes</div>
-      <div class="db-stat-sub">total registradas</div>
-    </div>
-    <div class="db-stat-card db-stat-amber loading">
-      <div class="db-stat-icon"><i class="bi bi-hourglass-split"></i></div>
-      <div class="db-stat-num" id="stat-sol-pend">…</div>
-      <div class="db-stat-label">Certificados</div>
-      <div class="db-stat-sub">pendientes de emitir</div>
-    </div>
-    {% endif %}
+      {% if can('participacion') %}
+      <div class="lg-stat lg-stat--s">
+        <div class="lg-stat-icon lg-icon-rose"><i class="bi bi-chat-dots-fill"></i></div>
+        <div class="lg-stat-val" id="lgStatPqrsPend">—</div>
+        <div class="lg-stat-lbl">PQRS <span class="lg-stat-sub">pendientes</span></div>
+      </div>
+      <div class="lg-stat lg-stat--s">
+        <div class="lg-stat-icon lg-icon-orange"><i class="bi bi-arrow-repeat"></i></div>
+        <div class="lg-stat-val" id="lgStatPqrsTramite">—</div>
+        <div class="lg-stat-lbl">En trámite <span class="lg-stat-sub">PQRS</span></div>
+      </div>
+      {% endif %}
 
-    {% if can('participacion') %}
-    <div class="db-stat-card db-stat-rose loading">
-      <div class="db-stat-icon"><i class="bi bi-chat-dots-fill"></i></div>
-      <div class="db-stat-num" id="stat-pqrs-pend">…</div>
-      <div class="db-stat-label">PQRS Pendientes</div>
-      <div class="db-stat-sub">sin respuesta</div>
-    </div>
-    <div class="db-stat-card db-stat-orange loading">
-      <div class="db-stat-icon"><i class="bi bi-arrow-repeat"></i></div>
-      <div class="db-stat-num" id="stat-pqrs-tramite">…</div>
-      <div class="db-stat-label">En Trámite</div>
-      <div class="db-stat-sub">en proceso</div>
-    </div>
-    {% endif %}
+      {% if can('contratos') %}
+      <div class="lg-stat lg-stat--m">
+        <div class="lg-stat-icon lg-icon-sky"><i class="bi bi-briefcase-fill"></i></div>
+        <div class="lg-stat-val" id="lgStatCtTotal">—</div>
+        <div class="lg-stat-lbl">Contratos <span class="lg-stat-sub">en el sistema</span></div>
+      </div>
+      <div class="lg-stat lg-stat--s">
+        <div class="lg-stat-icon lg-icon-amber"><i class="bi bi-exclamation-triangle-fill"></i></div>
+        <div class="lg-stat-val" id="lgStatCtAlerta">—</div>
+        <div class="lg-stat-lbl">Por vencer <span class="lg-stat-sub">contratos</span></div>
+      </div>
+      {% endif %}
 
-    {% if can('contratos') %}
-    <div class="db-stat-card db-stat-sky loading">
-      <div class="db-stat-icon"><i class="bi bi-briefcase-fill"></i></div>
-      <div class="db-stat-num" id="stat-contratos-total">…</div>
-      <div class="db-stat-label">Contratos</div>
-      <div class="db-stat-sub">en el sistema</div>
-    </div>
-    <div class="db-stat-card db-stat-amber loading">
-      <div class="db-stat-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
-      <div class="db-stat-num" id="stat-contratos-alerta">…</div>
-      <div class="db-stat-label">Por Vencer</div>
-      <div class="db-stat-sub">con alerta activa</div>
-    </div>
-    {% endif %}
+      {% if can('riesgo') %}
+      <div class="lg-stat lg-stat--m">
+        <div class="lg-stat-icon lg-icon-green"><i class="bi bi-tree-fill"></i></div>
+        <div class="lg-stat-val" id="lgStatRiesgoTotal">—</div>
+        <div class="lg-stat-lbl">Gestión arbórea <span class="lg-stat-sub">radicados</span></div>
+      </div>
+      <div class="lg-stat lg-stat--s">
+        <div class="lg-stat-icon lg-icon-teal"><i class="bi bi-clipboard2-check-fill"></i></div>
+        <div class="lg-stat-val" id="lgStatRiesgoPend">—</div>
+        <div class="lg-stat-lbl">Sin dictamen <span class="lg-stat-sub">riesgo</span></div>
+      </div>
+      {% endif %}
 
-    {% if can('riesgo') %}
-    <div class="db-stat-card db-stat-green loading">
-      <div class="db-stat-icon"><i class="bi bi-tree-fill"></i></div>
-      <div class="db-stat-num" id="stat-riesgo-total">…</div>
-      <div class="db-stat-label">Gestión Arbórea</div>
-      <div class="db-stat-sub">radicados totales</div>
+      {% if session.user_role in ['admin', 'superadmin'] %}
+      <div class="lg-stat lg-stat--m">
+        <div class="lg-stat-icon lg-icon-violet"><i class="bi bi-people-fill"></i></div>
+        <div class="lg-stat-val" id="lgStatUsTotal">—</div>
+        <div class="lg-stat-lbl">Usuarios <span class="lg-stat-sub">en el sistema</span></div>
+      </div>
+      <div class="lg-stat lg-stat--s">
+        <div class="lg-stat-icon lg-icon-slate"><i class="bi bi-person-check-fill"></i></div>
+        <div class="lg-stat-val" id="lgStatUsActivos">—</div>
+        <div class="lg-stat-lbl">Activos <span class="lg-stat-sub">sin bloqueo</span></div>
+      </div>
+      {% endif %}
+
     </div>
-    <div class="db-stat-card db-stat-teal loading">
-      <div class="db-stat-icon"><i class="bi bi-clipboard2-check-fill"></i></div>
-      <div class="db-stat-num" id="stat-riesgo-pend">…</div>
-      <div class="db-stat-label">Sin Dictamen</div>
-      <div class="db-stat-sub">pendientes de decisión</div>
-    </div>
-    {% endif %}
 
     {% if session.user_role in ['admin', 'superadmin'] %}
-    <div class="db-stat-card db-stat-violet loading">
-      <div class="db-stat-icon"><i class="bi bi-people-fill"></i></div>
-      <div class="db-stat-num" id="stat-usuarios-total">…</div>
-      <div class="db-stat-label">Usuarios</div>
-      <div class="db-stat-sub">en el sistema</div>
-    </div>
-    <div class="db-stat-card db-stat-slate loading">
-      <div class="db-stat-icon"><i class="bi bi-person-check-fill"></i></div>
-      <div class="db-stat-num" id="stat-usuarios-activos">…</div>
-      <div class="db-stat-label">Activos</div>
-      <div class="db-stat-sub">sin bloqueo</div>
+    <div class="lg-admin-status">
+      <span class="lg-spill active"><i class="bi bi-circle-fill"></i> Sistema operativo</span>
+      <span class="lg-spill ok"><i class="bi bi-circle-fill"></i> Base de datos OK</span>
+      <span class="lg-spill pending"><i class="bi bi-circle-half"></i> Auditoría programada</span>
+      <a href="{{ url_for('configuracion.index') }}" class="lg-admin-link">
+        <i class="bi bi-gear-fill"></i> Panel de administración
+      </a>
     </div>
     {% endif %}
 
-  </div><!-- /db-stats-grid -->
-
-  <!-- Estado del sistema (solo admin, compacto) -->
-  {% if session.user_role in ['admin', 'superadmin'] %}
-  <div class="db-admin-status">
-    <span class="db-spill active"><i class="bi bi-circle-fill"></i> Sistema operativo</span>
-    <span class="db-spill ok"><i class="bi bi-circle-fill"></i> Base de datos OK</span>
-    <span class="db-spill pending"><i class="bi bi-circle-half"></i> Auditoría programada</span>
-    <a href="{{ url_for('configuracion.index') }}" class="db-admin-link">
-      <i class="bi bi-gear-fill"></i> Panel de administración
-    </a>
-  </div>
+  </section>
   {% endif %}
 
-  {% endif %}<!-- /has_stats -->
+</div>
+{% endblock %}
 
-</div><!-- /db-page -->
-
+{% block scripts %}
 <script>
 (function () {
+  'use strict';
+
+  // ── Hero greeting dinámico ──
+  var h = new Date().getHours();
+  var greet = h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches';
+  var greetEl = document.getElementById('lgHeroGreeting');
+  if (greetEl) greetEl.textContent = greet + ', {{ session.user|title }}';
+
+  var dateEl = document.getElementById('lgHeroDate');
+  if (dateEl) {
+    var d = new Date().toLocaleDateString('es-CO', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    });
+    dateEl.textContent = d.charAt(0).toUpperCase() + d.slice(1);
+  }
+
+  // ── Animación de conteo ──
   function animateCount(el, target) {
     if (isNaN(target) || target < 0) { el.textContent = target; return; }
-    const dur = 700, start = performance.now();
+    var dur = 700, start = performance.now();
     (function step(now) {
-      const p = Math.min((now - start) / dur, 1);
-      const ease = 1 - Math.pow(1 - p, 3);
+      var p = Math.min((now - start) / dur, 1);
+      var ease = 1 - Math.pow(1 - p, 3);
       el.textContent = Math.round(ease * target);
       if (p < 1) requestAnimationFrame(step);
     })(start);
   }
 
   function setText(id, val) {
-    const el = document.getElementById(id);
+    var el = document.getElementById(id);
     if (!el) return;
-    const n = parseInt(val, 10);
+    var n = parseInt(val, 10);
     if (!isNaN(n)) animateCount(el, n);
-    else el.textContent = val ?? '--';
+    else el.textContent = (val != null) ? val : '—';
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
-    fetch('/api/dashboard-stats')
-      .then(r => r.json())
-      .then(d => {
-        if (d.solicitudes) {
-          setText('stat-sol-total', d.solicitudes.total);
-          setText('stat-sol-pend',  d.solicitudes.pendientes);
-        }
-        if (d.pqrs) {
-          setText('stat-pqrs-pend',   d.pqrs.pendiente);
-          setText('stat-pqrs-tramite', d.pqrs.en_tramite);
-        }
-        if (d.contratos) {
-          setText('stat-contratos-total',  d.contratos.total);
-          setText('stat-contratos-alerta', d.contratos.alerta);
-        }
-        if (d.riesgo) {
-          setText('stat-riesgo-total', d.riesgo.total);
-          setText('stat-riesgo-pend',  d.riesgo.pendientes);
-        }
-        if (d.usuarios) {
-          setText('stat-usuarios-total',  d.usuarios.total);
-          setText('stat-usuarios-activos', d.usuarios.activos);
-        }
-        document.querySelectorAll('#statsGrid .db-stat-card.loading')
-          .forEach(c => c.classList.remove('loading'));
-      })
-      .catch(() => {
-        document.querySelectorAll('#statsGrid .db-stat-num')
-          .forEach(n => { if (n.textContent === '…') n.textContent = '--'; });
-        document.querySelectorAll('#statsGrid .db-stat-card.loading')
-          .forEach(c => c.classList.remove('loading'));
-      });
-  });
-})();
-</script>
-<script>
-// ── Accesos Destacados dinámicos ──────────────────────────────────────────
-(function () {
+  // ── Hidratar stats ──
+  fetch('/api/dashboard-stats', { cache: 'no-store' })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (d.solicitudes) {
+        setText('lgStatSolTotal', d.solicitudes.total);
+        setText('lgStatSolPend',  d.solicitudes.pendientes);
+      }
+      if (d.pqrs) {
+        setText('lgStatPqrsPend',    d.pqrs.pendiente);
+        setText('lgStatPqrsTramite', d.pqrs.en_tramite);
+      }
+      if (d.contratos) {
+        setText('lgStatCtTotal',  d.contratos.total);
+        setText('lgStatCtAlerta', d.contratos.alerta);
+      }
+      if (d.riesgo) {
+        setText('lgStatRiesgoTotal', d.riesgo.total);
+        setText('lgStatRiesgoPend',  d.riesgo.pendientes);
+      }
+      if (d.usuarios) {
+        setText('lgStatUsTotal',   d.usuarios.total);
+        setText('lgStatUsActivos', d.usuarios.activos);
+      }
+    })
+    .catch(function () {});
+
+  // ── Featured modules — star buttons ──
   var featured = {{ featured_cards | map(attribute='id') | list | tojson }};
 
-  // Inyectar botón estrella en cada db-quick-item que tenga data-module-id
-  document.querySelectorAll('.db-quick-item[data-module-id]').forEach(function (el) {
+  document.querySelectorAll('.lg-mod-item[data-module-id]').forEach(function (el) {
     var mid = el.dataset.moduleId;
+    var isActive = featured.indexOf(mid) > -1;
     var btn = document.createElement('button');
-    btn.className = 'db-star-btn' + (featured.indexOf(mid) > -1 ? ' active' : '');
-    btn.title = featured.indexOf(mid) > -1 ? 'Quitar de destacados' : 'Añadir a destacados';
-    btn.innerHTML = featured.indexOf(mid) > -1 ? '★' : '☆';
+    btn.className = 'lg-star-btn' + (isActive ? ' active' : '');
+    btn.title = isActive ? 'Quitar de destacados' : 'Añadir a destacados';
+    btn.textContent = isActive ? '★' : '☆';
     btn.addEventListener('click', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault(); e.stopPropagation();
       toggleFeatured(mid, btn);
     });
     el.appendChild(btn);
@@ -854,8 +376,7 @@ body.has-sidebar {
   };
 
   window.removeFeatured = function (e, mid) {
-    e.preventDefault();
-    e.stopPropagation();
+    e.preventDefault(); e.stopPropagation();
     var idx = featured.indexOf(mid);
     if (idx > -1) featured.splice(idx, 1);
     saveFeatured(featured, function () { location.reload(); });
@@ -870,6 +391,7 @@ body.has-sidebar {
       .then(function (d) { if (d.ok && cb) cb(); })
       .catch(function () { alert('Error al guardar preferencias.'); });
   }
+
 })();
 </script>
 {% endblock %}
