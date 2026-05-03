@@ -875,3 +875,157 @@ body.has-sidebar:not(.lg-login-page) {
   .lg-stats-grid { grid-template-columns:1fr; }
   .lg-stat--m, .lg-stat--l { grid-column:span 1; }
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   FASE 3 — SIDEBAR LIQUID-GLASS · PALETA VERDE INSTITUCIONAL
+   Overrides sobre .av-sidebar definido en base.html inline <style>.
+   Todos con !important para vencer la alta especificidad del bloque
+   de estilos inline del template base.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Variables re-mapeadas al verde institucional ── */
+.av-sidebar {
+  --sb-primary      : #2D9F5C !important;
+  --sb-primary-dark : #0E8A4F !important;
+  --sb-primary-light: rgba(45,159,92,.12) !important;
+  --sb-bg           : rgba(255,255,255,.72) !important;
+  --sb-border       : rgba(45,159,92,.15) !important;
+  --sb-text         : #0F1A14 !important;
+  --sb-text-muted   : #4A6357 !important;
+  --sb-hover-bg     : rgba(45,159,92,.08) !important;
+}
+
+/* ── Sidebar shell — glass card ── */
+.av-sidebar {
+  background : rgba(255,255,255,.72) !important;
+  border-right: 1px solid rgba(45,159,92,.18) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+  box-shadow : 4px 0 24px rgba(14,138,79,.07) !important;
+}
+
+/* ── Brand area ── */
+.av-sidebar-brand {
+  border-bottom: 1px solid rgba(45,159,92,.15) !important;
+  background   : transparent !important;
+}
+
+.av-sidebar-brand-icon {
+  background: linear-gradient(135deg,#2D9F5C 0%,#0E8A4F 100%) !important;
+  box-shadow: 0 4px 14px rgba(45,159,92,.35) !important;
+  color: #fff !important;
+}
+
+.av-sidebar-brand-text h2 {
+  color: #0F1A14 !important;
+}
+.av-sidebar-brand-text span {
+  color: #4A6357 !important;
+}
+
+/* ── Nav section labels ── */
+.av-nav-section-label {
+  color  : #6B8F7E !important;
+  letter-spacing: .06em !important;
+}
+
+/* ── Nav items — default ── */
+.av-nav-item {
+  color      : #1E3329 !important;
+  border-radius: 10px !important;
+}
+.av-nav-item:hover:not(.active):not(.danger) {
+  background: rgba(45,159,92,.09) !important;
+  color     : #0E8A4F !important;
+}
+.av-nav-item:hover:not(.active):not(.danger) .av-nav-icon {
+  color: #0E8A4F !important;
+}
+
+/* ── Nav item — active ── */
+.av-nav-item.active {
+  background: linear-gradient(135deg,#2D9F5C 0%,#0E8A4F 100%) !important;
+  box-shadow: 0 4px 14px rgba(45,159,92,.28) !important;
+  color     : #ffffff !important;
+}
+.av-nav-item.active .av-nav-icon {
+  color: #ffffff !important;
+}
+
+/* ── Nav item — danger (logout / red actions) ── */
+.av-nav-item.danger {
+  color: #d93025 !important;
+}
+.av-nav-item.danger:hover {
+  background: rgba(217,48,37,.08) !important;
+  color     : #b71c1c !important;
+}
+.av-nav-item.danger .av-nav-icon {
+  color: inherit !important;
+}
+
+/* ── Nav icon default tint ── */
+.av-nav-icon {
+  color: #4A6357 !important;
+  transition: color .18s !important;
+}
+
+/* ── Sidebar footer ── */
+.av-sidebar-footer {
+  border-top: 1px solid rgba(45,159,92,.15) !important;
+  background : transparent !important;
+}
+
+/* ── User card ── */
+.av-user-card {
+  background   : rgba(45,159,92,.07) !important;
+  border       : 1px solid rgba(45,159,92,.18) !important;
+  border-radius: 12px !important;
+}
+.av-user-card:hover {
+  background: rgba(45,159,92,.13) !important;
+}
+
+.av-user-avatar-placeholder {
+  background: linear-gradient(135deg,#2D9F5C 0%,#0E8A4F 100%) !important;
+  color     : #fff !important;
+}
+
+.av-user-name {
+  color: #0F1A14 !important;
+  font-weight: 600 !important;
+}
+.av-user-role {
+  color: #4A6357 !important;
+}
+
+/* ── Scrollbar — thin green tint ── */
+.av-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.av-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.av-sidebar::-webkit-scrollbar-thumb {
+  background   : rgba(45,159,92,.35);
+  border-radius: 2px;
+}
+.av-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(45,159,92,.6);
+}
+
+/* ── Mobile offcanvas — keep glass coherent ── */
+@media (max-width: 991.98px) {
+  .av-sidebar.offcanvas,
+  .av-sidebar.offcanvas-start {
+    background        : rgba(240,248,243,.95) !important;
+    backdrop-filter   : blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    border-right      : 1px solid rgba(45,159,92,.22) !important;
+    box-shadow        : 8px 0 32px rgba(14,138,79,.12) !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   END FASE 3
+   ══════════════════════════════════════════════════════════════════ */
