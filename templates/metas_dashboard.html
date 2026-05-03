@@ -1,26 +1,36 @@
 {% extends "base.html" %}
-{% block title %}Seguimiento de Metas - Plan de Desarrollo{% endblock %}
+{% block title %}Seguimiento de Metas — Alcaldía Virtual Supatá{% endblock %}
 
 {% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-glass-2026.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 {% endblock %}
 
 {% block content %}
-<section class="md-page">
-  <div class="md-header">
-    <div class="md-header-left">
-      <h1>Seguimiento de Metas</h1>
-      <p id="mdSubtitle">Plan de Desarrollo 2024-2027 · Cargando resumen...</p>
-      <div class="md-header-chips">
-        <span class="md-chip" id="mdChipTime">Tiempo transcurrido: --</span>
-        <span class="md-chip" id="mdChipScore">Score promedio: --</span>
-        <span class="md-chip" id="mdChipUpdated">Ultimo corte: --</span>
+<div class="lg-module">
+
+  <!-- ── BANNER ── -->
+  <div class="lg-mod-banner lg-banner--blue">
+    <div class="lg-mod-banner-left">
+      <div class="lg-mod-banner-icon"><i class="bi bi-bullseye"></i></div>
+      <div class="lg-mod-banner-text">
+        <h1 class="lg-mod-banner-title">Seguimiento de Metas</h1>
+        <p class="lg-mod-banner-sub" id="mdSubtitle">Plan de Desarrollo 2024-2027 · Cargando resumen...</p>
       </div>
     </div>
-    <div class="md-header-right">
-      <button class="md-btn md-btn-primary" id="mdBtnExportPdf">Exportar PDF</button>
+    <div class="lg-mod-banner-actions">
+      <button class="lg-mod-banner-btn lg-mod-banner-btn--solid" id="mdBtnExportPdf">
+        <i class="bi bi-file-earmark-pdf-fill"></i> Exportar PDF
+      </button>
+      <span class="lg-mod-banner-btn" id="mdChipTime" style="cursor:default;">—</span>
+      <span class="lg-mod-banner-btn" id="mdChipScore" style="cursor:default;">—</span>
     </div>
   </div>
+
+  <!-- ── KPI CARDS ── -->
+  <div class="lg-kpi-row lg-kpi-row--6" id="mdKpiRow"></div>
+
+<section class="md-page" style="padding:0; background:none; border-radius:0; box-shadow:none;">
 
   <div class="md-filter-bar">
     <input type="text" id="mdFilterQ" placeholder="Buscar meta, codigo, secretaria..." />
@@ -215,6 +225,8 @@
     </div>
   </div>
 </div>
+
+</div>{# /lg-module #}
 {% endblock %}
 
 {% block scripts %}

@@ -1,219 +1,163 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gestión del Riesgo — Supatá</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --rojo:#b3322a;--rojo2:#e05252;
-  --verde:#1a5c2e;--verde2:#2e8b57;
-  --naranja:#d97706;--naranja2:#fbbf24;
-  --azul:#0f4c81;--azul2:#1565c0;--azul3:#0ea5e9;
-}
-html,body{height:100%;font-family:'Inter',sans-serif;overflow:hidden}
+{% extends "base.html" %}
+{% block title %}Gestión del Riesgo — Alcaldía Virtual Supatá{% endblock %}
 
-/* ── Fondo ── */
-.bg{
-  position:fixed;inset:0;
-  background:linear-gradient(145deg,#0a0f0a 0%,#0d1f0d 35%,#101a10 65%,#080f08 100%);
-}
-.bg::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 80% 60% at 50% -10%, rgba(26,92,46,.18) 0%, transparent 70%);
-}
-.stars{position:absolute;inset:0;overflow:hidden}
-.star{
-  position:absolute;border-radius:50%;background:#fff;
-  animation:twinkle var(--d,3s) ease-in-out infinite;
-  opacity:0;
-}
-@keyframes twinkle{0%,100%{opacity:0}50%{opacity:var(--op,.8)}}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-glass-2026.css') }}">
+{% endblock %}
 
-/* ── Layout ── */
-.wrap{
-  position:relative;z-index:10;height:100vh;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:0;padding:24px;
-}
+{% block content %}
+<div class="lg-module">
 
-/* ── Escudo / ícono ── */
-.escudo{
-  width:100px;height:100px;border-radius:50%;
-  background:linear-gradient(135deg,var(--verde) 0%,var(--verde2) 60%,#3aad6a 100%);
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 0 0 1px rgba(255,255,255,.12), 0 8px 32px rgba(26,92,46,.5),
-             0 0 60px rgba(46,139,87,.2);
-  margin-bottom:28px;
-  animation:pulse-ring 3s ease-in-out infinite;
-}
-.escudo i{font-size:42px;color:#fff;opacity:.95}
-@keyframes pulse-ring{
-  0%,100%{box-shadow:0 0 0 1px rgba(255,255,255,.12),0 8px 32px rgba(26,92,46,.5),0 0 60px rgba(46,139,87,.2)}
-  50%{box-shadow:0 0 0 1px rgba(255,255,255,.2),0 8px 40px rgba(26,92,46,.7),0 0 100px rgba(46,139,87,.35)}
-}
+  <!-- ── BANNER ── -->
+  <div class="lg-mod-banner lg-banner--lime">
+    <div class="lg-mod-banner-left">
+      <div class="lg-mod-banner-icon"><i class="bi bi-shield-fill-check"></i></div>
+      <div class="lg-mod-banner-text">
+        <h1 class="lg-mod-banner-title">Gestión del Riesgo</h1>
+        <p class="lg-mod-banner-sub">Plataforma para la gestión de riesgos, amenazas y planes de contingencia · CMGRD</p>
+      </div>
+    </div>
+    <div class="lg-mod-banner-actions">
+      <a href="/riesgo/tala" class="lg-mod-banner-btn lg-mod-banner-btn--solid">
+        <i class="bi bi-plus-lg"></i> Iniciar trámite
+      </a>
+      <a href="/riesgo/amenazas" class="lg-mod-banner-btn">
+        <i class="bi bi-map-fill"></i> Mapa de amenazas
+      </a>
+      <a href="{{ url_for('reportes.dashboard') }}" class="lg-mod-banner-btn">
+        <i class="bi bi-box-arrow-up-right"></i> Reportes
+      </a>
+    </div>
+  </div>
 
-/* ── Texto ── */
-.eyebrow{
-  font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;
-  color:#3aad6a;margin-bottom:10px;
-}
-.title{
-  font-size:clamp(26px,4vw,42px);font-weight:800;color:#fff;
-  text-align:center;line-height:1.15;margin-bottom:8px;
-  text-shadow:0 2px 20px rgba(46,139,87,.3);
-}
-.subtitle{
-  font-size:15px;font-weight:400;color:rgba(255,255,255,.5);
-  text-align:center;margin-bottom:40px;letter-spacing:.3px;
-}
+  <!-- ── KPI CARDS ── -->
+  <div class="lg-kpi-row">
+    <div class="lg-kpi-card kpi-green">
+      <div class="lg-kpi-icon lg-icon-emerald"><i class="bi bi-shield-check"></i></div>
+      <div class="lg-kpi-val" id="kpiTramites">—</div>
+      <div class="lg-kpi-lbl">Trámites CMGRD</div>
+      <div class="lg-kpi-sub">activos</div>
+    </div>
+    <div class="lg-kpi-card kpi-teal">
+      <div class="lg-kpi-icon lg-icon-teal"><i class="bi bi-tree-fill"></i></div>
+      <div class="lg-kpi-val" id="kpiTala">—</div>
+      <div class="lg-kpi-lbl">Tala de árboles</div>
+      <div class="lg-kpi-sub" id="kpiTalaSub">aprobados</div>
+    </div>
+    <div class="lg-kpi-card kpi-amber">
+      <div class="lg-kpi-icon lg-icon-amber"><i class="bi bi-file-earmark-text-fill"></i></div>
+      <div class="lg-kpi-val" id="kpiPlanes">—</div>
+      <div class="lg-kpi-lbl">Planes contingencia</div>
+      <div class="lg-kpi-sub">vigentes</div>
+    </div>
+    <div class="lg-kpi-card kpi-rose">
+      <div class="lg-kpi-icon lg-icon-rose"><i class="bi bi-exclamation-triangle-fill"></i></div>
+      <div class="lg-kpi-val" id="kpiAlertas">—</div>
+      <div class="lg-kpi-lbl">Cert. amenaza</div>
+      <div class="lg-kpi-sub">emitidos este mes</div>
+    </div>
+  </div>
 
-/* ── Tarjetas de acceso ── */
-.cards{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-bottom:36px}
-.card{
-  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
-  border-radius:16px;padding:28px 32px;width:220px;cursor:pointer;
-  text-decoration:none;
-  display:flex;flex-direction:column;align-items:center;gap:12px;
-  transition:all .25s ease;
-  backdrop-filter:blur(12px);
-}
-.card:hover{
-  background:rgba(255,255,255,.1);
-  transform:translateY(-4px);
-}
-.card.verde:hover{border-color:rgba(46,139,87,.6);box-shadow:0 12px 40px rgba(26,92,46,.3);}
-.card.naranja:hover{border-color:rgba(217,119,6,.6);box-shadow:0 12px 40px rgba(217,119,6,.25);}
-.card.rojo:hover{border-color:rgba(179,50,42,.6);box-shadow:0 12px 40px rgba(179,50,42,.25);}
+  <!-- ── TRÁMITES DISPONIBLES ── -->
+  <div class="lg-section-label">
+    <i class="bi bi-grid-fill"></i> Trámites disponibles
+  </div>
+  <div class="lg-tool-grid" style="grid-template-columns: repeat(3, 1fr);">
 
-.card .c-icon{
-  width:52px;height:52px;border-radius:12px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:22px;color:#fff;
-}
-.card .c-icon.verde{background:linear-gradient(135deg,var(--verde),var(--verde2))}
-.card .c-icon.naranja{background:linear-gradient(135deg,#92400e,var(--naranja))}
-.card .c-icon.rojo{background:linear-gradient(135deg,#7f1d1d,var(--rojo2))}
+    <div class="lg-tool-card">
+      <div class="lg-tool-icon lg-icon-emerald"><i class="bi bi-tree-fill"></i></div>
+      <div class="lg-tool-name">Tala de árboles</div>
+      <div class="lg-tool-desc">Visita técnica e informe de aprobación del Comité CMGRD</div>
+      <a href="/riesgo/tala" class="lg-tool-btn lg-tool-btn--green">
+        Iniciar trámite <i class="bi bi-arrow-up-right"></i>
+      </a>
+    </div>
 
-.card .c-title{font-size:13px;font-weight:700;color:#fff;text-align:center;line-height:1.3}
-.card .c-desc{font-size:11px;color:rgba(255,255,255,.45);text-align:center;line-height:1.4}
+    <div class="lg-tool-card">
+      <div class="lg-tool-icon lg-icon-orange"><i class="bi bi-file-earmark-text-fill"></i></div>
+      <div class="lg-tool-name">Plan de contingencia</div>
+      <div class="lg-tool-desc">Generación del plan oficial de contingencia municipal</div>
+      <a href="/riesgo/plan-contingencia" class="lg-tool-btn lg-tool-btn--orange">
+        Generar PDF <i class="bi bi-arrow-up-right"></i>
+      </a>
+    </div>
 
-/* ── Divisor ── */
-.divider{
-  width:100%;max-width:680px;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);
-  margin-bottom:20px;
-}
-
-/* ── Pie ── */
-.footer-bar{
-  display:flex;align-items:center;gap:24px;
-  font-size:11px;color:rgba(255,255,255,.3);
-  flex-wrap:wrap;justify-content:center;
-}
-.dot{opacity:.4}
-
-/* ── Navegación ── */
-.user-badge{
-  position:fixed;top:20px;right:24px;z-index:20;
-  display:flex;align-items:center;gap:10px;
-  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
-  border-radius:50px;padding:8px 16px;
-  font-size:12px;color:rgba(255,255,255,.7);
-  backdrop-filter:blur(10px);
-}
-.user-badge i{color:#3aad6a}
-.back-btn{
-  position:fixed;top:20px;left:24px;z-index:20;
-  display:flex;align-items:center;gap:8px;
-  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
-  border-radius:50px;padding:8px 16px;
-  font-size:12px;color:rgba(255,255,255,.6);
-  text-decoration:none;backdrop-filter:blur(10px);
-  transition:all .2s;
-}
-.back-btn:hover{background:rgba(255,255,255,.12);color:#fff}
-
-@media(max-width:600px){
-  .cards{flex-direction:column;align-items:center}
-  .card{width:100%;max-width:300px}
-  .escudo{width:80px;height:80px}
-  .escudo i{font-size:32px}
-}
-</style>
-</head>
-<body>
-
-<!-- Fondo con estrellas -->
-<div class="bg">
-  <div class="stars" id="stars"></div>
-</div>
-
-<!-- Navegación -->
-<a href="/dashboard" class="back-btn"><i class="fas fa-arrow-left"></i> Panel de Inicio</a>
-<div class="user-badge"><i class="fas fa-shield-halved"></i> {{ session.get('user','') }}</div>
-
-<!-- Contenido principal -->
-<div class="wrap">
-
-  <div class="escudo"><i class="fas fa-shield-virus"></i></div>
-
-  <div class="eyebrow">Secretaría de Planeación · Supatá</div>
-  <h1 class="title">Gestión del Riesgo</h1>
-  <p class="subtitle">Plataforma para la gestión de riesgos, amenazas y planes de contingencia</p>
-
-  <div class="cards">
-
-    <a href="/riesgo/tala" class="card verde">
-      <div class="c-icon verde"><i class="fas fa-tree"></i></div>
-      <span class="c-title">Tala de Árboles</span>
-      <span class="c-desc">Visita técnica e informe de aprobación del Comité CMGRD</span>
-    </a>
-
-    <a href="/riesgo/plan-contingencia" class="card naranja">
-      <div class="c-icon naranja"><i class="fas fa-file-shield"></i></div>
-      <span class="c-title">Plan de Contingencia</span>
-      <span class="c-desc">Generación del plan oficial de contingencia municipal</span>
-    </a>
-
-    <a href="/riesgo/amenazas" class="card rojo">
-      <div class="c-icon rojo"><i class="fas fa-triangle-exclamation"></i></div>
-      <span class="c-title">Certificado de Amenaza</span>
-      <span class="c-desc">Certificado oficial de amenaza sobre predios del municipio</span>
-    </a>
+    <div class="lg-tool-card">
+      <div class="lg-tool-icon lg-icon-rose"><i class="bi bi-shield-exclamation"></i></div>
+      <div class="lg-tool-name">Certificado de amenaza</div>
+      <div class="lg-tool-desc">Certificado oficial de amenaza sobre predios del municipio</div>
+      <a href="/riesgo/amenazas" class="lg-tool-btn lg-tool-btn--red">
+        Solicitar <i class="bi bi-arrow-up-right"></i>
+      </a>
+    </div>
 
   </div>
 
-  <div class="divider"></div>
-
-  <div class="footer-bar">
-    <span><i class="fas fa-building-columns"></i> Alcaldía Municipal de Supatá</span>
-    <span class="dot">·</span>
-    <span>Gestión del Riesgo · CMGRD</span>
+  <!-- ── ALERTAS ACTIVAS ── -->
+  <div class="lg-section-row">
+    <div class="lg-section-label" style="margin-bottom:0;">
+      <i class="bi bi-bell-fill"></i> Alertas activas en el municipio
+    </div>
+    <span class="lg-card-badge" id="alertCount"></span>
+  </div>
+  <div class="lg-alert-list" id="alertList">
+    <!-- Hidratado por JS desde /api/actas/stats -->
+    <div class="lg-alert-item">
+      <div class="lg-alert-icon lg-icon-rose"><i class="bi bi-droplet-fill"></i></div>
+      <div class="lg-alert-body">
+        <div class="lg-alert-name">Inundación <span class="lg-badge lg-badge--alta">Alta</span></div>
+        <div class="lg-alert-sub">Vereda La Cumbre · hace 2 días</div>
+      </div>
+      <a href="/riesgo/amenazas" class="lg-alert-action">Ver protocolo</a>
+    </div>
+    <div class="lg-alert-item">
+      <div class="lg-alert-icon lg-icon-amber"><i class="bi bi-layers-fill"></i></div>
+      <div class="lg-alert-body">
+        <div class="lg-alert-name">Movimiento en masa <span class="lg-badge lg-badge--media">Media</span></div>
+        <div class="lg-alert-sub">Sector San José · hace 5 días</div>
+      </div>
+      <a href="/riesgo/amenazas" class="lg-alert-action">Ver protocolo</a>
+    </div>
+    <div class="lg-alert-item">
+      <div class="lg-alert-icon lg-icon-orange"><i class="bi bi-fire"></i></div>
+      <div class="lg-alert-body">
+        <div class="lg-alert-name">Incendio forestal <span class="lg-badge lg-badge--baja">Baja</span></div>
+        <div class="lg-alert-sub">Cerro El Tablazo · hace 12 días</div>
+      </div>
+      <a href="/riesgo/amenazas" class="lg-alert-action">Ver protocolo</a>
+    </div>
   </div>
 
 </div>
+{% endblock %}
 
+{% block scripts %}
 <script>
-(function(){
-  var s=document.getElementById('stars');
-  for(var i=0;i<120;i++){
-    var el=document.createElement('div');
-    el.className='star';
-    var size=Math.random()*2.5+.5;
-    el.style.cssText=[
-      'width:'+size+'px','height:'+size+'px',
-      'top:'+Math.random()*100+'%','left:'+Math.random()*100+'%',
-      '--d:'+(Math.random()*4+2)+'s',
-      '--op:'+(Math.random()*.7+.2),
-      'animation-delay:'+(Math.random()*5)+'s'
-    ].join(';');
-    s.appendChild(el);
+(function () {
+  'use strict';
+  function setText(id, val) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var n = parseInt(val, 10);
+    if (!isNaN(n)) {
+      var dur = 600, start = performance.now();
+      (function step(now) {
+        var p = Math.min((now - start) / dur, 1);
+        el.textContent = Math.round((1 - Math.pow(1 - p, 3)) * n);
+        if (p < 1) requestAnimationFrame(step);
+      })(start);
+    } else { el.textContent = val != null ? val : '—'; }
   }
+
+  fetch('/api/riesgo/stats', { cache: 'no-store' })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      setText('kpiTramites', d.total || d.radicadas || '—');
+      setText('kpiTala',     d.pendientes || '—');
+      setText('kpiPlanes',   d.aprobadas || '—');
+      setText('kpiAlertas',  d.criticos  || '—');
+    })
+    .catch(function () {});
 })();
 </script>
-</body>
-</html>
+{% endblock %}

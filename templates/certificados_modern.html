@@ -4,6 +4,7 @@
 
 {% block styles %}
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-glass-2026.css') }}">
 <style>
 /* =====================================================
    CERTIFICADOS — Diseño SaaS en armonía con dashboard
@@ -25,11 +26,11 @@
 .cert-banner {
   position: relative;
   overflow: hidden;
-  border-radius: 18px;
-  background: linear-gradient(130deg, #0f4c81 0%, #1565c0 55%, #0ea5e9 100%);
+  border-radius: 24px;
+  background: linear-gradient(135deg, #2D9F5C 0%, #0EA5E9 100%);
   padding: 1.75rem 2.25rem;
   margin-bottom: 1.75rem;
-  box-shadow: 0 8px 32px rgba(15,76,129,0.22);
+  box-shadow: 0 16px 48px -16px rgba(45,159,92,.4), 0 6px 18px -6px rgba(45,159,92,.2);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -120,28 +121,34 @@
   border-radius: 50%;
 }
 
-.cert-kpi-card:nth-child(1) { animation-delay: 0.04s; background: linear-gradient(130deg, #0c3d6b, #0f4c81); }
-.cert-kpi-card:nth-child(2) { animation-delay: 0.08s; background: linear-gradient(130deg, #065f46, #059669); }
-.cert-kpi-card:nth-child(3) { animation-delay: 0.12s; background: linear-gradient(130deg, #9a3412, #ea580c); }
-.cert-kpi-card:nth-child(4) { animation-delay: 0.16s; background: linear-gradient(130deg, #0369a1, #0ea5e9); }
-.cert-kpi-card:nth-child(5) { animation-delay: 0.20s; background: linear-gradient(130deg, #6d28d9, #8b5cf6); }
-.cert-kpi-card:nth-child(6) { animation-delay: 0.24s; background: linear-gradient(130deg, #92400e, #d97706); }
+.cert-kpi-card:nth-child(1) { animation-delay: 0.04s; background: linear-gradient(150deg, rgba(10,132,255,.11), rgba(10,132,255,.05)); border: .5px solid rgba(10,132,255,.18); }
+.cert-kpi-card:nth-child(2) { animation-delay: 0.08s; background: linear-gradient(150deg, rgba(45,159,92,.12), rgba(45,159,92,.06)); border: .5px solid rgba(45,159,92,.2); }
+.cert-kpi-card:nth-child(3) { animation-delay: 0.12s; background: linear-gradient(150deg, rgba(255,159,10,.13), rgba(255,159,10,.06)); border: .5px solid rgba(255,159,10,.22); }
+.cert-kpi-card:nth-child(4) { animation-delay: 0.16s; background: linear-gradient(150deg, rgba(14,165,233,.10), rgba(14,165,233,.05)); border: .5px solid rgba(14,165,233,.18); }
+.cert-kpi-card:nth-child(5) { animation-delay: 0.20s; background: linear-gradient(150deg, rgba(191,90,242,.10), rgba(191,90,242,.05)); border: .5px solid rgba(191,90,242,.16); }
+.cert-kpi-card:nth-child(6) { animation-delay: 0.24s; background: linear-gradient(150deg, rgba(245,184,68,.13), rgba(245,184,68,.06)); border: .5px solid rgba(217,119,6,.2); }
 
 .cert-kpi-icon {
   width: 34px; height: 34px;
   border-radius: 9px;
-  background: rgba(255,255,255,0.18);
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.95rem; color: #fff;
+  font-size: 0.95rem;
   margin-bottom: 0.35rem;
   flex-shrink: 0;
   position: relative; z-index: 1;
 }
 
+.cert-kpi-card:nth-child(1) .cert-kpi-icon { background: rgba(10,132,255,.15); color: #0A84FF; }
+.cert-kpi-card:nth-child(2) .cert-kpi-icon { background: rgba(45,159,92,.15);  color: #2D9F5C; }
+.cert-kpi-card:nth-child(3) .cert-kpi-icon { background: rgba(255,159,10,.15); color: #CC7A00; }
+.cert-kpi-card:nth-child(4) .cert-kpi-icon { background: rgba(14,165,233,.15); color: #0EA5E9; }
+.cert-kpi-card:nth-child(5) .cert-kpi-icon { background: rgba(191,90,242,.15); color: #BF5AF2; }
+.cert-kpi-card:nth-child(6) .cert-kpi-icon { background: rgba(245,184,68,.15); color: #B45309; }
+
 .cert-kpi-num {
   font-size: 1.9rem;
   font-weight: 900;
-  color: #fff;
+  color: #0f172a;
   line-height: 1;
   letter-spacing: -1.5px;
   position: relative; z-index: 1;
@@ -150,7 +157,7 @@
 .cert-kpi-num-sm {
   font-size: 1rem;
   font-weight: 800;
-  color: #fff;
+  color: #0f172a;
   line-height: 1.2;
   position: relative; z-index: 1;
   word-break: break-word;
@@ -159,7 +166,7 @@
 .cert-kpi-label {
   font-size: 0.73rem;
   font-weight: 700;
-  color: rgba(255,255,255,0.88);
+  color: #475569;
   margin-top: 0.1rem;
   position: relative; z-index: 1;
 }

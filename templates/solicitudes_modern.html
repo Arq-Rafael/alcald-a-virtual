@@ -3,6 +3,7 @@
 {% block title %}Solicitudes — Alcaldía Virtual Supatá{% endblock %}
 
 {% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-glass-2026.css') }}">
 <style>
 /* =====================================================
    SOLICITUDES — Diseño SaaS en armonía con dashboard
@@ -24,11 +25,11 @@
 .sol-banner {
   position: relative;
   overflow: hidden;
-  border-radius: 18px;
-  background: linear-gradient(130deg, #0f4c81 0%, #1565c0 55%, #0ea5e9 100%);
+  border-radius: 24px;
+  background: linear-gradient(135deg, #2D9F5C 0%, #0EA5E9 100%);
   padding: 1.75rem 2.25rem;
   margin-bottom: 1.75rem;
-  box-shadow: 0 8px 32px rgba(15,76,129,0.22);
+  box-shadow: 0 16px 48px -16px rgba(45,159,92,.4), 0 6px 18px -6px rgba(45,159,92,.2);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -78,7 +79,7 @@
   transition: all 0.18s ease;
 }
 
-.sol-banner-btn.primary { background: #fff; color: #0f4c81; }
+.sol-banner-btn.primary { background: #fff; color: #0E8A4F; }
 .sol-banner-btn.primary:hover { background: #e0f2fe; }
 .sol-banner-btn.outline {
   background: rgba(255,255,255,0.12);
@@ -119,10 +120,11 @@
   border-radius: 50%;
 }
 
-.sol-stat-chip.total    { background: linear-gradient(130deg, #0c3d6b, #0f4c81); }
-.sol-stat-chip.nuevas   { background: linear-gradient(130deg, #0369a1, #0ea5e9); }
-.sol-stat-chip.pendientes { background: linear-gradient(130deg, #9a3412, #ea580c); }
-.sol-stat-chip.generadas  { background: linear-gradient(130deg, #065f46, #059669); }
+.sol-stat-chip { background: rgba(255,255,255,.78) !important; border: .5px solid rgba(15,26,20,.07); box-shadow: 0 2px 12px rgba(15,26,20,.06); }
+.sol-stat-chip.total    { background: linear-gradient(150deg, rgba(10,132,255,.09), rgba(10,132,255,.04)) !important; border-color: rgba(10,132,255,.18) !important; }
+.sol-stat-chip.nuevas   { background: linear-gradient(150deg, rgba(45,159,92,.10), rgba(45,159,92,.05)) !important; border-color: rgba(45,159,92,.2) !important; }
+.sol-stat-chip.pendientes { background: linear-gradient(150deg, rgba(255,159,10,.13), rgba(255,159,10,.06)) !important; border-color: rgba(255,159,10,.22) !important; }
+.sol-stat-chip.generadas  { background: linear-gradient(150deg, rgba(52,199,89,.10), rgba(52,199,89,.05)) !important; border-color: rgba(52,199,89,.2) !important; }
 
 .sol-stat-icon {
   width: 40px; height: 40px;
@@ -130,23 +132,27 @@
   display: flex; align-items: center; justify-content: center;
   font-size: 1.1rem;
   flex-shrink: 0;
-  background: rgba(255,255,255,0.18);
+  background: linear-gradient(135deg, #2D9F5C, #0E8A4F);
   color: #fff;
 }
+.sol-stat-chip.total    .sol-stat-icon { background: linear-gradient(135deg, #38B6FF, #0A84FF); }
+.sol-stat-chip.nuevas   .sol-stat-icon { background: linear-gradient(135deg, #34C759, #0E8A4F); }
+.sol-stat-chip.pendientes .sol-stat-icon { background: linear-gradient(135deg, #FF9F0A, #FF8C00); }
+.sol-stat-chip.generadas  .sol-stat-icon { background: linear-gradient(135deg, #34C759, #2D9F5C); }
 
 .sol-stat-info { min-width: 0; position: relative; z-index: 1; }
 
 .sol-stat-num {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-weight: 900;
-  color: #fff;
+  color: #0F1A14;
   line-height: 1;
   letter-spacing: -1px;
 }
 
 .sol-stat-label {
   font-size: 0.73rem;
-  color: rgba(255,255,255,0.8);
+  color: #3C4A41;
   margin-top: 0.15rem;
   white-space: nowrap;
   font-weight: 600;

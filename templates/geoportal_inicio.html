@@ -1,364 +1,106 @@
-<!DOCTYPE html>
-<html lang="en"><head>
-<meta charset="utf-8">
-<title>Globe Loader</title>
+{% extends "base.html" %}
+{% block title %}Geoportal SIG — Alcaldía Virtual Supatá{% endblock %}
 
-<style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    background: #f4f1ec;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: ui-monospace, Menlo, monospace;
-  }
-  .loader {
-    width: 200px;
-    height: 200px;
-    position: relative;
-  }
-  .loader svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-    overflow: visible;
-  }
-  .globe-disc {
-    fill: #ffffff;
-  }
-  .globe-stroke {
-    fill: none;
-    stroke: #111111;
-    stroke-width: 0.9;
-    stroke-linejoin: round;
-    stroke-linecap: round;
-  }
-  .graticule {
-    fill: none;
-    stroke: #111111;
-    stroke-opacity: 0.18;
-    stroke-width: 0.5;
-  }
-  .rim {
-    fill: none;
-    stroke: #111111;
-    stroke-width: 1.1;
-  }
-  .whirl-arc {
-    fill: none;
-    stroke: #111111;
-    stroke-linecap: round;
-  }
-</style>
-</head>
-<body>
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-glass-2026.css') }}">
+{% endblock %}
 
-  <div class="loader" aria-label="Loading">
-    <svg viewBox="-120 -120 240 240" id="globe">
-      <!-- whirl (drawn first so it sits behind) -->
-      <g id="whirl"></g>
+{% block content %}
+<div class="lg-module">
 
-      <!-- clip the globe contents to its disc -->
-      <defs>
-        <clipPath id="disc-clip">
-          <circle cx="0" cy="0" r="82"></circle>
-        </clipPath>
-      </defs>
-
-      <!-- globe disc -->
-      <circle class="globe-disc" cx="0" cy="0" r="82"></circle>
-
-      <!-- rotating earth (graticule + land) -->
-      <g clip-path="url(#disc-clip)">
-        <path class="graticule" id="graticule" d=""></path>
-        <path class="globe-stroke" id="land" d=""></path>
-      </g>
-
-      <!-- rim on top -->
-      <circle class="rim" cx="0" cy="0" r="82"></circle>
-    </svg>
+  <!-- ── BANNER ── -->
+  <div class="lg-mod-banner lg-banner--green">
+    <div class="lg-mod-banner-left">
+      <div class="lg-mod-banner-icon"><i class="bi bi-globe-americas"></i></div>
+      <div class="lg-mod-banner-text">
+        <h1 class="lg-mod-banner-title">Geoportal SIG</h1>
+        <p class="lg-mod-banner-sub">Sistema de información geográfica · Municipio de Supatá 2025</p>
+      </div>
+    </div>
+    <div class="lg-mod-banner-actions">
+      <a href="/geoportal/mapa" class="lg-mod-banner-btn lg-mod-banner-btn--solid">
+        <i class="bi bi-map-fill"></i> Visor Geoportal
+      </a>
+      <a href="/geoportal/usos-del-suelo" class="lg-mod-banner-btn">
+        <i class="bi bi-file-earmark-check-fill"></i> Certificado de Uso
+      </a>
+      <a href="#" class="lg-mod-banner-btn">
+        <i class="bi bi-database-fill-down"></i> Datos abiertos
+      </a>
+    </div>
   </div>
 
-<script>
-(() => {
-  const R = 82;
-  const land = document.getElementById('land');
-  const grat = document.getElementById('graticule');
-  const whirl = document.getElementById('whirl');
+  <!-- ── KPI CARDS ── -->
+  <div class="lg-kpi-row">
+    <div class="lg-kpi-card kpi-green">
+      <div class="lg-kpi-icon lg-icon-emerald"><i class="bi bi-grid-3x3-gap-fill"></i></div>
+      <div class="lg-kpi-val">4.218</div>
+      <div class="lg-kpi-lbl">Predios registrados</div>
+      <div class="lg-kpi-sub">rural y urbano</div>
+    </div>
+    <div class="lg-kpi-card kpi-blue">
+      <div class="lg-kpi-icon lg-icon-blue"><i class="bi bi-layers-fill"></i></div>
+      <div class="lg-kpi-val">12</div>
+      <div class="lg-kpi-lbl">Capas activas</div>
+      <div class="lg-kpi-sub">IGAC · POT</div>
+    </div>
+    <div class="lg-kpi-card kpi-violet">
+      <div class="lg-kpi-icon lg-icon-violet"><i class="bi bi-search"></i></div>
+      <div class="lg-kpi-val" id="kpiConsultas">186</div>
+      <div class="lg-kpi-lbl">Consultas mes</div>
+      <div class="lg-kpi-sub">+24% vs abril</div>
+    </div>
+    <div class="lg-kpi-card kpi-amber">
+      <div class="lg-kpi-icon lg-icon-amber"><i class="bi bi-patch-check-fill"></i></div>
+      <div class="lg-kpi-val">41</div>
+      <div class="lg-kpi-lbl">Certificados USO</div>
+      <div class="lg-kpi-sub">emitidos</div>
+    </div>
+  </div>
 
-  // ---- Build whirl: dashed arcs at three radii, each rotating at its own speed ----
-  const whirlRings = [
-    { r: 95,  dash: '2 10', sw: 1.2, alpha: 0.55, speed:  60, offset: 0 },
-    { r: 104, dash: '1 14', sw: 1.0, alpha: 0.35, speed: -85, offset: 0.3 },
-    { r: 113, dash: '1 22', sw: 0.8, alpha: 0.22, speed:  40, offset: 0.6 },
-  ];
-  whirlRings.forEach((ring, i) => {
-    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    g.setAttribute('data-speed', ring.speed);
-    g.setAttribute('data-offset', ring.offset);
-    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    c.setAttribute('cx', 0); c.setAttribute('cy', 0);
-    c.setAttribute('r', ring.r);
-    c.setAttribute('class', 'whirl-arc');
-    c.setAttribute('stroke-dasharray', ring.dash);
-    c.setAttribute('stroke-width', ring.sw);
-    c.setAttribute('stroke-opacity', ring.alpha);
-    g.appendChild(c);
+  <!-- ── HERRAMIENTAS ── -->
+  <div class="lg-section-label">
+    <i class="bi bi-tools"></i> Herramientas geográficas
+  </div>
+  <div class="lg-tool-grid" style="grid-template-columns: repeat(4, 1fr);">
 
-    // small comet dots at intervals to emphasize rotation
-    if (i < 2) {
-      for (let k = 0; k < 3; k++) {
-        const ang = (k / 3) * Math.PI * 2;
-        const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        dot.setAttribute('cx', Math.cos(ang) * ring.r);
-        dot.setAttribute('cy', Math.sin(ang) * ring.r);
-        dot.setAttribute('r', i === 0 ? 1.6 : 1.1);
-        dot.setAttribute('fill', '#111');
-        dot.setAttribute('opacity', i === 0 ? 0.75 : 0.45);
-        g.appendChild(dot);
-      }
-    }
-    whirl.appendChild(g);
-  });
+    <div class="lg-tool-card">
+      <div class="lg-tool-icon lg-icon-teal"><i class="bi bi-globe-americas"></i></div>
+      <div class="lg-tool-name">Visor Geoportal</div>
+      <div class="lg-tool-desc">Consultar mapa municipal con capas POT, predial y ambientales</div>
+      <a href="/geoportal/mapa" class="lg-tool-open" style="color: var(--lg-accent);">
+        Abrir <i class="bi bi-chevron-right"></i>
+      </a>
+    </div>
 
-  // ---- Orthographic projection ----
-  // lon, lat in radians; rotation lambda around y-axis
-  function project(lon, lat, lambda) {
-    const l = lon + lambda;
-    const x = Math.cos(lat) * Math.sin(l);
-    const y = -Math.sin(lat);
-    const z = Math.cos(lat) * Math.cos(l); // z>0 = front
-    return [x * R, y * R, z];
-  }
+    <div class="lg-tool-card">
+      <div class="lg-tool-icon lg-icon-emerald"><i class="bi bi-patch-check-fill"></i></div>
+      <div class="lg-tool-name">Certificado de Uso del Suelo</div>
+      <div class="lg-tool-desc">Generar certificado oficial de uso del suelo para un predio</div>
+      <a href="/geoportal/usos-del-suelo" class="lg-tool-open" style="color: var(--lg-accent);">
+        Abrir <i class="bi bi-chevron-right"></i>
+      </a>
+    </div>
 
-  // Clip a line segment to the visible hemisphere (z >= 0) in 3D then project
-  function segmentPath(a, b, lambda) {
-    const [ax, ay, az] = project(a[0], a[1], lambda);
-    const [bx, by, bz] = project(b[0], b[1], lambda);
-    const aVis = az >= 0, bVis = bz >= 0;
-    if (!aVis && !bVis) return null;
-    if (aVis && bVis) return { from:[ax,ay], to:[bx,by] };
-    // clip at z=0
-    const t = az / (az - bz);
-    const cx = ax + (bx - ax) * t;
-    const cy = ay + (by - ay) * t;
-    if (aVis) return { from:[ax,ay], to:[cx,cy] };
-    return { from:[cx,cy], to:[bx,by] };
-  }
+    <div class="lg-tool-card">
+      <div class="lg-tool-icon lg-icon-violet"><i class="bi bi-search"></i></div>
+      <div class="lg-tool-name">Consulta predial</div>
+      <div class="lg-tool-desc">Buscar información catastral por dirección o cédula catastral</div>
+      <a href="/geoportal/mapa" class="lg-tool-open" style="color: var(--lg-accent);">
+        Abrir <i class="bi bi-chevron-right"></i>
+      </a>
+    </div>
 
-  function drawRings(rings, lambda) {
-    let d = '';
-    for (const ring of rings) {
-      let penDown = false;
-      let prev = null;
-      for (let i = 0; i < ring.length; i++) {
-        const cur = ring[i];
-        if (prev) {
-          const seg = segmentPath(prev, cur, lambda);
-          if (seg) {
-            if (!penDown) {
-              d += `M${seg.from[0].toFixed(2)},${seg.from[1].toFixed(2)}`;
-              penDown = true;
-            }
-            d += `L${seg.to[0].toFixed(2)},${seg.to[1].toFixed(2)}`;
-          } else {
-            penDown = false;
-          }
-        }
-        prev = cur;
-      }
-    }
-    return d;
-  }
+    <div class="lg-tool-card">
+      <div class="lg-tool-icon lg-icon-amber"><i class="bi bi-cloud-download-fill"></i></div>
+      <div class="lg-tool-name">Descargas SIG</div>
+      <div class="lg-tool-desc">Datos abiertos: shapefiles, KMZ y PDF del POT</div>
+      <a href="#" class="lg-tool-open" style="color: var(--lg-accent);">
+        Abrir <i class="bi bi-chevron-right"></i>
+      </a>
+    </div>
 
-  // ---- Graticule: meridians every 30°, parallels every 30° ----
-  function buildGraticule() {
-    const rings = [];
-    const step = Math.PI / 180 * 3;
-    for (let lonDeg = -180; lonDeg < 180; lonDeg += 30) {
-      const lon = lonDeg * Math.PI / 180;
-      const ring = [];
-      for (let lat = -Math.PI/2; lat <= Math.PI/2 + 1e-6; lat += step) {
-        ring.push([lon, lat]);
-      }
-      rings.push(ring);
-    }
-    for (let latDeg = -60; latDeg <= 60; latDeg += 30) {
-      const lat = latDeg * Math.PI / 180;
-      const ring = [];
-      for (let lon = -Math.PI; lon <= Math.PI + 1e-6; lon += step) {
-        ring.push([lon, lat]);
-      }
-      rings.push(ring);
-    }
-    return rings;
-  }
-  const graticuleRings = buildGraticule();
+  </div>
 
-  // ---- Load world geojson ----
-  // Flatten Polygons/MultiPolygons to an array of rings (each ring = [[lon,lat],...] in radians)
-  let landRings = [];
-  function ingestGeojson(geojson) {
-    const rings = [];
-    function pushPoly(poly) {
-      for (const ring of poly) {
-        const rad = ring.map(([lon, lat]) => [lon * Math.PI / 180, lat * Math.PI / 180]);
-        rings.push(rad);
-      }
-    }
-    for (const f of geojson.features) {
-      const g = f.geometry;
-      if (!g) continue;
-      if (g.type === 'Polygon') pushPoly(g.coordinates);
-      else if (g.type === 'MultiPolygon') g.coordinates.forEach(pushPoly);
-    }
-    landRings = rings;
-  }
-
-  const topoUrl = (window.__resources && window.__resources.landTopo) || 'https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json';
-
-  async function loadWorld() {
-    try {
-      const r = await fetch(topoUrl);
-      if (r.ok) {
-        const topo = await r.json();
-        const geo = topoToGeo(topo, Object.keys(topo.objects)[0]);
-        ingestGeojson(geo);
-        return;
-      }
-    } catch(e){}
-  }
-
-  // Tiny TopoJSON decoder (supports Polygon/MultiPolygon objects)
-  function topoToGeo(topo, name) {
-    const obj = topo.objects[name];
-    const t = topo.transform;
-    const arcs = topo.arcs.map(arc => {
-      let x = 0, y = 0;
-      return arc.map(([dx, dy]) => {
-        x += dx; y += dy;
-        return [x * t.scale[0] + t.translate[0], y * t.scale[1] + t.translate[1]];
-      });
-    });
-    function arc(i) {
-      if (i < 0) return arcs[~i].slice().reverse();
-      return arcs[i];
-    }
-    function ring(ids) {
-      const pts = [];
-      ids.forEach((id, k) => {
-        const a = arc(id);
-        pts.push(...(k === 0 ? a : a.slice(1)));
-      });
-      return pts;
-    }
-    function poly(rings) { return rings.map(ring); }
-    const features = [];
-    function toFeature(geom) {
-      if (geom.type === 'Polygon') {
-        features.push({ type:'Feature', geometry:{ type:'Polygon', coordinates: poly(geom.arcs) }});
-      } else if (geom.type === 'MultiPolygon') {
-        features.push({ type:'Feature', geometry:{ type:'MultiPolygon', coordinates: geom.arcs.map(poly) }});
-      } else if (geom.type === 'GeometryCollection') {
-        geom.geometries.forEach(toFeature);
-      }
-    }
-    toFeature(obj);
-    return { type:'FeatureCollection', features };
-  }
-
-  // ---- Animation ----
-  let lambda = 0;
-  let lastT = performance.now();
-  const spinSpeed = 0.35; // radians / second
-
-  function frame(t) {
-    const dt = (t - lastT) / 1000;
-    lastT = t;
-    lambda += spinSpeed * dt;
-
-    if (landRings.length) {
-      land.setAttribute('d', drawRings(landRings, lambda));
-    }
-    grat.setAttribute('d', drawRings(graticuleRings, lambda));
-
-    // rotate whirl groups
-    for (const g of whirl.children) {
-      const sp = parseFloat(g.getAttribute('data-speed'));
-      const off = parseFloat(g.getAttribute('data-offset')) || 0;
-      const deg = ((t/1000 + off) * sp) % 360;
-      g.setAttribute('transform', `rotate(${deg})`);
-    }
-
-    requestAnimationFrame(frame);
-  }
-
-  loadWorld();
-  requestAnimationFrame((t) => { lastT = t; frame(t); });
-})();
-</script>
-
-
-
-<style>
-  .geo-label {
-    position: fixed;
-    bottom: 148px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-    font-size: 12px;
-    color: #777;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    white-space: nowrap;
-    z-index: 9999;
-  }
-  .geo-btns {
-    position: fixed;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 16px;
-    z-index: 9999;
-    white-space: nowrap;
-  }
-  .geo-enter-btn {
-    background: #0f4c81;
-    color: #fff;
-    padding: 14px 36px;
-    border-radius: 50px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-    text-decoration: none;
-    box-shadow: 0 4px 20px rgba(15,76,129,0.35);
-    transition: all 0.2s ease;
-    display: inline-block;
-  }
-  .geo-enter-btn:hover {
-    background: #1565c0;
-    box-shadow: 0 6px 28px rgba(15,76,129,0.5);
-    transform: translateY(-2px);
-    color: #fff;
-  }
-  .geo-enter-btn.secondary {
-    background: #1a5c38;
-    box-shadow: 0 4px 20px rgba(26,92,56,0.35);
-  }
-  .geo-enter-btn.secondary:hover {
-    background: #0d3320;
-    box-shadow: 0 6px 28px rgba(26,92,56,0.5);
-    transform: translateY(-2px);
-  }
-</style>
-<span class="geo-label">Geoportal EOT — Municipio de Supatá 2023</span>
-<div class="geo-btns">
-  <a href="/geoportal/mapa" class="geo-enter-btn">&#128506; Visor Geoportal</a>
-  <a href="/geoportal/usos-del-suelo" class="geo-enter-btn secondary">&#128196; Certificado Uso del Suelo</a>
 </div>
-</body></html>
+{% endblock %}
