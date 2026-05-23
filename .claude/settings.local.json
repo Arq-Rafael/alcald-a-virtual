@@ -34,7 +34,13 @@
       "PowerShell($r = Invoke-WebRequest -Uri \"http://127.0.0.1:5000/calendario\" -UseBasicParsing -TimeoutSec 10; if\\($r.Content -match \"gc-shell\"\\) { \"OK: gc-shell found\" } else { \"MISSING: gc-shell\" }; if\\($r.Content -match \"Nuevo evento\"\\) { \"OK: sidebar button found\" } else { \"MISSING: sidebar\" }; if\\($r.Content -match \"gc-days\"\\) { \"OK: calendar grid found\" } else { \"MISSING: grid\" }; if\\($r.Content -match \"LUN\"\\) { \"OK: weekday headers found\" } else { \"MISSING: weekday headers\" })",
       "Bash(git stash *)",
       "Bash(git restore *)",
-      "Bash(python -c \"import csv; f=open\\('datos/solicitudes.csv','r',encoding='utf-8'\\); r=list\\(csv.DictReader\\(f\\)\\); f.close\\(\\); [print\\(i, row.get\\('estado','?'\\), row.get\\('objeto','?'\\)[:60]\\) for i,row in enumerate\\(r\\)]\")"
+      "Bash(python -c \"import csv; f=open\\('datos/solicitudes.csv','r',encoding='utf-8'\\); r=list\\(csv.DictReader\\(f\\)\\); f.close\\(\\); [print\\(i, row.get\\('estado','?'\\), row.get\\('objeto','?'\\)[:60]\\) for i,row in enumerate\\(r\\)]\")",
+      "Bash(python -c \"from app import create_app; app = create_app\\(\\); client = app.test_client\\(\\); r = client.get\\('/login'\\); print\\(r.status_code, len\\(r.data\\), 'login-page' in r.data.decode\\('utf-8', errors='replace'\\), 'stage' in r.data.decode\\('utf-8', errors='replace'\\), 'liquid-glass-2026' in r.data.decode\\('utf-8', errors='replace'\\)\\)\")",
+      "Bash(python -c \"import os; print\\('CSS exists:', os.path.exists\\('static/css/liquid-glass-2026.css'\\)\\); print\\('Size:', os.path.getsize\\('static/css/liquid-glass-2026.css'\\), 'bytes'\\)\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\rafa_\\\\Downloads\\\\AlcaldiaVirtualWeb\\\\templates\\\\\" -Filter \"*.html\" -File | Select-Object Name, Length | Format-Table -AutoSize)",
+      "Bash(powershell -Command \"Get-ChildItem -Path 'c:\\\\Users\\\\rafa_\\\\Downloads\\\\AlcaldiaVirtualWeb\\\\templates\\\\' -Filter '*.html' -File | Select-Object Name,Length\")"
     ]
   }
 }

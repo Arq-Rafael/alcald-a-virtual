@@ -1,37 +1,65 @@
 :root {
-  /* Colors: Login + Dashboard */
-  --av-color-primary: #0f4c81;
-  --av-color-primary-600: #1565c0;
-  --av-color-primary-700: #0d3d6b;
-  --av-color-accent: #0ea5e9;
-  --av-color-success: #7cb342;
-  --av-color-warning: #d97706;
-  --av-color-danger: #dc2626;
+  /* === Claude Designer 2026 — Verde institucional Supatá === */
+  /* Paleta principal (extraída del bundle React) */
+  --av-color-primary: #2D9F5C;          /* Verde institucional */
+  --av-color-primary-600: #0E8A4F;      /* Verde profundo */
+  --av-color-primary-700: #096A3D;      /* Verde más oscuro hover */
+  --av-color-accent: #0A84FF;           /* Azul iOS — destellos / links */
+  --av-color-success: #34C759;          /* Verde éxito (chips) */
+  --av-color-warning: #FF9F0A;          /* Ámbar iOS */
+  --av-color-danger: #FF453A;           /* Rojo iOS */
+  --av-color-info: #0A84FF;
+  --av-color-purple: #BF5AF2;           /* Morado para acentos secundarios */
+  --av-color-teal: #0E8A7C;             /* Teal alcaldía (alternativa) */
 
-  --av-bg-page: #f1f5f9;
+  /* Estados con su tinte (chip = bg + fg + dot) */
+  --av-chip-success-bg: rgba(52, 199, 89, 0.14);
+  --av-chip-success-fg: #1B7B3F;
+  --av-chip-success-dot: #34C759;
+  --av-chip-info-bg: rgba(10, 132, 255, 0.12);
+  --av-chip-info-fg: #0353AF;
+  --av-chip-info-dot: #0A84FF;
+  --av-chip-warning-bg: rgba(255, 159, 10, 0.14);
+  --av-chip-warning-fg: #9A5700;
+  --av-chip-warning-dot: #FF9F0A;
+  --av-chip-danger-bg: rgba(255, 69, 58, 0.14);
+  --av-chip-danger-fg: #B12219;
+  --av-chip-danger-dot: #FF453A;
+  --av-chip-neutral-bg: rgba(120, 120, 128, 0.12);
+  --av-chip-neutral-fg: #475569;
+  --av-chip-neutral-dot: #94A3B8;
+
+  /* Superficies — fondo Liquid Glass del bundle */
+  --av-bg-page: #F2F4F0;                /* Fondo principal del bundle */
+  --av-bg-page-soft: #EAEDE6;           /* Variante para zonas hundidas */
   --av-surface-0: #ffffff;
-  --av-surface-50: #f8fafc;
-  --av-surface-100: #f1f5f9;
-  --av-border: #e2e8f0;
-  --av-border-strong: #cbd5e1;
+  --av-surface-50: #FAFBF8;
+  --av-surface-100: #F2F4F0;
+  --av-surface-glass: rgba(255, 255, 255, 0.80);  /* Glass para inputs */
+  --av-border: rgba(0, 0, 0, 0.06);     /* Border suave del bundle */
+  --av-border-strong: rgba(0, 0, 0, 0.10);
 
-  --av-text-primary: #0f172a;
-  --av-text-secondary: #64748b;
-  --av-text-muted: #94a3b8;
+  --av-text-primary: #0F172A;
+  --av-text-secondary: #475569;
+  --av-text-muted: #94A3B8;
   --av-text-inverse: #ffffff;
 
-  /* Typography */
+  /* Typography — Inter, letter-spacing -0.01em del bundle */
   --av-font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --av-font-size-xs: 12px;
+  --av-font-size-xs: 11.5px;
   --av-font-size-sm: 13px;
   --av-font-size-md: 14px;
   --av-font-size-lg: 16px;
   --av-font-size-xl: 20px;
   --av-font-size-2xl: 28px;
+  --av-font-size-3xl: 34px;
   --av-font-weight-medium: 500;
   --av-font-weight-semibold: 600;
   --av-font-weight-bold: 700;
+  --av-font-weight-extrabold: 800;
   --av-line-height: 1.5;
+  --av-letter-tight: -0.01em;
+  --av-letter-display: -0.02em;
 
   /* Spacing (8px system) */
   --av-space-1: 4px;
@@ -41,19 +69,32 @@
   --av-space-5: 20px;
   --av-space-6: 24px;
   --av-space-8: 32px;
+  --av-space-10: 40px;
+  --av-space-12: 48px;
 
-  /* Radius */
+  /* Radius — del bundle: inputs 12, cards 20, hero 24-28 */
   --av-radius-sm: 8px;
-  --av-radius-md: 10px;
-  --av-radius-lg: 12px;
-  --av-radius-xl: 16px;
-  --av-radius-2xl: 18px;
+  --av-radius-md: 12px;       /* inputs y botones */
+  --av-radius-lg: 16px;
+  --av-radius-xl: 20px;       /* cards */
+  --av-radius-2xl: 24px;      /* sections grandes */
+  --av-radius-3xl: 28px;      /* hero / sidebar */
+  --av-radius-pill: 999px;
 
-  /* Shadows */
-  --av-shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
-  --av-shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
-  --av-shadow-lg: 0 20px 60px rgba(15, 23, 42, 0.12);
-  --av-shadow-focus: 0 0 0 3px rgba(15, 76, 129, 0.16);
+  /* Shadows — Liquid Glass del bundle (sombras suaves) */
+  --av-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.05);
+  --av-shadow-md: 0 4px 14px rgba(15, 23, 42, 0.06), 0 2px 6px rgba(15, 23, 42, 0.04);
+  --av-shadow-lg: 0 14px 40px rgba(15, 23, 42, 0.10), 0 6px 16px rgba(15, 23, 42, 0.06);
+  --av-shadow-xl: 0 24px 60px rgba(15, 23, 42, 0.14), 0 10px 24px rgba(15, 23, 42, 0.08);
+  --av-shadow-focus: 0 0 0 3px rgba(45, 159, 92, 0.18);
+  --av-shadow-focus-blue: 0 0 0 3px rgba(10, 132, 255, 0.18);
+
+  /* Hero gradient (verde institucional radial del bundle) */
+  --av-hero-gradient: linear-gradient(135deg, #2D9F5C 0%, #0E8A4F 100%);
+  --av-hero-radial:
+    radial-gradient(ellipse 60% 40% at 10% 10%, rgba(45, 159, 92, 0.16), transparent 55%),
+    radial-gradient(ellipse 70% 60% at 100% 100%, rgba(10, 132, 255, 0.10), transparent 50%);
+  --av-glass-blur: saturate(140%) blur(18px);
 
   /* Backward-compatible aliases */
   --primary: var(--av-color-primary);
@@ -61,6 +102,9 @@
   --secondary: var(--av-color-accent);
   --text-primary: var(--av-text-primary);
   --text-secondary: var(--av-text-secondary);
+  --bg-light: var(--av-bg-page);
+  --card-border: var(--av-border);
+  --card-hover-bg: rgba(45, 159, 92, 0.06);
 }
 
 html,
@@ -401,4 +445,312 @@ a:focus-visible {
   .table-responsive {
     border-radius: var(--av-radius-lg);
   }
+}
+
+/* =================================================================
+   CLAUDE DESIGNER 2026 — Componentes nuevos del bundle
+   ModuleHero · StatPill · EstadoChip · GlassInput · Card refresh
+   ================================================================= */
+
+/* === Body baseline (Inter + letter-spacing -0.01em) === */
+body {
+  font-family: var(--av-font-family);
+  letter-spacing: var(--av-letter-tight);
+  background: var(--av-bg-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* === ModuleHero: gradiente verde institucional (igual que el bundle) === */
+.av-hero,
+.module-hero,
+.lg-hero-banner,
+.db-banner,
+.sol-banner,
+.contratos-hero {
+  background: var(--av-hero-gradient) !important;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 15% 0%, rgba(255,255,255,0.18), transparent 55%),
+    radial-gradient(ellipse 70% 60% at 100% 100%, rgba(255,255,255,0.10), transparent 50%),
+    var(--av-hero-gradient) !important;
+  border-radius: var(--av-radius-3xl) !important;
+  padding: var(--av-space-8) var(--av-space-8) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 18px 50px rgba(45, 159, 92, 0.25) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.av-hero h1, .module-hero h1, .lg-hero-greeting {
+  font-size: var(--av-font-size-2xl);
+  font-weight: var(--av-font-weight-extrabold);
+  letter-spacing: var(--av-letter-display);
+  color: #fff;
+  margin: 0 0 6px 0;
+}
+
+.av-hero p, .module-hero p, .lg-hero-sub {
+  color: rgba(255,255,255,0.92);
+  font-size: var(--av-font-size-md);
+  margin: 0;
+}
+
+.lg-hero-date { color: rgba(255,255,255,0.78) !important; font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; }
+.lg-hero-pill {
+  background: rgba(255,255,255,0.18) !important;
+  border: 1px solid rgba(255,255,255,0.24) !important;
+  color: #fff !important;
+  border-radius: var(--av-radius-pill) !important;
+  padding: 6px 12px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  backdrop-filter: blur(8px);
+}
+.lg-pulse { background: #34C759 !important; box-shadow: 0 0 0 4px rgba(52,199,89,0.25) !important; }
+
+/* === StatPill: KPI cards estilo bundle === */
+.av-stat,
+.stat-card,
+.kpi-card,
+.lg-fav-card {
+  background: var(--av-surface-0);
+  border: 1px solid var(--av-border);
+  border-radius: var(--av-radius-xl);
+  padding: var(--av-space-5);
+  box-shadow: var(--av-shadow-sm);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.av-stat:hover,
+.stat-card:hover,
+.kpi-card:hover,
+.lg-fav-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--av-shadow-md);
+  border-color: rgba(45, 159, 92, 0.20);
+}
+
+/* Tinted icon chips para StatPill (NO toca los lg-icon-* del dashboard,
+   esos ya tienen gradientes propios en liquid-glass-2026.css) */
+.av-stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+.av-stat-icon.tint-green   { background: rgba(45,159,92,0.14);  color: #1B7B3F; }
+.av-stat-icon.tint-blue    { background: rgba(10,132,255,0.14); color: #0353AF; }
+.av-stat-icon.tint-amber,
+.av-stat-icon.tint-orange  { background: rgba(255,159,10,0.14); color: #9A5700; }
+.av-stat-icon.tint-purple  { background: rgba(191,90,242,0.14); color: #7A2BB5; }
+.av-stat-icon.tint-teal    { background: rgba(14,138,124,0.14); color: #0E6B60; }
+.av-stat-icon.tint-rose,
+.av-stat-icon.tint-red     { background: rgba(255,69,58,0.14);  color: #B12219; }
+
+.av-stat-label {
+  font-size: 12px;
+  color: var(--av-text-secondary);
+  font-weight: var(--av-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.av-stat-value, .stat-value {
+  font-size: 28px !important;
+  font-weight: var(--av-font-weight-extrabold) !important;
+  letter-spacing: var(--av-letter-display);
+  color: var(--av-text-primary);
+  line-height: 1.1;
+  margin: 6px 0 4px 0;
+}
+.av-stat-sub {
+  font-size: 12px;
+  color: var(--av-text-muted);
+}
+
+/* === EstadoChip: chips de estado con dot indicator === */
+.av-chip,
+.sol-badge,
+.estado-badge,
+.badge-status {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 4px 10px !important;
+  height: 24px !important;
+  border-radius: var(--av-radius-pill) !important;
+  font-size: 11.5px !important;
+  font-weight: var(--av-font-weight-semibold) !important;
+  letter-spacing: 0.01em !important;
+  border: none !important;
+  line-height: 1 !important;
+}
+.av-chip::before,
+.sol-badge::before,
+.estado-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.85;
+}
+
+.av-chip.success, .sol-badge.generado, .estado-badge.generado, .badge-active {
+  background: var(--av-chip-success-bg) !important;
+  color: var(--av-chip-success-fg) !important;
+}
+.av-chip.info, .sol-badge.editado, .estado-badge.revision, .badge-publicado {
+  background: var(--av-chip-info-bg) !important;
+  color: var(--av-chip-info-fg) !important;
+}
+.av-chip.warning, .sol-badge.pendiente, .estado-badge.pendiente, .badge-ejecucion {
+  background: var(--av-chip-warning-bg) !important;
+  color: var(--av-chip-warning-fg) !important;
+}
+.av-chip.danger, .badge-blocked, .badge-desierto {
+  background: var(--av-chip-danger-bg) !important;
+  color: var(--av-chip-danger-fg) !important;
+}
+.av-chip.neutral, .sol-badge.nuevo, .badge-secop-i {
+  background: var(--av-chip-neutral-bg) !important;
+  color: var(--av-chip-neutral-fg) !important;
+}
+
+/* === Glass Input (input-tw del bundle) === */
+.input-tw,
+.av-glass-input {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: var(--av-radius-md);
+  background: var(--av-surface-glass);
+  border: 1px solid var(--av-border);
+  font-size: 13px;
+  color: var(--av-text-primary);
+  outline: none;
+  transition: all 0.15s;
+  width: 100%;
+  font-family: inherit;
+}
+.input-tw:focus,
+.av-glass-input:focus {
+  border-color: var(--av-color-primary);
+  background: #fff;
+  box-shadow: var(--av-shadow-focus);
+}
+.input-tw::placeholder,
+.av-glass-input::placeholder {
+  color: var(--av-text-muted);
+}
+
+/* === Card refresh: sombra suave + hover lift === */
+.card,
+.av-card,
+.lg-section,
+.panel-section {
+  border-radius: var(--av-radius-xl) !important;
+  border: 1px solid var(--av-border) !important;
+  box-shadow: var(--av-shadow-sm) !important;
+}
+
+/* === Sidebar refinement: verde activo del bundle === */
+.av-sidebar {
+  background: var(--av-surface-0) !important;
+  border-right: 1px solid var(--av-border) !important;
+}
+.av-nav-item {
+  border-radius: var(--av-radius-md) !important;
+  font-weight: 500 !important;
+  color: var(--av-text-secondary) !important;
+  transition: all .15s ease !important;
+}
+.av-nav-item:hover {
+  background: rgba(45, 159, 92, 0.08) !important;
+  color: var(--av-color-primary-600) !important;
+}
+.av-nav-item.active {
+  background: linear-gradient(135deg, rgba(45,159,92,0.14), rgba(14,138,79,0.10)) !important;
+  color: var(--av-color-primary-700) !important;
+  font-weight: 600 !important;
+  position: relative;
+}
+.av-nav-item.active::before {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--av-color-primary);
+}
+.av-nav-item.active .av-nav-icon,
+.av-nav-item:hover .av-nav-icon {
+  color: var(--av-color-primary) !important;
+}
+.av-sidebar-brand h2 { color: var(--av-color-primary-700) !important; font-weight: 700 !important; }
+.av-nav-section-label {
+  color: var(--av-text-muted) !important;
+  font-size: 10.5px !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700 !important;
+}
+
+/* === Bootstrap tweaks alineados al bundle === */
+.btn { letter-spacing: var(--av-letter-tight); }
+.bg-primary, .navbar.bg-primary, .navbar { background: var(--av-color-primary) !important; }
+.text-primary { color: var(--av-color-primary) !important; }
+.border-primary { border-color: var(--av-color-primary) !important; }
+.btn-success { background: var(--av-color-success); border-color: var(--av-color-success); }
+a { color: var(--av-color-primary-600); }
+a:hover { color: var(--av-color-primary-700); }
+
+/* Floating action button (#btn-home en style.css) usar verde */
+#btn-home {
+  background-color: var(--av-color-primary) !important;
+}
+#btn-home:hover {
+  background-color: var(--av-color-primary-600) !important;
+}
+
+/* === Scrollbar refinada === */
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: rgba(120,120,128,0.20); border-radius: 999px; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(120,120,128,0.32); }
+
+/* === Hero orbs ajustados al verde institucional === */
+.lg-hero-orb-2 {
+  background: rgba(10, 132, 255, 0.20) !important; /* azul iOS, complementa verde */
+}
+.lg-hero-orb-1 {
+  background: rgba(255, 255, 255, 0.14) !important;
+}
+.lg-hero-greeting {
+  letter-spacing: var(--av-letter-display) !important;
+  font-size: var(--av-font-size-2xl) !important;
+}
+
+/* === lg-section refinement (matches bundle Card) === */
+.lg-section {
+  background: var(--av-surface-0) !important;
+  border-radius: var(--av-radius-2xl) !important;
+  padding: var(--av-space-6) !important;
+  border: 1px solid var(--av-border) !important;
+}
+.lg-section-lbl {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: var(--av-text-primary) !important;
+  letter-spacing: var(--av-letter-tight);
+}
+.lg-section-hint {
+  font-size: 12px !important;
+  color: var(--av-text-muted) !important;
 }
